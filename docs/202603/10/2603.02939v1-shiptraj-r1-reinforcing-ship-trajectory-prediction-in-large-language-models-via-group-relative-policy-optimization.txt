@@ -1,0 +1,353 @@
+Title: ShipTraj-R1: Reinforcing Ship Trajectory Prediction in Large Language Models via Group Relative Policy Optimization
+
+URL Source: https://arxiv.org/pdf/2603.02939v1
+
+Published Time: Wed, 04 Mar 2026 02:02:32 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+# ShipTraj-R1: Reinforcing Ship Trajectory Prediction in Large Language Models via Group Relative Policy Optimization 
+
+Yang Zhan 1,2 , Yunhao Li 3, Chao Zhang 3, Yuxu Lu 2 , and Yan Li 3 
+
+> 1
+
+School of Artificial Intelligence, Optics, and Electronics (iOPEN), Northwestern Polytechnical University, Xi’an 710072, China  
+
+> 2
+
+Department of Logistics and Maritime Studies, The Hong Kong Polytechnic University, Hong Kong 999077, China  
+
+> 3
+
+State Key Laboratory of Information Engineering in Surveying, Mapping and Remote Sensing, Wuhan University, Wuhan 430079, China 
+
+zhanyangnwpu@gmail.com, liyanWHU@whu.edu.cn 
+
+Abstract. Recent advancements in reinforcement fine-tuning have sig-nificantly improved the reasoning ability of large language models (LLMs). In particular, methods such as group relative policy optimization (GRPO) have demonstrated strong capabilities across various fields. However, ap-plying LLMs to ship trajectory prediction remains largely unexplored. In this paper, we propose ShipTraj-R1 , a novel LLM-based framework that reformulates ship trajectory prediction as a text-to-text genera-tion problem. (1) We design a dynamic prompt containing trajectory information about conflicting ships to guide the model to achieve adap-tive chain-of-thought (CoT) reasoning. (2) We introduce a comprehen-sive rule-based reward mechanism to incentivize the reasoning format and prediction accuracy of the model. (3) Our ShipTraj-R1 is reinforced through the GRPO mechanism guided by domain-specific prompts and rewards, and utilizes the Qwen3 as the model backbone. Extensive exper-imental results on two complex and real-world maritime datasets show that the proposed ShipTraj-R1 achieves the least error compared with state-of-the-art deep learning and LLM-based baselines. 
+
+Keywords: Ship Trajectory Prediction · Large Language Models · Group Relative Policy Optimization · Reinforcement Fine-Tuning. 
+
+1 Introduction 
+
+The surge in global maritime trade and the increasing density of ship traffic in complex waterways have intensified the demand for accurate and robust ship trajectory prediction [9]. Accurate prediction is critical for advancing maritime intelligent transportation services and ensuring navigation safety through effec-tive collision avoidance and congestion management [12,27]. Traditional methods primarily rely on Deep Learning (DL) models, such as Long Short-Term Memory  
+
+> arXiv:2603.02939v1 [cs.AI] 3 Mar 2026 2Y. Zhan et al.
+
+(LSTM) and Convolutional Neural Networks (CNNs), and their hybrids, demon-strating a strong ability to capture sequential and spatio-temporal features. Recently, Large Language Models (LLMs) has shown great potential in se-quence generation and complex reasoning tasks across various domains [5,10]. Leveraging their powerful semantic understanding and inherent reasoning capa-bilities, researchers have begun exploring LLMs for trajectory prediction. Ap-proaches like LMTraj-SUP [1] and LG-Traj [3] encode continuous coordinates into symbolic tokens, demonstrating the potential of LLMs to generate trajec-tories autoregressively, analogous to generating natural language sentences. However, the application of LLMs specifically for ship trajectory prediction remains largely unexplored. Crucially, even the existing LLM-based prediction models are black box regressors that rely on supervised fine-tuning. These meth-ods imitate historical trajectories, which is insufficient. The cost of error in colli-sion avoidance is extremely high, requiring that the complex reasoning process of the prediction model not only refer to historical data but also take into account the status of the surrounding ships, especially those with collision risks. To address these challenges, we propose ShipTraj-R1, a novel LLM-based pre-diction framework built upon reinforcement fine-tuning and Chain-of-Thought (CoT) reasoning. Our method fundamentally reformulates ship trajectory pre-diction as a text-to-text generation problem. The core of ShipTraj-R1 lies in its ability to enforce domain-specific reasoning and precision by employing the Group Relative Policy Optimization (GRPO) mechanism. Specifically, we de-sign a dynamic prompt incorporating trajectory information about conflicting ships to induce adaptive CoT reasoning, which is essential for proactive collision avoidance. Then, the reinforcement process is dynamically guided by a novel rule-based reward function that simultaneously incentivizes the model’s struc-tured reasoning format and quantifies coordinate prediction accuracy, ensur-ing reliability in complex maritime scenarios. Finally, by fine-tuning our model, ShipTraj-R1 can iteratively self-improve its reasoning and prediction capabilities in complex scenarios. To the best of our knowledge, we have for the first time provided a benchmark evaluation of LLMs in the ship trajectory prediction. Our contributions can be summarized as follows: 
+
+– We propose ShipTraj-R1, a novel LLM-based ship trajectory prediction frame-work. It reformulates the traditional numerical regression task into a text-to-text generation problem with CoT reasoning. 
+
+– We design a prompt containing context about conflicting ships, rule-based re-ward mechanisms and the reinforcement fine-tuning paradigm using GRPO, specifically for ship trajectory prediction. 
+
+– We provide a comprehensive benchmark on real-world ship trajectory data in various representative and SOTA models and LLM-based baselines. Ex-tensive experiments demonstrate that ShipTraj-R1 is promising and of great potential for ship trajectory prediction. ShipTraj-R1 3
+
+2 Related Work 
+
+2.1 Ship Trajectory Prediction 
+
+Deep learning (DL) methods have become highly competitive in ship trajec-tory prediction [9] and are mainly divided into three categories: discriminative, generative, and hybrid methods. Discriminative methods are widely used, learn-ing direct mappings from input to output. LSTM and Gate Recurrent Unit (GRU) can effectively capture long-term dependencies in trajectory sequences and have become mainstream. CNNs are often combined with these temporal models [14] to capture comprehensive spatiotemporal information. Furthermore, graph-based models like Graph Convolutional Neural Networks (GCNN) and Graph Auto-Encoders (GAE), are applied to effectively model the mutual influ-ence and interactive behaviors among individual ships [20]. Generative methods are designed to comprehend data distributions and produce new data samples. This category includes Generative Adversarial Networks (GANs) [13], with spe-cific variants like Time-series GAN and Sequence GAN [24] being highly relevant for time-series analysis. Hybrid methods provide an effective and adaptable ap-proach by combining two or more DL models. 
+
+2.2 LLM-based Trajectory Prediction 
+
+The application of LLMs for trajectory prediction is an emerging research di-rection, rapidly expanding due to their powerful semantic and reasoning ca-pabilities [25]. Existing methods can be broadly divided into direct language-based modeling and LLM-based auxiliary prediction. For direct language-based modeling, trajectory data is adapted into textual format for LLMs, enabling them to predict future trajectory coordinate "tokens" akin to generating words. For example, LMTraj-SUP [1] reformulates the task as question-answering. It converts numerical and scene features into structured prompts and utilizes a decimal-aware tokenizer to bridge the gap between continuous values and dis-crete tokens. Traj-LLM [7] integrates a frozen GPT-2 backbone directly into the prediction pipeline. It encodes multimodal scene context into transformer-compatible token sequences and employs LoRA for fine-tuning, demonstrating strong few-shot adaptability. LLMs also serve several critical auxiliary functions in this domain. Language-guided scene understanding uses language as a comple-mentary modality to enrich spatial context [3]. By encoding semantics like scene images or traffic rules, models achieve more interpretable and socially aware pre-dictions. Language-driven data generation leverages LLMs as generative engines to synthesize diverse and controllable trajectory datasets from high-level textual descriptions [23]. Finally, language-based reasoning and interpretability employs LLMs to explain or justify a model’s predictions [15]. This often involves CoT prompting to verbalize the model’s decision-making process, enhancing safety and user trust. However, despite this significant progress, the application of LLMs for ship trajectory prediction remains a largely unexplored area. 4 Y. Zhan et al. .KL Divergence                    
+
+> User :
+> Context: The historical T-step trajectory of ship 0 is (122.661976, 37.72847), ( …), ( …), ….
+> The historical T-step trajectories of adjacent ships are as follows:
+> Ship 1 moves along the trajectory (122.663083, 37.72792), ( …), ( …), ….
+> Ship 2 moves along the trajectory (122.662573, 37.72817167), ( …), ( …), ….
+> ……
+> Question: What trajectory does ship 0 follow for the next Psteps? Output the thinking process in <think> </think> and
+> next Psets of coordinates in <answer> </answer> tags. i.e., <think> thinking process here </think> <answer> {'trajectory ':
+> [(x1,y1), (x2,y2), …… ]} </answer>
+
+Prompt for ShipTraj -R1               
+
+> Rewards Advantages
+> …
+> R1R1
+> R4R4
+> A1A1
+> A4A4
+> …
+> Group
+> Computation (b) Prediction Accuracy Reward
+> Rule -based Reward Function
+> Ship Trajectory
+> AMAMRMRM
+> R2R2A2A2
+> R3R3A3A3
+> Reference Model Reference Model
+> Policy Model Policy Model
+> Policy Optimization
+> ……
+> Prompt Prompt
+> om
+> om
+> LLM
+> (a) Thinking Format Reward
+> <think> …</think> <answer> …</answer>
+> {'trajectory': [(x1,y1), (x2,y2), …]}
+> (a) Thinking Format Reward
+> <think> …</think> <answer> …</answer>
+> {'trajectory': [(x1,y1), (x2,y2), …]}
+> Center point distance Center point distance Point -wise distance Point -wise distance
+
+Fig. 1. Overview of our proposed ShipTraj-R1 framework. 
+
+3 Methodology 
+
+3.1 Problem Definition 
+
+The objective of ship trajectory prediction is to forecast a ship’s future coor-dinates given a sequence of its past observations. Formally, the historical tra-jectory Xi with length Tobs for ship i can be defined as a sequence of spatial points Xi = {(lon ti, lat ti)|t ∈ [1 , . . . , T obs ]}, where (lon ti, lat ti) is the longitude and latitude at time step t. The task is to predict the ground truth future trajectory 
+
+Yi = {(lon ti, lat ti)|t ∈ [Tobs + 1 , . . . , T obs + Tpred ]}. The prediction model F seeks to minimize the error or distance between the predicted trajectory ˆYi = F(Xi)
+
+and the ground truth trajectory Yi.
+
+3.2 ShipTraj-R1 Model 
+
+We propose ShipTraj-R1, a specialist LLM for ship trajectory prediction. The overall architecture of ShipTraj-R1 is illustrated in Figure 1. The framework is built upon two core principles: (1) reformulating the numerical prediction into a text-to-text generation task, and (2) leveraging a powerful, open-source LLM model as the core reasoning agent. 
+
+Task Reformulation and Model As defined in Section 3.1, existing trajectory prediction is treated as a numerical regression problem. They typically encode continuous GPS coordinates through normalization or specialized schemes, use models with a decoder for numerical prediction, and then apply inverse trans-formations. In contrast, we instead adopt a "first-reasoning, then-predicting" paradigm. As an LLM-based approach, ShipTraj-R1 reformulates the task as a text-to-text generation problem with CoT reasoning. The input observation Xi
+
+is textualized and attached to a structured prompt P . The model then gener-ates a structured output O that fuses the explicit CoT reasoning think and the ShipTraj-R1 5
+
+textualized predicted trajectory ˆYi:
+
+think, ˆYi = FShipT raj −R1 (Xi, P ) . (1) The text-based nature eliminates the need for normalization/inverse-normalization steps of longitude and latitude, simplifying the model architecture. The explicit reasoning provides an intermediate interpretability process that justifies its pre-diction. ShipTraj-R1 is built upon the Qwen3 model [22], which serves as the foundational reasoning and prediction backbone. Qwen3 serves as our founda-tion due to its demonstrated superior performance in mathematical reasoning and structured text generation across various benchmarks, making it highly suit-able for the coordinate-level precision required in trajectory prediction. 
+
+Prompt Design Contextualizing Conflicting Ships We design a dynamic prompt that explicitly incorporates the contextual information of the trajec-tories of nearby ships with a significant risk of conflict. In maritime naviga-tion, this is crucial because the trajectory is not purely kinematic but is domi-nated by collision avoidance logic. As illustrated in Figure 1, the prompt serves as a cognitive scaffold that guides the model through a "first-reasoning, then-predicting" paradigm. The prompt structure explicitly provides the necessary spatio-temporal context, including the historical trajectory of the target ship and the trajectories of adjacent ships that pose a risk of conflict. Our method-ology leverages the inherent capability of LLMs to formulate CoT reasoning without requiring labor-intensive, manually annotated reasoning data. Instead of being constrained to mimic fixed logical patterns, the model is incentivized to autonomously generate an adaptive thinking process that is tailored to the adjacent ship context of each trajectory sample. This comprehensive context is critical for prompting the LLM to perform adaptive social-spatial reasoning. 
+
+Ship Domain Conflict Detection Algorithm: We establish a quaternion ship domain (QSD) model to conduct ship domain conflict detection [19]. This step assesses the collision risk between the raw adjacent ship and the target ship. The trajectory information of conflicting ships that exceed the risk threshold is provided to the model instead of providing trajectories of all neighboring ships. The QSD model defines a ship’s requisite safe water domain, which other ships must avoid to prevent collision risk. The QSD is defined in the ship-centered coordinate system by the four safety distance: Rbow (bow), Rstern (stern), Rstarb 
+
+(starboard), and Rport (port). The boundary of the QSD is defined as: QSD = {(x, y )|fk(x, y ; H) ≤ 1, H = {Rf ore , R af t , R starb , R port }} , (2) where k determines the shape of the QSD. When k=1, its shape is a combined quadrilateral. When k=2, its shape is a combined ellipse. 
+
+3.3 Rule-based Reward Function 
+
+To reinforce the LLM’s ability to generate both reliable CoT reasoning and accu-rate coordinate outputs, we design a comprehensive rule-based reward function, including the thinking format reward and the prediction accuracy reward. 6 Y. Zhan et al. 
+
+Thinking Format Reward This reward ensures the model’s output is correctly structured and reliably parsable for accuracy evaluation. The reward is binary ( 1
+
+or 0) for compliance. The model’s response must strictly adhere to the required structure, separating the reasoning and the final answer using explicit tags, i.e. ,
+
+<think> the CoT thinking </think> <answer> . . . </answer> . Within the 
+
+⟨answer ⟩⟨ /answer ⟩ tag, the contained content must be a valid trajectory object. This object must contain the key "trajectory" whose value is a list of exactly 
+
+Tpred predicted coordinate pairs. Furthermore, each coordinate pair must fall within the predefined geographic boundary constraints of the maritime region. Under the above constraints, the trajectory format is considered correct. 
+
+Prediction Accuracy Reward This task-specific reward quantifies the error between the predicted trajectory ˆYi and the ground truth trajectory Yi. We use the Vincenty formula to calculate the geodesic distance between coordinates. First, we calculate the center point of both the ground-truth and predicted trajectories by averaging their respective coordinates, i.e. , Ci and ˆCi. A reward of 1 is assigned if their distance is less than 120 meters; otherwise, the reward is 0. Then, we need to encourage each predicted trajectory point to achieve high precision. We calculate the distance between the predicted coordinates and the true coordinates for each point. For each distance below the threshold of 90 meters, we increment the reward by 1 
+
+> Tpred
+
+.
+
+3.4 Reinforcement Fine-Tuning 
+
+The ultimate objective of ShipTraj-R1 is to elevate the LLM’s ability to produce highly accurate and safety-compliant ship trajectory predictions. We achieve this by optimizing the model using the GRPO algorithm [16], guided by our designed rule-based rewards. For each input x, which includes the historical trajectory and adjacent ship context, the old policy model πθold samples M candidate output completions (CoT reasoning and trajectories) {om}Mm=1 . Each completion om
+
+is evaluated by the rule-based reward function to obtain a scalar reward Rm.This reward quantifies both the correctness of the reasoning structure and the accuracy of the predicted trajectory. The advantage ˆAm for each output om is calculated relative to the average reward of its group: 
+
+ˆAm =  Rm − mean {R1, R 2, . . . , R M }/std {R1, R 2, . . . , R M }. (3) This relative advantage calculation naturally promotes samples that exhibit su-perior prediction accuracy than the group average, effectively utilizing feedback to steer the learning process. The objective JGRPO (θ) is designed to maximize the expected advantage while ensuring the updated policy πθ does not deviate excessively from the reference policy πref . The objective is formulated as: 
+
+JGRP O (θ) = E{om}Mm=1 ∼ πθold (O|x)
+
+h 1
+
+M
+
+> M
+
+X
+
+> m=1
+
+min 
+
+
+
+ρ(m) 
+
+> θ
+
+ˆAm, clip  ρ(m) 
+
+> θ
+
+, 1−ϵ, 1+ ϵ ˆAm
+
+
+
+− β D KL (πθ ∥ πref )
+
+i
+
+, (4) ShipTraj-R1 7
+
+where ρ(m) 
+
+> θ
+
+= πθ (om|x)  
+
+> πθold (om|x)
+
+, ϵ is the clipping hyperparameter, and β controls the KL-divergence regularization strength. 
+
+4 Experiment 
+
+4.1 Experimental Settings Datasets To rigorously evaluate the predictive capability and stability of our proposed ShipTraj-R1 framework, we conducted extensive experiments using real-world ship trajectory data derived from the Automatic Identification Sys-tem (AIS). Our benchmark dataset focuses on two distinct maritime regions: ChengShanJiao Promontory (CSJP) and CaoFeiDian Port (CFDP). The water-way layouts and ship traffic patterns in CSJP waters are generally more complex than those in CFDP. The AIS data was collected over a two-week period, from July 6 to July 19, 2020, for both areas. Prior to model training, the raw, non-equidistant trajectory data was preprocessed using cubic spline interpolation to ensure uniform time intervals. Specifically, the trajectories were sampled at a 5-second interval per point. The CSJP dataset contains 2,649 complete ship tra-jectories, including 25,592 GPS points. The CFDP dataset comprises 2,948 ship trajectories, including 34,038 GPS points. The total dataset for each region was partitioned into 90% for training and 5% each for validation and testing. 
+
+Evaluation Metrics We employ two widely used evaluation metrics for ship trajectory prediction: the Final Displacement Error (FDE) and the Average Dis-placement Error (ADE). The FDE measures the L2 distance between the pre-dicted position and the true position solely at the final predicted time step. The ADE measures the mean L2 distance between the predicted position and the true position across all predicted time steps in a trajectory. Mathematically, they are defined as: 
+
+F DE = 1
+
+M
+
+> M
+
+X
+
+> i=1
+
+q
+
+(xPi − ˆxPi )2 + ( yPi − ˆyPi )2, (5) 
+
+ADE = 1
+
+M × P
+
+> M
+
+X
+
+> i=1
+> P
+
+X
+
+> t=1
+
+q
+
+(xti − ˆxti)2 + ( yti − ˆyti )2, (6) where M is the number of trajectories, P is the number of predicted points, 
+
+(xti, y ti ) is the ground truth coordinate, and (ˆ xti, ˆyti ) is the predicted coordinate at time step t for trajectory i. For both ADE and FDE, a lower value indicates higher prediction accuracy. 
+
+Implementation Details For the GRPO training, we perform the RL-based post-training paradigm, implemented via VLM-R1 [17]. We adopt Qwen3-8B [22] as our default language model. The initial learning rate is set to 1e-6, and the weight decay is 1e-2. We set the batch size to 16. Our experiments are conducted on four NVIDIA RTX 4090 GPUs and four L20 GPUs. For our prediction task, we utilized past observed trajectories with length Tobs ∈ [4 , 8] (20s or 40s) to predict future trajectories with length Tpred ∈ [1 , 2, 3, 4] (5s, 10s, 15s, or 20s). 8 Y. Zhan et al. 
+
+Table 1. Comparisons with representative DL-based methods, LLM-based methods, and SoTA open-source LLMs. 
+
+Model Release Year-month CSJP CFDP 
+
+FDE ADE FDE ADE 
+
+DL-based Methods 
+
+TBENet TRE’24 [8] 24-11 0.009827 8.1000e-04 0.005993 4.0200e-04 GeoCLSTM CAEE’24 [9] 24-12 0.070173 5.4530e-03 0.064019 4.1890e-03 DBSCAN-GeoCLSTM CAEE’24 [9] 24-12 0.033494 2.2640e-03 0.030183 1.4730e-03 GAT-LSTM JMSE’24 [11] 24-12 0.012828 2.7260e-03 0.009032 1.0520e-03 DGCN-Transformer EAAI’25 [26] 25-02 0.009216 8.2400e-04 0.006087 5.8900e-04 SeqLSTM-U-Net OE’25 [4] 25-08 0.009907 1.4360e-03 0.007183 9.6300e-04 
+
+LLM-based Methods 
+
+LMTraj-SUP CVPR’24 [1] 24-03 0.004734 9.2331e-05 0.001297 5.0249e-05 LG-Traj CVPR’25 [3] 24-03 0.004081 7.9923e-05 0.001004 3.7743e-05 Traj-LLM T-IV’25 [7] 24-06 0.003894 4.7202e-05 0.000674 9.6587e-06 
+
+Open-source LLMs 
+
+Baichuan2-7B [21] 23-12 0.028621 2.1598e-04 0.003834 2.8329e-05 Hunyuan-7B [2] 25-07 0.010099 1.5845e-04 0.003294 1.2795e-05 Llama-3-8B [5] 24-04 0.002671 7.0153e-05 0.000897 9.7625e-06 Qwen2.5-3B [18] 24-09 0.003862 4.8339e-05 0.000882 2.8602e-06 Qwen2.5-7B [18] 24-09 0.003255 2.9338e-05 0.000498 6.1298e-07 DeepSeek-R1 [6] 25-05 0.002303 2.2688e-05 0.000490 6.9395e-07 Qwen3-4B [22] 25-07 0.002350 2.7751e-05 0.000504 7.7631e-07 Qwen3-8B [22] 25-07 0.002293 2.0529e-05 0.000474 6.7403e-07 
+
+ShipTraj-R1-4B (Ours) - 0.001582 1.8084e-05 0.000386 4.9705e-07 
+
+ShipTraj-R1-8B (Ours) - 0.001297 1.1547e-05 0.000311 3.8912e-07 
+
+Our LLM-based model can unify prediction tasks under different Tobs and Tpred 
+
+conditions and has strong flexibility. However, traditional DL-based methods must train separate models for different combinations of Tobs and Tpred .
+
+4.2 Comparison with State-of-art Methods Quantitative Results The quantitative results presented in Table 1 establish the superior performance of our proposed ShipTraj-R1 framework across both the complex CSJP and CFDP datasets. Firstly, our ShipTraj-R1 achieves the lowest FDE and ADE across all tested baselines, setting a new state-of-the-art for ship trajectory prediction. The results represent a marked improvement over all competitors. The gain over traditional DL-based models is substantial. This large performance gap validates the fundamental advantage of leverag-ing Large Language Models over small models for complex maritime scenarios. Furthermore, ShipTraj-R1 significantly outperforms previous SOTA LLM-based trajectory models like Traj-LLM. On the CFDP dataset, our model reduces the FDE from Traj-LLM’s 0.000674 to 0.000311 . Crucially, by comparing ShipTraj-R1-8B against its base model, Qwen3-8B, we observe a definitive reduction in error. This gain directly validates the efficacy of our designed prompt and re-ward mechanisms in reinforcing the model’s spatial reasoning based on latitude and longitude coordinates through reinforcement fine-tuning. The consistent and pronounced error reduction across both datasets highlights that the ShipTraj-R1 ShipTraj-R1 9User: 
+
+Context: The historical 4 -step trajectory of ship 0 is (123.0465317,37.43752066), (123.0252457,37.44706119), 
+
+(123.0039597,37.4566005), (122.9850769,37.4653211) . The historical 4 -step trajectories of adjacent ships are as 
+
+follows: Ship 1 moves along the trajectory (123.0533123, 37.43983775), (123.0312538,37.44999125), 
+
+(123.0112553,37.45980272), (122.9929733,37.46825045) . Ship 2 moves along the trajectory (123.0307388, 
+
+37.39634613), (123.0204391,37.41284593), (123.0101395,37.42879682), (123.0003548,37.44188219) .
+
+Question: What trajectory does ship 0 follow for the next 4 steps? Output the thinking process in <think> </think> 
+
+and next 4 sets of coordinates in <answer> </answer> tags. i.e., <think> thinking process here </think> 
+
+<answer> {'trajectory ': [(x1,y1), (x2,y2), …… ]} </answer> 
+
+ShipTraj -R1's Output :
+
+<think> I need to figure out the next 4 -step trajectory for ship 0 based on the given historical data and the trajectories of ships 1 and 2. Let me analyze the 
+
+movement of ship 0 first. Let's calculate the differences between consecutive points to see if there's a pattern. 
+
+Step 1: Understanding the Movement Patter n …… 
+
+Step 2: Calculate the Movement Difference …… 
+
+Step 3: Extrapolating the Next Steps . … Ship 2 is approaching and there is a risk of collision, we will estimate the next longitude change and latitude change …
+
+Step 4: Predict the next 4 points …… </think> 
+
+<answer> {'trajectory': [( 122.9664763 , 37.4745879), ( 122.9479865 , 37.4838547), ( 122.9295861 , 37.49 14829 ), ( 122.911286 , 37.50 02035 )]} </answer> 
+
+Ship Trajectory 
+
+Ground Truth : (122.9685974, 37.47431315), (122.9486847,37.483576555), (122.9301453,37.492294), (122.9119492,37.50073806) 
+
+> Ship 0
+> Ship 1
+> Ship 2
+
+Fig. 2. Qualitative examples of our ShipTraj-R1 on the CSJP dataset. In this case, the ShipTraj-R1 adaptively generates CoT reasoning by itself based on the user prompt. Observed Trajectory Observed Trajectory Ground Truth Ground Truth DGCN -Transformer DGCN -Transformer 
+
+Qwen3 -8B Qwen3 -8B Traj -LLM Traj -LLM ShipTraj -R1 ShipTraj -R1 
+
+Observed Trajectory Ground Truth DGCN -Transformer 
+
+Qwen3 -8B Traj -LLM ShipTraj -R1 
+
+(a) CSJP (b) CFDP 
+
+Fig. 3. Illustration of predicted ship trajectories from the CSJP and CFDP datasets. 
+
+approach is not only highly accurate but also robust in generalizing to diverse and challenging maritime traffic environments. 
+
+Qualitative Results To visually validate the superiority of ShipTraj-R1 in complex maritime environments, we provide an example in Figure 2. We have observed that the reasoning process is helpful for physics-based motion analysis and the estimation of the impact of conflicting ships. Figure 3 presents compara-tive qualitative results against several competitive baselines across the CSJP and CFDP datasets. DGCN-Transfromer [26], Traj-LLM [7], and Qwen3-8B [22] are respectively the most advanced methods among DL-based methods, LLM-based methods, and open-source LLMs. As seen in the zoomed-in views, ShipTraj-R1’s predicted trajectory aligns almost perfectly with the Ground Truth trajectory. The qualitative visualization confirms that ShipTraj-R1’s reinforcement fine-tuning successfully addresses the limitations of pure geometric and language-based models, yielding predictions that are significantly more accurate, physi-cally compliant, and stable, thereby minimizing the risk of collision or violation in real-world applications. 10 Y. Zhan et al. 
+
+Table 2. Ablation on different fine-tuning methods and chain-of-thought. Model Type CoT CSJP CFDP FDE ADE FDE ADE Baseline-8B - - 0.002293 2.0529e-05 0.000474 6.7403e-07 ShipTraj-R1-8B SFT ✗ 0.001701 1.8153e-05 0.000412 5.1295e-07 ShipTraj-R1-8B RFT ✗ 0.001430 1.6216e-05 0.000341 4.1216e-07 ShipTraj-R1-8B RFT ✓ 0.001297 1.1547e-05 0.000311 3.8912e-07 
+
+Table 3. Ablation on whether the user prompt includes conflicting ship context. Model Conflicting Ships CSJP CFDP FDE ADE FDE ADE ShipTraj-R1-8B ✗ 0.002756 2.7804e-05 0.000569 6.3881e-07 ShipTraj-R1-8B ✓ 0.001297 1.1547e-05 0.000311 3.8912e-07 
+
+Table 4. Ablation on the the KL loss coefficient. Model KL loss coef CSJP CFDP FDE ADE FDE ADE ShipTraj-R1-8B 1e-4 0.001297 1.1547e-05 0.000311 3.8912e-07                
+
+> ShipTraj-R1-8B 5e-4 0.001394 1.4580e-05 0.000336 4.4628e-07 ShipTraj-R1-8B 1e-3 0.002287 2.0466e-05 0.000519 7.3491e-07 ShipTraj-R1-8B 5e-3 0.003650 3.6814e-05 0.000842 2.1277e-06
+
+4.3 Ablation Studies SFT vs. RFT We compare the efficacy of our reinforcement fine-tuning (RFT) using GRPO against supervised fine-tuning (SFT), as detailed in Table 2. The RFT-only model (without CoT) significantly outperforms the SFT model. This performance gap validates RFT’s superior ability to leverage the rule-based reward signal for enforcing prediction. Furthermore, with CoT reasoning, our ShipTraj-R1 yields the best overall accuracy. 
+
+User Prompt We investigate the impact of trajectory information about con-flicting ships within the prompt, as shown in Table 3. The omission of this conflict context results in a significant performance drop. This degradation confirms the crucial role of conflicting ship context in guiding the LLM’s reasoning. 
+
+KL Loss Coefficient The KL divergence regularization term balances the acquisition of new domain knowledge against the retention of the LLM’s pre-existing capabilities. As shown in Table 4, the optimal performance is achieved at the lowest coefficient 1e-4. As the coefficient increases, performance degrades. 
+
+5 Conclusion 
+
+In this work, we propose ShipTraj-R1, a novel framework that leverages LLMs with CoT reasoning to achieve robust ship trajectory prediction. (1) Our method reformulates the complex prediction task as an LLM sequence generation prob-lem and utilizes GRPO during reinforcement fine-tuning. (2) Our model can ShipTraj-R1 11 
+
+generate an explicit CoT reasoning process to justify its predictions, enhancing interpretability. (3) Unlike traditional methods that require separate models, our framework flexibly unifies prediction tasks under various observation ( Tobs )and prediction ( Tpred ) lengths. Extensive experiments on complex real-world datasets demonstrate that ShipTraj-R1 establishes a new state-of-the-art, sig-nificantly reducing both FDE and ADE compared to existing baselines. We acknowledge that the current short-term prediction horizon (up to 20s) primarily validates the model’s capability for high-precision, immediate course-keeping. However, a complete long-term collision avoidance system requires a much longer forecast window. We plan to explore the performance of LLMs in long-term prediction, which holds greater value for practical applications. 
+
+Acknowledgments. This work is supported in part by grants from the National Natural Science Foundation of China (No.624B2113). 
+
+References 
+
+1. Bae, I., Lee, J., Jeon, H.G.: Can language beat numerical regression? language-based multimodal trajectory prediction. In: Proceedings of the IEEE/CVF Con-ference on Computer Vision and Pattern Recognition. pp. 753–766 (2024) 2. Cao, S., Chen, H., Chen, P., Cheng, Y., Cui, Y., Deng, X., Dong, Y., Gong, K., Gu, T., Gu, X., et al.: Hunyuanimage 3.0 technical report. arXiv preprint arXiv:2509.23951 (2025) 3. Chib, P.S., Singh, P.: LG-Traj: Llm guided pedestrian trajectory prediction. In: Proceedings of the IEEE/CVF International Conference on Computer Vision. pp. 6802–6812 (2025) 4. Gan, L., Gao, Z., Zhang, X., Xu, W., Cai, Y., Song, L.: Maritime vessel trajectory prediction based on sequential long short-term memory and u-net architectures. Ocean Engineering 334 , 121598 (2025) 5. Grattafiori, A., Dubey, A., Jauhri, A., Pandey, A., Kadian, A., Al-Dahle, A., Let-man, A., Mathur, A., Schelten, A., Vaughan, A., et al.: The Llama 3 herd of models. arXiv preprint arXiv:2407.21783 (2024) 6. Guo, D., Yang, D., Zhang, H., Song, J., Wang, P., Zhu, Q., Xu, R., Zhang, R., Ma, S., Bi, X., et al.: DeepSeek-R1 incentivizes reasoning in llms through reinforcement learning. Nature 645 (8081), 633–638 (2025) 7. Lan, Z., Liu, L., Fan, B., Lv, Y., Ren, Y., Cui, Z.: Traj-LLM: A new exploration for empowering trajectory prediction with pre-trained large language models. IEEE Transactions on Intelligent Vehicles (2024) 8. Li, H., Xing, W., Jiao, H., Yuen, K.F., Gao, R., Li, Y., Matthews, C., Yang, Z.: Bi-directional information fusion-driven deep network for ship trajectory prediction in intelligent transportation systems. Transportation Research Part E: Logistics and Transportation Review 192 , 103770 (2024) 9. Li, Y., Chen, B.Y., Liu, Q., Zhang, Y.: Geohash coding-powered deep learning net-work for vessel trajectory prediction using clustered ais data in maritime internet of things industries. Computers and Electrical Engineering 120 , 109611 (2024) 10. Li, Y., Zhan, Y., Liang, M., Zhang, Y., Liang, J.: UPTM-LLM: Large language models-powered urban pedestrian travel modes recognition for intelligent trans-portation system. Applied Soft Computing p. 113999 (2025) 12 Y. Zhan et al. 11. Li, Y., Yu, Q., Yang, Z.: Vessel trajectory prediction for enhanced maritime nav-igation safety: A novel hybrid methodology. Journal of Marine Science and Engi-neering 12 (8), 1351 (2024) 12. Liang, M., Su, J., Gao, R., Liu, R.W., Zhan, Y.: Estimation of vessel link-level travel time distribution: A directed network-driven approach. Ocean Engineering 
+
+313 , 119371 (2024) 13. Liu, H., Zhao, H., Wang, J., Yuan, S., Feng, W.: LSTM-GAN-AE: A promising approach for fault diagnosis in machine health monitoring. IEEE Transactions on Instrumentation and Measurement 71 , 1–13 (2021) 14. Lu, B., Lin, R., Zou, H.: A novel CNN-LSTM method for ship trajectory predic-tion. In: 2021 IEEE 23rd Int Conf on High Performance Computing & Communi-cations; 7th Int Conf on Data Science & Systems; 19th Int Conf on Smart City; 7th Int Conf on Dependability in Sensor, Cloud & Big Data Systems & Application (HPCC/DSS/SmartCity/DependSys). pp. 2431–2436. IEEE (2021) 15. Peng, M., Guo, X., Chen, X., Chen, K., Zhu, M., Chen, L., Wang, F.Y.: Lc-LLM: Explainable lane-change intention and trajectory predictions with large language models. Communications in Transportation Research 5, 100170 (2025) 16. Shao, Z., Wang, P., Zhu, Q., Xu, R., Song, J., Bi, X., Zhang, H., Zhang, M., Li, Y., Wu, Y., et al.: DeepSeekMath: Pushing the limits of mathematical reasoning in open language models. arXiv preprint arXiv:2402.03300 (2024) 17. Shen, H., Liu, P., Li, J., Fang, C., Ma, Y., Liao, J., Shen, Q., Zhang, Z., Zhao, K., Zhang, Q., et al.: VLM-R1: A stable and generalizable r1-style large vision-language model. arXiv preprint arXiv:2504.07615 (2025) 18. Team, Q., et al.: Qwen2 technical report. arXiv preprint arXiv:2407.10671 (2024) 19. Wang, N.: An intelligent spatial collision risk based on the quaternion ship domain. The Journal of Navigation 63 (4), 733–749 (2010) 20. Wang, S., Li, Y., Xing, H., Zhang, Z.: Vessel trajectory prediction based on spatio-temporal graph convolutional network for complex and crowded sea areas. Ocean Engineering 298 , 117232 (2024) 21. Yang, A., Xiao, B., Wang, B., Zhang, B., Bian, C., Yin, C., Lv, C., Pan, D., Wang, D., Yan, D., et al.: Baichuan 2: Open large-scale language models. arXiv preprint arXiv:2309.10305 (2023) 22. Yang, A., Li, A., Yang, B., Zhang, B., Hui, B., Zheng, B., Yu, B., Gao, C., Huang, C., Lv, C., et al.: Qwen3 technical report. arXiv preprint arXiv:2505.09388 (2025) 23. Yang, K., Guo, Z., Lin, G., Dong, H., Huang, Z., Wu, Y., Zuo, D., Peng, J., Zhong, Z., Wang, X., et al.: Trajectory-LLM: A language-based data generator for trajectory prediction in autonomous driving. In: The Thirteenth International Conference on Learning Representations (2025) 24. Yu, L., Zhang, W., Wang, J., Yu, Y.: SeqGAN: Sequence generative adversarial nets with policy gradient. In: Proceedings of the AAAI conference on artificial intelligence. vol. 31 (2017) 25. Zhan, Y., Xiong, Z., Yuan, Y.: SkyEyeGPT: Unifying remote sensing vision-language tasks via instruction tuning with large language model. ISPRS Journal of Photogrammetry and Remote Sensing 221 , 64–77 (2025) 26. Zhang, Y., Tu, P., Zhao, Z., Chen, X.Y.: Incorporating prior knowledge of collision risk into deep learning networks for ship trajectory prediction in the maritime internet of things industry. Engineering Applications of Artificial Intelligence 146 ,110311 (2025) 27. Zhao, Z., Zhan, Y.: DiffSCTG: Diffusion-based safety-critical trajectory generation for autonomous vehicles. In: 2025 IEEE 7th International Conference on Commu-nications, Information System and Computer Engineering. pp. 405–414 (2025)
