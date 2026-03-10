@@ -25,3 +25,39 @@ subscriptions:
     stage: A
     diff_threshold_pct: 15
   keyword_recall_mode: or
+  intent_profiles:
+    - tag: LLM MA
+      description: 大模型多智能体系统相关论文检索
+      enabled: true
+      keywords:
+        - keyword: llm
+          keyword_cn: 大模型
+          query: d
+        - keyword: agent
+          keyword_cn: 智能体
+          query: a
+        - keyword: multi-agent
+          keyword_cn: 多智能体
+          query: m
+      intent_queries:
+        - query: Frameworks for building multi agent systems with LLMs
+          query_cn: 构建大模型多智能体系统的框架
+          enabled: true
+          source: manual
+          note: ''
+        - query: Emergent behavior in multi agent large language models
+          query_cn: 多智能体大模型中的涌现行为
+          enabled: true
+          source: manual
+          note: ''
+        - query: Collaborative problem solving in LLM multi agent environments
+          query_cn: 大模型多智能体环境下的协作问题求解
+          enabled: true
+          source: manual
+          note: ''
+        - query: Multi agent reinforcement learning with large language models
+          query_cn: 结合大模型的多智能体强化学习
+          enabled: true
+          source: manual
+          note: ''
+      updated_at: '2026-03-10T09:48:55.216Z'
