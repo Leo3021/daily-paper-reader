@@ -1,0 +1,991 @@
+Title: MT-PingEval: Evaluating Multi-Turn Collaboration with Private Information Games
+
+URL Source: https://arxiv.org/pdf/2602.24188v1
+
+Published Time: Mon, 02 Mar 2026 02:19:46 GMT
+
+Number of Pages: 31
+
+Markdown Content:
+> 2026-03-02
+
+# MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games 
+
+Jacob Eisenstein *,1 , Fantine Huot 1, Adam Fisch 1, Jonathan Berant 2 and Mirella Lapata 1  
+
+> *Corresponding author, 1Google DeepMind, 2Google Research
+
+We present a scalable methodology for evaluating language models in multi-turn interactions, using a suite of collaborative games that require effective communication about private information. This enables an interactive scaling analysis, in which a fixed token budget is divided over a variable number of turns. We find that in many cases, language models are unable to use interactive collaboration to improve over the non-interactive baseline scenario in which one agent attempts to summarize its information and the other agent immediately acts – despite substantial headroom. This suggests that state-of-the-art models still suffer from significant weaknesses in planning and executing multi-turn collaborative conversations. We analyze the linguistic features of these dialogues, assessing the roles of sycophancy, information density, and discourse coherence. While there is no single linguistic explanation for the collaborative weaknesses of contemporary language models, we note that humans achieve comparable task success at superior token efficiency by producing dialogues that are more coherent than those produced by most language models. The proactive management of private information is a defining feature of real-world communication, and we hope that MT-PingEval will drive further work towards improving this capability. 
+
+Keywords: multi-turn evaluation, dialogue, language models 
+
+1. Introduction 
+
+Multi-turn conversation is a core capability for language models, but it is difficult to measure. The primary challenge is how to create realistic conditions in which (1) dialogue is necessary, yet (2) performance is verifiable. Many existing evaluations focus on scripted scenarios where a human participant (or more often, a user simulator that is backed by another language model) is given a predefined goal or set of goals, and is asked to play out a multi-turn interaction with an AI assistant (e.g., Laban et al., 2025; Shao et al., 2024). There are at least two major drawbacks to this style of evaluation. First, it is fundamentally asymmetric: for example, the assistant generates a series of proposals (e.g., a travel itinerary, some software code) that the human critiques until reaching a satisfactory output. In contrast, human-human interactions usually require both participants to proactively shape the direction of the dialogue. This symmetry gives rise to two of the central tasks in communication: determining what parts of one’s knowledge are sufficiently relevant to the shared purpose to be worth communicating, and what additional knowledge needs to be elicited from the other participant(s) (Grice, 1975; Lin et al., 2024). Second, this style of evaluation requires a faithful simulator of human users. This is a challenging task in its own right, because in real conversations, the human user may begin with only a vague sense of their own goals, and without enough clarity about the nature of the task to enumerate their preferences and constraints (Lin and Tomlin, 2025). To measure the ability of language models to address the fundamental communicative challenges of multi-turn dialogue, we present a new form of multi-turn evaluation through collaborative private information games (PINGs). The key feature is that each participant has access to private infor-mation, some of which is essential to the successful completion of the task. The participants must  
+
+> Corresponding author(s): jeisenstein@google.com
+> ©2026 Google. All rights reserved
+> arXiv:2602.24188v1 [cs.CL] 27 Feb 2026 MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+
+then collaboratively solve the task by building a shared understanding of their private information through linguistic communication. To prevent participants from simply giving away their private information, we use information modalities that are not easy to convert into text (under reasonable length constraints): images and structured knowledge. This basic idea echoes much earlier work on "information gap" tasks in second-language instruction, in which language learners must share private information to jointly accomplish a goal (Doughty and Pica, 1986). We collect these private information games into a benchmark called MT-PingEval . To enable comparative analysis at scale, we design the games to enable automatic verification and generation of new instances. This makes it possible to evaluate the multi-turn capabilities of language models from a new perspective that focuses on their proactive conversational capabilities. Success or failure in multi-turn private information games depends on two capabilities: (1) interacting effectively across multi-turn dialogues; and (2) reasoning about the game itself. Our primary interest is in the interactive capability; to isolate it, we propose a novel form of multi-turn scaling analysis, in which we fix the total number of tokens that can be exchanged in the interaction, and vary the number of turns (see Section 4). The performance with two turns is then a baseline, because if given a larger number of turns, the players can achieve the same communication by ignoring each other and sharding their message from the two-turn variant into however many turns are permitted. In well-designed tasks (see formal characterization in Section 2), the players can do better by refining their communication based on the dialogue context. However, we observe that contemporary language generally fail to achieve this. In most cases, there is no improvement as the turn budget grows, showing that the language model players are unable to use interaction to improve their task performance. In several cases, performance significantly decreases with higher turn budgets, because the players prematurely terminate the dialogue rather than verifying their conclusions (Cemri et al., 2025, show a related finding in practical deployment scenarios). These negative results hold broadly across model scales and thinking budgets, suggesting that there is still significant room for improvement in multi-turn communication. 
+
+2. Levels of interactivity 
+
+To formalize intuitions about the role of private information in multi-turn communication, we propose a framework for quantifying the level of interactivity for a collaborative private information game. Consider a two-player game, where player 1 receives private information 𝑋 1 and player 2 receives private information 𝑋 2. The shared goal is for player 1 to give an answer that gets a high score. (For this theoretical formulation it is convenient to allow only player 1 to give an answer.) The private information need not be completely disjoint: for example, both 𝑋 1 and 𝑋 2 may contain some description of the task, but they should also each contain at least some information that is unique. Assume each player 𝑖 ∈ { 1, 2} has an encoding function 𝑓 𝑖 ∈ F 𝑛 𝑖 = { 𝑓 : X𝑖 × S → V 𝑛 }, where V𝑛 
+
+is the set of strings with 𝑛 tokens on vocabulary V and S = (V 𝑛 )∗ is the set of possible conversational histories. The history is then updated by concatenation, 𝑆 𝑡 := 𝑆 𝑡 +1 ◦ 𝑓 𝑖 (𝑡 ) (𝑋 𝑖 (𝑡 ) , 𝑆 𝑡 +1), with 𝑡 indicating the number of remaining turns and 𝑖 (𝑡 ) indicating the active player at turn 𝑡 . We will use 𝑖 (𝑡 ) = 𝑡 mod 2+1,with 𝑖 (0) = 1 indicating that player 1 always provides the final answer. At the initial turn 𝑇 , we have 𝑆 𝑇 = ∅, and we will write 𝑓 (𝑋 ) as shorthand for 𝑓 (𝑋, 𝑆 𝑇 = ∅) . Finally, let 𝔼 [score (𝑋 1, 𝑆 )] ≥ 0
+
+represent the expected score from player 1 answering based on private information 𝑋 1 and state 𝑆 .We give concrete examples of such games and encoding functions immediately below. For constants 𝑛 ∈ ℤ+, 𝑐 ∈ ℝ+, we can characterize games by their level of interactivity: 
+
+• Level 0: The game is solvable without 𝑋 2, so no communication is needed: 𝔼 [score (𝑋 1, ∅)] > 𝑐 .
+
+> 2MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+
+• Level 1: There is an efficient encoding function for 𝑋 2 that makes the game level-0 interactive: 
+
+∃ 𝑓 2 ∈ F 𝑛  
+
+> 2
+
+: 𝔼 [score (𝑋 1, 𝑆 0)] > 𝑐 
+
+where 𝑆 0 = 𝑓 2 (𝑋 2).
+
+This means that the game is solvable in one round of conversation, with player 2 transmitting the length-restricted message 𝑓 2 (𝑋 2) to player 1. For example, suppose that the game is image classification, so that 𝑋 2 is an image and 𝑌 labels the class of the main object in the image. Player 2 does not need to know anything about 𝑋 1 (indeed, 𝑋 1 can even be empty) to transmit the message 𝑌 = 𝑓 2 (𝑋 2) to player 1. 
+
+• Level 2: There is an efficient encoding function for 𝑋 1 such that sharing this encoding makes the game level-1 interactive: 
+
+∃ 𝑓 1 ∈ F 𝑛  
+
+> 1
+
+, ∃ 𝑓 2 ∈ F 𝑛  
+
+> 2
+
+: 𝔼 [score (𝑋 1, 𝑆 0)] > 𝑐 
+
+where 𝑆 1 = 𝑓 1 (𝑋 1)
+
+𝑆 0 = 𝑆 1 ◦ 𝑓 2 (𝑋 2, 𝑆 1) = 𝑓 1 (𝑋 1) ◦ 𝑓 2 (𝑋 2, 𝑓 1 (𝑋 1)) 
+
+For intuition, suppose that 𝑋 2 is an image and 𝑋 1 is another image and a text proposition (e.g., "there are more beads in my image than your image", 𝑓 1 (𝑋 1) = "how many beads", 
+
+𝑓 2 (𝑋 2, 𝑓 1 (𝑋 1)) = "three" ), and 𝑌 labels whether the proposition is true. This example corresponds our multiplayer implementation of COVR (Bogin et al., 2021), detailed in Section 3.2, although some instances from this task may not be resolvable in such a minimal dialogue. 
+
+• Level 3: There is an efficient encoding of 𝑋 2 such that sharing this encoding makes the game level-2 interactive: 
+
+∃ 𝑓 1 ∈ F 𝑛  
+
+> 1
+
+, ∃ 𝑓 2 ∈ F 𝑛  
+
+> 2
+
+: 𝔼 [score (𝑋 1, 𝑆 0)] > 𝑐 
+
+where 𝑆 2 = 𝑓 2 (𝑋 2)
+
+𝑆 1 = 𝑆 2 ◦ 𝑓 1 (𝑋 1, 𝑆 2) = 𝑓 2 (𝑋 2) ◦ 𝑓 1 (𝑋 1, 𝑓 2 (𝑋 2)) 
+
+𝑆 0 = 𝑆 1 ◦ 𝑓 2 (𝑋 2, 𝑆 1) = 𝑓 2 (𝑋 2) ◦ 𝑓 1 (𝑋 1, 𝑓 2 (𝑋 2)) ◦ 𝑓 2 (𝑋 2, 𝑓 2 (𝑋 2) ◦ 𝑓 1 (𝑋 1, 𝑓 2 (𝑋 2)) 
+
+It is harder to construct intuitive examples at this level and above. However, imagine the game of identifying elements that are shared between structured objects 𝑋 1 and 𝑋 2. The game can be solved in the following fashion: 𝑓 2 (𝑋 2) lists at a high level the elements present in 𝑋 2; 𝑓 1 (𝑋 1, 𝑆 2)
+
+identifies a subset of those elements that are also present in 𝑋 1; 𝑓 2 (𝑋 2, 𝑆 1) describes the detailed 
+
+features of those elements in 𝑋 2; and given this information, player 1 outputs a list of elements that have identical features in both 𝑋 1 and 𝑋 2.
+
+• Level 𝑘 > 3: There is an efficient encoding of 𝑋 1 or 𝑋 2 (depending on whether 𝑘 is even or odd) such that sharing this encoding makes the game level 𝑘 − 1 interactive. Clearly games that are level-𝑘 interactive are also level (𝑘 + 1)-interactive. We seek games such that for some 𝑘 ≥ 2, the game is level-𝑘 interactive but not level (𝑘 − 1)-interactive, for reasonable values of 𝑛 and 𝑐 . A related property is the game should be solvable by a single agent with access to both 𝑋 1 and 𝑋 2. Note that interactivity is a property of a game and model , because a strong model might be able to solve a game in a smaller number of turns than a weaker model by producing better encodings or making better inferences. It is therefore not possible to analytically compute a game’s level of interactivity. Rather, levels of interactivity are a conceptual tool to help formalize the design of our multi-turn evaluations. 
+
+> 3MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+
+QUESTION: Is there both a bowl that is on a table that is in a bedroom and a paper towel that is on a table that is in a cafeteria? 
+
+Alice Bob 1. Alice: Okay, let’s figure this out! I see a bedroom with a desk and a fireplace. Do you see a cafeteria in your image? 2. Bob: No, I don’t see a cafeteria. I see a living room with a display cabinet. 3. Alice: Okay. Does your living room have a table with a bowl on it? 4. Bob: No, I don’t see a bowl on a table. I do see a coffee table. 5. Alice: Does your living room have a table with a paper towel on it? 6. Bob: No, I don’t see a paper towel on any table. 7. Alice: Okay, so I see a bedroom, you see a living room. Neither of us has a bowl/paper towel on a table in the right places. 8. Bob: ANSWER: False 
+
+Figure 1 | An example of a successful COVR dialogue from Gemma3-12B. 
+
+3. Private information games 
+
+The MT-PingEval tasks aim for high levels of interactivity by giving each player private information that is difficult to transmit efficiently as text. The games are chosen to cover a few distinct forms of private data and modes of interaction. In some cases, the private information consists of images; in others it is structured data. Some games are perfectly symmetric between the players (chess, COVR, name-game), while others assign distinct roles (MD3 and tangram). We now describe each game in detail. Full prompts are shown in Section A. 
+
+3.1. Chess 
+
+In the chess task, each player receives a board configuration, in ASCII form. The boards are from the same game, and the players must determine which board is earlier in the game. The boards are chosen to be several moves apart, so that this should almost always be unambiguous. All moves are selected randomly from the uniform distribution over legal moves at each board position. Either player can end the game by saying _YOURS_ or _MINE_. An example is shown in Figure 6. The task has a baseline success rate of 50%. An effective strategy would be to focus on two aggregate statistics: the number of pieces on the board and the rank of the most advanced pawns. Because these statistics are almost always monotonic over the course of a chess game, they could quickly identify the earlier board in most cases. The strategy of counting pieces is used by Gemini 2.5 Pro (see Figure 6), but is not discovered by the other models that we tested (Gemini 2.5 Flash, GPT-4o, Qwen-VL8B, and Gemma3-12B). 
+
+3.2. COVR 
+
+Multimodal reasoning benchmarks such as NLVR (Suhr et al., 2017) and COVR (Bogin et al., 2021) require answering natural questions or evaluating sentences about sets of images. These benchmarks naturally lend themselves to conversational evaluation by showing one image to each player and requiring them to communicate about their images so as to arrive at an answer. We use data from the COVR benchmark, restricting ourselves to the examples with exactly two images; the generalization     
+
+> 4MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+> 1. Describer : A bird with a bright yellow head and black body perched among tall reeds near water. 2. Guesser : Can you describe the bird’s pose or its surroundings further? 3. Describer : The bird is facing left, gripping reeds with its beak, with a rippling water background. 4. Guesser : ANSWER: Image 5
+
+Figure 2 | An example of a successful dialogue for GPT-4o on the MD3 image selection task. The guesser sees all six images, while the describer sees only the highlighted image on the lower right. to multi-party conversations about larger numbers of images is left for future work. An example is shown in Figure 1. As shown in the prompt (Table 2), it was necessary to instruct the language models on the desired answer format to enable exact match evaluation. 
+
+3.3. Image selection: MD3 and Tangram 
+
+The MD3 and tangram tasks are asymmetric image selection tasks. One player (the "describer") receives a single image and the other (the "guesser") receives a set of six photographs (MD3) or four geometrical shapes (tangram). The goal is for the guesser to identify which of its images is the one seen by the describer, or to indicate if there is no match. This can be done by the describer enumerating features of their image, such as the focal object, the background, and visual features of the image’s components. The guesser can help by asking questions that distinguish likely candidates. These tasks are derived from prior work on descriptions of geometric objects (Ji et al., 2022) and human-human dialogue (Eisenstein et al., 2023). Examples of MD3 and Tangram are shown in Figures 2 and 3, respectively. 
+
+3.4. Name-game 
+
+In the name-game task, each player receives a structured database of people, and the task is to find the single record that is common to both databases. To modulate difficulty, the size of the database and number of features can be changed; we include examples with 9, 16, and 25 records and five features. This task is inspired by He et al. (2017), although we generated new data using Gemini 2.5 Pro. An example of this task is shown in Figure 4. The task is quite challenging, and informally we have found that humans have a hard time identifying a good strategy. 
+
+> 5
+
+MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games 
+
+1. Describer : Describer: Black and white geometric pattern with diagonal stripes. 2. Guesser : ANSWER: Image 0 
+
+Figure 3 | An unsuccessful dialogue for Qwen-VL8B on the Tangram image selection task. The guesser sees all four images, while the describer sees only the highlighted image on the far right. The guesser answers prematurely, instead of using additional turns to narrow down the selection. Alice row name astrological sign company favorite musician allergies 1 Michael Scorpio Cisco John Coltrane Corn 2 Andrew Aries Amazon Count Basie Shellfish 3 Ethan Cancer Tesla Miles Davis Eggs 4 Asher Aries Sony Ella Fitzgerald Corn 5 Lucas Capricorn Amazon Art Blakey Fish 6 Charlotte Libra Cisco Nina Simone Mustard 7 Isabella Leo Tesla Miles Davis Eggs 8 Asher Cancer Google Ella Fitzgerald Corn 9 Isabella Leo HP Miles Davis Eggs Bob row name astrological sign company favorite musician allergies 1 Isabella Leo Tesla Miles Davis Eggs 2 Lily Sagittarius HP Herbie Hancock Soy 3 Chloe Pisces Oracle Herbie Hancock Mustard 4 Chloe Gemini Qualcomm Louis Armstrong Gelatin 5 Sophia Libra Samsung Wes Montgomery Peanuts 6 Aurora Capricorn Apple Billie Holiday Sesame 7 Sofia Leo Amazon Art Blakey Tree Nuts 8 Ella Pisces Apple Thelonious Monk Tree Nuts 9 Samuel Leo Tesla Miles Davis Corn 
+
+1. ALICE: Hello! I know a Michael who works at Cisco. Do you know him? 2. BOB: I don’t know a Michael at Cisco. Do you know anyone who works at Apple? 3. ALICE: I don’t know anyone at Apple. I know an Andrew who works at Amazon. Do you know him? 4. BOB: I don’t know Andrew. Do you know anyone who is a Leo? 5. ALICE: Yes, I know two Leos. One works at Tesla. Do you know an Ethan who works at Tesla and likes Miles Davis? 6. BOB: I don’t know Ethan. I know two Leos at Tesla liking Miles Davis, but different names. Do you know a Pisces? 7. ALICE: I don’t know a Pisces. I know one Leo at Tesla liking Miles Davis. Her name is Isabella. Do you know her? 8. BOB: SELECT ROW 1 
+
+Figure 4 | A successful but lucky dialogue for Gemini 2.5 Flash (thinking) on the name-game. 
+
+4. Isotoken multi-turn scaling evaluation 
+
+To evaluate the multi-turn scaling capabilities of language models, we propose a new form of evaluation, called isotoken evaluation , which is motivated by the theory of levels of interactivity that was introduced in Section 2. The core idea is that both players are given a fixed total token budget, and we vary the number of turns into which that budget must be partitioned. For example, a budget of 128 tokens per player (256 tokens in total) may be partitioned into 16 tokens per turn in a 16-turn setting, or 128 tokens per turn in a 2-turn setting. The intuition is that any dialogue that can be performed in 𝑡 turns can also be performed in > 𝑡 turns, because the players can ignore some of the turn boundaries. Thus, the task success should never decrease as the number of turns is increased, and for highly interactive tasks, we should expect task success to improve as the turn budget grows. Both the token and turn budgets are upper limits: we do not force the models to use all available turns, as part of the challenge is to determine when the task has been successfully solved. For simplicity of implementation, we do not allow the models to partition the token budget arbitrarily, but rather allow exactly ⌊𝑇 /𝑡 ⌋ tokens per turn with a budget of 𝑇 tokens and 𝑡 turns. The token limit 
+
+6MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games                 
+
+> 24816
+> 0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1
+> accuracy
+> chess
+> 24816
+> 0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1
+> covr
+> 24816
+> 0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1
+> md3
+> 24816
+> 0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1
+> max_turns
+> accuracy
+> name-game
+> 24816
+> 0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1
+> max_turns
+> tangram model
+> GPT-4o Gemini Flash Gemini Pro Gemma3-12b Qwen-VL8b
+> thinking
+> off on
+
+Figure 5 | Isotoken evaluation , showing task accuracy with a constant token budget sharded over varying numbers of turns. In most cases, performance is flat or decreasing as the turn budget increases, indicating that the models fail to exploit interactivity. is given in the prompt, and all of the models were able to consistently stay under budget, except in the chess task. 1 In the rare cases where the token budget was violated, we truncate the output. At first, the models sometimes disregarded the turn budget, failing to complete the task on the final turn. This problem was cured by adding strong reminders in the prompts for the final and penultimate turns, as shown in the bottom of Table 3. 
+
+Experimental setup We apply isotoken evaluation to the MT-PingEval tasks described in Section 3, with budgets of {2, 4, 8, 16 } turns and 256 tokens per player. We generate 1000 examples per task. We evaluate five models: Gemini 2.5 Pro, Gemini 2.5 Flash, GPT-4o, Qwen-vl8B, and Gemma3-12B. The Gemini 2.5 models are evaluated with and without thinking, which does not count against the token budget. All models use the same prompts, which are shown in Section A. 
+
+Summary of results The main results are shown in Figure 5. With few exceptions, performance does not improve as the models are allowed more turns. In the image selection tasks, performance clearly gets worse as the turn budget increases. We now describe some qualitative differences in the scaling trends across tasks, along with discussion of how the models approach the tasks.   
+
+> 1The token budget is implemented in subword tokens, but the language models appear to be capable of reasoning only about whitespace-delimited tokens: for example, when in thinking mode, Gemini 2.5 Pro and Flash explicitly count out the number of whitespace-delimited tokens in each proposed response before responding. As there are approximately 1.3 subword tokens per whitespace-delimited token, we have the prompt state a token budget that is 1.3×smaller than the true subword token budget. This may partly explain the difficulty in the chess task, where the number of subwords per whitespace token would be higher for chess-specific board position terminology like ‘A8’.
+> 7MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+
+Alice 
+
+. . b . . k r . r . . q p p . . n p p . . . . . p B . . . . . p . P . . . P p P . . P . P . P . P . . P . . . . . R B Q . K N . 
+
+Bob 
+
+r n b q k b r . . . p p p p p . p p . . . . . p . . . . . . . . B P . . N . . . . . . . P . . P P . P P N P P . R . B Q K . . n                    
+
+> 1. Alice: Hi Bob. My board has the White King on g1 and a Rook on b1. The Black King is on f8. Both sides have 7 2. Bob: Okay Alice. My board has 8 white pawns and 8 black pawns. White King is on e1, Black King on e8. 3. Alice: Okay Bob. My board has only 6 white pawns and 7 black pawns. My White King has castled kingside to g1. 4. Bob: Okay Alice. My Kings are still on e1 and e8, not castled. I have 15 white pieces, 16 black pieces. 5. Alice: Okay Bob. My board has fewer pieces than yours: 13 white pieces and 14 black pieces. Several pieces have been captured. Yours must be 6. Bob: Okay Alice. My board has more pieces and pawns than yours. My Kings haven’t moved or castled yet. Yours have. Therefore, 7. Alice: Okay Bob. Your board has more pieces and pawns than mine. Your Kings are on their starting squares, while my White King has castled. This confirms 8. Bob: _MINE_
+
+Figure 6 | An example of a successful chess dialogue from Gemini 2.5 Pro with thinking. Chess is the sole task in which the models regularly exceed the token budget, as seen in turns 1, 5, 6, and 7. 
+
+4.1. Chess 
+
+In the chess task, the thinking models are clearly superior, and the non-thinking Gemini models improve somewhat with the number of turns. The remaining models perform at around the chance level of 50%. As noted above, on this task it is possible to give a highly informative summary of a board position in a very small number of tokens, by listing the number of pieces per player and the rank of the most advanced pawns (with few exceptions, these indicators move monotonically over the coarse of a game). This is shown in Figure 6, where both models report on the number of pieces on the board. Gemini 2.5 Pro is the only model to use this strategy, and it sometimes makes mistakes in counting. Other models tend to list apparently random subsets of their board positions before summarizing the situation and guessing at a conclusion (e.g., Figure 8). 
+
+4.2. COVR 
+
+On the COVR task, which focuses on image analysis, the accuracies for all models are relatively flat as the number of turns increases. For the strongest model, Gemini Pro (thinking), performance decreases monotonically from an overall best of 61.5% accuracy at two turns, to 58.8% at 16 turns. However, the non-thinking version of the same model improves its performance from 53.2% to 59.3% from two to 16 turns, suggesting that thinking and interactive dialogue may in some cases play similar roles. Most of the other differences in performance across turn budgets are small and statistically insignificant. 
+
+4.3. Image selection: MD3 and Tangram 
+
+The image selection tasks show the strongest evidence of inverse scaling with the number of turns: all models suffer from reduced performance as the number of turns increases and the number of tokens per turn decreases. Any 2-turn dialogue could in principle be played over a larger number of turns, so there is nothing that makes the many-turn / few-token setting inherently more challenging. Some models waste tokens in each turn with uninformative introductions, but the main issue is that the    
+
+> 8MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+> 24816
+> 0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1
+> max_turns
+> accuracy
+> name-game
+> model
+> Gemini Pro Gemini Flash Guess one baseline
+> thinking
+> off on
+
+Figure 7 | Comparison of the Gemini models against a simple guess-and-check heuristic. The perfor-mance of the heuristic increases rapidly with the number of turns, as a random guess will eventually be correct. models do not use their full turn budgets, to a far greater extent than in the other tasks (Figure 15). For example, on MD3, even Gemini 2.5 Pro uses fewer than four turns on average in the setting where it is permitted 16 turns and 16 tokens per turn. As a result, the total number of tokens used by each player in the dialogue decreases as the number of turns grows (Figure 16). This is despite our efforts to tune the prompts to encourage the models not to terminate the dialogue until completely sure of their answer (Table 4). Premature task termination was previously identified as a frequent cause of failures in practical multi-LLM applications (Cemri et al., 2025). 
+
+4.4. Name-game 
+
+Name-game stands out as the task in which performance improves substantially with the number of turns. However, inspection of the transcripts shows that in many cases, the players simply guess randomly until they find a lucky match or run out of turns. This can be seen in Figure 4, where Alice happens to mention Isabella in the final turn, and Bob marks this as a match without confirming all of the attributes. The example also highlights the questionable pragmatics of even relatively strong models: Alice’s response in turn 5 strongly implies that Ethan is the astrological Leo who works at Tesla and likes Miles Davis, but in fact she has changed the topic and is no longer talking about Leos. While the language models do improve their performance with the turn budget, this is driven primarily by poor performance at low turn budgets rather than effective use of interaction at high turn budgets. The models usually guess only a single row per turn, and therefore do not use all allowed tokens in the 2-turn and 4-turn cases. Indeed, a baseline that simply proposes a random record in each turn (sampled without replacement) displays a similar scaling trend, achieving a higher success rate than all models except Gemini 2.5 Pro (thinking) in the 16-turn setting (Figure 7). By the nature of the task, this baseline’s performance will improve rapidly with the turn limit. This explains much of the improvement in performance of the language models, which follow a similar strategy. 
+
+5. Dialogue style 
+
+To better understand the numerical performance of language models on MT-PingEval , we closely examine three aspects of their dialogues: sycophancy, information density, and goal-directedness (via discourse coherence). We also compare the language model dialogue styles with that of human participants on the MD3 image selection task.        
+
+> 9MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+> 1. Alice : Okay Bob, my board has no White Queen. Black King is on C8, White King on E1. Black Queen is on G7. 2. Bob : My White King is on F1, Black King on E8. Black Queen is on D6. White Bishop H3, Black Bishop G4. 3. Alice : Interesting. My White Bishop is on G4. You say your Black Bishop is on G4. That’s impossible. Can you clarify? 4. Bob : Okay, Alice. My apologies, I misspoke. My Black Bishop is on G4. My White Bishop is on H3. My White King is on 5. Alice : Okay Bob, let’s focus on the Kings and Bishops. My Black Bishop is on F8, yours is on G4. My White King is on 6. Bob : Okay Alice, your board came first. Black castled queenside, White castled kingside later. Black Bishop F8 to G4. 7. Alice : Yes, Bob, your analysis is correct. My board came first. Black castled queenside, then White castled kingside. _MINE_
+
+Figure 8 | Example of sycophancy and answer proposal in chess (Gemini 2.5 Flash, thinking). Bob offers a spurious apology in turn 4. In turn 6 Bob proposes an answer but does not formally enter it; the (correct) proposal is accepted by Alice in turn 7. Note also that the players struggle with the token limit on this task, a phenomenon that we observed far less frequently in the other tasks. 
+
+5.1. Sycophancy in task performance 
+
+Sycophancy is a major concern about today’s large language models (Perez et al., 2023), due in part to its potential effects on human-human interaction patterns (Cheng et al., 2025). In the context of 
+
+MT-PingEval , sycophantic language model players might be too willing to accept claims or ideas by the other player, potentially overriding private information that could help them achieve a more accurate answer (Stengel-Eskin et al., 2025). If so, this would suggest that language models are likely to do the same in dialogues with human interlocutors, which would significantly limit their utility. To test this, we searched for situations in which one player proposed a game solution without committing to it, and measured whether the other player was likely to agree. We used simple string-matching techniques (Section C.1), which were sufficient to identify most such cases. An example is shown in Figure 8. For simplicity, we focus on the chess task, because both players can propose answers and because all answers are binary, and we consider only the transcripts at the 8-turn limit, which strikes a balance between turn length and dialogue length. In this setting, the Gemini 2.5 thinking models often proposed possible answers on non-final turns. This occurred in 12.7% of non-final turns (42.9% of dialogues) for Gemini 2.5 Flash and 5.8% of non-final turns (21.4% of dialogues) for Gemini 2.5 Pro. Such answer proposals were rarely made by other models (including the same Gemini models without thinking), so we focus on the Gemini thinking models. Our main question is whether these proposals were accepted at an excessively high rate, indicating sycophancy. As shown in Figure 9, the Gemini models are effective at distinguishing correct and incorrect proposals, accepting correct proposals at a far higher rate than incorrect proposals. Indeed, of accepted proposals, the accuracy is 90.0% and 95.0% for Flash and Pro respectively, which is significantly higher than the overall accuracies of 83.4% and 91.4% for the same models at this turn budget. While some incorrect early proposals are accepted, task performance is not significantly negatively impacted by this form of sycophancy. 
+
+Summary Sycophantic acceptance of early answer proposals was hypothesized as a link between sycophancy and collaborative failures. But in fact, the Gemini models, which make such proposals most frequently, are selective: they are far more likely to accept proposals that are correct. 
+
+> 10 MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+
+incorrect correct 
+
+0
+
+100 
+
+200 
+
+300 
+
+400  
+
+> 20 18
+> 39
+> 353
+> count
+
+Gemini 2.5 Flash 
+
+incorrect correct  
+
+> 10 910
+> 187
+
+Gemini 2.5 Pro 
+
+rejected 
+
+accepted 
+
+Figure 9 | Counts of early answer proposals in the chess task for the Gemini thinking models. While the models do accept some incorrect early proposals, they are far more likely to accept proposals that are correct. 
+
+0246810   
+
+> Gemini Pro (Thinking)
+> Gemini Pro
+> Gemini Flash (Thinking)
+> Gemini Flash
+> Gemma3-12b
+> GPT-4o
+> Qwen-VL8b
+> 5.25
+> 5.02
+> 3.66
+> 4.25
+> 3.72
+> 3.93
+> 4.69
+> Uncritical agreement %
+
+0 2 4 6 8 10 12 14 16 18 20 
+
+> 14 .6
+> 15 .1
+> 12 .6
+> 14
+> 14 .1
+> 14 .6
+> 13 .7
+> Validation of false premise %
+
+Figure 10 | Rates of sycophantic features per dialogue across models on the chess task. 
+
+5.2. Stylistic sycophancy 
+
+While the Gemini models were found not to suffer from sycophancy in incorrectly accepting early answer proposals in chess, we did find considerable evidence of stylistic sycophancy. An example is shown in turn 4 of Figure 8, where Bob spuriously apologizes – and then immediately repeats the assertion for which he had just apologized! In 8-turn chess dialogues with Gemini 2.5 Pro (thinking), we find inflections of the word "apology" in 19.6% of conversations (other models do this very rarely). For a deeper and more systematic analysis of stylistic sycophancy, we use an LLM-as-a-judge autorater. We defined sycophancy as uncritical agreement or the validation of false/unsupported premises (Cheng et al., 2025). The autorater was first provided information about the task, together with a detailed definition of sycophancy. It was then instructed to read the conversation and decide whether: a) a speaker uncritically agrees with their interlocutor (without introducing new evidence); b) they adapt their descriptions to align with the interlocutor despite conflicting evidence; and c) the conversation is free of sycophancy. (For simplicity the autorater must choose exclusively between (a) and (b).) The autorater was further prompted to provide a short justification for its decision. The detailed autorater prompt is provided in Section C.2. We selected Gemini Pro as the autorater, as it achieved the highest accuracy in preliminary human evaluations compared to Gemini Flash and GPT-4o. Again, we consider only the transcripts under the 8-turn limit as in Section 5.1. 
+
+> 11 MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+
+As shown in Figure 10, the overall rates of detected sycophantic behavior range from 16-20%. The dominant type of sycophancy is the validation of a false or unsupported premise. The pairwise differences between models were not significant by a sign test at 𝑝 < . 05 after Bonferroni correction for multiple comparisons. While the overall rates of sycophancy are low, this finding highlights a failure mode of current LLMs: when faced with contradictory or partial information in a collaborative setting, they often default to undermining their internal state in favor of conversational coherence, rather than challenging factual errors and incorrect premises. 
+
+Summary As expected, all models display sycophantic behavior. The differences between models are limited, revealing no clear association between stylistic sycophancy and task success rates. 
+
+5.3. Information density 
+
+We next explore whether differences in performance across models and turn budgets can be attributed to differences in the information density of each utterance. On one hand, more interactive dialogue naturally requires conversational scaffolding (e.g., acknowledgments, confirmations, clarification requests) that serve important coordination functions but would yield lower density. A strategic 
+
+communicator might therefore show decreasing density with more turns while still improving task performance, by using low-density utterances to establish common ground before transmitting high-density task-relevant content. On the other hand, decreasing information density may signal that the models have gotten stuck in a repetitive loop and are no longer introducing novel content. The critical test is whether density patterns correlate with task success: if density decreases without corresponding performance gains, this suggests models are producing formulaic or repetitive content rather than purposeful coordination. We might also expect stronger models to maintain higher density across turn budgets, reflecting better planning and more efficient use of the communication channel. To test these expectations, we focus on lexical density (Halliday, 1985; Ure, 1971), a widely used measure in linguistics and discourse analysis that captures how much informational content a text conveys by examining the proportion of lexical (content) words relative to the total number of words. Our proposed metric aims to capture how efficiently a multi-turn dialogue communicates novel, content-bearing information. The metric combines two complementary signals: 
+
+• The content-word ratio measures the proportion of lexical content in the dialogue by excluding stopwords and disfluencies, penalizing verbosity and filler language. 
+
+• The novelty of each turn is estimated using TF–IDF representations of utterances, where each utterance is assigned a novelty score equal to the average TF–IDF weight of its non-zero terms, and dialogue-level novelty is computed by averaging across utterances. 2 Our novelty score uses TF–IDF-based sentence vectors to identify sentences that introduce new information relative to prior context and therefore rewards dialogues that are both content-heavy and avoid repetition. Information density is defined as the product of these two quantities, scaled to a 0–100 range (we formally define ContentRatio and Novelty in Section C). This provides a quantitative measure of dialogue efficiency. 
+
+LexicalDensity (𝑈 ) = 100 × ContentRatio (𝑈 ) × Novelty (𝑈 ). (1)            
+
+> 2TF–IDF is a standard way to quantify the informativeness of words in a corpus, originally introduced as a measure of term specificity in information retrieval (Jones, 1972). In dialogue, TF-IDF-weighted utterance representations have been widely used for tasks such as dialogue-act classification (Ahmadvand et al., 2019), topic segmentation (Matsumoto et al., 2022), response evaluation (Lowe et al., 2017), and utterance-level summarization (Zhu and Penn, 2006).
+> 12 MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+> 4816
+> 0
+> 20
+> 40
+> 60
+> mean density
+> chess
+> 4816
+> 0
+> 20
+> 40
+> 60
+> covr
+> 4816
+> 0
+> 20
+> 40
+> 60
+> md3
+> 4816
+> 0
+> 20
+> 40
+> 60
+> max_turns
+> mean density
+> name-game
+> 4816
+> 0
+> 20
+> 40
+> 60
+> max_turns
+> tangram Model
+> GPT-4o Gemini Flash Gemini Pro Gemma3-12b Qwen-VL8b
+> Thinking
+> off on
+
+Figure 11 | Lexical density as a function of dialogue length. Each curve shows a model’s average density at 4, 8, and 16 turns. Higher values reflect more content-bearing and novel lexical choices. Solid lines correspond to standard inference and dashed lines to thinking mode. The density of responses was evaluated across models and tasks and illustrated in Figure 11. We exclude the two 2-turn setting from this analysis because it is non-interactive. As can be seen in the figure, lexical density patterns vary substantially across tasks and models, but are relatively constant over varying turn budgets. 
+
+Model comparisons The use of thinking consistently increases lexical density across most tasks and turn budgets. In chess, thinking-enabled Gemini models maintain density scores of 30-37 regardless of turn count, while their non-thinking counterparts decline substantially. These models tend to produce very granular descriptions of the positions of individual pieces (e.g., "My board has a black king on e8, a white king on g1, and a black pawn on h7"). In contrast, Gemma3-12b has the highest lexical density in chess, producing more holistic descriptions of the board state (e.g., "strong central pawn structure"). However, these holistic descriptions do not enable Gemma to achieve better than chance performance on this task. In COVR and name-game, the density advantage of Gemini’s thinking mode is smaller, possibly because the visual grounding in these tasks constrains the vocabulary regardless of planning. But while thinking increases lexical density for the Gemini models, two non-thinking models, Gemma3-12b and Qwen-VL8B, consistently get the highest density scores. As a methodological note, because IDF is computed over the full conversation, models that use fewer turns (e.g., Gemma3-12b, Qwen-VL8B on MD3 and Tangram, where early termination is common) will have smaller effective corpus sizes and thus higher IDF weights for any given term. This partially explains their elevated density scores relative to the Gemini models, independently of any genuine difference in communicative informativenes. As noted above, high density does not translate to task success for these models, reinforcing the conclusion that current LLMs struggle to convert communicative effort into effective collaborative problem-solving. To better understand the relationship between lexical density and model strength, it is worth 
+
+> 13 MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+
+distinguishing the two components of LexicalDensity. The content-word ratio penalizes verbosity: models that produce more conversational scaffolding (acknowledgments, hedges) will score lower regardless of informational value. The novelty component penalizes repetition across turns. These capture partially independent phenomena: a model could be verbose (low content-word ratio) yet still contribute genuinely novel information each turn (high novelty), or vice versa. For the image selection tasks (MD3, tangram), where Gemini Flash uses substantially more tokens than Gemma3-12b (Figure 16), the density gap between the two models is larger than in other tasks, consistent with verbosity, rather than lack of novelty, being the primary driver of Gemini’s lower scores. 
+
+Game comparisons Across models, lexical density is generally highest in the image selection tasks (MD3 and tangram), and lowest in chess and name-game. This may be partially explained by the early termination observed in the image selection tasks, which reduces the possibility for repetition. On the name-game, lexical density is generally flat across turn budgets, with most scores between 25-40. This is consistent with the hypothesis that performance improvement in this task is driven primarily by random guessing strategies, as models repeatedly propose individual records. 
+
+Summary Overall, the hypothesis that stronger models would maintain higher density finds limited support. Lexical density also does not correlate with task success rates, and displays no consistent relationship with the turn budget. This discrepancy between communicative effort and task success suggests that current LLMs can generate content-rich utterances but struggle to deploy that content strategically in service of collaborative goals . The ability to produce dense, novel text is necessary but not sufficient for effective multi-turn interaction. 
+
+5.4. Goal directedness and coherence 
+
+Goal-directed conversations are coherent in the sense of maintaining focus on the overarching goal of interaction. Are language models able to maintain coherence on the MT-PingEval tasks? How is coherence impacted by model scale, task difficulty, and the use of inference-time thinking? To answer these questions, we apply Centering Theory — a discourse-level framework for modeling local coherence by tracking how entities are introduced, maintained, and shift across adjacent utterances (Grosz et al., 1995; Walker et al., 1994). Rather than treating discourse structure globally, the theory focuses on local transitions , capturing how speakers manage continuity and change in what a discourse is “about” from one utterance to the next. At the core of the theory is the notion of 
+
+centers , discourse entities that are salient at a given point. For each utterance 𝑈 𝑛 , Centering Theory defines a set of forward-looking centers (𝐶 𝑓 𝑛 ), ranked by grammatical role (e.g., subjects typically outrank objects), and a single backward-looking center (𝐶𝑏 𝑛 ), which represents the entity linking  
+
+> 𝑈 𝑛
+
+to the preceding utterance 𝑈 𝑛 −1. Local coherence is characterized by how 𝐶𝑏 𝑛 relates to 𝐶𝑏 𝑛 −1
+
+and to the ranking of entities in 𝐶 𝑓 𝑛 . These relations give rise to a small set of transition types — 
+
+Continue , Retain , Smooth Shift , and Rough Shift — which encode increasingly disruptive changes in discourse focus. Continue transitions, in which the same center is maintained and remains highly salient (i.e., as a subject or object), correspond to the strongest form of local coherence. Retain and 
+
+Smooth Shift transitions reflect controlled changes in focus, while Rough Shifts indicate abrupt topic changes and are generally associated with degraded coherence. Centering Theory has been used extensively to explain patterns of pronominalization (Brennan et al., 1987; Gordon et al., 1993), co-reference resolution (Chai and Strube, 2022), and discourse flow in natural language production and comprehension (Karamanis et al., 2009; Poesio et al., 2004). It has also served as a foundation for modeling coherence in text generation and evaluation, providing interpretable signals that correlate with human judgments of discourse quality (Barzilay and Lapata, 2008; Miltsakaki and Kukich, 2000).                                                                      
+
+> 14 MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+> 1. Alice: Aclose-up of creamy, long pasta, possibly fettuccine Alfredo, served in a shallow, yellowish bowl. 2. Bob: Does the ::::
+> pasta have any green vegetables like broccoli in it? Rough-Shift
+> 3. Alice: No, there are no visible green vegetables in the pasta .Retain
+> 4. Bob: Is the bowl truly yellowish? Does the pasta have any garnish or other items like shrimp? Retain
+> 5. Alice: Yes, the ::::
+> bowl is a pale, matte yellow. No garnish or shrimp, just creamy pasta. Smooth-Shift
+> 6. Bob: Is the :::
+> bowl definitely yellow, or could it be white or off-white, perhaps due to lighting? Continue
+> 7. Alice: The ::::
+> bowl is definitely a solid, pale yellow, not white or off-white. Its actual color appears to be yellow.
+> Continue
+> 8. Bob: No match .Rough-Shift
+> 1. Alice: I know Mateo .He loves Herbie Hancock, photography, and Forest Green. University? Los Angeles. 2. Bob: No mutual match yet. Herbie Hancock fans: Mia, Hazel (row 2,7). Check if you know either. University? Photography? Color?
+> Rough-Shift
+> 3. Alice: I know :::::
+> Hazel . Ella Fitzgerald, University of Michigan, Birdwatching, Beige. Do you know her? Confirm all traits.
+> Rough-Shift
+> 4. Bob: Row 6 matches: Hazel , Ella Fitzgerald, University of Michigan, Birdwatching, Beige. Confirm mutual knowledge.
+> Rough-Shift
+> 5. Alice: I know Andrew .Ella Fitzgerald , UPenn, Gardening, Navy. Do you know him? Confirm all traits.
+> Rough-Shift
+> 6. Bob: No match for Andrew . Ella Fitzgerald, UPenn, Gardening, Navy? No row matches all. Confirm if you know Hazel or Mia.
+> Rough-Shift
+
+Figure 12 | Example dialogues and their centering transitions (as identified by our automatic proce-dure). The top example is Gemini 2.5 Pro (no thinking) on MD3; the bottom example is Qwen-VL8B on name-game. We also highlight the preferred (𝐶 𝑝 ) and backward-looking (𝐶 𝑏 ) centers as detected by our algorithm. Entities that are both the preferred and backward-looking center are highlighted in ::::::: 
+
+orange . The top exchange exhibits higher coherence, maintaining focus on a consistent set of entities, while the bottom exchange is less coherent, shifting abruptly between different entities. We operationalize Centering Theory for the analysis of multi-turn model interactions. Specifically, we extract centering transitions between adjacent utterances and aggregate them into a quantitative coherence score that reflects how well a model maintains or evolves discourse centers as interactions grow longer. Details of this operationalization are presented in Section C.4. For each dialogue, we identify forward-looking centers ( 𝐶 𝑓 𝑛 ) for every utterance 𝑈 𝑛 within a turn using syntactic information and define the backward-looking center 𝐶𝑏 𝑛 following standard centering conventions. We parse utterances using SpaCY 3 and identify as centers noun phrases in subject and object positions. Each adjacent pair of utterances (𝑈 𝑛 −1, 𝑈 𝑛 ) is then assigned one of four transition types: Continue , Retain ,
+
+Smooth Shift , or Rough Shift .While prior work often reports the distribution of centering transitions directly, such distributions become difficult to compare across models, tasks, or interaction lengths. We therefore introduce a scalar Centering Coherence Score (CS) that aggregates transition statistics into a single interpretable measure, while preserving the ordinal preferences predicted by Centering Theory. Formally, let 𝐶 , 𝑅 ,
+
+𝑆𝑆 , and 𝑅𝑆 denote the proportions of Continue (C), Retain (R), Smooth Shift (SS), and Rough Shift (RS) transitions in a dialogue, excluding the initial utterance. We define the centering coherence score as: 
+
+CS = 3C + 2R + 1SS (2) 
+
+> 3
+
+https://spacy.io/.            
+
+> 15 MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+> 4816
+> 0
+> 1
+> 2
+> CS Score
+> chess
+> 4816
+> 0
+> 1
+> 2
+> covr
+> 4816
+> 0
+> 1
+> 2
+> md3
+> 4816
+> 0
+> 1
+> 2
+> max_turns
+> CS Score
+> tangram
+> 4816
+> 0
+> 1
+> 2
+> max_turns
+> name-game Model
+> GPT-4o Gemini Flash Gemini Pro Gemma3-12b Qwen-VL8b
+> Thinking
+> off on
+
+Figure 13 | Mean Centering Coherence Score (CS) for five private information games across three turn lengths (max_turns ∈ { 4, 8, 16 }). This weighting scheme reflects the canonical centering preference ordering 
+
+Continue > Retain > Smooth Shift > Rough Shift ,
+
+assigning zero utility to Rough Shifts, which correspond to the weakest form of local coherence. By construction, CS ranges from 0 (all transitions are Rough Shifts) to 3 (all transitions are Continue), with intermediate values capturing varying degrees of discourse coherence. The CS metric offers several practical advantages. First, it normalizes coherence across dialogues of different lengths, enabling fair comparisons across interaction budgets. Second, it complements raw transition distributions by summarizing both coherence strength and failure modes in a single value. Finally, because CS is grounded directly in centering-theoretic preferences, it remains interpretable and diagnostic: changes in CS can be traced back to shifts in specific transition types. Figure 12 shows examples with high (top) and low (bottom) centering coherence scores. 
+
+Overall results Figure 13 shows CS for each model, task, and interaction length, revealing how centering coherence evolves as the number of turns increases. (We omit the two-turn setting from this analysis, as the last turn is reserved for the player to state their answer, so there is often no change in discourse focus). For most model/task/turn combinations, the score ranges between 1 and 2, suggesting a moderate level of local discourse coherence. Coherence is generally flat or increasing with the number of turns, with increases particularly likely in the step from 4 to 8 turns. This may be because the more interactive setting makes it possible for the conversational partners to focus in on a target hypothesis or on some especially discriminating features, as in Figure 12 (top). 
+
+Model comparisons The maximum score observed across all tasks is 2.41 for Gemini Pro (no thinking) on the Chess task, under the 8-turn limit. The Gemini models often achieve the highest CS, particularly in the chess, COVR, and name-game tasks. This indicates that the internal reasoning step, 
+
+> 16 MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+
+while improving answer accuracy in some cases (e.g., chess), often leads to dialogues characterized by weaker local coherence. GPT-4o consistently exhibits the lowest coherence scores, placing it near the bottom for nearly all tasks and turn limits. Gemma3-12B generally falls within the low-to-mid coherence range, often showing a flat line near zero in MD3 and tangram. Qwen-VL8b demonstrates a highly fluctuating CS across tasks. While it shows mid-to-high coherence in chess and name-game, its coherence is low in MD3 and COVR, which suggests its ability to maintain discourse coherence is sensitive to the task domain. 
+
+Game Comparisons The chess task features some of the most coherent dialogues, possibly due to the restricted domain of discourse entities (pieces and moves). Name-game also exhibits high CS values, particularly for the Gemini models, with a peak near 2.20 at 8 turns. Dialogues for these models often follow the proposal-response strategy shown in Figure 4, in which each turn ends with a question about a specific individual and feature, and the next turn begins with an explicit answer to that question, e.g. “Do you know a Pisces? / I don’t know a Pisces.” However, such local conversational smoothness does not indicate effective, global task planning, and the execution of this strategy can lead to far more fragmented conversations, as in Figure 12 (bottom). Coherence scores for image selection tasks (MD3, tangram) are generally below 1.0, perhaps because the domain of potential discourse referents in the players’ private images are highly distinct. The COVR game includes both images and text; correspondingly, it features coherence scores that are generally higher than the image-only tasks (MD3, tangram) and below the text-based tasks (chess and name-game). 
+
+Summary The coherence score metric confirms that LLMs are capable of generating conversations with non-trivial degree of local coherence. However, coherent dialogues often reflect repetitive conversational patterns rather than effective problem-solving, given the turn budget. 
+
+5.5. Comparison with human dialogues: MD3 
+
+In prior work, a closely-related image selection task is performed by humans (Eisenstein et al., 2023). 4
+
+There are a few important differences between the settings. The human players had no limit on the number of turns or tokens that they could use, but rather were encouraged to solve as many task instances as they could in five minutes. "No match" was not an option for the human players, but the number of distractor images was 12 rather than six. With those caveats in mind, it is possible to make a rough comparison between the properties of human-human dialogues with those of dialogues between language models (Shaikh et al., 2024). 
+
+Task performance Humans achieve task success rates between 86-91%. This exceeds the task success rates for language models, although the success rates are not directly comparable because the human instantiation of the task did not include "no match" cases but had more distractor images. Also, recall that the humans did not have a token or turn limit. 
+
+Efficiency Humans averaged 10.6 whitespace-delimited tokens per turn (median = 5), and 5.5 turns per prompt (median = 4). This means that on average humans used only 60 tokens per dialogue in total (across both players). The short turn lengths and relatively interactive dialogues may be linked to the speech modality (Biber, 1991). While the language models were allowed 256 tokens per dialogue, they used significantly fewer: as shown in Figure 16, each player used fewer than 50 tokens in all settings, except GPT-4o at 2 turns. Thus, the language models were  
+
+> 4These transcripts are available at https://www.kaggle.com/datasets/jacobeis99/md3en
+> 17 MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+
+20 30 40 50 60 70 
+
+0.4
+
+0.5
+
+0.6
+
+0.7
+
+0.8
+
+0.9
+
+1
+
+1.1
+
+human speech 
+
+> GPT-4o Gemini Flash
+> Gemini Flash, thinking
+> Gemini Pro
+> Gemini Pro, thinking
+> Gemma3-12b
+> Qwen-VL8b
+
+lexical density 
+
+> coherence score
+
+Task: MD3 image selection 
+
+Figure 14 | Lexical density and coherence for AI models and humans on the MD3 image selection task. The language model scores are averaged over all turn budgets. less token-efficient than the human players, while also failing to fully utilize their token budget to maximize task performance. 
+
+Linguistic features Human dialogues had an average lexical density of 24.95. This was lower than all of the language models on all versions of MD3, which ranged from 40–70. Again, a likely explanation is the speech modality: 89% of the human dialogues contained a backchannel or filler token ("ok", "okay", "done", "um", "uh") and 6.8% contain an apology. The human dialogues have an average coherence score of 0.86 , which exceeded most of the models in this task, except for Gemini Pro (no thinking). The relationship between lexical density and coherence on this task is shown in Figure 14. 
+
+Summary Humans are able to perform the MD3 image selection task with high accuracy, despite low lexical density. This may be partly explained by the relatively high coherence of human dialogues, which exceeds all but one of the language models. Beyond coherence, the outstanding token efficiency of human dialogues suggests that they approach these tasks in a more goal-directed way than even the strongest language models. 
+
+6. Related work 
+
+Early multi-turn evaluations of contemporary large language models focused on manually-designed follow-up questions to elicit multi-turn conversations (Bai et al., 2024; Kwan et al., 2024; Zheng et al., 2023). Laban et al. (2025) describe these as "episodic" evaluations, because each turn introduces a subtask that can in principle be evaluated in isolation. They propose an alternative evaluation frame-work in which single-turn questions are sharded into multiple turns, which they find to significantly diminish the performance of even the strong language models. However, the sharding is an arbitrary source of noise, rather than the natural result of attempts to communicate rich private information under information bandwidth constraints. An alternative approach is taken in BotChat, in which they begin with a real human-human conversation and then ask an LLM to generate the next turn (Duan et al., 2024). An autorater must 
+
+> 18 MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+
+then determine whether the conversation is AI-generated. This can catch stylistically inappropriate outputs, but it takes human style as the gold standard. An LLM might be able to conduct a dialogue effectively towards a shared goal while still revealing its identity; the converse may also be true if the task is not sufficiently challenging. Self-play between conversational agents was proposed as a technique for building training data for a task-based dialogue system (Shah et al., 2018). This work involved a user simulator and an assistant, similar to more recent work on multi-turn evaluation (e.g., Dou et al., 2025; Li et al., 2024; Shao et al., 2024; Wang et al., 2023). The user-assistant setting benefits from close ties to deployment scenarios. However it is challenging for evaluation of the multi-turn collaboratively capability because it requires faithfully simulating human users and their many foibles, such as laziness, lack of understanding, and imprecise goal specifications (Lin and Tomlin, 2025). Progress on this orthogonal capability of user simulation may alter multi-turn performance in unpredictable ways. As user simulators improve, multi-turn task performance could become worse, because the simulators can more faithfully imitate grounding failures and comprehension gaps. Alternatively, multi-turn performance may appear to improve as simulators become more realistic, because weak user simulators may structure their communication less coherently. To sidestep these issues, we have designed an alternative form of self-play evaluation, in which the language models do not need to simulate human users and are free to make their best efforts to achieve task success under the given constraints. Two recently-published papers take a similarly symmetrical approach to evaluation of collaboration between language model agents, finding significant challenges in multi-agent collaboration. Davidson et al. (2025) design a navigation task in which each agent sees a partially-occluded version of the same map, and must communicate to identify a path. They find that this setting is significantly more challenging than one in which a single agent sees the whole map. In CooperBench, a set of coding tasks is partitioned between two agents (Khatua et al., 2026). They find that agents often fail to coordinate their work (see also Cemri et al., 2025). Our approach complements this work by focusing on simpler tasks that can be completed with a single, short output (a few tokens). This allows us to identify linguistic issues that arise across diverse types of tasks, and to quantify the scaling of language model collaboration across varying turn budgets. Unconstrained self-play evaluation has also been applied in the chit-chat setting by Ghandeharioun et al. (2019), who focus on measures of sentiment and semantic coherence across the dialogue (see also Gooding and Grefenstette, 2025). We explore measures of coherence in Section 5.4, but rather than using word and sentence embeddings, we build on linguistic theories about the role of discourse entities through the conversation. Another distinction is that we consider dialogues in which the participants must share information to accomplish a task, rather than chit-chat without a clearly-defined goal. 
+
+7. Conclusion 
+
+We have presented MT-PingEval , a benchmark for evaluating multi-turn conversational capabilities through private information games. Our isotoken evaluation methodology fixes the total communi-cation budget while varying the number of turns, isolating multi-turn interaction capabilities from raw task-solving ability. The results reveal a consistent pattern: state-of-the-art language models generally fail to improve, and often get worse, as they are given more opportunities for interactive communication. On image selection tasks, all models show inverse scaling with turn budget. On the chess and COVR tasks, performance is flat across turn budgets for almost all models. On the name-game, apparent improvements are largely attributable to guess-and-check strategies. Analysis of dialogue style provides insight into these failures. Models exhibit stylistic sycophancy 
+
+> 19 MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+
+(e.g., spurious apologies and uncritical agreement), wasting tokens without advancing the task. And despite generating locally coherent dialogues, this coherence reflects formulaic patterns rather than strategic progress toward shared understanding. Comparison with human performance on MD3 highlights the gap: humans achieve higher accuracy with far fewer tokens, suggesting the challenge lies not in capability but in communication strategy—knowing what to share, what to elicit, and when to commit. Private information is a defining feature of real-world communication: we rarely know exactly what our interlocutors know, want, or need. MT-PingEval offers a rigorous framework for measuring progress on this fundamental challenge, and our results suggest that substantial advances in multi-turn interaction remain ahead. 
+
+Language model usage. We used Gemini in the following ways: (1) creating figures and tables by generating LaTeX code; (2) helping write data analysis code; (3) formatting bibtex entries; (4) automatically assessing sycophancy, as described in Section 5.2; (5) generating the name-game examples, as described in Section 3.4; (6) reviewing the paper and suggesting areas in which the writing could be improved. 
+
+Acknowledgments Thanks to Diego Antognini and Kevin Robinson for their assistance with engi-neering aspects of the project. The paper benefitted from helpful feedback from Bernd Bohnet, Ryan Burnell, Elizabeth Clark, William Cohen, Chris Dyer, Asma Ghandeharioun, Anastasios Kement, Tal Linzen, Annie Louis, Claudiu Musat, and Hannah Rashkin. 
+
+References 
+
+A. Ahmadvand, J. I. Choi, and E. Agichtein. Contextual dialogue act classification for open-domain conversational agents. Proceedings of the 42nd International ACM SIGIR Conference on Research and Development in Information Retrieval , pages 33–42, 2019. G. Bai, J. Liu, X. Bu, Y. He, J. Liu, Z. Zhou, Z. Lin, W. Su, T. Ge, B. Zheng, et al. Mt-bench-101: A fine-grained benchmark for evaluating large language models in multi-turn dialogues. arXiv preprint arXiv:2402.14762 , 2024. R. Barzilay and M. Lapata. Modeling local coherence: An entity-based approach. Computational Linguistics , 34(1):1–34, 2008. doi: 10.1162/coli.2008.34.1.1. URL https://aclanthology. org/J08-1001/ .D. Biber. Variation across speech and writing . Cambridge university press, 1991. B. Bogin, S. Gupta, M. Gardner, and J. Berant. Covr: A test-bed for visually grounded compositional generalization with real images. arXiv preprint arXiv:2109.10613 , 2021. S. E. Brennan, M. W. Friedman, and C. J. Pollard. A centering approach to pronouns. In Proceedings of the 25th Annual Meeting of the Association for Computational Linguistics , pages 155–162, 1987. M. Cemri, M. Z. Pan, S. Yang, L. A. Agrawal, B. Chopra, R. Tiwari, K. Keutzer, A. Parameswaran, D. Klein, K. Ramchandran, et al. Why do multi-agent llm systems fail? arXiv preprint arXiv:2503.13657 ,2025. H. Chai and M. Strube. Incorporating centering theory into neural coreference resolution. In M. Carpuat, M.-C. de Marneffe, and I. V. Meza Ruiz, editors, Proceedings of the 2022 Conference 
+
+> 20 MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+
+of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies , pages 2996–3002, Seattle, United States, July 2022. Association for Computational Linguistics. doi: 10.18653/v1/2022.naacl-main.218. URL https://aclanthology.org/2022. naacl-main.218/ .M. Cheng, C. Lee, P. Khadpe, S. Yu, D. Han, and D. Jurafsky. Sycophantic ai decreases prosocial intentions and promotes dependence. arXiv preprint arXiv:2510.01395 , 2025. T. R. Davidson, A. Fourney, S. Amershi, R. West, E. Horvitz, and E. Kamar. The collaboration gap. 
+
+arXiv preprint arXiv:2511.02687 , 2025. Y. Dou, M. Galley, B. Peng, C. Kedzie, W. Cai, A. Ritter, C. Quirk, W. Xu, and J. Gao. Simulatorarena: Are user simulators reliable proxies for multi-turn evaluation of ai assistants? In Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing , pages 35200–35278, 2025. C. Doughty and T. Pica. “Information gap”’ tasks: Do they facilitate second language acquisition? 
+
+TESOL quarterly , 20(2):305–325, 1986. H. Duan, J. Wei, C. Wang, H. Liu, Y. Fang, S. Zhang, D. Lin, and K. Chen. Botchat: Evaluating llms’ capabilities of having multi-turn dialogues. In Findings of the association for computational linguistics: NAACL 2024 , pages 3184–3200, 2024. J. Eisenstein, V. Prabhakaran, C. Rivera, D. Demszky, and D. Sharma. Md3: The multi-dialect dataset of dialogues. arXiv preprint arXiv:2305.11355 , 2023. A. Ghandeharioun, J. H. Shen, N. Jaques, C. Ferguson, N. Jones, A. Lapedriza, and R. Picard. Approxi-mating interactive human evaluation with self-play for open-domain dialog systems. Advances in Neural Information Processing Systems , 32, 2019. S. Gooding and E. Grefenstette. Interaction dynamics as a reward signal for llms. arXiv preprint arXiv:2511.08394 , 2025. P. C. Gordon, B. J. Grosz, and L. A. Gilliom. Pronouns, names, and the centering of attention in discourse. Cognitive Science , 17(3):311–347, 1993. H. P. Grice. Logic and conversation. In P. Cole and J. L. Morgan, editors, Syntax and Semantics: Vol. 3: Speech Acts , pages 41–58. Academic Press, New York, 1975. URL http://www.ucl.ac.uk/ ls/studypacks/Grice-Logic.pdf .B. J. Grosz, A. K. Joshi, and S. Weinstein. Centering: A framework for modeling the local coherence of discourse. Computational Linguistics , 21(2):203–225, 1995. M. A. K. Halliday. An Introduction to Functional Grammar . Edward Arnold, London, 1985. H. He, A. Balakrishnan, M. Eric, and P. Liang. Learning symmetric collaborative dialogue agents with dynamic knowledge graph embeddings. arXiv preprint arXiv:1704.07130 , 2017. A. Ji, N. Kojima, N. Rush, A. Suhr, W. K. Vong, R. Hawkins, and Y. Artzi. Abstract visual reasoning with tangram shapes. In Proceedings of the 2022 conference on empirical methods in natural language processing , pages 582–601, 2022. K. S. Jones. A statistical interpretation of term specificity and its application in retrieval. Journal of Documentation , 28(1):11–21, 1972. 
+
+> 21 MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+
+N. Karamanis, C. Mellish, M. Poesio, and J. Oberlander. Evaluating centering for information or-dering using corpora. Computational Linguistics , 35(1):29–46, Mar. 2009. doi: 10.1162/coli. 07-036-R2-06-22. URL https://aclanthology.org/J09-1003/ .A. Khatua, H. Zhu, P. Tran, A. Prabhudesai, F. Sadrieh, J. K. Lieberwirth, X. Yu, Y. Fu, M. J. Ryan, J. Pei, et al. Cooperbench: Why coding agents cannot be your teammates yet. arXiv preprint arXiv:2601.13295 , 2026. W.-C. Kwan, X. Zeng, Y. Jiang, Y. Wang, L. Li, L. Shang, X. Jiang, Q. Liu, and K.-F. Wong. Mt-eval: A multi-turn capabilities evaluation benchmark for large language models. arXiv preprint arXiv:2401.16745 , 2024. P. Laban, H. Hayashi, Y. Zhou, and J. Neville. LLMs get lost in multi-turn conversation. arXiv preprint arXiv:2505.06120 , 2025. S. Li, V. Balachandran, S. Feng, J. Ilgen, E. Pierson, P. W. W. Koh, and Y. Tsvetkov. Mediq: Question-asking llms and a benchmark for reliable interactive clinical reasoning. Advances in Neural Informa-tion Processing Systems , 37:28858–28888, 2024. J. Lin and N. Tomlin. User simulators bridge RL with real-world interaction. https://jessylin. com/2025/07/10/user-simulators-1/ , July 2025. Accessed: 2025-11-19. J. Lin, N. Tomlin, J. Andreas, and J. Eisner. Decision-oriented dialogue for human-ai collaboration. 
+
+Transactions of the Association for Computational Linguistics , 12:892–911, 2024. R. Lowe, M. Noseworthy, I. V. Serban, N. Angelard-Gontier, Y. Bengio, and J. Pineau. Towards an automatic Turing test: Learning to evaluate dialogue responses. In R. Barzilay and M.-Y. Kan, editors, 
+
+Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , pages 1116–1126, Vancouver, Canada, July 2017. Association for Computational Linguistics. doi: 10.18653/v1/P17-1103. URL https://aclanthology.org/P17-1103/ .K. Matsumoto et al. Topic break detection in interview dialogues using BiLSTM-CRF. Sensors , 22(2): 694, 2022. E. Miltsakaki and K. Kukich. The role of centering theory’s rough-shift in the teaching and evaluation of writing skills. In Proceedings of the 38th Annual Meeting of the Association for Computational Linguistics , pages 408–415, Hong Kong, Oct. 2000. Association for Computational Linguistics. doi: 10.3115/1075218.1075270. URL https://aclanthology.org/P00-1052/ .E. Perez, S. Ringer, K. Lukosiute, K. Nguyen, E. Chen, S. Heiner, C. Pettit, C. Olsson, S. Kundu, S. Kadavath, A. Jones, A. Chen, B. Mann, B. Israel, B. Seethor, C. McKinnon, C. Olah, D. Yan, D. Amodei, D. Amodei, D. Drain, D. Li, E. Tran-Johnson, G. Khundadze, J. Kernion, J. Landis, J. Kerr, J. Mueller, J. Hyun, J. Landau, K. Ndousse, L. Goldberg, L. Lovitt, M. Lucas, M. Sellitto, M. Zhang, N. Kingsland, N. Elhage, N. Joseph, N. Mercado, N. DasSarma, O. Rausch, R. Larson, S. McCandlish, S. Johnston, S. Kravec, S. El Showk, T. Lanham, T. Telleen-Lawton, T. Brown, T. Henighan, T. Hume, Y. Bai, Z. Hatfield-Dodds, J. Clark, S. R. Bowman, A. Askell, R. Grosse, D. Hernandez, D. Ganguli, E. Hubinger, N. Schiefer, and J. Kaplan. Discovering language model behaviors with model-written evaluations. In A. Rogers, J. Boyd-Graber, and N. Okazaki, editors, 
+
+Findings of the Association for Computational Linguistics: ACL 2023 , pages 13387–13434, Toronto, Canada, July 2023. Association for Computational Linguistics. doi: 10.18653/v1/2023.findings-acl. 847. URL https://aclanthology.org/2023.findings-acl.847/ .
+
+> 22 MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+
+M. Poesio, R. Stevenson, B. Di Eugenio, and J. Hitzeman. Centering: A parametric theory and its instantiations. Computational Linguistics , 30(3):309–363, 2004. doi: 10.1162/0891201041850911. URL https://aclanthology.org/J04-3003/ .P. Shah, D. Hakkani-Tür, B. Liu, and G. Tür. Bootstrapping a neural conversational agent with dialogue self-play, crowdsourcing and on-line reinforcement learning. In S. Bangalore, J. Chu-Carroll, and Y. Li, editors, Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 3 (Industry Papers) , pages 41–51, New Orleans - Louisiana, June 2018. Association for Computational Linguistics. doi: 10.18653/v1/N18-3006. URL https://aclanthology.org/N18-3006/ .O. Shaikh, K. Gligorić, A. Khetan, M. Gerstgrasser, D. Yang, and D. Jurafsky. Grounding gaps in language model generations. In Proceedings of the 2024 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (Volume 1: Long Papers) , pages 6279–6296, 2024. Y. Shao, V. Samuel, Y. Jiang, J. Yang, and D. Yang. Collaborative Gym: A framework for enabling and evaluating human-agent collaboration, 2024. E. Stengel-Eskin, P. Hase, and M. Bansal. Teaching models to balance resisting and accepting persuasion. In Proceedings of the 2025 Conference of the Nations of the Americas Chapter of the Association for Computational Linguistics: Human Language Technologies (Volume 1: Long Papers) ,pages 8108–8122, 2025. A. Suhr, M. Lewis, J. Yeh, and Y. Artzi. A corpus of natural language for visual reasoning. In Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics (Volume 2: Short Papers) ,2017. J. Ure. Lexical density and register differentiation. In G. E. Perren and J. L. M. Trim, editors, 
+
+Applications of Linguistics , pages 443–452. Cambridge University Press, Cambridge, 1971. M. A. Walker, M. Iida, and S. Cote. Japanese discourse and the process of centering. In Proceedings of the 32nd Annual Meeting of the Association for Computational Linguistics , pages 88–95, Las Cruces, New Mexico, 1994. Association for Computational Linguistics. X. Wang, Z. Wang, J. Liu, Y. Chen, L. Yuan, H. Peng, and H. Ji. Mint: Evaluating llms in multi-turn interaction with tools and language feedback. arXiv preprint arXiv:2309.10691 , 2023. L. Zheng, W.-L. Chiang, Y. Sheng, S. Zhuang, Z. Wu, Y. Zhuang, Z. Lin, Z. Li, D. Li, E. Xing, et al. Judging llm-as-a-judge with mt-bench and chatbot arena. Advances in neural information processing systems , 36:46595–46623, 2023. X. Zhu and G. Penn. Utterance-level extractive summarization of open-domain spontaneous conver-sations with rich features. In 2006 IEEE International Conference on Multimedia and Expo , pages 793–796, 2006. doi: 10.1109/ICME.2006.262600. 
+
+A. Private Information Game Prompts 
+
+Prompt examples for all the MT-PingEval tasks are shown in Tables 1, 2, 3, and 4. 
+
+> 23
+
+MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games 
+
+Your name is Bob and my name is Alice. You are a chess expert. We are going to talk about chess games using diagrams in which the white pieces are shown by upper-case letters like ‘K’ and ‘Q’, and the black pieces are shown by lower-case letters like ‘ k’ and ‘q’. Empty squares are shown as periods, ‘.’. For example, in this board, White has moved its pawn to D4 and its knight to A3, while Black has moved its pawn to C5: r n b q k b n r p p . p p p p p . . . . . . . . . . p . . . . . . . . P . . . . N . . . . . . . P P P . P P P P R . B Q K B N R Each of us will be shown a board that the other player cannot see. The two boards are from the same game of chess. Our task is to determine which board came earlier in the game. To accomplish this, we must describe our boards to each other. You can use only 22 words per turn, so you cannot fully specify the locations of all pieces. Instead, describe the key features that will help us determine which board came first. After discussing it, if you think your board came first, say ‘_MINE_’; if you think my board came first, say ‘_YOURS_’. Otherwise, you can continue to describe your board to me, or ask questions about my board. It is important to get this right, so let’s discuss until we are sure. However, if I say this is your final turn, then you ** must** give a final answer that is either ‘_MINE_’ or ‘_YOURS_’. Here is your board, which I cannot see: . n . . q . n r r b . p k . b . . . p . . . . . p . . . P p p p . . B P . . . . . P . . . . P P P . P N K P . . R N . Q . R . . # CONVERSATION Here is our conversation history. 1. ME: Hello Bob. On my board, all black pieces are on their starting squares. White has moved the d-pawn to d4. No other white pieces You have 7 turns left. 2. YOU: 
+
+Table 1 | Example chess prompt, after turn 1 of the dialogue. 
+
+# INSTRUCTIONS You are Alice, and you are playing a collaborative game that involves having a conversation with another player about two images. You can see the ‘left’ image and the other player can see the ‘right’ image. Here is the ‘left’ image: <start_of_image> With the help of the other player, you have to answer the question: "How many images contain at least 1 women that are watching child that is wearing helmet?" To do this, you will have a conversation with the other player, for example by sharing information about your image or asking about the other player’s image. In each turn you can use at most 22 words, so be concise! When you are ready, output ‘ANSWER:’ followed by your answer to the question. Your answer should be a *single* word, a number, or (rarely) a short phrase, e.g.: ‘ANSWER: 4’ ‘ANSWER: True’ ‘ANSWER: next door’ If it is a true/false question, make sure to output ‘True’ or ‘False’. 
+
+Table 2 | Example COVR prompt, on the first turn of the dialogue. 
+
+24 MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games 
+
+# INSTRUCTIONS Your name is Bob, and we are going to play a conversational game. You have a database of people who you know: ‘‘‘ row,name,company,favorite color,favorite musician,city 1,Noah,IBM,Mustard Yellow,Wes Montgomery,Chicago 2,Joshua,Samsung,Charcoal,Miles Davis,Sydney 3,James,HP,Charcoal,Charlie Parker,Rome 4,Madison,Google,Mustard Yellow,Thelonious Monk,Berlin 5,Elizabeth,Foxconn,Coral,John Coltrane,Rio de Janeiro 6,Asher,Amazon,Teal,John Coltrane,Moscow 7,Asher,Foxconn,Teal,John Coltrane,Moscow 8,Owen,Sony,Peach,Wes Montgomery,London 9,Madison,Foxconn,Coral,John Coltrane,New York ’’’ I might know one of the same people. Let’s talk to find out whom we both know. You can ask questions or describe some of the people you know. If I ask you a question, don’t forget to answer it. To match, *all attributes* of the row must match exactly. If you are sure you have identified a person that we both know, output only ‘SELECT ROW i’, with ‘i’ indicating the row number of your mutual friend. Only answer when you are completely sure, and talk it over until then. You can use only 44 words per turn, so be concise. If I say that this is your final turn, then you **must** give a final answer in the format of ‘SELECT ROW i’. # CONVERSATION Here is our conversation history. 1. ME: I know Chloe from Microsoft who loves crimson and Charles Mingus, based in Paris. Do you know her? Or someone else with matching details? 2. YOU: I don’t know Chloe. No one in my database matches Microsoft, crimson, Charles Mingus, and Paris. Do you know anyone else with those traits? 3. ME: I know David from Sony, mustard yellow, Art Blakey, Berlin. Do you know him? Or any other with exact same traits? This is your final turn, so you must give a final answer. Based on the conversation, make a guess and output ‘SELECT ROW i’. Don’t say anything else: do not explain or ask any questions. Your next words **must** be ‘SELECT ROW’ and your last word must be a number between 1 and 9. 
+
+Table 3 | Example name-game prompt, on the fourth and final turn of the dialogue. Note the extra instructions to finish the dialogue. 
+
+25 MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games 
+
+> # INSTRUCTIONS We are playing an interactive game, which involves having a conversation. In this game you are the GUESSER and I am the DESCRIBER. I will show you a numbered list of images. Next, I will describe an image, which may be in your list. If you are sure that the image I am describing is in our list, respond with the number of the image I am describing. For example, to identify image 1, your output should be formatted as ‘ANSWER: Image 1’ and nothing else. Sometimes the image I am describing will not be in your list. If you are sure that none of the images in your list match mine, respond with ‘ANSWER: No match’ and nothing else. If you are not sure which image matches the description, you can ask me a clarification question or tell me about your choices . In each turn you can use no more than 11 words, so be concise. It’s better to ask for clarification than to guess incorrectly, so don’t be afraid to ask me for more information if you are not sure! # Images Image 0: <start_of_image> Image 1: <start_of_image> Image 2: <start_of_image> Image 3: <start_of_image> # CONVERSATION Here is our conversation history. 1. ME: Black and white abstract pattern with diagonal stripes and geometric shapes. 2. YOU: Is the pattern mostly diagonal or horizontal? 3. ME: Pattern has both diagonal and horizontal stripes, forming intersecting shapes. You have 13 turns left. 4. YOU:
+
+Table 4 | Example image selection (Tangram) prompt, on the fourth turn of the dialogue. The MD3 image selection task follows a similar prompt format but with a different number of images. 
+
+B. Dialogue Statistics 
+
+Average number of turns per dialogue are shown in Figure 15. Average number of tokens per dialogue are shown in Figure 16. 
+
+C. Text Analysis Methods 
+
+In this section we describe the methods used for dialogue analysis in Section 5, specifically, we formally define lexical density. Let 𝑈 = {𝑢 1, . . . 𝑢 𝑛 } denote a dialogue containing 𝑢 𝑛 turns. Let 𝑊 denote all word tokens in a dialogue and 𝐶 ∈ 𝑊 the subset of context-word tokens (for a list of non-content words, see Section C.3). The content ratio captures how much of the text carries semantic content as opposed to disfluencies or function words. We define it as ContentRatio (𝑈 ) = |𝐶 ||𝑊 | (3) TF–IDF is a standard way to quantify the informativeness of words in a corpus, originally introduced as a measure of term specificity in information retrieval (Jones, 1972). In dialogue, TF-IDF-weighted representations at the utterance level have been widely used for tasks such as dialogue-act classification (Ahmadvand et al., 2019), topic segmentation (Matsumoto et al., 2022), response evaluation (Lowe et al., 2017), and utterance-level summarization (Zhu and Penn, 2006) Our novelty score uses TF–IDF-based sentence vectors to identify sentences that introduce new information relative to prior context and therefore rewards dialogues that are both content-heavy and avoid repetition. 
+
+26 MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games 
+
+2 4 8 16 
+
+2
+
+4
+
+8
+
+16 
+
+> turns
+
+chess 
+
+2 4 8 16 
+
+2
+
+4
+
+8
+
+16 
+
+covr 
+
+2 4 8 16 
+
+2
+
+4
+
+8
+
+16 
+
+md3 
+
+2 4 8 16 
+
+2
+
+4
+
+8
+
+16 
+
+max_turns 
+
+> turns
+
+name-game 
+
+2 4 8 16 
+
+2
+
+4
+
+8
+
+16 
+
+max_turns 
+
+tangram model 
+
+GPT-4o Gemini Flash Gemini Pro Gemma3-12b Qwen-VL8b 
+
+thinking 
+
+off on 
+
+Figure 15 | Turns used per dialogue. 
+
+2 4 8 16 
+
+0
+
+50 
+
+100 
+
+> tokens
+
+chess 
+
+2 4 8 16 
+
+0
+
+50 
+
+100 
+
+covr 
+
+2 4 8 16 
+
+0
+
+50 
+
+100 
+
+md3 
+
+2 4 8 16 
+
+0
+
+50 
+
+100 
+
+max_turns 
+
+> tokens
+
+name-game 
+
+2 4 8 16 
+
+0
+
+50 
+
+100 
+
+max_turns 
+
+tangram model 
+
+GPT-4o Gemini Flash Gemini Pro Gemma3-12b Qwen-VL8b 
+
+thinking 
+
+off on 
+
+Figure 16 | Tokens per dialogue. 
+
+> 27 MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+
+We treat each utterance 𝑢 𝑖 as a separate document in a corpus of size 𝑛 . Let v𝑖 ∈ ℝ𝑑 denote the TF–IDF vector for 𝑢 𝑖 , with components 
+
+𝑣 𝑖 𝑗 = tf 𝑖 𝑗 · log 
+
+ 𝑛 
+
+df 𝑗 
+
+
+
+, (4) where tf 𝑖 𝑗 is the term frequency of term 𝑗 in 𝑢 𝑖 and df 𝑗 is the number of utterances in which term 𝑗 
+
+appears. The novelty of an utterance is defined as the mean TF–IDF weight of its non-zero components: 
+
+Novelty (𝑢 𝑖 ) =
+
+
+
+1
+
+|{ 𝑗 : 𝑣 𝑖 𝑗 > 0}| ∑︁ 𝑗 :𝑣 𝑖 𝑗 >0
+
+𝑣 𝑖 𝑗 , if ∃ 𝑗 : 𝑣 𝑖 𝑗 > 0,
+
+0, otherwise .
+
+(5) And dialogue-level novelty is computed by averaging over utterances: 
+
+Novelty (𝑈 ) = 1
+
+𝑛 
+
+> 𝑛
+
+∑︁ 
+
+> 𝑖 =1
+
+Novelty (𝑢 𝑖 ). (6) Finally, the lexical density of the dialogue is defined as 
+
+LexicalDensity (𝑈 ) = 100 × ContentRatio (𝑈 ) × Novelty (𝑈 ). (7) Note that IDF weights are computed globally over all utterances in a dialogue. This means task-relevant terms that recur coherently across turns, as would occur in a well-grounded dialogue, receive lower IDF weights than terms appearing in only one or two turns. As a side effect, models that terminate early and models that shift topics frequently obtain higher novelty scores than models that develop a coherent line of reasoning across many turns. Common function words and backchannels are excluded prior to computation via the stopword list (see Appendix C.3), so acknowledgement tokens do not directly inflate or deflate scores. 
+
+C.1. Answer proposals 
+
+We define, 
+
+my-subjects =my board, mine (8) 
+
+your-subjects =your board, yours (9) 
+
+early-predicates =is earlier, seems earlier, came first (10) 
+
+later-predicates =is later, seems later, came last (11) 
+
+mine-proposals =(my-subjects × early-predicates ) ∪ ( your-subjects × late-predicates ) (12) 
+
+your-proposals =(your-subjects × early-predicates ) ∪ ( my-subjects × late-predicates ). (13) These simple rules were developed iteratively by sampling rollouts from all models and covering all cases that we could manually identify. 
+
+> 28
+
+MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games 
+
+C.2. Stylistic sycophancy autorater prompt 
+
+Your task is to determine whether either speaker in the following dialogue exhibits sycophancy. #Context The dialogue is a multi-turn conversation between two players who each see a different chess board from the same game. Their shared goal is to determine which board came earlier in the game. Because of strict word limits, speakers must summarize selectively and objectively. # Definition of Sycophancy Sycophancy occurs when a speaker: 1. Uncritically agrees with the other speaker’s claims. 2. Repeats the other speaker’s statements without adding new information. 3. Validates incorrect or unsubstantiated assertions. 4. Adapts their descriptions to align with the interlocutor despite conflicting evidence. Sycophancy is about *agreement behavior*, not politeness or cooperation. # Instructions Carefully read the full conversation. Focus on whether Alice or Bob: 1. echoes the other’s descriptions without independent verification 2. adopts the other’s implied conclusion without introducing new evidence 3. validates a factual error or weak inference 4. Do NOT label coordination, neutral restatement, or consistent factual agreement as sycophancy. #Output Format (STRICT) Return exactly two lines: LABEL: <0 | 1 | 2> JUSTIFICATION: <one sentence> Where: 0 = No sycophancy detected 1 = Uncritical agreement 2 = Validation of a false or unsupported premise Do not include any other text. # Dialogue 
+
+C.3. Lexical density 
+
+We computed lexical density using the following list of non-content words, all lower-cased: 
+
+d, ll, m, re, s, ve, a, about, above, across, after, afterwards, again, against, all, almost, alone, along, already, also, although, always, am, among, amongst, amount, an, and, another, any, anyhow, anyone, anything, anyway, anywhere, are, around, as, at, back, be, became, because, become, becomes, becoming, been, before, beforehand, behind, being, below, beside, besides, between, beyond, both, bottom, but, by, ca, call, can, cannot, could, did, do, does, doing, done, down, due, during, each, eight, either, eleven, else, elsewhere, empty, enough, even, ever, every, everyone, everything, everywhere, except, few, fifteen, fifty, first, five, for, former, formerly, forty, four, from, front, full, further, get, give, go, had, has, have, he , hence, her, here, hereafter, hereby, herein, hereupon, hers, herself, him, himself, his, how, however, hundred, i, if, in, indeed, into, is, it, its, itself, just, keep, last, latter, latterly, least, less, made, make, many, may, me, meanwhile, might, mine, more, moreover, most, mostly, move, much, must, my, myself, n’t, name, namely, neither, never, nevertheless, next , nine, no, nobody, none, noone, nor, not, nothing, now, nowhere, n‘t, n’t, of, off, often, on, once, one, only, onto, or, other, others, otherwise, our, ours, ourselves, out, over, own, part, per, perhaps, please, put, quite, rather, ’re, really, regarding, same, say, see, seem, seemed, seeming, seems, serious, several, she, should, show, side, since, six, sixty, so, some, somehow, someone, something, sometime, sometimes, somewhere, still, such, take, ten, than, that, the, their, them, themselves, then, thence, there, thereafter, thereby, therefore, therein, thereupon, these, they, third, this, those, though, three, through, throughout, thru, thus, to, together, too, top, toward, towards, twelve, twenty, two, under, unless, until, up , upon, us, used, using, various, very, via, was, we, well, were, what, whatever, when, whence, whenever, where, whereafter, whereas, whereby, wherein, whereupon, wherever, whether, which, while, whither, who, whoever, whole, whom, whose, why, will, with, within, without, would, yet, you, your, yours, yourself, yourselves, ‘d, ‘ll, ‘m, ‘re, ‘s, ‘ve, ’d, ’ll, ’m, ’re, ’s, ’ ve, mhm, huh, lot, gosh, yep, hm, na, wow, yup, yeah, lots, lot, yes, no, okay, ok, um, uh, hmm, ah, oh, ooh, cuz, uhm, mm, sorry, thanks, aha, ouch, hi, hello, like, just, really, actually, basically, literally, maybe, bit, god, cool,kind, sort, thing, things, stuff, know, mean, think, guess, say, said, gonna, wanna, gotta, got, get, right, well, anyway, anyways, alright 
+
+C.4. Goal-directedness 
+
+We implemented a centering theory analysis following the framework of Grosz et al. (1995). For each dialogue, we extract noun phrases and classify centering transitions between adjacent turns as follows. 
+
+29 MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games 
+
+Preprocessing Raw dialogue text is first cleaned to remove formatting artifacts (e.g., literal \n 
+
+sequences and turn numbering). We then parse each utterance using spaCy’s en_core_web_sm 
+
+model. 5 For each sentence within a turn, we extract noun chunks and classify them by grammatical role based on dependency relations: 
+
+• Subjects : noun phrases containing a token with dependency label nsubj or nsubjpass 
+
+• Objects : noun phrases containing a token with dependency label dobj , iobj , or pobj 
+
+• Neither : noun phrases that do not fall into either category All noun phrases are normalized to lowercase with punctuation and excess whitespace removed. 
+
+Forward-looking centers ( 𝐶 𝑓 ) The forward-looking center list for each turn is constructed by concatenating subjects, objects, and other noun phrases in that order, reflecting the standard centering preference for grammatical role salience. 
+
+Preferred center ( 𝐶 𝑝 ) The preferred center is defined as the first subject if any subjects are present; otherwise, the first object. If neither exists, 𝐶 𝑝 is undefined. 
+
+Backward-looking center ( 𝐶 𝑏 ) The backward-looking center links the current turn to the previous turn. We compute 𝐶 𝑏 by iterating through the previous turn’s 𝐶 𝑓 list in rank order and returning the first entity that also appears in the current turn’s 𝐶 𝑓 list. If no entity is shared, 𝐶 𝑏 is undefined. 
+
+Transition classification Given the previous turn’s backward-looking center ( 𝐶 𝑏 𝑛 −1 ), the current turn’s backward-looking center ( 𝐶 𝑏 𝑛 ), and the current turn’s preferred center ( 𝐶 𝑝 𝑛 ), we classify transitions according to Table 5. 
+
+Transition Condition 
+
+Continue 𝐶 𝑏 𝑛 = 𝐶 𝑏 𝑛 −1 and 𝐶 𝑏 𝑛 = 𝐶 𝑝 𝑛 
+
+Retain 𝐶 𝑏 𝑛 = 𝐶 𝑏 𝑛 −1 and 𝐶 𝑏 𝑛 ≠ 𝐶 𝑝 𝑛 
+
+Smooth Shift 𝐶 𝑏 𝑛 ≠ 𝐶 𝑏 𝑛 −1 and 𝐶 𝑏 𝑛 = 𝐶 𝑝 𝑛 
+
+Rough Shift 𝐶 𝑏 𝑛 ≠ 𝐶 𝑏 𝑛 −1 and 𝐶 𝑏 𝑛 ≠ 𝐶 𝑝 𝑛 , or 𝐶 𝑏 𝑛 is undefined 
+
+Table 5 | Centering transition classification rules. 
+
+Centering Coherence Score We aggregate transition counts into the scalar coherence score defined in Equation (2), which weights transitions according to the canonical centering preference ordering: Continue (3) > Retain, Smooth Shift (2) > Rough Shift (1). 
+
+Algorithm The complete procedure is summarized below. 
+
+Require: Dialogue 𝐷 = {𝑢 1, . . . , 𝑢 𝑛 } 
+
+> 1:
+
+𝐶 prev  
+
+> 𝑏
+
+← None ; 𝐶 prev  
+
+> 𝑓
+
+← [ ]  
+
+> 2:
+
+for 𝑖 = 1 to 𝑛 do  
+
+> 3:
+
+Parse 𝑢 𝑖 ; extract noun phrases by role: 𝑆 𝑖 (subjects), 𝑂 𝑖 (objects), 𝑁 𝑖 (other)  
+
+> 4:
+
+𝐶 𝑖 𝑓 ← 𝑆 𝑖 ⊕ 𝑂 𝑖 ⊕ 𝑁 𝑖 ⊲ Concatenate in salience order  
+
+> 5:
+
+𝐶 𝑖 𝑝 ← First (𝑆 𝑖 ) if 𝑆 𝑖 ≠ ∅ else First (𝑂 𝑖 )
+
+> 5
+
+https://spacy.io/ 
+
+> 30 MT-PingEval : Evaluating Multi-Turn Collaboration with Private Information Games
+
+6: 𝐶 𝑖 𝑏 ← First ({ 𝑒 ∈ 𝐶 prev  
+
+> 𝑓
+
+: 𝑒 ∈ 𝐶 𝑖 𝑓 }) ⊲ Highest-ranked shared entity 
+
+7: if 𝑖 = 1 then 
+
+8: 𝑇 𝑖 ← Start 
+
+9: else if 𝐶 𝑖 𝑏 = None then 
+
+10: 𝑇 𝑖 ← Rough Shift 
+
+11: else if 𝐶 𝑖 𝑏 = 𝐶 prev  
+
+> 𝑏
+
+then 
+
+12: 𝑇 𝑖 ← Continue if 𝐶 𝑖 𝑏 = 𝐶 𝑖 𝑝 else Retain 
+
+13: else 
+
+14: 𝑇 𝑖 ← Smooth Shift if 𝐶 𝑖 𝑏 = 𝐶 𝑖 𝑝 else Rough Shift 
+
+15: end if 
+
+16: 𝐶 prev  
+
+> 𝑓
+
+← 𝐶 𝑖 𝑓 ; 𝐶 prev  
+
+> 𝑏
+
+← 𝐶 𝑖 𝑏 
+
+17: end for 
+
+18: return Transition sequence {𝑇 1, . . . , 𝑇 𝑛 }

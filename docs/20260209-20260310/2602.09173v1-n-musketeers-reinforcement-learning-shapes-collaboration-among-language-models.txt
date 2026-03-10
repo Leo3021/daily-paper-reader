@@ -1,0 +1,656 @@
+Title: $n$-Musketeers: Reinforcement Learning Shapes Collaboration Among Language Models
+
+URL Source: https://arxiv.org/pdf/2602.09173v1
+
+Published Time: Wed, 11 Feb 2026 01:12:24 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+# n-M usketeers : R einforcement Learning Shapes Collaboration Among 
+
+# Language Models 
+
+Preprint , compiled February 11, 2026 
+
+Ryozo Masukawa 1∗
+
+, Sanggeon Yun 1, Hyunwoo Oh 1, SungHeon Jeong 1, Raheeb Hassan 1, Hanning Chen 1, Wenjun Huang 1,Mahdi Imani 4, Pietro Mercati 2, Nathaniel D. Bastian 3, and Mohsen Imani 11Department of Computer Science, University of California, Irvine 
+
+> 2
+
+Intel Corporation 
+
+> 3
+
+United States Military Academy at West Point 
+
+> 4
+
+Department of Electrical and Computer Engineering, Northeastern University 
+
+Abstract 
+
+Recent progress in reinforcement learning with verifiable rewards (RLVR) shows that small, specialized language models (SLMs) can exhibit structured reasoning without relying on large monolithic LLMs. We introduce 
+
+soft hidden-state collaboration , where multiple heterogeneous frozen SLM experts are integrated through their internal representations via a trainable attention interface. Experiments on Reasoning Gym and GSM8K show that this latent integration is competitive with strong single-model RLVR baselines. Ablations further reveal a dual mechanism of expert utilization: for simpler arithmetic domains, performance gains can largely be explained by static expert preferences, whereas more challenging settings induce increasingly concentrated and structured expert attention over training, indicating emergent specialization in how the router connects to relevant experts. Overall, hidden-state collaboration provides a compact mechanism for leveraging frozen experts, while o ff ering an observational window into expert utilization patterns and their evolution under RLVR. 
+
+1 Introduction 
+
+Recent large language models (LLMs), exemplified by DeepSeek-R1 [ 1 ], demonstrate that reinforcement learning with verifiable rewards (RLVR), together with distillation, can trans-fer strong multi-step reasoning behaviors into more compact language models (LMs) 2. In particular, these results suggest that small language models (SLMs) ( ∼10B parameters) can re-tain such reasoning competence under substantial compression, with some reaching or surpassing GPT-3.5-class performance on reasoning benchmarks [ 2]. These findings indicate that struc-tured reasoning ability can be induced through outcome-level supervision, rather than being inherently tied to model scale. If reasoning competence can indeed be transferred across models of di ff erent sizes, the design space for practical agentic systems shifts from scaling monolithic LLMs toward composing collec-tions of o ff -the-shelf expert SLMs [ 3 ]. A natural next question is how such heterogeneous experts can be combined within a single trainable policy, without retraining the experts themselves or relying on discrete text-based aggregation. This shift has mo-tivated a growing body of work on multi-LM reasoning systems that coordinate multiple frozen models [4, 5, 6]. However, a basic question remains poorly understood: Do frozen, off -the-shelf LMs’ hidden states actually provide useful infor-mation to policies trained purely with RLVR? Since expert uti-lization itself is never directly supervised under RLVR, it is unclear what information the policy learns to extract from expert models, or under what conditions such information is benefi-cial. Addressing this question requires mechanisms that expose and condition on expert representations during learning, rather than treating experts as black-box generators. Most existing multi-LM approaches are not designed to expose how expert 
+
+> 2
+
+Unless specified otherwise, we use the term “LM” to refer to autoregressive decoder-only language models in this paper. Steps          
+
+> Reward
+> z
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> 0.0
+> z
+> z
+> z
+> z
+> z
+> z
+> z
+> 0.0
+> -0.1
+> -0.2
+> -0.3
+> 0.1
+> 0.2
+> 0.3 𝑞 1
+> 𝑞 2
+> 𝑞 3
+> 𝑞 4
+> 𝑞 5
+> 𝑞 6
+> 𝑞 7
+> 𝑞 8
+> ∆Attention weight (from initial state) Reward Progress During Training
+> 0100 200 300 400 500
+> Spearman : 𝜌 =−0.52
+> RLVR induces emergent LM preferences.
+
+Figure 1: During training with RLVR, expert LM utilization becomes increasingly structured, without routing or expert-role supervision. Left: reward during training. Right: change in expert attention from initialization, illustrating emergent expert roles. information is utilized during learning. Instead, prior work has largely focused on model-level coordination which can be broadly grouped into two paradigms (Figure 2.a, b). Output-level collaboration (Figure 2.a) combines LLMs through discrete textual communication [ 7 , 8, 9, 10 , 11 , 12 ]. While this approach is human-readable and flexible, it is token-heavy and provides only indirect evidence of how individual experts contribute to final decisions. Hard LM selection via routing (Fig-ure 2.b) selects one or a small number of experts conditioned on the input [ 13 , 14 , 15 , 16 , 17 , 18 , 19 ], improving computational effi ciency at the cost of brittle decisions and limited cross-expert interaction. Architecture-level mixture-of-experts (MoE) meth-ods integrate experts within a unified model [ 20 , 21 , 19 ], but typically require pretraining-scale integration, often training from scratch, and hinder the plug-and-play reuse of heteroge-neous, independently developed experts. To study expert utilization under RLVR, we introduce soft hid-den state collaboration (Figure 2.c), which integrates multiple frozen expert SLMs via their hidden state representations by gen-
+
+> arXiv:2602.09173v1 [cs.LG] 9 Feb 2026
+
+Preprint – A preprint template for LaTeX users (H eader ) 2(a) Output -Level Collaboration                                     
+
+> Text Encoder ℰ𝑇
+> Router
+> Query Vector 𝒒
+> (b) Hard Expert Routing (Top -𝑘 Selection) (c) Ours : Hidden State Soft Prompting
+> Fast invocation
+> Clean selection
+> Collapsed expert utilization
+> Rich latent integration
+> Observable expert utilization
+> Not minimal compute
+> Cross Attention
+> Prompt Question: You see a size 3 Rubik’s cube. Provide a solution...
+> <Expert 1>...<Apply 𝑅 𝜋 /2matrix transforms to the state
+> vector...</Expert 1> <Expert 2>Map surface topology to unified hex -
+> code symbols...</Expert 2> <Expert 3>def solve_opt (cube): # 𝑂 (𝑛 )
+> complexity...</Expert 3> …<Expert n>Formalize intuition into
+> discrete logical predicates/Expert n>
+> Output Concatenation (i.e. Discussion/Debate)
+> Readable
+> Token -Inefficient
+> Opaque Contribution
+> SLM 3 SLM 1SLM 2SLM 𝑛
+> Output LM
+> Prompt Question: You see a size 3 Rubik’s cube. Provide a solution...
+> SLM 1 SLM 2SLM 3 SLM 𝑛
+> Output
+> SLM 2
+> SLM 3 SLM 1 SLM 2 SLM 𝑛
+> Prompt Question: You see a size 3 Rubik’s cube. Provide a solution...
+> 𝑧 1𝑧 2𝑧 3𝑧 𝑛
+> Output LM
+> Top -𝑘 selection
+> Trainable Tokens KV
+> Q
+
+Figure 2: Comparison of (a) output-level textual collaboration, (b) hard expert routing, and (c) our hidden state soft prompting approach, highlighting di ff erences in computational e ffi ciency, expert utilization, and observability of expert utilization. erating trainable context tokens in a simple and plug-and-play manner, allowing arbitrary numbers and combinations of o ff -the-shelf experts to be incorporated without modifying the experts themselves [ 22 , 23 ]. This representation-level adapter exposes expert information as a latent interface to the policy, making expert utilization directly observable during RLVR training. We implement this adapter with a lightweight Perceiver-style cross-attention module [ 24 ]. This representation-level adapter allows expert information to influence the policy continuously, while making expert utilization directly observable during training. We evaluate this approach on Reasoning Gym [ 25 ] and GSM8K [ 26 ], where soft hidden-state collaboration improves reasoning performance over strong baselines, with gains varying across tasks and expert teams and reaching up to 22.9% in the best-performing cases. Beyond accuracy, we observe structured correlations between reward progression and expert utilization, indicating that expert hidden states provide actionable auxil-iary signals under RLVR, while controlled ablations suggest that a substantial fraction of these gains can be attributed to prefix-style latent conditioning rather than fine-grained expert reasoning traces. Crucially, even without explicit supervision over LM usage, RLVR induces structured, task-dependent ex-pert utilization that reveals emergent, reward-aligned roles. The Perceiver-based integration thus serves mainly as a principled interface for observing these dynamics, rather than as a mecha-nism required for accuracy. In summary, our contributions are as follows: 
+
+• We introduce a simple, plug-and-play hidden state col-laboration framework that exposes SLM utilization dy-namics under outcome-level supervision without rely-ing on hard routing or textual aggregation. 
+
+• We empirically demonstrate that hidden states from frozen experts, including compact SLMs, contain ac-tionable reasoning signals that can be exploited by RLVR-trained policies. 
+
+• Through controlled experiments and ablations, we char-acterize when and how expert representations improve, degrade, or fail to benefit reasoning performance. 
+
+2 Problem Formulation 
+
+Post-training of pretrained LLMs is commonly performed either via supervised fine-tuning (SFT) or RL with task-level feedback such as RLVR. The two-stage paradigm of first applying SFT to establish a strong initial policy and then continuing with RLVR remains a dominant and widely recognized post-training strategy in the reasoning literature [ 27 ]. Recent studies widely suggest that RLVR improves mathematical and analytical reasoning performance in LLMs [ 1, 28 , 29 ], although some works remain cautious about interpreting these gains as the acquisition of fundamentally new reasoning capabilities, instead attributing them to a reshaping of existing behaviors under sparse outcome-based supervision [ 30 , 31 ]. In this work, we focus on the RLVR setting and study how a trainable policy can leverage SLMs through a latent interface. 
+
+2.1 Frozen o ff -the-shelf expert LMs. 
+
+Let F = {LM 1, . . . , LM n} denote the set of frozen expert LMs. Given an input prompt x, the i-th frozen expert LM i ∈ F pro-cesses x using its own tokenizer τi and architecture, producing a sequence of final-layer hidden states 
+
+H(Li) 
+
+> i
+
+= (h(Li) 
+
+> i,1
+
+, . . . , h(Li) 
+
+> i,Ti
+
+) = LM i(τi(x)) , (1) where Ti denotes the number of tokens produced by τi and 
+
+Li indicates the number of hidden layers in LM i. All expert parameters remain fixed during training. For convenience, we denote the collection of expert representations {H(Li) 
+
+> i
+
+}ni=1 as H.To incorporate frozen expert information, we introduce an auxil-iary set of expert-conditioned context tokens constructed from the aggregated expert representations H:
+
+C = (c1, . . . , cm) = gϕ(H), (2) where m is the number of context tokens. The mapping gϕ may be instantiated di ff erently across collaboration paradigms. For example, in output-level collaboration (Figure 2.a), expert rep-resentations are first transformed into logits via each expert’s LM head and subsequently aggregated through decoding-based procedures. In this case, gϕ is a fixed, non-trainable mapping that is not optimized under the downstream learning objective. Accordingly, the parameters ϕ may be either fixed or trainable, depending on how gϕ is instantiated across di ff erent baselines. Our method parameterizes gϕ as a trainable latent adapter that produces learnable context tokens injected as prefix condition-ing to the policy, allowing their representations to be shaped indirectly through RLVR training. This distinction enables learn-ing not only the final policy, but also how expert information is internally represented and utilized. Inspired by [ 22 , 23 ], we define the expert-conditioned policy as 
+
+πθ,ϕ (y | x) : = πθ
+
+ y | [ x ∥ C ], (3) Preprint – A preprint template for LaTeX users (H eader ) 3where [ · ∥ · ] denotes token-sequence concatenation. Crucially, expert utilization is not directly supervised: there exists no ground-truth annotation specifying what C should encode, which parts of expert information should be relied upon, or how information from di ff erent experts should be combined. Accordingly, the semantics of C are defined only through their eff ect on the policy’s behavior. 
+
+2.2 RLVR enables end-to-end expert utilization. 
+
+Standard SFT based on Maximum Likelihood Estimation (MLE) optimizes only the conditional likelihood of target outputs. In our setting, this implies that the context tokens C = gϕ(H) are never directly supervised and are constrained only indirectly through output likelihood. As a result, MLE provides no explicit preference for what C should encode or how expert information should be utilized, beyond what is necessary to match the target outputs. We therefore adopt RLVR, where the policy is optimized using outcome-level task feedback rather than token-level supervision. This is particularly suitable in our setting, since the context tokens C = gϕ(H) are not associated with any ground-truth an-notations and their usefulness can only be judged by downstream task success. Under RLVR, each sampled response y is evaluated by a task-level reward function r(x, y), and the policy is optimized to maximize expected reward over the entire generation process. Consequently, the construction parameters ϕ are updated through their contribution to task outcomes, enabling end-to-end learning of how frozen expert representations should be transformed into context tokens. A range of RL algorithms, including PPO [ 32 ], GRPO [ 1], DAPO [ 33 ], and REINFORCE ++ [34 ], can be viewed as instances of the following KL-regularized expected reward objective: arg max  
+
+> θ,ϕ
+
+Ex∼D , y∼πθ (·| [x ∥ C ]) 
+
+hr(x, y)
+
+− β−1 log πθ
+
+ y | [x ∥ C ]
+
+πref (y | x)
+
+i.
+
+(4) Here, β > 0 controls the strength of KL regularization to the reference policy πref (y | x), which is the frozen initial policy used to initialize πθ. Thus, RLVR provides a direct learning signal for optimizing expert utilization through the context tokens C.
+
+3 Method : P erceiver -based SLM A dapter 
+
+We consider a setting in which multiple heterogeneous, o ff -the-shelf LMs are available as frozen experts. Our goal is to integrate their internal representations into a single trainable policy, without retraining the experts or relying on discrete text-based aggregation. An overview of the proposed framework is shown in Figure 3. As introduced in section 2, we abstract expert integration as a context-token construction operator gϕ
+
+that maps frozen expert representations to context tokens, i.e., 
+
+C = gϕ(H). Here, ϕ collectively denotes all trainable parameters introduced in this section. 
+
+3.1 Expert hidden state extraction and alignment 
+
+We follow the frozen expert setup in subsection 2.1 and use the same notation for expert hidden representations as in Equation 1. To obtain a compact prompt-conditioned expert representation, we apply a pooling operator pool (·) to the expert hidden states and define 
+
+hi = pool( Hi) = h(Li) 
+
+> i,Ti
+
+∈ Rdi , (5) where h(Li) 
+
+> i,Ti
+
+denotes the final-layer hidden states of i-th expert for an input of length Ti, and di is the expert-specific hidden dimen-sionality. In our default configuration, we use last-token pooling. This choice is motivated by the autoregressive structure of causal LMs: the final-token hidden state summarizes the full input pre-fix and parameterizes the conditional next-token distribution. In our framework, experts are evaluated in a forward-only manner; no decoding or sampling is performed. Under the assumption of heterogeneous experts, we align their representations using expert-specific linear projections. Let d
+
+denote the shared latent dimension. The aligned expert represen-tations are given by 
+
+zi = hiWi, Wi ∈ Rdi×d. (6) We collect the projected expert representations into an ordered latent sequence 
+
+V = (z1, z2, . . . , zn) ∈ Rn×d. (7) 
+
+3.2 Latent queries via a Perceiver-style bottleneck 
+
+To aggregate the aligned expert representations into a fixed-size auxiliary context, we adopt a Perceiver-style cross-attention mechanism [ 24 ]. Specifically, we introduce a set of m trainable latent query vectors, stacked as 
+
+Qlat = (q1, . . . , qm) ∈ Rm×d, (8) where m is a hyperparameter controlling the size of the latent bottleneck. Fixing m decouples the number of experts from downstream computation, yielding a constant-size representa-tion regardless of ensemble size. The interaction between latent queries and expert representations is implemented via scaled dot-product cross-attention. We first form queries, keys, and values using learned linear projections: 
+
+
+
+Q = Qlat WQ,
+
+K = VW K ,
+
+V′ = VW V ,
+
+(9) where WQ, WK , WV are trainable projection matrices. We first compute intermediate latent representations via cross-attention followed by a token-wise feed-forward network with tanh acti-vation (FFN : Appendix 7.1): 
+
+C′ = FFN Qlat + softmax QK ⊤
+
+√d
+
+!
+
+V′
+
+!
+
+. (10) The final context tokens are then obtained via a linear projection to the policy embedding space: 
+
+C = C′Wout + bout ∈ Rm×dout , (11) where dout matches the token embedding dimension of the final policy model πθ. We initialize the output projection parameters (Wout ∈ Rd×dout , bout ∈ R1×dout ) to be near-zero for the sake of stability in early training steps. Finally, the context tokens C are provided to the final policy 
+
+πθ via prefix-style conditioning, consistent with the expert-conditioned policy definition in section 2. We optimize the train-able parameters in our method using GRPO under the RLVR objective in Equation 4. Preprint – A preprint template for LaTeX users (H eader ) 4Prompt                       
+
+> Question: You see a size 3 Rubik’s cube.
+> Please provide a solution...
+> Trainable 𝑚 Query Vectors
+> Final SLM Policy ( 𝜋 𝜃 )
+> ℎ1,𝑇 1
+> (𝐿 1)ℎ2,𝑇 2
+> (𝐿 2)ℎ3,𝑇 3
+> (𝐿 3)ℎ𝑛 ,,𝑇 𝑛
+> (𝐿 𝑛 )
+> Extract Last Extract Last Extract Last Extract Last
+> Adapter 𝑊 1Adapter 𝑊 2Adapter 𝑊 3Adapter 𝑊 𝑛
+> SLM 3 SLM 1 SLM 2 SLM 𝑛
+> Q
+> Original
+> Prompt
+> Concatenation
+> 𝑧 1𝑧 2𝑧 3𝑧 𝑛
+> KV
+> Cross Attention
+> FFN
+> Output Projection
+
+Figure 3: Perceiver-based hidden state collaboration framework. Frozen heterogeneous SLM experts expose final-layer hidden states, which are aligned and aggregated via trainable latent query tokens using cross-attention. The resulting context tokens condition the final policy model trained with RLVR. 
+
+4 Experiments 
+
+This section empirically evaluates hidden state collaboration under RLVR through a series of controlled comparisons. Our experiments are designed to answer two questions: (i) whether latent expert tokens improve RLVR performance beyond single-model training, and (ii) whether RLVR induces structured expert roles without routing supervision. To this end, we systematically vary the design of the context-token construction operator gϕ,the expert pool composition, and the source of expert hidden states, while keeping the downstream policy and RLVR setup fixed. 
+
+4.1 Experimental Setup 
+
+Implementation Details. We employ Qwen-2.5-3B-Instruct [ 35 ] as the policy πθ, with trainable LoRA adapters [ 36 ]of rank 8, together with an adapter implemented accordingly to each baseline operating on hidden-state tokens with a latent dimension of 512. All models are implemented in PyTorch and trained using GRPO with a group size of 8, a KL coe ffi cient 
+
+β = 0.04, an e ff ective batch size of 32, and a learning rate of 1.0 × 10 −4. We train for 500 steps on Reasoning Gym bench-marks and 233 steps on GSM8K. For πref in Equation 4, we insert zero-valued context tokens at the same positions as C to match the token layout of the policy input. All experiments are conducted on a single NVIDIA H200 GPU. Each experiment is repeated three times with di ff erent random seeds, and we report the mean and standard deviation. To isolate the e ff ect of expert utilization and control Chain-of-Thought [ 37 ] variance, we en-force a fixed generation budget of 128 tokens across all methods including frozen SLM outputs. Unless otherwise specified, we fix the number of latent query vectors to m = 8 and the number of attention heads to 8 for all Perceiver-style cross-attention layers. 
+
+LM pool. We draw LMs from widely used open instruction-tuned model families that cover complementary skill profiles: (1) a math specialist Qwen2.5-Math-1.5B-Instruct [ 35 ], (2) a 
+
+coding specialist Qwen2.5-Coder-7B-Instruct [ 35 ], (3) a gener-alist Llama-3.2-3B-Instruct [ 38 ], as well as additional general-purpose SLMs including Phi-3.5-mini-instruct [ 2], gemma-2-2b-it [ 39 ], and Mistral-7B-Instruct-v0.3 [ 40 ]. To stress-test robustness, we also include a naive expert , GPT-2 [ 41 ]. Finally, we evaluate an alternative large expert GPT-OSS 20B [ 42 ] to test whether the learned interface remains compatible under substantially di ff erent expert capacity. 
+
+Design of Heterogeneous LM Teams. Our framework is de-signed to be plug-and-play with respect to the expert team: all experts are treated as frozen, o ff -the-shelf instruction-tuned LMs, and collaboration is enabled solely through a trainable latent interface. Thus, we can freely reconfigure the expert team without modifying expert parameters, reflecting a modular perspective where SLMs are orchestrated rather than trained jointly [ 3 , 4, 5]. In this work, we mainly explore the following expert-team designs: (1) Default Team (n = 3). We use a compact team consisting of a math specialist (Qwen2.5-Math-1.5B), a coding specialist (Qwen2.5-Coder-7B), and a generalist instruction model (Llama-3.2-3B). This configuration serves as our primary expert pool in the main experiments. (2) Generalist Team (n = 5). To test whether our method relies on a specific expert backbone, we additionally consider a larger pool of general-purpose SLMs, including Phi-3.5-mini, Gemma-2-2B, and Mistral-7B, together with Qwen2.5-Math-1.5B. This setting emphasizes heterogeneity across model families and capacity. (3) Naive LM Team (n = 4) . We include GPT-2 as a naive (low-capability) expert, alongside Qwen2.5-Math-1.5B, Qwen2.5-Coder-7B, and Llama-3.2-3B. This stress test evaluates whether the learned interface can suppress low-utility experts rather than exploiting spurious shortcuts. (4) LLM Team (n = 3). Finally, we replace Llama-3.2-3B in the default heterogenous team in (1) with generalist expert with GPT-OSS-20B to test compatibility with substantially di ff erent expert capacity. This verifies that the proposed hidden-state interface remains plug-and-play even under drastic changes in expert scale. 
+
+Benchmarks. We primarily evaluate our method on Reasoning Gym [ 25 ], focusing on task families that prior work has shown to di ff er in RLVR di ffi culty. Specifically, we include Arithmetic and Logic tasks, which are known to be readily solvable by LLMs under RLVR, as well as Algorithmic tasks, which remain challenging and often fail to benefit from RLVR alone. All tasks are trained using the default settings without curriculum learning, allowing us to isolate the e ff ect of soft hidden state collaboration. For each Reasoning Gym task family, we train on 16,000 procedurally generated data points and report perfor-mance on a held-out validation set of 4,000 samples (Details in section 8). In addition, we report results on GSM8K [ 26 ] as a standard mathematical reasoning benchmark to assess whether our method remains competitive in settings where single-model RLVR is already strong. or GSM8K, we train on the standard training split and evaluate directly on the o ffi cial test set. Preprint – A preprint template for LaTeX users (H eader ) 5
+
+Baselines. We compare against representative collaboration paradigms while controlling for the downstream RLVR setup. All methods share the same final policy model, GRPO hyperpa-rameters, and fixed generation budget, and di ff er only in how expert information is exposed and processed through the context-token construction operator gϕ in Equation 2. These baselines follow common designs in prior multi-model collaboration and routing-based systems [7, 17]. 
+
+(1) Single-Model RLVR. We train the same final policy model (πθ) without any auxiliary experts or context tokens, i.e., re-moving gϕ. This baseline corresponds to standard single-model RLVR training [25]. 
+
+(2) Output-Level Collaboration (Figure 2.a). Each expert is prompted to generate a short textual hint or solution using the same fixed generation budget of 128 tokens, and the resulting decoded tokens are concatenated verbatim into an [Expert Hints] block. The operator g maps this text into prefix tokens for the final policy using the tokenizer of the final policy model (τπ). In this setting, g introduces no trainable parameters ϕ:expert outputs are produced via frozen decoding (including the LM head), and the mapping into context tokens is fixed. This baseline corresponds to text-mediated collaboration and output aggregation used in debate-style, role-based, and ensembling systems [7, 8]: 
+
+g(x) = τπ
+
+[ decode i(LM i(τi(x))) ] ni=1
+
+ . (12) 
+
+(3) Hard Expert Routing (Top-1) (Figure 2.b). We include a hard top-1 expert routing baseline to match router-based expert selection methods [ 17 , 18 , 43 ], while omitting task-specific cost modeling and constraint formulations. Here, gϕ selects a single expert per prompt using a learned router and constructs con-text tokens exclusively from the selected expert. Each prompt is first encoded by a sentence-level semantic encoder ET [ 44 ], whose output is mapped to expert logits by a router head; the expert with the highest logit is selected at evaluation time, while straight-through Gumbel-Softmax is used during training, and we use all-MiniLM-L6-v2 as ET . We perform selective execu-tion by running only the chosen expert and projecting its pooled hidden representation into a single memory token: 
+
+gϕ(x) = FFN 
+
+
+
+> n
+
+X
+
+> i=1
+
+Ri(ET (x)) Wi pool( LM i(τi(x))) 
+
+ , (13) where Ri(·) ∈ { 0, 1} is the top-1 routing decision over experts, 
+
+LM i is the i-th frozen expert, and Wi and FFN are learned pro-jections producing a single memory token. 
+
+(4) Ours: Hidden-State Collaboration. Frozen experts expose pooled hidden representations, which are aligned and aggre-gated into m trainable context tokens via a Perceiver-style cross-attention bottleneck [ 24 ]. Both the latent adapter and context-token construction are optimized end-to-end under RLVR, al-lowing multiple experts to simultaneously influence the policy through continuous latent representations. 
+
+(5) Ours: Without Cross-Attention. We remove the Perceiver-style cross-attention and apply the token-wise FFN directly to the stacked expert representations V. This isolates the role of cross-attention in enabling input-dependent expert aggregation. 
+
+gϕ(x) = FFN( V). (14) Table 1: Performance comparison across di ff erent reasoning tasks on evaluation datasets. We report mean accuracy and standard deviation across 3 runs for all methods and settings considered. Method Algorithmic Arithmetic Logic GSM8k Single 51 .56 ±0.55 52 .34 ±1.78 96 .88 ±1.10 64.32 ±0.92                             
+
+> Hard Routing 34 .18 ±4.18 32 .47 ±5.10 63 .80 ±2.39 14 .52 ±1.52
+> Output Collaboration 51 .43 ±3.41 31 .19 ±1.16 66 .80 ±0.64 67 .58 ±1.03
+> Ours (w /o Cross Attn) ( n=3) 51 .56 ±0.64 60 .16 ±4.38 89 .71 ±2.17 63 .28 ±1.03
+> Ours : Default Team (n=3) 51 .82 ±0.49 75 .26 ±5.62 82 .81 ±1.56 61 .59 ±1.25
+> Ours : Generalist Team (n=5) 52 .02 ±2.77 65 .10 ±8.49 90 .23 ±5.01 41 .02 ±29 .01
+
+4.2 Performance analysis This section examines whether augmenting a small policy model (πθ) with additional trainable context tokens ( C) yields consistent performance gains under RLVR. As shown in Table 1, the e ff ect of latent expert conditioning is highly regime-dependent. On Arithmetic, we observe a clear and consistent improvement, where the full model substantially outperforms the Single-model baseline. This indicates that expert-derived latent context can provide a useful inductive bias in arithmetic-dominant settings, particularly when the RLVR objective leaves substantial capacity for further performance improvement and the base policy alone is insu ffi cient. We also observe substantially increased variance across runs in our proposed framework, especially for larger expert teams, indicating that while our method can achieve strong performance, it is sensitive to training dynamics and alignment with the latent expert representations. In contrast, improvements on Algorithmic tasks are negligible. Even with latent expert context, performance remains close to the Single-model baseline, indicating that expert conditioning does not fundamentally resolve the known di ffi culty of algorith-mic reasoning under RLVR. This behavior is consistent with prior observations reported in [ 25 ]. For Logic and especially GSM8K, adding expert context provides limited benefit and of-ten degrades performance. These tasks are already well-handled by a single SLM under RLVR, and the Single-model operates near saturation. In such regimes, additional context tokens intro-duce auxiliary latent variables that o ff er little new information and instead act as structured noise, interfering with an otherwise su ffi cient internal reasoning process. Taken together, these results suggest that latent context tokens are not universally beneficial under RLVR. Their e ff ectiveness is tightly coupled to task di ffi culty and the remaining capacity for improvement under the training objective. When the task remains challenging, latent expert representations can inject complementary structure that improves performance. However, for relatively simple or saturated tasks, such as GSM8K, multi-expert conditioning becomes unnecessary and can be counter-productive. This highlights a practical constraint: hidden state collaboration should be applied selectively, rather than treated as a general-purpose improvement over single-model RLVR. Across tasks, we observe that failures to exploit SLM informa-tion often manifest as high run-to-run variance, reflecting the di ffi culty of reliably coordinating multiple experts under RLVR. 
+
+4.3 Does RLVR discover LM expert roles? 
+
+This section investigates whether RLVR induces structured and task-dependent expert utilization patterns among frozen lan-guage models, despite the absence of any supervision on routing decisions or expert identities. In our framework, the only observ-Preprint – A preprint template for LaTeX users (H eader ) 6Arithmetic (Default Team) 
+
+> LM usage ( 𝑢 𝑖 )
+
+𝜌 = −0.63  𝜌 = −0.53  𝜌 = −0.39  𝜌 = −0.52  𝜌 = −0.59 𝜌 = −0.27                                                                       
+
+> 0.40
+> 0.38
+> 0.36
+> 0.34
+> 0.32
+> 0.30
+> 0.28
+> 0100 200 300 400 500
+> 1.1025
+> 1.1000
+> 1.0975
+> 1.0950
+> 1.0925
+> 1.0900
+> 1.0875
+> 1.0850
+> 0.8
+> 0.6
+> 0.4
+> 0.2
+> 1.0
+> 0.0
+> 0100 200 300 400 500
+> Reward
+> Entropy ( 𝐻 )
+> Steps
+> 0.6
+> 0.5
+> 0.4
+> 0.3
+> 0.7
+> 0.0
+> 0.1
+> 0.2
+> 1.100
+> 1.099
+> 1.098
+> 1.097
+> 1.096
+> 1.095
+> 1.094
+> 0100 200 300 400 500
+> Algorithmic (Default Team)
+> 0.345
+> 0.340
+> 0.335
+> 0.330
+> 0.350
+> 0.325
+> 0.320
+> 0100 200 300 400 500
+> Llama -3.2 -3B -Instruct
+> Qwen 2.5 -Coder -7B -Instruct
+> Qwen 2.5 -Math -1.5B -Instruct
+> Reward Entropy
+> 0100 200 300 400 500
+> Logic (Default Team)
+> 0.36
+> 0.35
+> 0.34
+> 0.33
+> 0.32
+> 0.31
+> 0100 200 300 400 500
+> 0.8
+> 0.6
+> 0.4
+> 0.2
+> 1.0
+> 0.0
+> 1.0985
+> 1.0980
+> 1.0975
+> 1.0970
+> Arithmetic (LLM -Team)
+> 0100 200 300 400 500
+> 0.50
+> 0.45
+> 0.40
+> 0.35
+> 0.30
+> 0.25
+> 0100 200 300 400 500
+> 0.8
+> 0.6
+> 0.4
+> 0.2
+> 0.0
+> 1.10
+> 1.08
+> 1.06
+> 1.00
+> 1.04
+> 1.02
+> 0.98
+> 0.96
+> Arithmetic (Naïve LM Team)
+> 0.265
+> 0.260
+> 0.255
+> 0.250
+> 0.245
+> 0.240
+> 0.235
+> 0100 200 300 400 500
+> 0.8
+> 0.6
+> 0.4
+> 0.2
+> 0.0
+> 1.0
+> 1.386
+> 1.385
+> 1.384
+> 1.383
+> 1.382
+> 0100 200 300 400 500
+> GSM8K (Default Team)
+> 0.340
+> 0.338
+> 0.336
+> 0.334
+> 0.332
+> 0.330
+> 0.328
+> 0.326
+> 050 100 150 200
+> 050 100 150 200
+> 0.8
+> 0.6
+> 0.4
+> 0.2
+> 0.0
+> 6.5e -4
+> 6.0e -4
+> 5.5e -4
+> 4.0 e-4
+> 5.0e -4
+> 4.5e -4
+> +1.098
+> Llama -3.2 -3B -Instruct
+> Qwen 2.5 -Coder -7B -Instruct
+> Qwen 2.5 -Math -1.5B -Instruct
+> Llama -3.2 -3B -Instruct
+> Qwen 2.5 -Coder -7B-Instruct
+> Qwen 2.5 -Math -1.5B -Instruct
+> Llama -3.2 -3B -Instruct
+> Qwen 2.5 -Coder -7B -Instruct
+> Qwen 2.5 -Math -1.5B -Instruct
+> Llama -3.2 -3B -Instruct
+> Qwen 2.5 -Coder -7B -Instruct
+> GPT -OSS
+> Llama -3.2 -3B-Instruct
+> Qwen 2.5 -Coder -7B -Instruct
+> Qwen 2.5 -Math -1.5B -Instruct
+> GPT -2
+
+Figure 4: Expert utilization dynamics and training progress under RLVR. Top row: evolution of per-expert utilization over training steps for di ff erent tasks and expert team compositions (Default Team, LLM Team replacement, and Naive Team). Shaded regions indicate standard deviation across runs. Bottom row: corresponding reward progression and routing entropy over training. The emergence of selective expert usage without routing supervision suggests that RLVR alone can induce self-organized expert role di ff erentiation. able signal of expert selection is the latent cross-attention weight matrix A ∈ Rm×n, where each row represents a distribution over the n experts for one latent query. To characterize expert se-lectivity and its relation to learning dynamics, we track routing entropy H, per-expert utilization ui, and their association with reward using Spearman rank correlation computed over training trajectories, i.e., between the time series of reward and routing entropy during RLVR: 
+
+H = 1
+
+m
+
+mX
+
+j=1
+
+ −
+
+nX
+
+i=1
+
+A j,i log A j,i
+
+, ui = 1
+
+m
+
+mX
+
+j=1
+
+A j,i. (15) Lower entropy indicates more concentrated expert usage. All statistics are averaged over the batch, and correlations are com-puted per run and then averaged. As shown in Figure 4, RLVR alone is su ffi cient to induce non-trivial expert di ff erentiation. Across tasks, routing evolves from an initially uniform mixture into structured allocations that con-centrate attention on a subset of consistently useful models. This process is reflected by a monotonic decrease in routing entropy and a consistent negative correlation between entropy and reward (mean Spearman ρ = −0.48), indicating that improvements in reward over training co-occur with increasingly selective expert usage. Importantly, the resulting structure adapts to the expert pool: weak experts such as GPT-2 are suppressed throughout training, whereas introducing a stronger expert such as GPT-OSS leads to a pronounced redistribution of attention toward it. These dynamics admit two complementary interpretations. One is functional, where the adapter discovers reward-relevant expert roles based on representational utility. The other is an implicit capacity bias, where higher-capacity models are favored irre-spective of nominal domain specialization, as suggested by the dominance of GPT-OSS and the preference for Qwen-Coder over Qwen-Math even on arithmetic tasks. Although expert representations are projected into a shared space before cross-attention, the expert-specific projections Wi in Equation 6 scale with the original hidden dimensionality, which may introduce a weak inductive advantage. Thus, while RLVR clearly induces robust, self-organized expert utilization without metadata or routing supervision, disentangling functional expertise from capacity-driven preference remains an open question. 
+
+4.4 Ablation Studies 
+
+Table 2: Ablation study on expert hidden-state pooling strategies (Arithmetic). We report mean accuracy and standard deviation. First Token ( h(Li)             
+
+> i,0)First Layer( h(0)
+> i,Ti)Random Token Random Layer Ours ( n=3) Accuracy (%) 75 .13 ±1.12 54 .62 ±17 .82 63 .93 ±6.33 38 .09 ±25 .55 75 .26 ±5.62
+
+Do context tokens C contribute to SLM reasoning? To eval-uate whether the C provide additional conditioning beyond the input x, we compare the same policy πθ under two generation set-tings during training: conditioning on the input alone, πθ(y | x), and conditioning on the input augmented with context tokens, 
+
+πθ(y | [x ∥ C ]). As shown in Figure 5, conditioning on C yields consistently higher rewards throughout training. In Logic, the model conditioned on C reaches higher reward within 500 train-ing steps, whereas conditioning on x alone saturates at a sub-stantially lower level. A similar trend is observed in Arithmetic, where context-conditioned generation leads to higher rewards across the entire training trajectory. These results indicate that the learned context tokens C make a non-trivial contribution during training, rather than performance improvements arising solely from optimizing πθ.
+
+Disentangling Token Position and Depth. We examine whether the default choice of last-token pooling from the final layer in Equation 5 is essential by conducting pooling ablations on the Arithmetic subset that vary token position and depth. Specifically, we replace last-token pooling with first-token pool-ing, uniformly sampled token pooling, first-layer pooling, and uniformly sampled layer pooling. As shown in Table 2, first-token pooling achieves performance comparable to the default configuration, while pooling from shallow layers or uniformly sampled layers leads to unstable or degraded performance. Uni-formly sampling a token position remains competitive but ex-hibits higher variance, suggesting that precise token alignment is not critical. Overall, these results may indicate that the pro-posed method does not rely on fine-grained, prompt-conditioned Preprint – A preprint template for LaTeX users (H eader ) 7Reward             
+
+> Arithmetic
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 1.2
+> 1.0
+> 0.8
+> Logic
+> 0100 200 300 400 500 0100 200 300 400 500
+> w/o context tokens
+> w/ context tokens
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 1.0
+> 0.8
+> Training Steps Training Steps
+
+Figure 5: Ablation comparing the proposed model (with C) and a baseline without 
+
+C on Logic and Arithmetic. Models with C achieve consistently higher rewards. Number of latent queries ( 𝑚 )        
+
+> Reward
+> 24816 32 64 128
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.9
+> 0.8
+> 0.7
+> 0.6
+> Mean
+> ±1Std Dev
+
+Figure 6: Eff ect of the number of latent queries m on reward performance. reasoning traces within SLM outputs; instead, a coarse and rela-tively prompt-invariant representation of each SLM is su ffi cient, with expert hidden states acting as stable model signatures that regularize the policy under RLVR. 
+
+Latent dimension analysis. We study the e ff ect of the number of latent queries m ∈ { 2, 4, 8, 16 , 32 , 64 , 128 } on performance. As shown in Figure 6, performance is maximized at moder-ate latent sizes ( m = 8) and degrades as m increases further. Larger latent dimensions also exhibit higher variance and less stable training, indicating that latent bottleneck capacity does not translate monotonically into better performance. 
+
+5 Related Works 
+
+LLMs as Collaborative Agents: Following prior work that highlights the role of SLMs as building blocks for agentic sys-tems [ 3], we use the term SLM to refer to relatively compact LMs below roughly 10B parameters. Recent studies have demon-strated that strong performance can be achieved with such mod-els through a variety of approaches, including e ffi cient hybrid architectures [ 45 , 46 ], retrieval-augmented modeling [ 47 ], and data-centric or RL-based training strategies [ 2, 48 , 1]. Together, these advances support a growing view that collections of spe-cialized LMs can serve as e ff ective, modular building blocks for agentic systems [ 49 , 50 , 51 ]. This trend toward modularity is further exemplified by emerging standards like the Model Context Protocol (MCP) [ 52 ] and large-scale API-tuning frame-works [ 53 , 54 ], which aim to unify how models interface with external tools via discrete text or JSON. Whereas prior work has primarily examined such collaboration at the system or orches-tration level, our interest lies at a di ff erent granularity: whether and how collaboration can emerge at the model level, through shared learning signals and internal representations, and what this perspective reveals about individual experts. 
+
+Coordination Paradigms for Heterogeneous LMs. Prior work on multi-LM collaborations typically follows three paradigms: expert routing for e ffi cient selection under constraints [ 17 , 18 ,43 , 14 , 15 , 16 ], output-level collaboration via textual interaction or ensembling [ 7, 4 , 55 ], and architectural-level MoE [ 20 , 21 ]that yields structured specialization [ 19 ]. While routing opti-mizes invocation, it provides limited mechanisms for joint expert utilization once models are available. Similarly, decoding-time interfaces—including distribution fusion in DeePEn [ 9 ] and collaborative decoding in Co-LLM [ 10 ]—can be viewed as non-architectural variants of MoE that operate on frozen ex-perts. However, by interfacing at the output level, these methods primarily rely on emitted distributions or token-level routing decisions [ 9, 10 ]. This coarse granularity overlooks evidence that intermediate hidden states can provide richer task-relevant features than final-layer outputs [ 56 ]. Consequently, we shift collaboration to the representation level by interfacing through latent hidden states. This moves coordination away from emitted tokens or distributions and instead exposes intermediate expert representations directly to the policy. While the interface re-mains latent, this finer-grained design provides a principled way to observe how expert utilization evolves under RLVR, allow-ing multiple frozen LMs to influence the policy simultaneously without the pretraining costs of architecture-level MoE, and revealing emergent roles for each LM. 
+
+6 Conclusions 
+
+We show that RLVR induces emergent specialization among frozen LM experts through a simple adapter-based soft prompt tuning mechanism, without any explicit supervision on rout-ing decisions or expert roles. Compared to hard routing and output-level fusion, this formulation avoids brittle decisions and token ine ffi ciency while enabling multiple experts to in-fluence the policy simultaneously at the representation level. Under RLVR, expert utilization evolves from uniform atten-tion to structured, non-uniform allocation aligned with reward improvement, indicating that role di ff erentiation can emerge purely from outcome-level supervision. At the same time, the benefits of soft prompt–based collaboration are task-dependent: on simpler benchmarks, single-model RLVR already saturates performance and additional experts can introduce interference, revealing a trade-o ff between single-model su ffi ciency and multi-expert conditioning. We note that our hard-routing comparison does not exhaust the space of possible router designs, and that our framework prioritizes understanding expert utilization under outcome-level supervision rather than computational e ffi ciency. Future work includes exploring a wider range of agent composi-tions and interaction patterns, incorporating selective execution or capacity-matched routing baselines, and revisiting this com-parison as SLMs continue to shrink, where finer-grained special-ization and more pronounced trade-o ff s may become easier to study. 
+
+References 
+
+[1] Daya Guo, Dejian Yang, Haowei Zhang, Junxiao Song, Ruoyu Zhang, Runxin Xu, Qihao Zhu, Shirong Ma, Peiyi Wang, Xiao Bi, et al. Deepseek-r1: Incentivizing reason-ing capability in llms via reinforcement learning. arXiv preprint arXiv:2501.12948 , 2025. [2] Marah Abdin, Jyoti Aneja, Harkirat Behl, Sébastien Bubeck, Ronen Eldan, Suriya Gunasekar, Michael Har-rison, Russell J Hewett, Mojan Javaheripi, Piero Kau ff -Preprint – A preprint template for LaTeX users (H eader ) 8mann, et al. Phi-4 technical report. arXiv preprint arXiv:2412.08905 , 2024. [3] Peter Belcak, Greg Heinrich, Shizhe Diao, Yonggan Fu, Xin Dong, Saurav Muralidharan, Yingyan Celine Lin, and Pavlo Molchanov. Small language models are the future of agentic ai. arXiv preprint arXiv:2506.02153 , 2025. [4] Qingyun Wu, Gagan Bansal, Jieyu Zhang, Yiran Wu, Beibin Li, Erkang Zhu, Li Jiang, Xiaoyun Zhang, Shaokun Zhang, Jiale Liu, Ahmed Hassan Awadallah, Ryen W White, Doug Burger, and Chi Wang. Autogen: Enabling next-gen LLM applications via multi-agent conversations. In First Conference on Language Modeling , 2024. URL 
+
+https://openreview.net/forum?id=BAakY1hNKS .[5] Sirui Hong, Mingchen Zhuge, Jonathan Chen, Xiawu Zheng, Yuheng Cheng, Jinlin Wang, Ceyao Zhang, Zili Wang, Steven Ka Shing Yau, Zijuan Lin, Liyang Zhou, Chenyu Ran, Lingfeng Xiao, Chenglin Wu, and Jür-gen Schmidhuber. MetaGPT: Meta programming for a multi-agent collaborative framework. In The Twelfth International Conference on Learning Representations ,2024. URL https://openreview.net/forum?id= VtmBAGCN7o .[6] Yusen Zhang, Ruoxi Sun, Yanfei Chen, Tomas Pfister, Rui Zhang, and Sercan Arik. Chain of agents: Large language models collaborating on long-context tasks. Advances in Neural Information Processing Systems , 37:132208– 132237, 2024. [7] Yilun Du, Shuang Li, Antonio Torralba, Joshua B Tenen-baum, and Igor Mordatch. Improving factuality and rea-soning in language models through multiagent debate. In 
+
+Forty-first International Conference on Machine Learning ,2023. [8] Dongfu Jiang, Xiang Ren, and Bill Yuchen Lin. LLM-blender: Ensembling large language models with pairwise ranking and generative fusion. In Anna Rogers, Jordan Boyd-Graber, and Naoaki Okazaki, editors, Proceedings of the 61st Annual Meeting of the Association for Com-putational Linguistics (Volume 1: Long Papers) , pages 14165–14178, Toronto, Canada, July 2023. Association for Computational Linguistics. doi: 10.18653 /v1 /2023. acl-long.792. URL https://aclanthology.org/2023. acl-long.792/ .[9] Yichong Huang, Xiaocheng Feng, Baohang Li, Yang Xi-ang, Hui Wang, Ting Liu, and Bing Qin. Ensemble learning for heterogeneous large language models with deep paral-lel collaboration. In The Thirty-eighth Annual Conference on Neural Information Processing Systems , 2024. URL 
+
+https://openreview.net/forum?id=7arAADUK6D .[10] Zejiang Shen, Hunter Lang, Bailin Wang, Yoon Kim, and David Sontag. Learning to decode collaboratively with multiple language models. In Lun-Wei Ku, An-dre Martins, and Vivek Srikumar, editors, Proceedings of the 62nd Annual Meeting of the Association for Com-putational Linguistics (Volume 1: Long Papers) , pages 12974–12990, Bangkok, Thailand, August 2024. Associ-ation for Computational Linguistics. doi: 10.18653 /v1 /
+
+2024.acl-long.701. URL https://aclanthology.org/ 2024.acl-long.701/ .[11] Junlin Wang, Jue WANG, Ben Athiwaratkun, Ce Zhang, and James Zou. Mixture-of-agents enhances large lan-guage model capabilities. In The Thirteenth International Conference on Learning Representations , 2025. URL 
+
+https://openreview.net/forum?id=h0ZfDIrj7T .[12] Lingjiao Chen, Matei Zaharia, and James Zou. FrugalGPT: How to use large language models while reducing cost and improving performance. Transactions on Machine Learning Research , 2024. ISSN 2835-8856. URL https: //openreview.net/forum?id=cSimKw5p6R . Featured Certification. [13] Zhongyang Li, Ziyue Li, and Tianyi Zhou. R2-t2: Re-routing in test-time for multimodal mixture-of-experts. In 
+
+Forty-second International Conference on Machine Learn-ing , 2025. URL https://openreview.net/forum? id=oqPcOMafOF .[14] Hongyi Wang, Felipe Maia Polo, Yuekai Sun, Souvik Kundu, Eric Xing, and Mikhail Yurochkin. Fusing models with complementary expertise. In The Twelfth International Conference on Learning Representations ,2024. URL https://openreview.net/forum?id= PhMrGCMIRL .[15] Tal Shnitzer, Anthony Ou, Mírian Silva, Kate Soule, Yuekai Sun, Justin Solomon, Neil Thompson, and Mikhail Yurochkin. Large language model routing with bench-mark datasets. In First Conference on Language Mod-eling , 2024. URL https://openreview.net/forum? id=Zb0ajZ7vAt .[16] Keming Lu, Hongyi Yuan, Runji Lin, Junyang Lin, Zheng Yuan, Chang Zhou, and Jingren Zhou. Routing to the ex-pert: E ffi cient reward-guided ensemble of large language models. In Kevin Duh, Helena Gomez, and Steven Bethard, editors, Proceedings of the 2024 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (Volume 1: Long Papers) , pages 1964–1974, Mexico City, Mexico, June 2024. Association for Computational Linguistics. doi: 10.18653 /v1 /2024.naacl-long.109. URL https: //aclanthology.org/2024.naacl-long.109/ .[17] Haozhen Zhang, Tao Feng, and Jiaxuan You. Router-r1: Teaching LLMs multi-round routing and aggrega-tion via reinforcement learning. In The Thirty-ninth An-nual Conference on Neural Information Processing Sys-tems , 2025. URL https://openreview.net/forum? id=DWf4vroKWJ .[18] Reza Shirkavand, Shangqian Gao, Peiran Yu, and Heng Huang. Cost-aware contrastive routing for LLMs. In The Thirty-ninth Annual Conference on Neural Information Processing Systems , 2025. URL https://openreview. net/forum?id=4Qe2Hga43N .[19] Jack Cook, Danyal Akarca, Rui Ponte Costa, and Jascha Achterberg. Brain-like processing pathways form in mod-els with heterogeneous experts. In The Thirty-ninth An-nual Conference on Neural Information Processing Sys-tems , 2025. URL https://openreview.net/forum? id=Qm6ah1hpFA .[20] William Fedus, Barret Zoph, and Noam Shazeer. Switch transformers: Scaling to trillion parameter models with Preprint – A preprint template for LaTeX users (H eader ) 9simple and e ffi cient sparsity. Journal of Machine Learning Research , 23(120):1–39, 2022. URL http://jmlr.org/ papers/v23/21-0998.html .[21] An Wang, Xingwu Sun, Ruobing Xie, Shuaipeng Li, Ji-aqi Zhu, Zhen Yang, Pinxue Zhao, Weidong Han, Zhan-hui Kang, Di Wang, Naoaki Okazaki, and Cheng-zhong Xu. HMoE: Heterogeneous mixture of experts for lan-guage modeling. In Christos Christodoulopoulos, Tan-moy Chakraborty, Carolyn Rose, and Violet Peng, edi-tors, Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing , pages 21954– 21968, Suzhou, China, November 2025. Association for Computational Linguistics. ISBN 979-8-89176-332-6. doi: 10.18653 /v1 /2025.emnlp-main.1115. URL https: //aclanthology.org/2025.emnlp-main.1115/ .[22] Brian Lester, Rami Al-Rfou, and Noah Constant. The power of scale for parameter-e ffi cient prompt tuning. In Marie-Francine Moens, Xuanjing Huang, Lucia Spe-cia, and Scott Wen-tau Yih, editors, Proceedings of the 2021 Conference on Empirical Methods in Natural Lan-guage Processing , pages 3045–3059, Online and Punta Cana, Dominican Republic, November 2021. Association for Computational Linguistics. doi: 10.18653 /v1 /2021. emnlp-main.243. URL https://aclanthology.org/ 2021.emnlp-main.243/ .[23] Xiang Lisa Li and Percy Liang. Prefix-tuning: Optimiz-ing continuous prompts for generation. In Chengqing Zong, Fei Xia, Wenjie Li, and Roberto Navigli, editors, 
+
+Proceedings of the 59th Annual Meeting of the Associa-tion for Computational Linguistics and the 11th Interna-tional Joint Conference on Natural Language Process-ing (Volume 1: Long Papers) , pages 4582–4597, On-line, August 2021. Association for Computational Lin-guistics. doi: 10.18653 /v1 /2021.acl-long.353. URL 
+
+https://aclanthology.org/2021.acl-long.353/ .[24] Andrew Jaegle, Felix Gimeno, Andy Brock, Oriol Vinyals, Andrew Zisserman, and Joao Carreira. Perceiver: General perception with iterative attention. In International con-ference on machine learning , pages 4651–4664. PMLR, 2021. [25] Zafir Stojanovski, Oliver Stanley, Joe Sharratt, Richard Jones, Abdulhakeem Adefioye, Jean Kaddour, and Andreas Köpf. Reasoning gym: Reasoning environments for rein-forcement learning with verifiable rewards. In The Thirty-ninth Annual Conference on Neural Information Process-ing Systems Datasets and Benchmarks Track , 2025. URL 
+
+https://openreview.net/forum?id=GqYSunGmp7 .[26] Karl Cobbe, Vineet Kosaraju, Mohammad Bavarian, Mark Chen, Heewoo Jun, Lukasz Kaiser, Matthias Plappert, Jerry Tworek, Jacob Hilton, Reiichiro Nakano, Christo-pher Hesse, and John Schulman. Training verifiers to solve math word problems. arXiv preprint arXiv:2110.14168 ,2021. [27] Tianzhe Chu, Yuexiang Zhai, Jihan Yang, Shengbang Tong, Saining Xie, Dale Schuurmans, Quoc V Le, Sergey Levine, and Yi Ma. SFT memorizes, RL generalizes: A comparative study of foundation model post-training. In 
+
+Forty-second International Conference on Machine Learn-ing , 2025. URL https://openreview.net/forum? id=dYur3yabMj .[28] Peiyi Wang, Lei Li, Zhihong Shao, Runxin Xu, Damai Dai, Yifei Li, Deli Chen, Yu Wu, and Zhifang Sui. Math-shepherd: Verify and reinforce LLMs step-by-step without human annotations. In Lun-Wei Ku, Andre Martins, and Vivek Srikumar, editors, Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , pages 9426–9439, Bangkok, Thailand, August 2024. Association for Computational Linguistics. doi: 10.18653 /v1 /2024.acl-long.510. URL 
+
+https://aclanthology.org/2024.acl-long.510/ .[29] Xueguang Ma, Qian Liu, Dongfu Jiang, Ge Zhang, Ze-jun MA, and Wenhu Chen. General-reasoner: Advancing LLM reasoning across all domains. In The Thirty-ninth Annual Conference on Neural Information Processing Sys-tems , 2025. URL https://openreview.net/forum? id=pBFVoll8Xa .[30] Yang Yue, Zhiqi Chen, Rui Lu, Andrew Zhao, Zhaokai Wang, Yang Yue, Shiji Song, and Gao Huang. Does rein-forcement learning really incentivize reasoning capacity in LLMs beyond the base model? In The Thirty-ninth Annual Conference on Neural Information Processing Sys-tems , 2025. URL https://openreview.net/forum? id=4OsgYD7em5 .[31] Fang Wu and Yejin Choi. On the limits of RLVR: Sup-port, entropy, and the illusion of reasoning. In 2nd AI for Math Workshop @ ICML 2025 , 2025. URL https: //openreview.net/forum?id=KXtLWJAzgh .[32] John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, and Oleg Klimov. Proximal policy optimization algorithms. arXiv preprint arXiv:1707.06347 , 2017. [33] Qiying Yu, Zheng Zhang, Ruofei Zhu, Yufeng Yuan, Xi-aochen Zuo, YuYue, Weinan Dai, Tiantian Fan, Gaohong Liu, Juncai Liu, LingJun Liu, Xin Liu, Haibin Lin, Zhiqi Lin, Bole Ma, Guangming Sheng, Yuxuan Tong, Chi Zhang, Mofan Zhang, Ru Zhang, Wang Zhang, Hang Zhu, Jinhua Zhu, Jiaze Chen, Jiangjie Chen, Chengyi Wang, Hongli Yu, Yuxuan Song, Xiangpeng Wei, Hao Zhou, Jingjing Liu, Wei-Ying Ma, Ya-Qin Zhang, Lin Yan, Yonghui Wu, and Mingxuan Wang. DAPO: An open-source LLM reinforcement learning system at scale. In 
+
+The Thirty-ninth Annual Conference on Neural Information Processing Systems , 2025. URL https://openreview. net/forum?id=2a36EMSSTp .[34] Jian Hu. Reinforce ++ : A simple and e ffi cient approach for aligning large language models. arXiv preprint arXiv:2501.03262 , 2025. [35] An Yang, Baosong Yang, Binyuan Hui, Bo Zheng, Bowen Yu, Chang Zhou, Chengpeng Li, Chengyuan Li, Dayiheng Liu, Fei Huang, Guanting Dong, Haoran Wei, Huan Lin, Jialong Tang, Jialin Wang, Jian Yang, Jianhong Tu, Jian-wei Zhang, Jianxin Ma, Jin Xu, Jingren Zhou, Jinze Bai, Jinzheng He, Junyang Lin, Kai Dang, Keming Lu, Keqin Chen, Kexin Yang, Mei Li, Mingfeng Xue, Na Ni, Pei Zhang, Peng Wang, Ru Peng, Rui Men, Ruize Gao, Runji Lin, Shijie Wang, Shuai Bai, Sinan Tan, Tianhang Zhu, Tianhao Li, Tianyu Liu, Wenbin Ge, Xiaodong Deng, Xi-aohuan Zhou, Xingzhang Ren, Xinyu Zhang, Xipin Wei, Preprint – A preprint template for LaTeX users (H eader ) 10 Xuancheng Ren, Yang Fan, Yang Yao, Yichang Zhang, Yu Wan, Yunfei Chu, Yuqiong Liu, Zeyu Cui, Zhenru Zhang, and Zhihao Fan. Qwen2 technical report. arXiv preprint arXiv:2407.10671 , 2024. [36] Edward J Hu, yelong shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Lu Wang, and Weizhu Chen. LoRA: Low-rank adaptation of large language mod-els. In International Conference on Learning Representa-tions , 2022. URL https://openreview.net/forum? id=nZeVKeeFYf9 .[37] Takeshi Kojima, Shixiang Shane Gu, Machel Reid, Yutaka Matsuo, and Yusuke Iwasawa. Large language models are zero-shot reasoners. Advances in neural information processing systems , 35:22199–22213, 2022. [38] Aaron Grattafiori, Abhimanyu Dubey, Abhinav Jauhri, Ab-hinav Pandey, Abhishek Kadian, Ahmad Al-Dahle, Aiesha Letman, Akhil Mathur, Alan Schelten, Alex Vaughan, et al. The llama 3 herd of models. arXiv preprint arXiv:2407.21783 , 2024. [39] Gemma Team, Morgane Riviere, Shreya Pathak, Pier Giuseppe Sessa, Cassidy Hardin, Surya Bhupatiraju, Léonard Hussenot, Thomas Mesnard, Bobak Shahriari, Alexandre Ramé, et al. Gemma 2: Improving open language models at a practical size. arXiv preprint arXiv:2408.00118 , 2024. [40] Albert Q. Jiang, Alexandre Sablayrolles, Arthur Mensch, Chris Bamford, Devendra Singh Chaplot, Diego de las Casas, Florian Bressand, Gianna Lengyel, Guillaume Lam-ple, Lucile Saulnier, Lélio Renard Lavaud, Marie-Anne Lachaux, Pierre Stock, Teven Le Scao, Thibaut Lavril, Thomas Wang, Timothée Lacroix, and William El Sayed. Mistral 7b, 2023. URL https://arxiv.org/abs/2310. 06825 .[41] Alec Radford, Je ff rey Wu, Rewon Child, David Luan, Dario Amodei, Ilya Sutskever, et al. Language models are unsupervised multitask learners. OpenAI blog , 1(8):9, 2019. [42] Sandhini Agarwal, Lama Ahmad, Jason Ai, Sam Altman, Andy Applebaum, Edwin Arbus, Rahul K Arora, Yu Bai, Bowen Baker, Haiming Bao, et al. gpt-oss-120b & gpt-oss-20b model card. arXiv preprint arXiv:2508.10925 ,2025. [43] Asterios Tsiourvas, Wei Sun, and Georgia Perakis. Causal LLM routing: End-to-end regret minimization from ob-servational data. In The Thirty-ninth Annual Conference on Neural Information Processing Systems , 2025. URL 
+
+https://openreview.net/forum?id=iZC5xoQQkX .[44] Wenhui Wang, Furu Wei, Li Dong, Hangbo Bao, Nan Yang, and Ming Zhou. Minilm: Deep self-attention distillation for task-agnostic compression of pre-trained transformers. 
+
+Advances in neural information processing systems , 33: 5776–5788, 2020. [45] Yonggan Fu, Xin Dong, Shizhe Diao, Matthijs Van keirs-bilck, Hanrong Ye, Wonmin Byeon, Yashaswi Karnati, Lu-cas Liebenwein, Maksim Khadkevich, Alexander Keller, Jan Kautz, Yingyan Celine Lin, and Pavlo Molchanov. Nemotron-flash: Towards latency-optimal hybrid small language models. In The Thirty-ninth Annual Conference on Neural Information Processing Systems , 2025. URL 
+
+https://openreview.net/forum?id=KTDAbnFsQj .[46] Aaron Blakeman, Aarti Basant, Abhinav Khattar, Adithya Renduchintala, Akhiad Bercovich, Aleksander Ficek, Alexis Bjorlin, Ali Taghibakhshi, Amala Sanjay Desh-mukh, Ameya Sunil Mahabaleshwarkar, et al. Nemotron-h: A family of accurate and e ffi cient hybrid mamba-transformer models. arXiv preprint arXiv:2504.03624 ,2025. [47] Sebastian Borgeaud, Arthur Mensch, Jordan Ho ff mann, Trevor Cai, Eliza Rutherford, Katie Millican, George Bm Van Den Driessche, Jean-Baptiste Lespiau, Bogdan Damoc, Aidan Clark, Diego De Las Casas, Aurelia Guy, Ja-cob Menick, Roman Ring, Tom Hennigan, Sa ff ron Huang, Loren Maggiore, Chris Jones, Albin Cassirer, Andy Brock, Michela Paganini, Geo ff rey Irving, Oriol Vinyals, Simon Osindero, Karen Simonyan, Jack Rae, Erich Elsen, and Laurent Sifre. Improving language models by retrieving from trillions of tokens. In Kamalika Chaudhuri, Stefanie Jegelka, Le Song, Csaba Szepesvari, Gang Niu, and Sivan Sabato, editors, Proceedings of the 39th International Con-ference on Machine Learning , volume 162 of Proceed-ings of Machine Learning Research , pages 2206–2240. PMLR, 17–23 Jul 2022. URL https://proceedings. mlr.press/v162/borgeaud22a.html .[48] Loubna Ben Allal, Anton Lozhkov, Elie Bakouch, Gabriel Martín Blázquez, Guilherme Penedo, Lewis Tun-stall, Andrés Marafioti, Hynek Kydlíˇ cek, Agustín Piqueres Lajarín, Vaibhav Srivastav, et al. Smollm2: When smol goes big–data-centric training of a small language model. 
+
+arXiv preprint arXiv:2502.02737 , 2025. [49] Jinwei Su, Qizhen Lan, Yinghui Xia, Lifan Sun, Weiyou Tian, Tianyu Shi, Xinyuan Song, and Lewei He. Di ffi culty-aware agentic orchestration for query-specific multi-agent workflows. arXiv preprint arXiv:2509.11079 , 2025. [50] Michelle Yuan, Khushbu Pahwa, Shuaichen Chang, Mustafa Devrim Kaba, MONICA SUNKARA, Jiarong Jiang, Xiaofei Ma, and Yi Zhang. Automated composi-tion of agents: A knapsack approach for agentic compo-nent selection. In The Thirty-ninth Annual Conference on Neural Information Processing Systems , 2025. URL 
+
+https://openreview.net/forum?id=1LPPMAUlaT .[51] Wentao Zhang, Liang Zeng, Yuzhen Xiao, Yongcong Li, Yilei Zhao, Ce Cui, Yang Liu, and Bo An. Agentorchestra: Orchestrating hierarchical multi-agent intelligence with the tool-environment-agent (TEA) protocol, 2026. URL 
+
+https://openreview.net/forum?id=YcnKdeI9pp .[52] Anthropic. Model context protocol: An open standard for connecting ai systems to data, 2024. URL https://www. anthropic.com/news/model-context-protocol .Accessed: 2025-01-20. [53] Shishir G Patil, Tianjun Zhang, Xin Wang, and Joseph E Gonzalez. Gorilla: Large language model connected with massive apis. Advances in Neural Information Processing Systems , 37:126544–126565, 2024. [54] Yujia Qin, Shihao Liang, Yining Ye, Kunlun Zhu, Lan Yan, Yaxi Lu, Yankai Lin, Xin Cong, Xiangru Tang, Bill Qian, Sihan Zhao, Lauren Hong, Runchu Tian, Ruobing Xie, Jie Preprint – A preprint template for LaTeX users (H eader ) 11 Zhou, Mark Gerstein, dahai li, Zhiyuan Liu, and Maosong Sun. ToolLLM: Facilitating large language models to mas-ter 16000 + real-world APIs. In The Twelfth International Conference on Learning Representations , 2024. URL 
+
+https://openreview.net/forum?id=dHng2O0Jjr .[55] Chen Qian, Wei Liu, Hongzhang Liu, Nuo Chen, Yufan Dang, Jiahao Li, Cheng Yang, Weize Chen, Yusheng Su, Xin Cong, et al. Chatdev: Communicative agents for software development. In Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , pages 15174–15186, 2024. [56] Oscar Skean, Md Rifat Arefin, Dan Zhao, Niket Nikul Patel, Jalal Naghiyev, Yann LeCun, and Ravid Shwartz-Ziv. Layer by layer: Uncovering hidden representa-tions in language models. In Forty-second International Conference on Machine Learning , 2025. URL https: //openreview.net/forum?id=WGXb7UdvTX .Preprint – A preprint template for LaTeX users (H eader ) 12 
+
+Appendix 
+
+7 Additional Implementation Details 
+
+7.1 Feed-Forward Network 
+
+The token-wise feed-forward network (FFN) following the cross-attention operation in Equation 11 is implemented as a two-layer multilayer perceptron with a bottleneck structure: FFN( x) = tanh( W2 tanh( W1 x)) , (16) where W1 ∈ Rd×d/2 and W2 ∈ Rd/2×d. We use tanh as the nonlinearity throughout all experiments. 
+
+8 Reasoning Gym Benchmark Details .
+
+This section summarizes the benchmark configurations used in our experiments. All Reasoning Gym settings follow the default settings of the Reasoning Gym [ 25 ] framework. We include representative YAML snippets for general training hyperparameters and for each task family to facilitate reproducibility. Listing 1: General Trainig Settings 
+
+data : train_batch_size : 4val_batch_size : 4trainer : is_sft : false multiple_lr : true lr : 1e -4 # LR for policy ( actor ) router_lr : 1e -4 epsilon : 1e -6 weight_decay : 1e -2 total_epochs : 1total_training_steps : 500 # 4 * 8 * 500 = 16 ,000 data points log_freq : 8save_freq : 1000 test_freq : 1000 eval_strategy : " steps " eval_batches : 1000 #( batch size ) * 1 ,000 = 4 ,000 validation data points . grad_clip : 1.0 warmup_steps : null gra dient _accu mulat ion_s teps : 8 # Thus the net batch size is 32. 
+
+Listing 2: Training configuration for Arithmetic 
+
+reasoning_gym : dataset_size : 20000 developer_prompt : DeepSeekZero datasets : complex_arithmetic : weight : 1intermediate_integration : weight : 1polynomial_equations : weight : 1polynomial_multiplication : weight : 1simple_geometry : weight : 1bitwise_arithmetic : weight : 1chain_sum : weight : 1decimal_arithmetic : weight : 1decimal_chain_sum : Preprint – A preprint template for LaTeX users (H eader ) 13 
+
+weight : 1curriculum : enabled : False schedule : automatic : True update_steps : 30 # automatic curriculum updating after 50 steps last_k : 20 success_threshold : 0.70 failure_threshold : 0.10 curricula : spell_backward : attribute_levels : word_len : 0
+
+Listing 3: Training configuration for Algorithmic 
+
+reasoning_gym : dataset_size : 20000 developer_prompt : DeepSeekZero datasets : ab : weight : 1base_conversion : weight : 1binary_alternation : weight : 1config : p_solvable : 0.9 binary_matrix : weight : 1config : min_n : 2max_n : 6caesar_cipher : weight : 1config : max_words : 10 cryptarithm : weight : 1isomorphic_strings : weight : 1config : max_string_length : 8jugs : weight : 1config : difficulty : 6rotate_matrix : weight : 1config : min_n : 2max_n : 6string_manipulation : weight : 1config : max_string_length : 15 max_num_rules : 6curriculum : enabled : False schedule : automatic : True update_steps : 30 # automatic curriculum updating after 50 steps last_k : 20 success_threshold : 0.70 failure_threshold : 0.10 Preprint – A preprint template for LaTeX users (H eader ) 14 
+
+curricula : spell_backward : attribute_levels : word_len : 0
+
+Listing 4: Training configuration for Logic 
+
+reasoning_gym : dataset_size : 20000 developer_prompt : DeepSeekZero datasets : aiw : weight : 1circuit_logic : weight : 1knights_knaves : weight : 1propositional_logic : weight : 1self_reference : weight : 1syllogism : weight : 1zebra_puzzles : weight : 1curriculum : enabled : False schedule : automatic : True update_steps : 30 # automatic curriculum updating after 50 steps last_k : 20 success_threshold : 0.70 failure_threshold : 0.10 curricula : spell_backward : attribute_levels : word_len : 0
