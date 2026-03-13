@@ -6,85 +6,100 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-12
-- 运行时间：2026-03-12 19:43:48 UTC
+- 最新运行日期：2026-03-13
+- 运行时间：2026-03-13 19:28:12 UTC
 - 运行状态：成功
-- 本次总论文数：21
-- 精读区：10
+- 本次总论文数：26
+- 精读区：15
 - 速读区：11
 
 ### 今日简报（AI）
-今日深挖 21 篇前沿论文，重点聚焦多智能体协作与代码生成，其中可解释性策略研究斩获满分。
-多智能体框架在 Verilog 硬件设计与复杂策略生成中展现出卓越效率，正成为提升 AI 任务执行力的核心。
-建议优先研读《Code-Space Response Oracles》，掌握利用大模型构建透明、可控多智能体系统的最新范式。
-- 详情：[/202603/12/README](/202603/12/README)
+今日精选 26 篇前沿论文，深度解析多智能体协作与结构化推理的满分架构。
+重点关注“计划-执行-验证-重规划”闭环框架及基于认识行为的集体推理，显著提升复杂任务解决的可靠性。
+建议关注 Agentic RAG 的演进与自主智能体治理架构，为构建安全可控的 AI 系统储备工程实践经验。
+- 详情：[/202603/13/README](/202603/13/README)
 
 ### 精读区论文标签
-1. [Code-Space Response Oracles: Generating Interpretable Multi-Agent Policies with Large Language Models](/202603/12/2603.10098v1-code-space-response-oracles-generating-interpretable-multi-agent-policies-with-large-language-models)  
+1. [Verified Multi-Agent Orchestration: A Plan-Execute-Verify-Replan Framework for Complex Query Resolution](/202603/13/2603.11445v1-verified-multi-agent-orchestration-a-plan-execute-verify-replan-framework-for-complex-query-resolution)  
    标签：评分：10.0/10、query:llm-ma
-   evidence：在多智能体策略中用大模型取代强化学习预言机
-2. [HDLFORGE: A Two-Stage Multi-Agent Framework for Efficient Verilog Code Generation with Adaptive Model Escalation](/202603/12/2603.04646v1-hdlforge-a-two-stage-multi-agent-framework-for-efficient-verilog-code-generation-with-adaptive-model-escalation)  
+   evidence：通过验证循环协调专业LLM智能体的框架
+2. [From Debate to Deliberation: Structured Collective Reasoning with Typed Epistemic Acts](/202603/13/2603.11781v1-from-debate-to-deliberation-structured-collective-reasoning-with-typed-epistemic-acts)  
+   标签：评分：10.0/10、query:llm-ma
+   evidence：多智能体LLM系统中的结构化集体推理与审议
+3. [Increasing intelligence in AI agents can worsen collective outcomes](/202603/13/2603.12129v1-increasing-intelligence-in-ai-agents-can-worsen-collective-outcomes)  
+   标签：评分：10.0/10、query:llm-ma
+   evidence：AI智能体群体的集体结果与涌现行为
+4. [Language Model Teams as Distributed Systems](/202603/13/2603.12229v1-language-model-teams-as-distributed-systems)  
+   标签：评分：10.0/10、query:llm-ma
+   evidence：基于分布式系统的LLM团队原则性框架
+5. [M$^3$-ACE: Rectifying Visual Perception in Multimodal Math Reasoning via Multi-Agentic Context Engineering](/202603/13/2603.08369v1-m3-ace-rectifying-visual-perception-in-multimodal-math-reasoning-via-multi-agentic-context-engineering)  
    标签：评分：9.0/10、query:llm-ma
-   evidence：用于代码生成的两阶段多智能体框架
-3. [MedCoRAG: Interpretable Hepatology Diagnosis via Hybrid Evidence Retrieval and Multispecialty Consensus](/202603/12/2603.05129v1-medcorag-interpretable-hepatology-diagnosis-via-hybrid-evidence-retrieval-and-multispecialty-consensus)  
+   evidence：用于协作推理的多智能体上下文工程
+6. [Fanar-Sadiq: A Multi-Agent Architecture for Grounded Islamic QA](/202603/13/2603.08501v2-fanar-sadiq-a-multi-agent-architecture-for-grounded-islamic-qa)  
    标签：评分：9.0/10、query:llm-ma
-   evidence：用于医疗诊断和共识的多智能体协作
-4. [Hindsight Credit Assignment for Long-Horizon LLM Agents](/202603/12/2603.08754v1-hindsight-credit-assignment-for-long-horizon-llm-agents)  
+   evidence：用于可靠问答的多智能体架构
+7. [RetroAgent: From Solving to Evolving via Retrospective Dual Intrinsic Feedback](/202603/13/2603.08561v3-retroagent-from-solving-to-evolving-via-retrospective-dual-intrinsic-feedback)  
    标签：评分：9.0/10、query:llm-ma
-   evidence：长程LLM智能体的事后信用分配
-5. [LLM-Agent Interactions on Markets with Information Asymmetries](/202603/12/2603.08853v1-llm-agent-interactions-on-markets-with-information-asymmetries)  
+   evidence：基于内在反馈的LLM智能体在线强化学习框架
+8. [Scale-Plan: Scalable Language-Enabled Task Planning for Heterogeneous Multi-Robot Teams](/202603/13/2603.08814v1-scale-plan-scalable-language-enabled-task-planning-for-heterogeneous-multi-robot-teams)  
    标签：评分：9.0/10、query:llm-ma
-   evidence：大模型智能体在市场中的交互与协作
-6. [AgenticCyOps: Securing Multi-Agentic AI Integration in Enterprise Cyber Operations](/202603/12/2603.09134v1-agenticcyops-securing-multi-agentic-ai-integration-in-enterprise-cyber-operations)  
+   evidence：多机器人团队的协作任务规划
+9. [Chow-Liu Ordering for Long-Context Reasoning in Chain-of-Agents](/202603/13/2603.09835v1-chow-liu-ordering-for-long-context-reasoning-in-chain-of-agents)  
    标签：评分：9.0/10、query:llm-ma
-   evidence：多智能体 AI 集成的安全框架
-7. [Multi-Agent Memory from a Computer Architecture Perspective: Visions and Challenges Ahead](/202603/12/2603.10062v1-multi-agent-memory-from-a-computer-architecture-perspective-visions-and-challenges-ahead)  
+   evidence：用于长上下文查询的顺序多智能体推理框架
+10. [Breaking User-Centric Agency: A Tri-Party Framework for Agent-Based Recommendation](/202603/13/2603.10673v1-breaking-user-centric-agency-a-tri-party-framework-for-agent-based-recommendation)  
    标签：评分：9.0/10、query:llm-ma
-   evidence：多智能体记忆系统的架构框架
-8. [KernelSkill: A Multi-Agent Framework for GPU Kernel Optimization](/202603/12/2603.10085v1-kernelskill-a-multi-agent-framework-for-gpu-kernel-optimization)  
+   evidence：协调多个利益相关者的三方LLM智能体框架
+11. [COMPASS: The explainable agentic framework for Sovereignty, Sustainability, Compliance, and Ethics](/202603/13/2603.11277v1-compass-the-explainable-agentic-framework-for-sovereignty-sustainability-compliance-and-ethics)  
    标签：评分：9.0/10、query:llm-ma
-   evidence：用于GPU内核优化的双层记忆多智能体框架
-9. [Learning to Negotiate: Multi-Agent Deliberation for Collective Value Alignment in LLMs](/202603/12/2603.10476v1-learning-to-negotiate-multi-agent-deliberation-for-collective-value-alignment-in-llms)  
+   evidence：价值对齐的多智能体编排系统
+12. [Multi-Agent Collaboration for Automated Design Exploration on High Performance Computing Systems](/202603/13/2603.11515v1-multi-agent-collaboration-for-automated-design-exploration-on-high-performance-computing-systems)  
    标签：评分：9.0/10、query:llm-ma
-   evidence：大模型集体价值对齐的多智能体商议
-10. [LLMGreenRec: LLM-Based Multi-Agent Recommender System for Sustainable E-Commerce](/202603/12/2603.11025v1-llmgreenrec-llm-based-multi-agent-recommender-system-for-sustainable-e-commerce)  
+   evidence：协调专业化智能体处理复杂设计工作流
+13. [Scaling Laws for Educational AI Agents](/202603/13/2603.11709v1-scaling-laws-for-educational-ai-agents)  
    标签：评分：9.0/10、query:llm-ma
-   evidence：用于推荐的大模型多智能体框架
+   evidence：EduClaw 配置文件驱动的多智能体平台
+14. [Automating Skill Acquisition through Large-Scale Mining of Open-Source Agentic Repositories: A Framework for Multi-Agent Procedural Knowledge Extraction](/202603/13/2603.11808v1-automating-skill-acquisition-through-large-scale-mining-of-open-source-agentic-repositories-a-framework-for-multi-agent-procedural-knowledge-extraction)  
+   标签：评分：9.0/10、query:llm-ma
+   evidence：多智能体程序性知识提取与技能获取框架
+15. [QUARE: Multi-Agent Negotiation for Balancing Quality Attributes in Requirements Engineering](/202603/13/2603.11890v1-quare-multi-agent-negotiation-for-balancing-quality-attributes-in-requirements-engineering)  
+   标签：评分：9.0/10、query:llm-ma
+   evidence：五个质量专业智能体之间针对需求工程的结构化协商
 
 ### 速读区论文标签
-1. [MistyPilot: An Agentic Fast-Slow Thinking LLM Framework for Misty Social Robots](/202603/12/2603.03640v1-mistypilot-an-agentic-fast-slow-thinking-llm-framework-for-misty-social-robots)  
+1. [Governance Architecture for Autonomous Agent Systems: Threats, Framework, and Engineering Practice](/202603/13/2603.07191v1-governance-architecture-for-autonomous-agent-systems-threats-framework-and-engineering-practice)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：用于工具编排的智能体大模型框架
-2. [Robustness of Agentic AI Systems via Adversarially-Aligned Jacobian Regularization](/202603/12/2603.04378v1-robustness-of-agentic-ai-systems-via-adversarially-aligned-jacobian-regularization)  
+   evidence：自主多智能体系统的治理架构
+2. [Governance Architecture for Autonomous Agent Systems: Threats, Framework, and Engineering Practice](/202603/13/2603.07191v2-governance-architecture-for-autonomous-agent-systems-threats-framework-and-engineering-practice)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：使用LLM的自主多智能体生态系统的鲁棒性
-3. [AutoControl Arena: Synthesizing Executable Test Environments for Frontier AI Risk Evaluation](/202603/12/2603.07427v1-autocontrol-arena-synthesizing-executable-test-environments-for-frontier-ai-risk-evaluation)  
+   evidence：自主多智能体系统的治理架构
+3. [SoK: Agentic Retrieval-Augmented Generation (RAG): Taxonomy, Architectures, Evaluation, and Research Directions](/202603/13/2603.07379v1-sok-agentic-retrieval-augmented-generation-rag-taxonomy-architectures-evaluation-and-research-directions)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：用于合成测试环境的三智能体框架
-4. [HLER: Human-in-the-Loop Economic Research via Multi-Agent Pipelines for Empirical Discovery](/202603/12/2603.07444v1-hler-human-in-the-loop-economic-research-via-multi-agent-pipelines-for-empirical-discovery)  
+   evidence：智能体RAG架构的统一框架
+4. [From Thinker to Society: Security in Hierarchical Autonomy Evolution of AI Agents](/202603/13/2603.07496v1-from-thinker-to-society-security-in-hierarchical-autonomy-evolution-of-ai-agents)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：用于实证研究自动化的多智能体架构
-5. [A Dual-Helix Governance Approach Towards Reliable Agentic AI for WebGIS Development](/202603/12/2603.04390v1-a-dual-helix-governance-approach-towards-reliable-agentic-ai-for-webgis-development)  
+   evidence：多智能体生态系统中的安全性
+5. [WebFactory: Automated Compression of Foundational Language Intelligence into Grounded Web Agents](/202603/13/2603.05044v1-webfactory-automated-compression-of-foundational-language-intelligence-into-grounded-web-agents)  
    标签：评分：7.0/10、query:llm-ma
-   evidence：智能体AI的双螺旋治理框架
-6. [Act-Observe-Rewrite: Multimodal Coding Agents as In-Context Policy Learners for Robot Manipulation](/202603/12/2603.04466v1-act-observe-rewrite-multimodal-coding-agents-as-in-context-policy-learners-for-robot-manipulation)  
+   evidence：落地式Web智能体的强化学习流水线
+6. [KARL: Knowledge Agents via Reinforcement Learning](/202603/13/2603.05218v1-karl-knowledge-agents-via-reinforcement-learning)  
    标签：评分：7.0/10、query:llm-ma
-   evidence：作为机器人操作上下文策略学习者的多模态编码智能体
-7. [Adaptive Memory Admission Control for LLM Agents](/202603/12/2603.04549v1-adaptive-memory-admission-control-for-llm-agents)  
+   evidence：通过强化学习训练企业搜索智能体
+7. [STRUCTUREDAGENT: Planning with AND/OR Trees for Long-Horizon Web Tasks](/202603/13/2603.05294v1-structuredagent-planning-with-andor-trees-for-long-horizon-web-tasks)  
    标签：评分：7.0/10、query:llm-ma
-   evidence：大模型智能体架构的记忆准入控制框架
-8. [SCoUT: Scalable Communication via Utility-Guided Temporal Grouping in Multi-Agent Reinforcement Learning](/202603/12/2603.04833v1-scout-scalable-communication-via-utility-guided-temporal-grouping-in-multi-agent-reinforcement-learning)  
+   evidence：LLM智能体的分层规划框架
+8. [Multi-Agent Reinforcement Learning with Submodular Reward](/202603/13/2603.06810v1-multi-agent-reinforcement-learning-with-submodular-reward)  
    标签：评分：7.0/10、query:llm-ma
-   evidence：多智能体强化学习中的可扩展通信
-9. [Learning Approximate Nash Equilibria in Cooperative Multi-Agent Reinforcement Learning via Mean-Field Subsampling](/202603/12/2603.03759v1-learning-approximate-nash-equilibria-in-cooperative-multi-agent-reinforcement-learning-via-mean-field-subsampling)  
+   evidence：协作式多智能体强化学习框架
+9. [BioLLMAgent: A Hybrid Framework with Enhanced Structural Interpretability for Simulating Human Decision-Making in Computational Psychiatry](/202603/13/2603.05016v1-biollmagent-a-hybrid-framework-with-enhanced-structural-interpretability-for-simulating-human-decision-making-in-computational-psychiatry)  
    标签：评分：6.0/10、query:llm-ma
-   evidence：合作式多智能体强化学习
-10. [Monitoring Emergent Reward Hacking During Generation via Internal Activations](/202603/12/2603.04069v1-monitoring-emergent-reward-hacking-during-generation-via-internal-activations)  
+   evidence：结合强化学习引擎和大模型外壳的混合智能体框架
+10. [NePPO: Near-Potential Policy Optimization for General-Sum Multi-Agent Reinforcement Learning](/202603/13/2603.06977v1-neppo-near-potential-policy-optimization-for-general-sum-multi-agent-reinforcement-learning)  
    标签：评分：6.0/10、query:llm-ma
-   evidence：监控LLM中涌现的奖励欺骗行为
-11. [Memex(RL): Scaling Long-Horizon LLM Agents via Indexed Experience Memory](/202603/12/2603.04257v1-memexrl-scaling-long-horizon-llm-agents-via-indexed-experience-memory)  
+   evidence：通用博弈多智能体强化学习
+11. [$\textbf{Re}^{2}$: Unlocking LLM Reasoning via Reinforcement Learning with Re-solving](/202603/13/2603.07197v1-textbfre2-unlocking-llm-reasoning-via-reinforcement-learning-with-re-solving)  
    标签：评分：6.0/10、query:llm-ma
-   evidence：扩展大模型智能体的记忆机制
+   evidence：带有可验证奖励的强化学习用于大模型推理
 
 
 <div class="dpr-home-promo-card">
