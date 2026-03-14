@@ -6,100 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-13
-- 运行时间：2026-03-13 19:28:12 UTC
+- 最新运行日期：2026-03-14
+- 运行时间：2026-03-14 19:20:28 UTC
 - 运行状态：成功
-- 本次总论文数：26
-- 精读区：15
+- 本次总论文数：17
+- 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-今日精选 26 篇前沿论文，深度解析多智能体协作与结构化推理的满分架构。
-重点关注“计划-执行-验证-重规划”闭环框架及基于认识行为的集体推理，显著提升复杂任务解决的可靠性。
-建议关注 Agentic RAG 的演进与自主智能体治理架构，为构建安全可控的 AI 系统储备工程实践经验。
-- 详情：[/202603/13/README](/202603/13/README)
+今日精选 17 篇论文，深度探索智能体从“解决问题”到“自我进化”的范式转变。
+核心推荐 RetroAgent 的双重反馈进化机制，以及 STAIRS-Former 在多智能体离线强化学习中的时空架构突破。
+建议关注智能体可控欺骗性与新型编程语言 Turn，提前布局更具自主性的 AI 应用开发。
+- 详情：[/202603/14/README](/202603/14/README)
 
 ### 精读区论文标签
-1. [Verified Multi-Agent Orchestration: A Plan-Execute-Verify-Replan Framework for Complex Query Resolution](/202603/13/2603.11445v1-verified-multi-agent-orchestration-a-plan-execute-verify-replan-framework-for-complex-query-resolution)  
-   标签：评分：10.0/10、query:llm-ma
-   evidence：通过验证循环协调专业LLM智能体的框架
-2. [From Debate to Deliberation: Structured Collective Reasoning with Typed Epistemic Acts](/202603/13/2603.11781v1-from-debate-to-deliberation-structured-collective-reasoning-with-typed-epistemic-acts)  
-   标签：评分：10.0/10、query:llm-ma
-   evidence：多智能体LLM系统中的结构化集体推理与审议
-3. [Increasing intelligence in AI agents can worsen collective outcomes](/202603/13/2603.12129v1-increasing-intelligence-in-ai-agents-can-worsen-collective-outcomes)  
-   标签：评分：10.0/10、query:llm-ma
-   evidence：AI智能体群体的集体结果与涌现行为
-4. [Language Model Teams as Distributed Systems](/202603/13/2603.12229v1-language-model-teams-as-distributed-systems)  
-   标签：评分：10.0/10、query:llm-ma
-   evidence：基于分布式系统的LLM团队原则性框架
-5. [M$^3$-ACE: Rectifying Visual Perception in Multimodal Math Reasoning via Multi-Agentic Context Engineering](/202603/13/2603.08369v1-m3-ace-rectifying-visual-perception-in-multimodal-math-reasoning-via-multi-agentic-context-engineering)  
+1. [RetroAgent: From Solving to Evolving via Retrospective Dual Intrinsic Feedback](/202603/14/2603.08561v2-retroagent-from-solving-to-evolving-via-retrospective-dual-intrinsic-feedback)  
    标签：评分：9.0/10、query:llm-ma
-   evidence：用于协作推理的多智能体上下文工程
-6. [Fanar-Sadiq: A Multi-Agent Architecture for Grounded Islamic QA](/202603/13/2603.08501v2-fanar-sadiq-a-multi-agent-architecture-for-grounded-islamic-qa)  
+   evidence：用于进化智能体的强化学习框架
+2. [STAIRS-Former: Spatio-Temporal Attention with Interleaved Recursive Structure Transformer for Offline Multi-task Multi-agent Reinforcement Learning](/202603/14/2603.11691v1-stairs-former-spatio-temporal-attention-with-interleaved-recursive-structure-transformer-for-offline-multi-task-multi-agent-reinforcement-learning)  
    标签：评分：9.0/10、query:llm-ma
-   evidence：用于可靠问答的多智能体架构
-7. [RetroAgent: From Solving to Evolving via Retrospective Dual Intrinsic Feedback](/202603/13/2603.08561v3-retroagent-from-solving-to-evolving-via-retrospective-dual-intrinsic-feedback)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：基于内在反馈的LLM智能体在线强化学习框架
-8. [Scale-Plan: Scalable Language-Enabled Task Planning for Heterogeneous Multi-Robot Teams](/202603/13/2603.08814v1-scale-plan-scalable-language-enabled-task-planning-for-heterogeneous-multi-robot-teams)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：多机器人团队的协作任务规划
-9. [Chow-Liu Ordering for Long-Context Reasoning in Chain-of-Agents](/202603/13/2603.09835v1-chow-liu-ordering-for-long-context-reasoning-in-chain-of-agents)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：用于长上下文查询的顺序多智能体推理框架
-10. [Breaking User-Centric Agency: A Tri-Party Framework for Agent-Based Recommendation](/202603/13/2603.10673v1-breaking-user-centric-agency-a-tri-party-framework-for-agent-based-recommendation)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：协调多个利益相关者的三方LLM智能体框架
-11. [COMPASS: The explainable agentic framework for Sovereignty, Sustainability, Compliance, and Ethics](/202603/13/2603.11277v1-compass-the-explainable-agentic-framework-for-sovereignty-sustainability-compliance-and-ethics)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：价值对齐的多智能体编排系统
-12. [Multi-Agent Collaboration for Automated Design Exploration on High Performance Computing Systems](/202603/13/2603.11515v1-multi-agent-collaboration-for-automated-design-exploration-on-high-performance-computing-systems)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：协调专业化智能体处理复杂设计工作流
-13. [Scaling Laws for Educational AI Agents](/202603/13/2603.11709v1-scaling-laws-for-educational-ai-agents)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：EduClaw 配置文件驱动的多智能体平台
-14. [Automating Skill Acquisition through Large-Scale Mining of Open-Source Agentic Repositories: A Framework for Multi-Agent Procedural Knowledge Extraction](/202603/13/2603.11808v1-automating-skill-acquisition-through-large-scale-mining-of-open-source-agentic-repositories-a-framework-for-multi-agent-procedural-knowledge-extraction)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：多智能体程序性知识提取与技能获取框架
-15. [QUARE: Multi-Agent Negotiation for Balancing Quality Attributes in Requirements Engineering](/202603/13/2603.11890v1-quare-multi-agent-negotiation-for-balancing-quality-attributes-in-requirements-engineering)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：五个质量专业智能体之间针对需求工程的结构化协商
+   evidence：基于Transformer架构的多智能体强化学习
+3. [MindfulAgents: Personalizing Mindfulness Meditation via an Expert-Aligned Multi-Agent System](/202603/14/2603.06926v1-mindfulagents-personalizing-mindfulness-meditation-via-an-expert-aligned-multi-agent-system)  
+   标签：评分：8.0/10、query:llm-ma
+   evidence：基于大语言模型的个性化冥想多智能体系统
+4. [Enhancing Consistency of Werewolf AI through Dialogue Summarization and Persona Information](/202603/14/2603.07111v1-enhancing-consistency-of-werewolf-ai-through-dialogue-summarization-and-persona-information)  
+   标签：评分：8.0/10、query:llm-ma
+   evidence：基于大语言模型的狼人杀协作推理智能体
+5. [Meissa: Multi-modal Medical Agentic Intelligence](/202603/14/2603.09018v1-meissa-multi-modal-medical-agentic-intelligence)  
+   标签：评分：8.0/10、query:llm-ma
+   evidence：具备多智能体协作能力的多模态医疗智能体
+6. [Enhancing Value Alignment of LLMs with Multi-agent system and Combinatorial Fusion](/202603/14/2603.11126v1-enhancing-value-alignment-of-llms-with-multi-agent-system-and-combinatorial-fusion)  
+   标签：评分：8.0/10、query:llm-ma
+   evidence：利用组合融合进行价值对齐的多智能体系统
 
 ### 速读区论文标签
-1. [Governance Architecture for Autonomous Agent Systems: Threats, Framework, and Engineering Practice](/202603/13/2603.07191v1-governance-architecture-for-autonomous-agent-systems-threats-framework-and-engineering-practice)  
+1. [Intentional Deception as Controllable Capability in LLM Agents](/202603/14/2603.07848v1-intentional-deception-as-controllable-capability-in-llm-agents)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：自主多智能体系统的治理架构
-2. [Governance Architecture for Autonomous Agent Systems: Threats, Framework, and Engineering Practice](/202603/13/2603.07191v2-governance-architecture-for-autonomous-agent-systems-threats-framework-and-engineering-practice)  
+   evidence：多智能体系统中的故意欺骗行为
+2. [Agentic Critical Training](/202603/14/2603.08706v1-agentic-critical-training)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：自主多智能体系统的治理架构
-3. [SoK: Agentic Retrieval-Augmented Generation (RAG): Taxonomy, Architectures, Evaluation, and Research Directions](/202603/13/2603.07379v1-sok-agentic-retrieval-augmented-generation-rag-taxonomy-architectures-evaluation-and-research-directions)  
+   evidence：训练自主大模型智能体的强化学习范式
+3. [Turn: A Language for Agentic Computation](/202603/14/2603.08755v1-turn-a-language-for-agentic-computation)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：智能体RAG架构的统一框架
-4. [From Thinker to Society: Security in Hierarchical Autonomy Evolution of AI Agents](/202603/13/2603.07496v1-from-thinker-to-society-security-in-hierarchical-autonomy-evolution-of-ai-agents)  
+   evidence：用于大模型智能体软件的基于 Actor 模型的编程语言
+4. [A Decentralized Frontier AI Architecture Based on Personal Instances, Synthetic Data, and Collective Context Synchronization](/202603/14/2603.08893v1-a-decentralized-frontier-ai-architecture-based-on-personal-instances-synthetic-data-and-collective-context-synchronization)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：多智能体生态系统中的安全性
-5. [WebFactory: Automated Compression of Foundational Language Intelligence into Grounded Web Agents](/202603/13/2603.05044v1-webfactory-automated-compression-of-foundational-language-intelligence-into-grounded-web-agents)  
+   evidence：具有集体上下文的去中心化前沿AI架构
+5. [Helix: Evolutionary Reinforcement Learning for Open-Ended Scientific Problem Solving](/202603/14/2603.07642v1-helix-evolutionary-reinforcement-learning-for-open-ended-scientific-problem-solving)  
    标签：评分：7.0/10、query:llm-ma
-   evidence：落地式Web智能体的强化学习流水线
-6. [KARL: Knowledge Agents via Reinforcement Learning](/202603/13/2603.05218v1-karl-knowledge-agents-via-reinforcement-learning)  
+   evidence：用于大模型推理的演化强化学习
+6. [Ares: Adaptive Reasoning Effort Selection for Efficient LLM Agents](/202603/14/2603.07915v1-ares-adaptive-reasoning-effort-selection-for-efficient-llm-agents)  
    标签：评分：7.0/10、query:llm-ma
-   evidence：通过强化学习训练企业搜索智能体
-7. [STRUCTUREDAGENT: Planning with AND/OR Trees for Long-Horizon Web Tasks](/202603/13/2603.05294v1-structuredagent-planning-with-andor-trees-for-long-horizon-web-tasks)  
+   evidence：多步智能体任务中每步动态推理努力选择的框架
+7. [SWE-Fuse: Empowering Software Agents via Issue-free Trajectory Learning and Entropy-aware RLVR Training](/202603/14/2603.07927v1-swe-fuse-empowering-software-agents-via-issue-free-trajectory-learning-and-entropy-aware-rlvr-training)  
    标签：评分：7.0/10、query:llm-ma
-   evidence：LLM智能体的分层规划框架
-8. [Multi-Agent Reinforcement Learning with Submodular Reward](/202603/13/2603.06810v1-multi-agent-reinforcement-learning-with-submodular-reward)  
+   evidence：软件智能体的熵感知强化学习训练
+8. [Agentic Neurosymbolic Collaboration for Mathematical Discovery: A Case Study in Combinatorial Design](/202603/14/2603.08322v1-agentic-neurosymbolic-collaboration-for-mathematical-discovery-a-case-study-in-combinatorial-design)  
    标签：评分：7.0/10、query:llm-ma
-   evidence：协作式多智能体强化学习框架
-9. [BioLLMAgent: A Hybrid Framework with Enhanced Structural Interpretability for Simulating Human Decision-Making in Computational Psychiatry](/202603/13/2603.05016v1-biollmagent-a-hybrid-framework-with-enhanced-structural-interpretability-for-simulating-human-decision-making-in-computational-psychiatry)  
+   evidence：LLM智能体、符号工具与人类之间的协作
+9. [Memory for Autonomous LLM Agents:Mechanisms, Evaluation, and Emerging Frontiers](/202603/14/2603.07670v1-memory-for-autonomous-llm-agentsmechanisms-evaluation-and-emerging-frontiers)  
    标签：评分：6.0/10、query:llm-ma
-   evidence：结合强化学习引擎和大模型外壳的混合智能体框架
-10. [NePPO: Near-Potential Policy Optimization for General-Sum Multi-Agent Reinforcement Learning](/202603/13/2603.06977v1-neppo-near-potential-policy-optimization-for-general-sum-multi-agent-reinforcement-learning)  
+   evidence：自主大模型智能体的记忆机制
+10. [Fibration Policy Optimization](/202603/14/2603.08239v1-fibration-policy-optimization)  
    标签：评分：6.0/10、query:llm-ma
-   evidence：通用博弈多智能体强化学习
-11. [$\textbf{Re}^{2}$: Unlocking LLM Reasoning via Reinforcement Learning with Re-solving](/202603/13/2603.07197v1-textbfre2-unlocking-llm-reasoning-via-reinforcement-learning-with-re-solving)  
+   evidence：异构智能体流水线的策略优化
+11. [Reachability-based Temporal Logic Verification for Reliable LLM-guided Human-Autonomy Teaming](/202603/14/2603.08633v1-reachability-based-temporal-logic-verification-for-reliable-llm-guided-human-autonomy-teaming)  
    标签：评分：6.0/10、query:llm-ma
-   evidence：带有可验证奖励的强化学习用于大模型推理
+   evidence：大模型引导的人机协作与任务规划
 
 
 <div class="dpr-home-promo-card">

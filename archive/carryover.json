@@ -1,197 +1,8 @@
 {
-  "generated_at": "2026-03-13T19:23:49.096655+00:00",
-  "updated_date": "20260313",
+  "generated_at": "2026-03-14T19:18:09.617906+00:00",
+  "updated_date": "20260314",
   "carryover_days": 9,
   "items": [
-    {
-      "id": "2603.08239v1",
-      "title": "Fibration Policy Optimization",
-      "abstract": "Large language models are increasingly trained as heterogeneous systems spanning multiple domains, expert partitions, and agentic pipelines, yet prevalent proximal objectives operate at a single scale and lack a principled mechanism for coupling token-level, trajectory-level, and higher-level hierarchical stability control. To bridge this gap, we derive the Aggregational Policy Censoring Objective (APC-Obj), the first exact unconstrained reformulation of sample-based TV-TRPO, establishing that clipping-based surrogate design and trust-region optimization are dual formulations of the same problem. Building on this foundation, we develop Fiber Bundle Gating (FBG), an algebraic framework that organizes sampled RL data as a fiber bundle and decomposes ratio gating into a base-level gate on trajectory aggregates and a fiber-level gate on per-token residuals, with provable first-order agreement with the true RL objective near on-policy. From APC-Obj and FBG we derive Fibration Policy Optimization (or simply, FiberPO), a concrete objective whose Jacobian is block-diagonal over trajectories, reduces to identity at on-policy, and provides better update direction thus improving token efficiency. The compositional nature of the framework extends beyond the trajectory-token case: fibrations compose algebraically into a Fibration Gating Hierarchy (FGH) that scales the same gating mechanism to arbitrary hierarchical depth without new primitives, as demonstrated by FiberPO-Domain, a four-level instantiation with independent trust-region budgets at the domain, prompt group, trajectory, and token levels. Together, these results connect the trust-region theory, a compositional algebraic structure, and practical multi-scale stability control into a unified framework for LLM policy optimization.",
-      "authors": [
-        "Chang Li",
-        "Tshihao Tsu",
-        "Yaren Zhang",
-        "Chao Xue",
-        "Xiaodong He"
-      ],
-      "primary_category": "cs.LG",
-      "categories": [
-        "cs.LG",
-        "cs.AI",
-        "cs.CL"
-      ],
-      "published": "2026-03-09T11:09:25+00:00",
-      "link": "https://arxiv.org/pdf/2603.08239v1",
-      "tags": [
-        "query:LLM MA"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "RL for agentic pipelines and heterogeneous systems",
-      "llm_evidence_cn": "用于智能体流水线和异构系统的强化学习",
-      "llm_evidence": "用于智能体流水线和异构系统的强化学习",
-      "canonical_evidence": "用于智能体流水线和异构系统的强化学习",
-      "llm_tldr_en": "Introduces an algebraic framework for optimizing heterogeneous agentic pipelines using fiber bundle gating.",
-      "llm_tldr_cn": "引入了一种代数框架，利用纤维丛门控优化异构智能体流水线。",
-      "llm_tldr": "引入了一种代数框架，利用纤维丛门控优化异构智能体流水线。",
-      "llm_tags": [
-        "query:llm-ma"
-      ],
-      "matched_query_tag": "query:llm-ma",
-      "matched_query_text": "Multi agent reinforcement learning with large language models",
-      "matched_requirement_id": "req-7",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.08239v1",
-      "carry_days": 4
-    },
-    {
-      "id": "2603.08388v1",
-      "title": "A Hierarchical Error-Corrective Graph Framework for Autonomous Agents with LLM-Based Action Generation",
-      "abstract": "We propose a Hierarchical Error-Corrective Graph FrameworkforAutonomousAgentswithLLM-BasedActionGeneration(HECG),whichincorporates three core innovations: (1) Multi-Dimensional Transferable Strategy (MDTS): by integrating task quality metrics (Q), confidence/cost metrics (C), reward metrics (R), and LLM-based semantic reasoning scores (LLM-Score), MDTS achieves multi-dimensional alignment between quantitative performance and semantic context, enabling more precise selection of high-quality candidate strate gies and effectively reducing the risk of negative transfer. (2) Error Matrix Classification (EMC): unlike simple confusion matrices or overall performance metrics, EMC provides structured attribution of task failures by categorizing errors into ten types, such as Strategy Errors (Strategy Whe) and Script Parsing Errors (Script-Parsing-Error), and decomposing them according to severity, typical actions, error descriptions, and recoverability. This allows precise analysis of the root causes of task failures, offering clear guidance for subsequent error correction and strategy optimization rather than relying solely on overall success rates or single performance metrics. (3) Causal-Context Graph Retrieval (CCGR): to enhance agent retrieval capabilities in dynamic task environments, we construct graphs from historical states, actions, and event sequences, where nodes store executed actions, next-step actions, execution states, transferable strategies, and other relevant information, and edges represent causal dependencies such as preconditions for transitions between nodes. CCGR identifies subgraphs most relevant to the current task context, effectively capturing structural relationships beyond vector similarity, allowing agents to fully leverage contextual information, accelerate strategy adaptation, and improve execution reliability in complex, multi-step tasks.",
-      "authors": [
-        "Cong Cao",
-        "Jingyao Zhang",
-        "Kun Tong"
-      ],
-      "primary_category": "cs.AI",
-      "categories": [
-        "cs.AI"
-      ],
-      "published": "2026-03-09T13:46:00+00:00",
-      "link": "https://arxiv.org/pdf/2603.08388v1",
-      "tags": [
-        "keyword:LLM MA",
-        "query:LLM MA"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "Framework for autonomous agents with LLM action generation",
-      "llm_evidence_cn": "基于大模型动作生成的自主智能体框架",
-      "llm_evidence": "基于大模型动作生成的自主智能体框架",
-      "canonical_evidence": "基于大模型动作生成的自主智能体框架",
-      "llm_tldr_en": "Presents a hierarchical graph framework to improve LLM-based agent action selection and error correction.",
-      "llm_tldr_cn": "提出一种分层纠错图框架，用于优化基于大模型的智能体动作生成与策略选择。",
-      "llm_tldr": "提出一种分层纠错图框架，用于优化基于大模型的智能体动作生成与策略选择。",
-      "llm_tags": [
-        "query:llm-ma"
-      ],
-      "matched_query_tag": "query:llm-ma",
-      "matched_query_text": "Frameworks for building multi agent systems with LLMs",
-      "matched_requirement_id": "req-4",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.08388v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.07848v1",
-      "title": "Intentional Deception as Controllable Capability in LLM Agents",
-      "abstract": "As LLM-based agents increasingly operate in multi-agent systems, understanding adversarial manipulation becomes critical for defensive design. We present a systematic study of intentional deception as an engineered capability, using LLM-to-LLM interactions within a text-based RPG where parameterized behavioral profiles (9 alignments x 4 motivations, yielding 36 profiles with explicit ethical ground truth) serve as our experimental testbed. Unlike accidental deception from misalignment, we investigate a two-stage system that infers target agent characteristics and generates deceptive responses steering targets toward actions counter to their beliefs and motivations. We find that deceptive intervention produces differential effects concentrated in specific behavioral profiles rather than distributed uniformly, and that 88.5% of successful deceptions employ misdirection (true statements with strategic framing) rather than fabrication, indicating fact-checking defenses would miss the large majority of adversarial responses. Motivation, inferable at 98%+ accuracy, serves as the primary attack vector, while belief systems remain harder to identify (49% inference ceiling) or exploit. These findings identify which agent profiles require additional safeguards and suggest that current fact-verification approaches are insufficient against strategically framed deception.",
-      "authors": [
-        "Jason Starace",
-        "Terence Soule"
-      ],
-      "primary_category": "cs.AI",
-      "categories": [
-        "cs.AI"
-      ],
-      "published": "2026-03-08T23:48:49+00:00",
-      "link": "https://arxiv.org/pdf/2603.07848v1",
-      "tags": [
-        "keyword:LLM MA",
-        "query:LLM MA"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "Study of intentional deception in multi-agent LLM interactions",
-      "llm_evidence_cn": "多智能体LLM交互中故意欺骗行为的研究",
-      "llm_evidence": "多智能体LLM交互中故意欺骗行为的研究",
-      "canonical_evidence": "多智能体LLM交互中故意欺骗行为的研究",
-      "llm_tldr_en": "Investigates intentional deception as a controllable capability within multi-agent LLM environments.",
-      "llm_tldr_cn": "研究了多LLM智能体环境中的故意欺骗行为，将其作为一种可控能力。",
-      "llm_tldr": "研究了多LLM智能体环境中的故意欺骗行为，将其作为一种可控能力。",
-      "llm_tags": [
-        "query:llm-ma"
-      ],
-      "matched_query_tag": "query:llm-ma",
-      "matched_query_text": "Emergent behavior in multi agent large language models",
-      "matched_requirement_id": "req-5",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.07848v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.08755v1",
-      "title": "Turn: A Language for Agentic Computation",
-      "abstract": "We present \\textbf{Turn}, a compiled, actor-based programming language -- statically typed for schema inference, dynamically typed at the value level -- for agentic software: programs that reason and act autonomously by delegating inference to large language models (LLMs). Existing approaches augment general-purpose languages with frameworks, encoding critical invariants (bounded context, typed inference output, credential isolation, durable state) as application-level conventions rather than language guarantees.   Turn introduces five language-level constructs that address this gap. \\emph{Cognitive Type Safety} makes LLM inference a typed primitive: the compiler generates a JSON Schema from a struct definition and the VM validates model output before binding. The \\emph{confidence operator} enables deterministic control flow gated on model certainty. Turn's \\emph{actor-based process model}, derived from Erlang, gives each agent an isolated context window, persistent memory, and mailbox. A \\emph{capability-based identity system} returns opaque, unforgeable handles from the VM host, ensuring raw credentials never enter agent memory. Finally, \\emph{compile-time schema absorption} (\\texttt{use schema::<protocol>}) synthesizes typed API bindings from external specifications at compile time; the \\texttt{openapi} adapter is shipped with \\texttt{graphql}, \\texttt{fhir}, and \\texttt{mcp} in active development.   We describe the language design, type rules, schema semantics, and a Rust-based bytecode VM, and evaluate Turn against representative agentic workloads. Turn is open source at https://github.com/ekizito96/Turn.",
-      "authors": [
-        "Muyukani Kizito"
-      ],
-      "primary_category": "cs.PL",
-      "categories": [
-        "cs.PL",
-        "cs.AI",
-        "cs.SE"
-      ],
-      "published": "2026-03-07T09:10:09+00:00",
-      "link": "https://arxiv.org/pdf/2603.08755v1",
-      "tags": [
-        "keyword:LLM MA",
-        "query:LLM MA"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "Programming language for agentic software and LLM delegation",
-      "llm_evidence_cn": "智能体软件和大模型委派的编程语言",
-      "llm_evidence": "智能体软件和大模型委派的编程语言",
-      "canonical_evidence": "智能体软件和大模型委派的编程语言",
-      "llm_tldr_en": "Introduces Turn, an actor-based language designed to provide safety and structure for LLM-driven agentic programs.",
-      "llm_tldr_cn": "引入Turn，一种旨在为大模型驱动的智能体程序提供安全性和结构化的参与者模型编程语言。",
-      "llm_tldr": "引入Turn，一种旨在为大模型驱动的智能体程序提供安全性和结构化的参与者模型编程语言。",
-      "llm_tags": [
-        "query:llm-ma"
-      ],
-      "matched_query_tag": "query:llm-ma",
-      "matched_query_text": "Frameworks for building multi agent systems with LLMs",
-      "matched_requirement_id": "req-4",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.08755v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.09018v1",
-      "title": "Meissa: Multi-modal Medical Agentic Intelligence",
-      "abstract": "Multi-modal large language models (MM-LLMs) have shown strong performance in medical image understanding and clinical reasoning. Recent medical agent systems extend them with tool use and multi-agent collaboration, enabling complex decision-making. However, these systems rely almost entirely on frontier models (e.g., GPT), whose API-based deployment incurs high cost, high latency, and privacy risks that conflict with on-premise clinical requirements. We present Meissa, a lightweight 4B-parameter medical MM-LLM that brings agentic capability offline. Instead of imitating static answers, Meissa learns both when to engage external interaction (strategy selection) and how to execute multi-step interaction (strategy execution) by distilling structured trajectories from frontier models. Specifically, we propose: (1) Unified trajectory modeling: trajectories (reasoning and action traces) are represented within a single state-action-observation formalism, allowing one model to generalize across heterogeneous medical environments. (2) Three-tier stratified supervision: the model's own errors trigger progressive escalation from direct reasoning to tool-augmented and multi-agent interaction, explicitly learning difficulty-aware strategy selection. (3) Prospective-retrospective supervision: pairing exploratory forward traces with hindsight-rationalized execution traces enables stable learning of effective interaction policies. Trained on 40K curated trajectories, Meissa matches or exceeds proprietary frontier agents in 10 of 16 evaluation settings across 13 medical benchmarks spanning radiology, pathology, and clinical reasoning. Using over 25x fewer parameters than typical frontier models like Gemini-3, Meissa operates fully offline with 22x lower end-to-end latency compared to API-based deployment. Data, models, and environments are released at https://github.com/Schuture/Meissa.",
-      "authors": [
-        "Yixiong Chen",
-        "Xinyi Bai",
-        "Yue Pan",
-        "Zongwei Zhou",
-        "Alan Yuille"
-      ],
-      "primary_category": "cs.AI",
-      "categories": [
-        "cs.AI"
-      ],
-      "published": "2026-03-09T23:22:55+00:00",
-      "link": "https://arxiv.org/pdf/2603.09018v1",
-      "tags": [
-        "keyword:LLM MA",
-        "query:LLM MA"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "medical agent systems with multi-agent collaboration",
-      "llm_evidence_cn": "具有多智能体协作能力的医疗智能体系统",
-      "llm_evidence": "具有多智能体协作能力的医疗智能体系统",
-      "canonical_evidence": "具有多智能体协作能力的医疗智能体系统",
-      "llm_tldr_en": "Develops a lightweight medical MM-LLM capable of multi-step interaction and agentic collaboration.",
-      "llm_tldr_cn": "开发了一种具有多步交互和智能体协作能力的轻量级医疗多模态大模型。",
-      "llm_tldr": "开发了一种具有多步交互和智能体协作能力的轻量级医疗多模态大模型。",
-      "llm_tags": [
-        "query:llm-ma"
-      ],
-      "matched_query_tag": "query:llm-ma",
-      "matched_query_text": "Collaborative problem solving in LLM multi agent environments",
-      "matched_requirement_id": "req-6",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.09018v1",
-      "carry_days": 1
-    },
     {
       "id": "2603.10268v1",
       "title": "SpecOps: A Fully Automated AI Agent Testing Framework in Real-World GUI Environments",
@@ -213,13 +24,13 @@
         "query:LLM MA"
       ],
       "llm_score": 8.0,
-      "llm_evidence_en": "specialized phases handled by distinct LLM-based specialist agents",
-      "llm_evidence_cn": "由不同大模型专家智能体处理的专业化阶段架构",
-      "llm_evidence": "由不同大模型专家智能体处理的专业化阶段架构",
-      "canonical_evidence": "由不同大模型专家智能体处理的专业化阶段架构",
-      "llm_tldr_en": "A multi-agent testing framework that automates GUI agent evaluation through specialized roles.",
-      "llm_tldr_cn": "一种通过专业化角色分工实现 GUI 智能体自动化评估的多智能体测试框架。",
-      "llm_tldr": "一种通过专业化角色分工实现 GUI 智能体自动化评估的多智能体测试框架。",
+      "llm_evidence_en": "Multi-agent framework with specialized agents for automated GUI testing",
+      "llm_evidence_cn": "包含专门用于自动化GUI测试的专业智能体的多智能体框架",
+      "llm_evidence": "包含专门用于自动化GUI测试的专业智能体的多智能体框架",
+      "canonical_evidence": "包含专门用于自动化GUI测试的专业智能体的多智能体框架",
+      "llm_tldr_en": "SpecOps uses a multi-agent architecture to automate the full lifecycle of AI agent testing in GUI environments.",
+      "llm_tldr_cn": "SpecOps利用多智能体架构在GUI环境中实现AI智能体测试的全生命周期自动化。",
+      "llm_tldr": "SpecOps利用多智能体架构在GUI环境中实现AI智能体测试的全生命周期自动化。",
       "llm_tags": [
         "query:llm-ma"
       ],
@@ -228,243 +39,6 @@
       "matched_requirement_id": "req-4",
       "selection_source": "carryover_cache",
       "paper_id": "2603.10268v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.08561v2",
-      "title": "RetroAgent: From Solving to Evolving via Retrospective Dual Intrinsic Feedback",
-      "abstract": "Large language model (LLM)-based agents trained with reinforcement learning (RL) have shown strong potential on complex interactive tasks. However, standard RL paradigms favor static problem-solving over continuous adaptation: agents often converge to suboptimal strategies due to insufficient exploration, while learned knowledge remains implicit within parameters rather than explicitly retrievable, limiting effective experiential learning. To address these limitations, we introduce RetroAgent, an online RL framework that empowers agents to master complex interactive environments not just by solving, but by evolving. Concretely, RetroAgent features a hindsight self-reflection mechanism that produces dual intrinsic feedback: (1) intrinsic numerical feedback that that tracks incremental subtask completion relative to prior attempts, rewarding promising explorations, and (2) intrinsic language feedback that distills reusable lessons into a memory buffer, retrieved via our proposed Similarity & Utility-Aware Upper Confidence Bound (SimUtil-UCB) strategy balancing relevance, utility, and exploration to effectively leverage past experiences. Extensive experiments on two model families across four challenging agentic tasks demonstrate that RetroAgent significantly outperforms existing methods, achieving state-of-the-art results -- e.g., surpassing Group Relative Policy Optimization (GRPO)-trained agents by +18.3% on ALFWorld, +15.4% on WebShop, +27.1% on Sokoban, and +8.9% on MineSweeper -- while exhibiting strong test-time adaptation and generalization to out-of-distribution scenarios.",
-      "authors": [
-        "Xiaoying Zhang",
-        "Zichen Liu",
-        "Yipeng Zhang",
-        "Xia Hu",
-        "Wenqi Shao"
-      ],
-      "primary_category": "cs.AI",
-      "categories": [
-        "cs.AI"
-      ],
-      "published": "2026-03-09T16:23:33+00:00",
-      "link": "https://arxiv.org/pdf/2603.08561v2",
-      "tags": [
-        "query:LLM MA"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "LLM-based agents trained with reinforcement learning",
-      "llm_evidence_cn": "基于强化学习训练的大模型智能体",
-      "llm_evidence": "基于强化学习训练的大模型智能体",
-      "canonical_evidence": "基于强化学习训练的大模型智能体",
-      "llm_tldr_en": "Introduces an online RL framework for agents to evolve through retrospective dual intrinsic feedback.",
-      "llm_tldr_cn": "引入一种在线强化学习框架，通过回顾性双重内在反馈使智能体实现自我进化。",
-      "llm_tldr": "引入一种在线强化学习框架，通过回顾性双重内在反馈使智能体实现自我进化。",
-      "llm_tags": [
-        "query:llm-ma"
-      ],
-      "matched_query_tag": "query:llm-ma",
-      "matched_query_text": "Multi agent reinforcement learning with large language models",
-      "matched_requirement_id": "req-7",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.08561v2",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.11721v1",
-      "title": "When OpenClaw Meets Hospital: Toward an Agentic Operating System for Dynamic Clinical Workflows",
-      "abstract": "Large language model (LLM) agents extend conventional generative models by integrating reasoning, tool invocation, and persistent memory. Recent studies suggest that such agents may significantly improve clinical workflows by automating documentation, coordinating care processes, and assisting medical decision making. However, despite rapid progress, deploying autonomous agents in healthcare environments remains difficult due to reliability limitations, security risks, and insufficient long-term memory mechanisms. This work proposes an architecture that adapts LLM agents for hospital environments. The design introduces four core components: a restricted execution environment inspired by Linux multi-user systems, a document-centric interaction paradigm connecting patient and clinician agents, a page-indexed memory architecture designed for long-term clinical context management, and a curated medical skills library enabling ad-hoc composition of clinical task sequences. Rather than granting agents unrestricted system access, the architecture constrains actions through predefined skill interfaces and resource isolation. We argue that such a system forms the basis of an Agentic Operating System for Hospital, a computing layer capable of coordinating clinical workflows while maintaining safety, transparency, and auditability. This work grounds the design in OpenClaw, an open-source autonomous agent framework that structures agent capabilities as a curated library of discrete skills, and extends it with the infrastructure-level constraints required for safe clinical deployment.",
-      "authors": [
-        "Wenxian Yang",
-        "Hanzheng Qiu",
-        "Bangqun Zhang",
-        "Chengquan Li",
-        "Zhiyong Huang",
-        "Xiaobin Feng",
-        "Rongshan Yu",
-        "Jiahong Dong"
-      ],
-      "primary_category": "cs.AI",
-      "categories": [
-        "cs.AI"
-      ],
-      "published": "2026-03-12T09:28:25+00:00",
-      "link": "https://arxiv.org/pdf/2603.11721v1",
-      "tags": [
-        "keyword:LLM MA",
-        "query:LLM MA"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "Agentic operating system architecture for clinical workflows",
-      "llm_evidence_cn": "用于临床工作流的智能体操作系统架构",
-      "llm_evidence": "用于临床工作流的智能体操作系统架构",
-      "canonical_evidence": "用于临床工作流的智能体操作系统架构",
-      "llm_tldr_en": "Introduces an OS-inspired architecture to manage LLM agents in complex hospital environments.",
-      "llm_tldr_cn": "引入了一种受操作系统启发的架构，用于在复杂的医院环境中管理大模型智能体。",
-      "llm_tldr": "引入了一种受操作系统启发的架构，用于在复杂的医院环境中管理大模型智能体。",
-      "llm_tags": [
-        "query:llm-ma"
-      ],
-      "matched_query_tag": "query:llm-ma",
-      "matched_query_text": "Frameworks for building multi agent systems with LLMs",
-      "matched_requirement_id": "req-4",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.11721v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.10249v1",
-      "title": "DUCTILE: Agentic LLM Orchestration of Engineering Analysis in Product Development Practice",
-      "abstract": "Engineering analysis automation in product development relies on rigid interfaces between tools, data formats and documented processes. When these interfaces change, as they routinely do as the product evolves in the engineering ecosystem, the automation support breaks. This paper presents a DUCTILE (Delegated, User-supervised Coordination of Tool- and document-Integrated LLM-Enabled) agentic orchestration, an approach for developing, executing and evaluating LLM-based agentic automation support of engineering analysis tasks. The approach separates adaptive orchestration, performed by the LLM agent, from deterministic execution, performed by verified engineering tools. The agent interprets documented design practices, inspects input data and adapts the processing path, while the engineer supervises and exercises final judgment. DUCTILE is demonstrated on an industrial structural analysis task at an aerospace manufacturer, where the agent handled input deviations in format, units, naming conventions and methodology that would break traditional scripted pipelines. Evaluation against expert-defined acceptance criteria and deployment with practicing engineers confirm that the approach produces correct, methodologically compliant results across repeated independent runs. The paper discusses practical consequences of adopting agentic automation, including unintended effects on the nature of engineering work and the tension between removing mundane tasks and creating an exhausting supervisory role.",
-      "authors": [
-        "Alejandro Pradas-Gomez",
-        "Arindam Brahma",
-        "Ola Isaksson"
-      ],
-      "primary_category": "cs.SE",
-      "categories": [
-        "cs.SE",
-        "cs.AI",
-        "cs.HC"
-      ],
-      "published": "2026-03-10T22:00:47+00:00",
-      "link": "https://arxiv.org/pdf/2603.10249v1",
-      "tags": [
-        "keyword:LLM MA",
-        "query:LLM MA"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "agentic LLM orchestration framework for engineering analysis",
-      "llm_evidence_cn": "用于工程分析的智能体LLM编排框架",
-      "llm_evidence": "用于工程分析的智能体LLM编排框架",
-      "canonical_evidence": "用于工程分析的智能体LLM编排框架",
-      "llm_tldr_en": "Introduces DUCTILE, a framework for LLM-based agentic automation of engineering analysis tasks.",
-      "llm_tldr_cn": "介绍了DUCTILE，一个用于工程分析任务的LLM智能体自动化框架。",
-      "llm_tldr": "介绍了DUCTILE，一个用于工程分析任务的LLM智能体自动化框架。",
-      "llm_tags": [
-        "query:llm-ma"
-      ],
-      "matched_query_tag": "query:llm-ma",
-      "matched_query_text": "Frameworks for building multi agent systems with LLMs",
-      "matched_requirement_id": "req-4",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.10249v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.11691v1",
-      "title": "STAIRS-Former: Spatio-Temporal Attention with Interleaved Recursive Structure Transformer for Offline Multi-task Multi-agent Reinforcement Learning",
-      "abstract": "Offline multi-agent reinforcement learning (MARL) with multi-task datasets is challenging due to varying numbers of agents across tasks and the need to generalize to unseen scenarios. Prior works employ transformers with observation tokenization and hierarchical skill learning to address these issues. However, they underutilize the transformer attention mechanism for inter-agent coordination and rely on a single history token, which limits their ability to capture long-horizon temporal dependencies in partially observable MARL settings. In this paper, we propose STAIRS-Former, a transformer architecture augmented with spatial and temporal hierarchies that enables effective attention over critical tokens while capturing long interaction histories. We further introduce token dropout to enhance robustness and generalization across varying agent populations. Extensive experiments on diverse multi-agent benchmarks, including SMAC, SMAC-v2, MPE, and MaMuJoCo, with multi-task datasets demonstrate that STAIRS-Former consistently outperforms prior methods and achieves new state-of-the-art performance.",
-      "authors": [
-        "Jiwon Jeon",
-        "Myungsik Cho",
-        "Youngchul Sung"
-      ],
-      "primary_category": "cs.AI",
-      "categories": [
-        "cs.AI"
-      ],
-      "published": "2026-03-12T08:56:20+00:00",
-      "link": "https://arxiv.org/pdf/2603.11691v1",
-      "tags": [
-        "keyword:LLM MA",
-        "query:LLM MA"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "transformer architecture for multi-agent reinforcement learning",
-      "llm_evidence_cn": "用于多智能体强化学习的Transformer架构",
-      "llm_evidence": "用于多智能体强化学习的Transformer架构",
-      "canonical_evidence": "用于多智能体强化学习的Transformer架构",
-      "llm_tldr_en": "A spatio-temporal transformer for offline MARL that improves inter-agent coordination and dependencies.",
-      "llm_tldr_cn": "一种用于离线多智能体强化学习的时空Transformer，增强了智能体间的协调。",
-      "llm_tldr": "一种用于离线多智能体强化学习的时空Transformer，增强了智能体间的协调。",
-      "llm_tags": [
-        "query:llm-ma"
-      ],
-      "matched_query_tag": "query:llm-ma",
-      "matched_query_text": "Multi agent reinforcement learning with large language models",
-      "matched_requirement_id": "req-7",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.11691v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.08322v1",
-      "title": "Agentic Neurosymbolic Collaboration for Mathematical Discovery: A Case Study in Combinatorial Design",
-      "abstract": "We study mathematical discovery through the lens of neurosymbolic reasoning, where an AI agent powered by a large language model (LLM), coupled with symbolic computation tools, and human strategic direction, jointly produced a new result in combinatorial design theory. The main result of this human-AI collaboration is a tight lower bound on the imbalance of Latin squares for the notoriously difficult case $n \\equiv 1 \\pmod{3}$.   We reconstruct the discovery process from detailed interaction logs spanning multiple sessions over several days and identify the distinct cognitive contributions of each component. The AI agent proved effective at uncovering hidden structure and generating hypotheses. The symbolic component consists of computer algebra, constraint solvers, and simulated annealing, which provides rigorous verification and exhaustive enumeration. Human steering supplied the critical research pivot that transformed a dead end into a productive inquiry. Our analysis reveals that multi-model deliberation among frontier LLMs proved reliable for criticism and error detection but unreliable for constructive claims.   The resulting human-AI mathematical contribution, a tight lower bound of $4n(n{-}1)/9$, is achieved via a novel class of near-perfect permutations. The bound was formally verified in Lean 4. Our experiments show that neurosymbolic systems can indeed produce genuine discoveries in pure mathematics.",
-      "authors": [
-        "Hai Xia",
-        "Carla P. Gomes",
-        "Bart Selman",
-        "Stefan Szeider"
-      ],
-      "primary_category": "cs.AI",
-      "categories": [
-        "cs.AI",
-        "cs.HC",
-        "math.CO"
-      ],
-      "published": "2026-03-09T12:42:56+00:00",
-      "link": "https://arxiv.org/pdf/2603.08322v1",
-      "tags": [
-        "keyword:LLM MA",
-        "query:LLM MA"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "Collaboration between LLM agent, symbolic tools, and humans for problem solving",
-      "llm_evidence_cn": "LLM智能体、符号工具与人类在问题解决中的协作",
-      "llm_evidence": "LLM智能体、符号工具与人类在问题解决中的协作",
-      "canonical_evidence": "LLM智能体、符号工具与人类在问题解决中的协作",
-      "llm_tldr_en": "This study explores neurosymbolic collaboration between LLM agents and symbolic tools to solve mathematical problems.",
-      "llm_tldr_cn": "本研究探讨了LLM智能体与符号工具之间的神经符号协作，用于解决复杂的数学组合设计问题。",
-      "llm_tldr": "本研究探讨了LLM智能体与符号工具之间的神经符号协作，用于解决复杂的数学组合设计问题。",
-      "llm_tags": [
-        "query:llm-ma"
-      ],
-      "matched_query_tag": "query:llm-ma",
-      "matched_query_text": "Collaborative problem solving in LLM multi agent environments",
-      "matched_requirement_id": "req-6",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.08322v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.12109v1",
-      "title": "On Information Self-Locking in Reinforcement Learning for Active Reasoning of LLM agents",
-      "abstract": "Reinforcement learning (RL) with outcome-based rewards has achieved significant success in training large language model (LLM) agents for complex reasoning tasks. However, in active reasoning where agents need to strategically ask questions to acquire task-relevant information, we find that LLM agents trained with RL often suffer from information self-locking: the agent ceases to ask informative questions and struggles to internalize already-obtained information. To understand the phenomenon, we decompose active reasoning into two core capabilities: Action Selection (AS), which determines the observation stream through queries, and Belief Tracking (BT), which updates the agent's belief based on collected evidence. We show that deficient AS and BT capabilities will limit the information exploration during RL training. Furthermore, insufficient exploration in turn hinders the improvement of AS and BT, creating a feedback loop that locks the agent in a low-information regime. To resolve the issue, we propose a simple yet effective approach that reallocates the learning signal by injecting easy- to-obtain directional critiques to help the agent escape self-locking. Extensive experiments with 7 datasets show that our approach significantly mitigates the information self-locking, bringing up to 60% improvements.",
-      "authors": [
-        "Deyu Zou",
-        "Yongqiang Chen",
-        "Fan Feng",
-        "Mufei Li",
-        "Pan Li",
-        "Yu Gong",
-        "James Cheng"
-      ],
-      "primary_category": "cs.AI",
-      "categories": [
-        "cs.AI"
-      ],
-      "published": "2026-03-12T16:14:14+00:00",
-      "link": "https://arxiv.org/pdf/2603.12109v1",
-      "tags": [
-        "keyword:LLM MA",
-        "query:LLM MA"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "Reinforcement learning for active reasoning of LLM agents",
-      "llm_evidence_cn": "用于大模型智能体主动推理的强化学习",
-      "llm_evidence": "用于大模型智能体主动推理的强化学习",
-      "canonical_evidence": "用于大模型智能体主动推理的强化学习",
-      "llm_tldr_en": "This paper analyzes information self-locking in RL-trained LLM agents during active information acquisition tasks.",
-      "llm_tldr_cn": "本文分析了经强化学习训练的大模型智能体在主动信息获取任务中的信息自锁现象。",
-      "llm_tldr": "本文分析了经强化学习训练的大模型智能体在主动信息获取任务中的信息自锁现象。",
-      "llm_tags": [
-        "query:llm-ma"
-      ],
-      "matched_query_tag": "query:llm-ma",
-      "matched_query_text": "Multi agent reinforcement learning with large language models",
-      "matched_requirement_id": "req-7",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.12109v1",
       "carry_days": 1
     },
     {
@@ -499,12 +73,12 @@
       ],
       "llm_score": 8.0,
       "llm_evidence_en": "reinforcement fine-tuning for LLM agents in multi-turn decision-making",
-      "llm_evidence_cn": "大模型智能体在多轮决策中的强化微调",
-      "llm_evidence": "大模型智能体在多轮决策中的强化微调",
-      "canonical_evidence": "大模型智能体在多轮决策中的强化微调",
-      "llm_tldr_en": "Empirically studies how reinforcement learning affects the generalization of LLM agents in unseen environments.",
-      "llm_tldr_cn": "实证研究强化学习如何影响大模型智能体在未知环境中的泛化能力。",
-      "llm_tldr": "实证研究强化学习如何影响大模型智能体在未知环境中的泛化能力。",
+      "llm_evidence_cn": "针对 LLM 智能体多轮决策的强化学习微调研究",
+      "llm_evidence": "针对 LLM 智能体多轮决策的强化学习微调研究",
+      "canonical_evidence": "针对 LLM 智能体多轮决策的强化学习微调研究",
+      "llm_tldr_en": "Studies how reinforcement learning affects the generalization of LLM agents across different environments.",
+      "llm_tldr_cn": "研究了强化学习如何影响 LLM 智能体在不同环境下的泛化能力。",
+      "llm_tldr": "研究了强化学习如何影响 LLM 智能体在不同环境下的泛化能力。",
       "llm_tags": [
         "query:llm-ma"
       ],
@@ -516,79 +90,80 @@
       "carry_days": 1
     },
     {
-      "id": "2603.11677v1",
-      "title": "From Control to Foresight: Simulation as a New Paradigm for Human-Agent Collaboration",
-      "abstract": "Large Language Models (LLMs) are increasingly used to power autonomous agents for complex, multi-step tasks. However, human-agent interaction remains pointwise and reactive: users approve or correct individual actions to mitigate immediate risks, without visibility into subsequent consequences. This forces users to mentally simulate long-term effects, a cognitively demanding and often inaccurate process. Users have control over individual steps but lack the foresight to make informed decisions. We argue that effective collaboration requires foresight, not just control. We propose simulation-in-the-loop, an interaction paradigm that enables users and agents to explore simulated future trajectories before committing to decisions. Simulation transforms intervention from reactive guesswork into informed exploration, while helping users discover latent constraints and preferences along the way. This perspective paper characterizes the limitations of current paradigms, introduces a conceptual framework for simulation-based collaboration, and illustrates its potential through concrete human-agent collaboration scenarios.",
+      "id": "2603.09843v1",
+      "title": "RecThinker: An Agentic Framework for Tool-Augmented Reasoning in Recommendation",
+      "abstract": "Large Language Models (LLMs) have revolutionized recommendation agents by providing superior reasoning and flexible decision-making capabilities. However, existing methods mainly follow a passive information acquisition paradigm, where agents either rely on static pre-defined workflows or perform reasoning with constrained information. It limits the agent's ability to identify information sufficiency, often leading to suboptimal recommendations when faced with fragmented user profiles or sparse item metadata. To address these limitations, we propose RecThinker, an agentic framework for tool-augmented reasoning in recommendation, which shifts recommendation from passive processing to autonomous investigation by dynamically planning reasoning paths and proactively acquiring essential information via autonomous tool-use. Specifically, RecThinker adopts an Analyze-Plan-Act paradigm, which first analyzes the sufficiency of user-item information and autonomously invokes tool-calling sequences to bridge information gaps between available knowledge and reasoning requirements. We develop a suite of specialized tools for RecThinker, enabling the model to acquire user-side, item-side, and collaborative information for better reasoning and user-item matching. Furthermore, we introduce a self-augmented training pipeline, comprising a Supervised Fine-Tuning (SFT) stage to internalize high-quality reasoning trajectories and a Reinforcement Learning (RL) stage to optimize for decision accuracy and tool-use efficiency. Extensive experiments on multiple benchmark datasets demonstrate that RecThinker consistently outperforms strong baselines in the recommendation scenario.",
       "authors": [
-        "Gaole He",
-        "Brian Y. Lim"
+        "Haobo Zhang",
+        "Yutao Zhu",
+        "Kelong Mao",
+        "Tianhao Li",
+        "Zhicheng Dou"
       ],
-      "primary_category": "cs.HC",
+      "primary_category": "cs.IR",
       "categories": [
-        "cs.HC",
-        "cs.AI",
-        "cs.CL"
+        "cs.IR"
       ],
-      "published": "2026-03-12T08:42:33+00:00",
-      "link": "https://arxiv.org/pdf/2603.11677v1",
+      "published": "2026-03-10T16:07:17+00:00",
+      "link": "https://arxiv.org/pdf/2603.09843v1",
       "tags": [
         "keyword:LLM MA",
         "query:LLM MA"
       ],
       "llm_score": 8.0,
-      "llm_evidence_en": "Simulation paradigm for human-agent collaboration",
-      "llm_evidence_cn": "人机协作的模拟范式",
-      "llm_evidence": "人机协作的模拟范式",
-      "canonical_evidence": "人机协作的模拟范式",
-      "llm_tldr_en": "Proposes a simulation-in-the-loop paradigm to enhance foresight in human-agent collaborative problem solving.",
-      "llm_tldr_cn": "提出了一种模拟在环范式，以增强人机协作问题解决中的预见性。",
-      "llm_tldr": "提出了一种模拟在环范式，以增强人机协作问题解决中的预见性。",
+      "llm_evidence_en": "Agentic framework for tool-augmented reasoning in recommendation",
+      "llm_evidence_cn": "推荐系统中工具增强推理的智能体框架",
+      "llm_evidence": "推荐系统中工具增强推理的智能体框架",
+      "canonical_evidence": "推荐系统中工具增强推理的智能体框架",
+      "llm_tldr_en": "RecThinker enables recommendation agents to autonomously plan reasoning paths and use tools.",
+      "llm_tldr_cn": "RecThinker使推荐智能体能够自主规划推理路径并使用工具。",
+      "llm_tldr": "RecThinker使推荐智能体能够自主规划推理路径并使用工具。",
       "llm_tags": [
         "query:llm-ma"
       ],
       "matched_query_tag": "query:llm-ma",
-      "matched_query_text": "Collaborative problem solving in LLM multi agent environments",
-      "matched_requirement_id": "req-6",
+      "matched_query_text": "Frameworks for building multi agent systems with LLMs",
+      "matched_requirement_id": "req-4",
       "selection_source": "carryover_cache",
-      "paper_id": "2603.11677v1",
+      "paper_id": "2603.09843v1",
       "carry_days": 1
     },
     {
-      "id": "2603.11126v1",
-      "title": "Enhancing Value Alignment of LLMs with Multi-agent system and Combinatorial Fusion",
-      "abstract": "Aligning large language models (LLMs) with human values is a central challenge for ensuring trustworthy and safe deployment. While existing methods such as Reinforcement Learning from Human Feedback (RLHF) and its variants have improved alignment, they often rely on a single evaluator or narrowly defined reward signals, limiting their ability to capture ethical pluralism. In this work, we propose the Value Alignment System using Combinatorial Fusion Analysis (VAS-CFA), a framework that operationalizes multi-agent fusion alignment. It instantiates multiple moral agents, each fine-tuned to represent a distinct normative perspective, and fuses their outputs using CFA with both rank- and score-based aggregation. This design leverages cognitive diversity, between agents, to mitigate conflicts and redundancies across multiple agents, producing responses that better reflect human values. Empirical evaluation demonstrates that VAS-CFA outperforms both single agent baselines and prior aggregation approaches on standard metrics, showing that multi-agent fusion provides a robust and effective mechanism for advancing value alignment in LLMs.",
+      "id": "2603.11560v1",
+      "title": "How Intelligence Emerges: A Minimal Theory of Dynamic Adaptive Coordination",
+      "abstract": "This paper develops a dynamical theory of adaptive coordination in multi-agent systems. Rather than analyzing coordination through equilibrium optimization or agent-centric learning alone, the framework models agents, incentives, and environment as a recursively closed feedback architecture. A persistent environment stores accumulated coordination signals, a distributed incentive field transmits those signals locally, and adaptive agents update in response. Coordination is thus treated as a structural property of coupled dynamics rather than as the solution to a centralized objective.   The paper establishes three structural results. First, under dissipativity assumptions, the induced closed-loop system admits a bounded forward-invariant region, ensuring viability without requiring global optimality. Second, when incentive signals depend non-trivially on persistent environmental memory, the resulting dynamics generically cannot be reduced to a static global objective defined solely over the agent state space. Third, persistent environmental state induces history sensitivity unless the system is globally contracting.   A minimal linear specification illustrates how coupling, persistence, and dissipation govern local stability and oscillatory regimes through spectral conditions on the Jacobian. The results establish structural conditions under which intelligent coordination dynamics emerge from incentive-mediated adaptive interaction within a persistent environment, without presuming welfare maximization, rational expectations, or centralized design.",
       "authors": [
-        "Yuanhong Wu",
-        "Djallel Bouneffouf",
-        "D. Frank Hsu"
+        "Stefano Grassi"
       ],
       "primary_category": "cs.MA",
       "categories": [
         "cs.MA",
-        "cs.CL"
+        "cs.AI",
+        "econ.TH",
+        "math.DS"
       ],
-      "published": "2026-03-11T14:57:51+00:00",
-      "link": "https://arxiv.org/pdf/2603.11126v1",
+      "published": "2026-03-12T05:28:28+00:00",
+      "link": "https://arxiv.org/pdf/2603.11560v1",
       "tags": [
         "keyword:LLM MA",
         "query:LLM MA"
       ],
       "llm_score": 8.0,
-      "llm_evidence_en": "operationalizes multi-agent fusion alignment",
-      "llm_evidence_cn": "实现多智能体融合对齐框架",
-      "llm_evidence": "实现多智能体融合对齐框架",
-      "canonical_evidence": "实现多智能体融合对齐框架",
-      "llm_tldr_en": "Uses a multi-agent system to align LLMs with diverse human values through combinatorial fusion.",
-      "llm_tldr_cn": "利用多智能体系统和组合融合技术，使大模型与多元人类价值观保持一致。",
-      "llm_tldr": "利用多智能体系统和组合融合技术，使大模型与多元人类价值观保持一致。",
+      "llm_evidence_en": "Theory of emergent coordination in multi-agent systems",
+      "llm_evidence_cn": "多智能体系统中涌现协作的理论",
+      "llm_evidence": "多智能体系统中涌现协作的理论",
+      "canonical_evidence": "多智能体系统中涌现协作的理论",
+      "llm_tldr_en": "Develops a dynamical theory to explain how coordination emerges from agent-environment feedback loops.",
+      "llm_tldr_cn": "开发了一种动力学理论，解释协作如何从智能体与环境的反馈循环中涌现。",
+      "llm_tldr": "开发了一种动力学理论，解释协作如何从智能体与环境的反馈循环中涌现。",
       "llm_tags": [
-        "query:llm-ma:composite"
+        "query:llm-ma"
       ],
-      "matched_query_tag": "query:llm-ma:composite",
-      "matched_query_text": "Papers central to 大模型多智能体系统相关论文检索, especially work that connects or combines: d; a; m; Frameworks for building multi agent systems with LLMs; Emergent behavior in multi agent large language models; Collaborative problem solving in LLM multi agent environments; Multi agent reinforcement learning with large language models.",
-      "matched_requirement_id": "req-composite-llm-ma",
+      "matched_query_tag": "query:llm-ma",
+      "matched_query_text": "Emergent behavior in multi agent large language models",
+      "matched_requirement_id": "req-5",
       "selection_source": "carryover_cache",
-      "paper_id": "2603.11126v1",
+      "paper_id": "2603.11560v1",
       "carry_days": 1
     }
   ]
