@@ -1,0 +1,431 @@
+Title: One Agent to Guide Them All: Empowering MLLMs for Vision-and-Language Navigation via Explicit World Representation
+
+URL Source: https://arxiv.org/pdf/2602.15400v1
+
+Published Time: Wed, 18 Feb 2026 01:28:29 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+# One Agent to Guide Them All: Empowering MLLMs for Vision-and-Language Navigation via Explicit World Representation 
+
+Zerui Li 1†, Hongpei Zheng 2†, Fangguo Zhao 3, Aidan Chan 1, Jian Zhou 1, Sihao Lin 1, Shijie Li 4, Qi Wu 1*
+
+Abstract — A navigable agent needs to understand both high-level semantic instructions and precise spatial perceptions. Building navigation agents centered on Multimodal Large Language Models (MLLMs) demonstrates a promising solu-tion due to their powerful generalization ability. However, the current tightly coupled design dramatically limits system performance. In this work, we propose a decoupled design that separates low-level spatial state estimation from high-level semantic planning. Unlike previous methods that rely on predefined, oversimplified textual maps, we introduce an interactive metric world representation that maintains rich and consistent information, allowing MLLMs to interact with and reason on it for decision-making. Furthermore, counterfactual reasoning is introduced to further elicit MLLMs’ capacity, while the metric world representation ensures the physical validity of the produced actions. We conduct comprehensive exper-iments in both simulated and real-world environments. Our method establishes a new zero-shot state-of-the-art, achieving 48.8% Success Rate (SR) in R2R-CE and 42.2% in RxR-CE benchmarks. Furthermore, to validate the versatility of our metric representation, we demonstrate zero-shot sim-to-real transfer across diverse embodiments, including a wheeled TurtleBot 4 and a custom-built aerial drone. These real-world deployments verify that our decoupled framework serves as a robust, domain-invariant interface for embodied Vision-and-Language navigation. 
+
+I. I NTRODUCTION 
+
+Vision-and-Language Navigation (VLN) [1] requires an embodied agent to follow natural language instructions while navigating a 3D environment. Recent Multimodal Large Language Models (MLLMs) [2], [3] exhibit strong semantic reasoning and open-world knowledge, making them promis-ing candidates for generalist VLN agents [4], [5]. There are two mainstream approaches to adapting MLLMs for VLN tasks: fine-tuning MLLMs with VLN data, which is expensive and leads to the loss of embedded genera-tive knowledge, and MLLM-centric zero-shot VLN systems, which are gaining increasing interest. Currently, such sys-tems [4], [5], [6], [7] typically adopt a tightly coupled design paradigm, where spatial and semantic reasoning are jointly performed over long-horizon observation streams, under the assumption that current MLLMs are sufficiently powerful. However, we observe that such designs often struggle in challenging scenarios. When relying solely on sequences of egocentric RGB observations as input, MLLMs are limited to implicitly inferring global spatial relationships, often leading    
+
+> †Joint First Author * Corresponding Authors
+> 1Australian Institute for Machine Learning, Adelaide University
+> 2The University of Manchester
+> 3Zhejiang University
+> 4Agency for Science, Technology and Research (A*STAR) Irrelevant candidate waypoints / views On -the -fly panoramic observation
+
+Fig. 1: Bridging high-level reasoning and embodied execution with GTA. Left : Existing MLLM-based VLN agents reduce the rich 3D environment into an oversimplified linearized text memory according to human knowledge. 
+
+Right : Our GTA framework decouples spatial modeling from semantic reasoning. Our Interactive Metric World Represen-tation maintains rich spatial and historical information, en-abling the MLLM to interact with it accordingly for decision-making. This also enables Counterfactual Reasoning, which further elicits the MLLM’s capacity. to inaccurate information, i.e., describing room layouts or connections that do not exist. Furthermore, this inaccurate spatial information can propagate into semantic reasoning, resulting in confident but incorrect interpretations of the instruction with respect to the environment. Moreover, by processing all information in a single step, this tightly cou-pled design also limits the flexibility of reasoning strategies needed to effectively elicit the full capabilities of MLLMs. In this work, we propose an effective zero-shot VLN framework, termed G UIDE THEM ALL (GTA), that decou-ples spatial and semantic reasoning. Specifically, as shown in Fig. 1, GTA first reasons about the global spatial structure and then performs semantic reasoning over language in an isolated and sequential manner for navigation. By decoupling these two processes, GTA effectively prevents the error propagation from spatial reasoning to semantic decision making. Furthermore, the decoupled design enables task-specific reasoning strategies for different modules, which are not feasible in previous tightly coupled systems. In the spatial reasoning module, we introduce an explicit interactive metric world representation. As shown in Fig. 2, 
+
+> arXiv:2602.15400v1 [cs.RO] 17 Feb 2026
+
+the agent can actively interact with it, enabling MLLMs to infer a consistent global spatial structure during navi-gation. In prior approaches, auxiliary information, such as language-descriptive maps or implicit memory buffers [8], [9], [10], [11], is typically constructed based on human-designed heuristics and serves as a passive summary of past observations, either symbolically or implicitly encoded in the model state. In contrast, our interactive metric world repre-sentation preserves rich contextual information and allows the agent to interact with it through a real-time simulator. As a result, the agent can actively seek the information required for decision making based on the current context, rather than relying on predefined summaries of historical observations. With this interactive metric world representation, we fur-ther propose a counterfactual reasoning-based strategy to better elicit the capabilities of MLLMs. Unlike previous works that rely on predefined waypoint predictors [12], our method makes navigation decisions by explicitly reason-ing about counterfactuals, i.e., “what will happen if . . . ,” through interaction with the metric world representation. At each step, the MLLM evaluates candidate actions against a structured goal list. It performs logical rollouts via coun-terfactual queries, ensuring each simulated trajectory aligns with the decomposed instruction semantics. Through such physically grounded imagination over an interactive metric world, MLLMs can not only determine the next action based on global context, but also ensure that the selected actions are physically valid. We evaluate GTA on diverse VLN benchmarks [1], [13], [14] and achieve state-of-the-art zero-shot performance across multiple datasets and MLLM backbones [3]. Our results demonstrate that the synergy between a metric world representation and counterfactual reasoning over procedural blueprints provides a structured foundation for future-state projection. This integration represents the key missing com-ponent for bridging the gap between high-level MLLM rea-soning and low-level embodied execution. Our contributions are as follows:  
+
+> •
+
+We propose G UIDE THEM ALL (GTA), a decoupled zero-shot VLN framework that mitigates error prop-agation and enables task-specific reasoning, achieving state-of-the-art zero-shot performance.  
+
+> •
+
+We introduce an interactive metric world representation that provides MLLMs with metric global spatial con-text for decision making, avoiding reliance on human-designed priors or passive memory summaries.  
+
+> •
+
+We develop a counterfactual reasoning strategy that directly operates on the metric world representation, enabling physically grounded reasoning and further unlocking the reasoning capabilities of MLLMs. II. R ELATED WORK 
+
+Vision-and-Language Navigation (VLN): represents a core challenge in Embodied AI, requiring autonomous agents to interpret natural language instructions and execute sequen-tial decisions in visual contexts. Early benchmarks were predominantly situated in discrete environments [1], [15], [14], where navigation was simplified into selecting nodes on a predefined topological graph. Recent efforts have shifted toward Continuous Environments (VLN-CE) [13] to better align with real-world robotics. This shift from “teleporting” between nodes to low-level discrete actions has led to sig-nificant performance degradation in traditional models [13], [16], [17], [18]. It must perform fine-grained spatial reason-ing, maintain robust temporal awareness of its navigation history, and dynamically map instructions to an infinite action space. Consequently, bridging the gap between high-level linguistic reasoning and low-level continuous control remains a fundamental bottleneck. 
+
+From Expert Models to Embodied Large Models: To miti-gate the decision-making complexities inherent in continuous spaces, earlier research primarily focused on the development of task-specific expert models. A pivotal advancement was the introduction of waypoint-based architectures [19], [20], [21], [11], [22], [23]. While these methods improved success rates on benchmarks like R2R-CE, they essentially operate as “in-domain” experts whose policies are tightly coupled with specific training distributions, leading to a deficiency in cross-scene generalization. The emergence of MLLMs has shifted the paradigm toward transforming these special-ized navigators into embodied general brains. Representative works rely on task-specific adaptation to align LLMs with navigation. They integrate visual-linguistic features into the LLM embedding space and introduce navigation-specific tokens, aiming to combine domain-specific navigation pro-ficiency with the open-vocabulary reasoning of foundation models [24], [25], [26]. Nevertheless, this adaptation-heavy paradigm required to map embodied observations to linguistic tokens is pro-hibitively resource-intensive [26]. More importantly, such task-specific fine-tuning leads to a structural decoupling from the rapidly evolving foundational models. 
+
+Zero-Shot Embodied Agents in VLN: The limitations of training-heavy paradigms have catalyzed a shift toward Zero-Shot Embodied Agents, which leverage the emergent reason-ing of foundation models without task-specific adaptation. Early explorations demonstrated the efficacy of LLMs in topological reasoning [8], [27]. However, these were primar-ily confined to discrete environments. Transitioning to the more challenging VLN-CE domain, a defining characteristic of these contemporary zero-shot planners is their reliance on linguistic abstractions to handle spatial and temporal history, they represent the environment by translating visual observations and topological relationships into serialized text or language-based mental maps [28], [29], [30], [31]. While these ”language-centric” representations allow LLMs to maintain a high-level narrative of navigation progress, they lack an explicit, geometrically grounded world rep-resentation [7], [12], [32]. Consequently, when navigating under limited line-of-sight or in cluttered geometries, these agents often struggle to resolve spatial ambiguities or pre-dict precise waypoints. This inherent limitation in implicit linguistic mapping motivates our approach, which integrates a robust, explicit spatial representation to optimize navigation STEP 1 STEP 2 STEP 3 STEP 4
+
+STEP 5 STEP 6 STEP 7 STEP 8
+
+Instruction: Walk through the room, past everything and towards the further window, stopping once 
+
+you're near the steps and making a right turn, stop once you're near the chairs. Fig. 2: Qualitative visualization of a navigation episode in R2R-CE. The top row displays the agent’s Metric World Representation (top-down metric view), while the bottom row shows the corresponding egocentric panoramic observations at each step. The planned trajectory is marked in yellow, with blue dots indicating waypoints and the red arrow showing the agent’s current pose. performance. III. P ROBLEM FORMULATION 
+
+We formulate the Vision-and-Language Navigation in Continuous Environments (VLN-CE) task as a Partially Observable Markov Decision Process (POMDP), formally defined by the tuple ⟨W , I, S, A, O, T ⟩ .
+
+a) Environment, Task, and State ( W, I, S).: The envi-ronment W ⊂ R3 represents the continuous 3D Euclidean space. The agent’s state space S consists of valid 2D poses on the navigable floor plan, where each state st = ( xt, y t, θ t) ∈S denotes the agent’s planar coordinates and heading at time 
+
+t. Given a natural language instruction I = {w1, . . . , w L},the objective is to reach a target state starget within a threshold distance, starting from an initial pose s0.
+
+b) Observation Space (O).: The reasoning module operates on a structured observation space comprising four RGB-D views selected from the continuous asynchronous perception stream. At reasoning time t, the observation 
+
+Oselected t ∈ O comprises orthogonal views captured at cardinal angles relative to the agent’s current heading: 
+
+Oselected t = (Vrgb sk , Vdepth sk ) | k ∈ { 0◦, 90 ◦, 180 ◦, 270 ◦}
+
+(1) where each view is selected based on spatial proximity to the current position and angular alignment with the target cardinal direction. This structure facilitates comprehensive 
+
+360 coverage with minimal redundancy for semantic reason-ing. 
+
+c) Action Space (A).: We define the action space 
+
+A as a set of continuous local waypoints. The high-level policy predicts a sub-goal at = (∆ x, ∆y) ∈ A relative to the agent’s current frame, subject to a maximum planning horizon dmax (i.e., || at|| 2 ≤ dmax ). 
+
+d) Transition Dynamics ( T ).: The transition function 
+
+T : S × A → S models the agent’s movement. Unlike discrete grid-hopping, our transitions are governed by a 
+
+deterministic low-level controller . Given the current state st
+
+and the predicted waypoint at, the controller computes a 4 Single RGB -D Sequence 
+
+> TSDF Reconstruction
+
+Explicit World Representation 
+
+Interface Perception 
+
+Agent Current Pose 
+
+Explicit Topological History 
+
+3D Re constructed Environment 
+
+> Render
+> Prompt
+
+Reasoning       
+
+> Multi -Modal
+> LLM
+> (Frozen MLLM)
+> Chian -of -Thought
+> I have successfully
+> walked to …
+> The next instruction is …
+> My RIGHT view shows ….
+> I will select a point in the
+> …
+> History
+> You are at approximately
+> the same floor level as
+> your starting position
+> Height Status
+> [x] Turn around and turn…
+> [x] Once out turn left …
+> [ ] Turn right.
+> [ ] Walk down the stair...
+> [ ] Stop
+> TODO List
+> loc_0 -> loc_1 -> loc_2 ->
+> loc_3 -> loc_4 -> loc_5 ->
+> loc_6
+> Past Paths
+> Waypoint
+> (x,y,z)
+> [Target Pose]
+> Closed -loop
+> Action
+> Move & Update
+> Instruction
+
+Fig. 3: Overview of the GTA Framework. Our architecture decouples spatial modeling from semantic reasoning. The 
+
+Metric Mapping Module (left) fuses sparse RGB-D streams via TSDF reconstruction to synthesize a real-time metric map. We construct the Interactive Metric World Representation by unifying this geometric reconstruction with Procedur al Reasoning Blueprints, which comprise the logical “TODO List” and topological history. This composite spatial-logic state is rendered via our Interactive Reasoning Interface into a structured prompt for Counterfactual Reasoning Brain driven by the frozen MLLM (right). Leveraging this unified context, the MLLM directly infers the next metric waypoint (x, y, z )
+
+collision-free trajectory to reach the next state st+1 . Thus, the state evolution is defined as st+1 = T (st, at), abstracting away the low-level actuator dynamics. IV. M ETHODOLOGY 
+
+We propose GTA , a hierarchical autonomy framework that decouples low-level spatial state estimation from high-level semantic planning (Fig. 3). The system operates in a closed-loop fashion, integrating an asynchronous Metric Mapping Module for interactive and explicit metric world modeling, and a Counterfactual Reasoning Brain for zero-shot waypoint generation. An Interactive Reasoning Inter-face is introduced to bridge the gap between low-level map representation and high-level reasoning. An overview of navigation loop is shown in Algorithm 1. 
+
+A. Interactive Metric World Representation 
+
+To enable the agent to be aware of both spatial and historical information during navigation, we introduce the Metric Mapping Module, which constructs a hybrid world representation Wt = ⟨M vol , Gtopo ⟩ asynchronously. It con-tinuously constructs a metric map Mvol from high-frequency RGB-D observations using a rotating camera to encode spatial information, while Gtopo is built on top of it to encode historical trajectories. In contrast to previous works that implicitly infer spatial information from noisy streaming observations, the constructed Metric World Representation provides consistent global context throughout navigation. 
+
+a) Volumetric Mapping ( Mvol ).: We maintain a dense 3D geometry of the environment using a Truncated Signed Distance Field (TSDF). The perception system continuously captures RGB-D observation Os = ( Is, Ds) at timestamp 
+
+s. Given the camera intrinsic matrix K and the agent’s estimated pose Twb (s) ∈ SE (3) at capture time s, we project each pixel u = ( u, v ) with depth d into the world frame: 
+
+pw = Twb (s) · Tbc (θs) · π−1(u, d ) (2) where Tbc (θs) represents the camera extrinsic calibration with rotation angle θs at capture time s. The TSDF volume is continuously updated by integrating these asynchronous point clouds via a weighted running average. For a voxel v
+
+with centroid x, the signed distance St(v) is updated as: 
+
+St(v) = Wt−1(v)St−1(v) + wt · sdf t(x)
+
+Wt−1(v) + wt
+
+(3) where sdf t(x) is the projective signed distance from the current observation. This explicit metric world representation provides a collision-free manifold for low-level planning. 
+
+b) Topological Graph Abstraction ( Gtopo ).: To support long-horizon memory, we abstract navigable space into a graph Gtopo = ( V, E). Each node vi = ⟨pi, c i⟩ stores its metric position pi ∈ R2 and a visit count ci. Upon reaching a new pose pcurr , we perform a spatial clustering update :
+
+V ← 
+
+(
+
+Update (vnearest ) if dmin < δ merge 
+
+V ∪ { Node (pcurr )} otherwise (4) Algorithm 1 Overview of the GTA Navigation Pipeline. 
+
+Require: Global Instruction Iinstr , Start Pose p0, MLLM 
+
+Fθ
+
+Require: Thresholds: δmerge (Node Merging), τloop (Loop Detection)  
+
+> 1:
+
+Initialize: Mvol ← ∅ , Gtopo ← ({p0}, ∅), H ← ∅  
+
+> 2:
+
+Initialize Task: Itask ← Decompose (Iinstr ) 
+
+> 3:
+
+while || pt − pgoal || > ϵ do  
+
+> 4:
+
+// 1. Metric Environment Perception  
+
+> 5:
+
+Capture rotating view Os = {(Is, Ds, θ s)} 
+
+> 6:
+
+Update Mvol via TSDF integration (Eq. (3))  
+
+> 7:
+
+// 2. Topological Memory Update  
+
+> 8:
+
+vcurr ← CLUSTER NODE (Gtopo , pt, δ merge ) 
+
+> 9:
+
+Salert ← ∅  
+
+> 10:
+
+if Count (vcurr , H) > τ loop then  
+
+> 11:
+
+Salert ← “CRITICAL: Potential Loop Detected”  
+
+> 12:
+
+end if  
+
+> 13:
+
+// 3. Zero-Shot Reasoning  
+
+> 14:
+
+Render visual tokens Vprompt ←
+
+[Proj ortho (Mvol ), Ot] 
+
+> 15:
+
+Construct prompt Pt = Vprompt ⊕ Salert ⊕
+
+State (Gtopo ) ⊕ I task ⊕ H  
+
+> 16:
+
+Generate response: R ← F θ (Pt) 
+
+> 17:
+
+Parse: (( u, v ), Inew task ) ← PARSE JSON (R) 
+
+> 18:
+
+Update Task Plan: Itask ← I new task  
+
+> 19:
+
+// 4. Grounding & Execution  
+
+> 20:
+
+wtarget ← RayCast (pcam , π −1(u, v ), Mvol ) 
+
+> 21:
+
+Compute control command: ut ← πlocal (pt, wtarget ) 
+
+> 22:
+
+Execute ut and update history H 
+
+> 23:
+
+end while 
+
+where dmin = min v∈V ∥pcurr − v. p∥2 represents the dis-tance to nearest existing node vnearest , and we set δmerge =0.8m. This graph structure enables the system to detect loops and backtracking behavior explicitly. 
+
+B. Interactive Reasoning Interface 
+
+To enable MLLMs to interact with and reason on the metric world representation Wt, we provide a model-agnostic reasoning interface that converts Wt into a format compatible with MLLMs. The interface functions as a differentiable transformation ϕ : Wt → P t, converting the metric world representation into a multimodal prompt that is compatible with off-the-shelf MLLMs. 
+
+a) Orthogonal View Selection for Reasoning.: When reasoning is triggered at time t, we select four RGB-D obser-vations Oselected t = {(Ik, Dk)}4 
+
+> k=1
+
+from the continuous per-ception stream that best approximate orthogonal viewpoints while maintaining spatial proximity to the current agent position. For each target angle αk ∈ { 0◦, 90 ◦, 180 ◦, 270 ◦},we retrieve the observation that minimizes both spatial and angular distances: 
+
+(Ik, Dk) = arg min 
+
+> s≤t
+> ∥ps−pt∥2<δ s
+
+|θs − (θt + αk)| (5) where δs defines the spatial proximity threshold to ensure the selected views represent the current local environment. This asynchronous selection strategy ensures comprehensive spatial coverage while maintaining temporal relevance of the visual information for accurate reasoning. 
+
+b) Visual Prompting with Coordinate Grids.: We render the TSDF map into a Third-Person Bird’s-Eye View (BEV) 
+
+Ibev via orthographic projection. To enable the MLLM to output precise spatial actions without continuous regression heads, we overlay a normalized coordinate grid Gnorm ∈
+
+[0 , 1000] 2 on both Ibev and egocentric views. The visual prompt tokens are assembled as Vprompt = [ Ibev , I(1 .. 4)  
+
+> ego
+
+].In this way, MLLMs can interact and reason with the inter-active metric world representation accordingly for decision-making, without relying on human-predefined, oversimplified textual map representations. 
+
+C. Counterfactual Reasoning Brain 
+
+Finally, MLLMs output the navigation action by reasoning over the constructed metric world representation Wt through the interactive reasoning interface. With the proposed coun-terfactual reasoning strategy, the system is able to evaluate multiple potential action trajectories and select the one that aligns with the task objectives, while the metric world representation ensures physical grounding. 
+
+a) Procedural Reasoning Blueprints.: Specifically, at each step, the interactive reasoning interface will provide MLLMs with: 
+
+Tprompt = Itask ⊕ State (Gtopo ) ⊕ History (Ht) ⊕ I instr (6) Detailed as follows:  
+
+> •
+
+Dynamic Task Plan ( Itask ): We decompose the naviga-tion goal into a dynamic checklist (e.g., “[x] Navigate to door”, “[ ] Turn left”). The MLLM is required to update this blueprint at every step, ensuring the immediate action aligns with the high-level plan.  
+
+> •
+
+Topological & Physical State (State (Gtopo )): Encodes the agent’s current situation in the graph. Crucially, this term integrates two safety mechanisms: (1) Vertical Awareness , reporting if the height difference ∆h > 
+
+0.3m (“Upstairs”) or < −0.3m (“Downstairs”); and (2) 
+
+Safety Alerts , which inject warnings if the previous action failed or a loop is detected.  
+
+> •
+
+Execution History (History (Ht)): A temporally or-dered log of previous thoughts, selected views, and actions, filtered by a sliding window w = 5 to maintain relevant context without exceeding the context window.  
+
+> •
+
+Global Instruction ( Iinstr ): The original natural lan-guage command provided by the user, serving as the immutable global reference. 
+
+b) Spatial Action Decoding and Execution.: Following the reasoning phase, the model generates a structured JSON response containing a reasoning chain and a spatial action 
+
+aspatial , comprising a selected view ID and normalized co-ordinates (u, v ). We recover the 3D target waypoint wtarget 
+
+via ray-casting on the TSDF mesh: 
+
+wtarget = RayCast (pcam , π −1(u, v ), Mvol ) (7) The metric world representation ensures that the semantic decision is physically executable on valid surfaces. The waypoint is then passed to a deterministic local planner to drive the agent. Finally, explicit loop detection is triggered if the target node visit count c > τloop , prompting are-planning request in the subsequent step via the safety injection mechanism. V. E XPERIMENTS 
+
+A. Experimental Setup a) Simulation Environment and Benchmarks: We con-duct all evaluations in physically realistic continuous envi-ronments using the Habitat simulator [38]. Unlike graph-based discrete settings, the agent must execute low-level ac-tions in continuous Euclidean space, presenting significantly harder challenges in obstacle avoidance and precise actua-tion. We utilize two standard benchmarks: R2R-CE [13] and 
+
+RxR-CE [39]. For evaluation, we use the full validation un-seen split for R2R-CE. For the larger RxR-CE benchmark, to align with established protocols for computationally intensive zero-shot MLLM agents [7], [12], [36], [40], we evaluate on a spatially diverse subset of 260 episodes from the validation unseen split. To rigorously evaluate the contribution of each component, we curated a challenging subset of the R2R-CE validation set, comprising 180 episodes. Specifically, we filtered out trivial cases and prioritized long-horizon trajec-tories. This selection is designed to stress-test the agent’s spatial reasoning capabilities, fully revealing the potential of our Procedural Reasoning Blueprints in complex, multi-room scenarios where memory and logic are critical. 
+
+b) Evaluation Metrics: We report standard metrics for VLN-CE Task [13]: Success Rate (SR), Oracle Success Rate 
+
+(OSR), Success weighted by Path Length (SPL), Trajectory Length (TL), and Navigation Error (NE). Additionally, we compute normalized Dynamic Time Warping (nDTW) to assess the fidelity of the agent’s trajectory relative to the ground truth path. An episode is considered successful if the agent stops within 3.0 meters of the target coordinates. 
+
+c) Baselines: We benchmark GTA against a broad spectrum of state-of-the-art continuous navigation agents, categorized into:  
+
+> •
+
+Supervised Learning Agents: We benchmark against a comprehensive set of supervised methods (#1 - #8) trained on in-domain data [19], [11], [22], [23], [34], [26], [35]. These baselines range from foundational ap-proaches like CMA and VLN-BERT to the recent state-of-the-art Efficient-VLN, providing a rigorous upper-bound reference for our zero-shot framework.  
+
+> •
+
+Zero-Shot Agents: We benchmark against training-free approaches that leverage the reasoning capabilities of foundation models (#9-#14) [7], [31], [12], [36], [37], [32]. Specifically, we focus on the recent state-of-the-art #14 and other contemporaneous MLLM-based planners. Comparing against fully supervised baselines allows us to quantify the “generalization gap” and demonstrate how close our zero-shot approach comes to domain-specific experts. 
+
+B. Main Results 
+
+We present a quantitative comparison of our proposed GTA framework against state-of-the-art baselines in R2R-CE and RxR-CE, as summarized in Tab. I. The results demonstrate that explicitly modeling the world metrically is key to unlocking the navigation potential of generalist MLLMs. 
+
+a) State-of-the-Art Zero-Shot Performance.: As evi-denced in Tab. I, GTA establishes a new state-of-the-art on both R2R-CE and RxR-CE benchmark, surpassing the previ-ous leading zero-shot agent BZS-VLN (#14) by a substantial margin. This performance gap underscores a critical limita-tion in prior implicit approaches: without an explicit spatial representation, agents struggle to ground high-level semantic instructions into the continuous coordinate space. In contrast, GTA leverages its Explicit Metric World Representation as a geometric anchor. By decoupling semantic reasoning from spatial execution, our framework empowers the MLLM to generate precise, physically valid waypoints rather than vague directional cues. The significant improvement in SPL (↑16.4% in R2R-CE, and ↑15% in RxR-CE) further confirms that GTA navigates with deliberate, map-informed efficiency rather than relying on stochastic exploration. 
+
+b) Competitive with Supervised Experts: Remarkably, although GTA operates in a strictly zero-shot manner without any parameter updates, it exhibits performance comparable to fully supervised baselines. As shown in Tab. I, GTA surpasses classic supervised agents such as CMA [13] and VLN-BERT [33]. Furthermore, it effectively narrows the gap with recent state-of-the-art supervised models like Efficient-VLN [35]. This result challenges the assumption that in-domain imitation learning is mandatory. More importantly, it highlights the pivotal role of agent architecture in the foundation model era: the reasoning capability for navi-gation already exists within off-the-shelf MLLMs, but it remains latent. GTA demonstrates that a robust agentic framework—specifically one that couples metric world mod-eling with structured prompting—is the key to unlocking and grounding this latent potential into expert-level physical execution. 
+
+c) Robustness on Complex Instructions (RxR-CE).: The versatility of GTA is further highlighted on the RxR-CE benchmark, which features significantly longer trajectories and fine-grained multilingual instructions. Navigating such complex paths poses a severe challenge to existing agents: the previous state-of-the-art exhibits a sharp performance degradation, dropping from ∼ 41% on R2R-CE to just 
+
+35 .7% on RxR-CE. In contrast, GTA demonstrates superior resilience. Despite the increased difficulty, it sustains a high success rate of 42 .2% (compared to 48 .8% on R2R-CE). This significant margin suggests that our Explicit Metric World Representation provides a robust geometric foundation that effectively mitigates the impact of instructional complexity, enabling the MLLM to generalize better than purely implicit baselines. TABLE I: Comparison in continuous environments on R2R-CE and RxR-CE Val-Unseen splits. The best supervised 
+
+results are highlighted in bold , while the best zero-shot results are underlined. We report metrics on the full validation split for R2R-CE (1839 episodes) and a sampled subset for RxR-CE (260 episodes).                                                                                                                                                                  
+
+> #Methods R2R-CE RxR-CE NE ↓OSR ↑SR ↑SPL ↑nDTW ↑NE ↓SR ↑SPL ↑nDTW ↑
+> Supervised Learning:
+> 1CMA [33] 6.30 49.0 38.0 33.0 –10.4 24.1 19.1 37.4 2VLN-BERT [33] 5.74 53.0 44.0 39.0 –8.98 27.1 22.7 46.7 3GridMM [11] 5.11 61.0 49.0 41.0 –––––4ETPNav [22] 4.71 65.0 57.0 49.0 –5.64 54.8 44.9 61.9 5BEVBert [23] 4.70 67.0 59.0 50.0 –4.80 64.4 –65.4 6HNR [34] 4.42 67.0 61.0 51.0 –5.51 56.4 46.7 63.6 7NavFoM [26] 4.61 72.1 61.7 55.3 –4.74 64.4 56.2 65.8 8Efficient-VLN [35] 4.18 73.7 64.2 55.9 –3.88 67.0 54.3 68.4
+> Zero-Shot Learning:
+> 9Open-Nav [7] 6.70 23.0 19.0 16.1 45.8 ––––10 CA-Nav [31] 7.58 48.0 25.3 10.8 –10.37 19.0 6.0 –11 Smartway [12] 7.01 51.0 29.0 22.5 –––––12 STRIDER [36] 6.91 39.0 35.0 30.3 51.8 11.19 21.2 9.6 30.1 13 VLN-Zero [37] 5.97 51.6 42.4 26.3 –9.13 30.8 19.0 –14 BZS-VLN [32] 6.12 55.0 41.0 25.4 –7.56 35.7 21.7 42.4 15 GTA (Ours) 4.95 56.2 48.8 41.8 60.4 6.29 46.2 39.3 57.4
+
+TABLE II: Comparison with baselines enhanced with Explicit World Representation (EWR). To ensure environ-mental diversity, we sample 180 trajectories from the discrete R2R and REVERIE datasets. In continuous environments, specifically for R2R-CE , we curate a challenging subset of 180 episodes defined in Sec. V-A.                                                 
+
+> Method - DE R2R-Sampled REVERIE-Sampled OSR( ↑) SR( ↑) SPL( ↑) OSR( ↑) SR( ↑)SPL( ↑)
+> NavGPT 53.2 43.5 34.7 37.2 31.2 23.4 NavGPT + EWR 55.6 45.0 37.2 41.7 36.1 26.8
+> Method - CE R2R-CE-Sampled REVERIE-CE-Sampled OSR( ↑) SR( ↑) SPL( ↑) OSR( ↑) SR( ↑)SPL( ↑)
+> OpenNav 33.3 30.6 23.5 22.8 16.1 11.1 OpenNav + EWR 41.7 38.3 31.7 30.6 23.9 18.9 SmartWay 38.9 34.4 28.1 26.7 20.0 16.7 SmartWay + EWR 46.1 41.1 36.7 35.0 25.5 25.7
+> GTA (ours) 56.7 47.2 39.6 51.1 42.2 33.8
+
+C. Ablation Study 
+
+We conduct comprehensive ablation studies to validate the effectiveness of our core design choices. We first investigate the contribution of the Explicit Metric World Representation and its specific impact on navigation tasks with varying instruction granularities. 
+
+a) Impact of Explicit Metric World Representation.: 
+
+To verify the necessity of our metric mapping module, we compare the performance of baseline agents equipped with and without our EWR module. As presented in Tab. II, base-lines enhanced with EWR exhibit consistent and substan-tial performance gains across both discrete and continuous environments. This empirical evidence validates our core hypothesis in Sec. I: providing MLLMs with a structured, metric-accurate description of the environment is essential for enabling genuine World Understanding. By serving as a predictive substrate, the EWR bridges the gap between local egocentric perception and global semantic reasoning. It offloads the burden of spatial state tracking from the MLLM, allowing the model to focus on high-level logical deductions and structural inference rather than being confined to reactive visual matching. A critical insight into the agent’s global awareness emerges when analyzing performance on the REVERIE dataset (and its continuous variant REVERIE-CE). REVERIE is characterized by coarse-grained, high-level object goals (e.g., “Find the pillow in the bedroom”), lacking intermediate directional cues. Typically, implicit agents suffer severe performance degradation when transfer-ring from R2R to REVERIE because they lack a persistent mental map to support long-horizon exploration. However, methods equipped with our EWR demonstrate significantly stronger resilience to this difficulty shift. We attribute this ro-bustness to the EWR. In the absence of detailed instructions, the EWR empowers the agent to perform global topologi-cal reasoning by inferring potential room connections and unexplored frontiers based on the mapped structure. This transforms the navigation process from simple instruction following into active environment exploration, proving that explicit spatial representation is the foundational component for understanding complex, large-scale environments. 
+
+b) Scalability with MLLM Reasoning Capabilities.: 
+
+A core advantage of GTA is its model-agnostic nature: by decoupling spatial state estimation from decision-making, it allows the navigation agent to directly benefit from advance-ments in foundation models without architectural changes. To investigate this scalability, we instantiate GTA with diverse MLLM backbones, ranging from open-weights models to state-of-the-art proprietary giants. As shown in Tab. IV, we observe a strong positive correlation between the general rea-soning capability of the backbone and the agent’s navigation performance. Starting with Qwen3-VL-235B, our framework TABLE III: Ablation study on Procedural Reasoning Blueprints (PB). We evaluate the impact of decomposing instructions into logical blueprints on the curated R2R-CE subset (180 episodes). ↑ denotes higher is better. Bold 
+
+numbers indicate the best performance.                     
+
+> Method R2R-Val-Sampled NE (↓)OSR (↑)SR (↑)SPL (↑)nDTW (↑)GTA (w/o PB) 5.38 48.3 45.0 38.1 52.7 GTA (w/ PB) 5.27 56.7 47.2 39.6 55.8
+
+TABLE IV: Comparison of different MLLM backbones on the R2R-CE dataset. Evaluations are conducted on the same curated subset of 180 challenging trajectories defined in Sec. V-A. ↑ denotes higher is better, and ↓ denotes lower is better. Bold numbers indicate the best performance.                          
+
+> Method - DE R2R-Val-Sampled NE (↓)OSR (↑)SR (↑)SPL (↑)nDTW (↑)GTA (Qwen3-VL-235B) 5.98 46.1 37.2 29.5 51.3 GTA (Gemini-2.5 Pro) 5.35 48.7 42.3 34.4 56.2 GTA (GPT 5.1) 5.27 56.7 47.2 39.6 55.8
+
+establishes a solid baseline with 37.2% SR. Switching to Gemini-2.5 Pro yields a notable improvement to 42.3% SR, demonstrating the benefit of stronger multimodal alignment. Most significantly, when equipped with GPT 5.1, the agent achieves the best performance across all metrics, reaching an SR of 47.2% and an SPL of 39.6%. This trend confirms that GTA successfully transforms continuous navigation into a high-level reasoning problem. It serves as a plug-and-play interface that is inherently future-proof: as MLLMs continue to scale in logic and spatial reasoning capabilities, the performance of GTA will naturally improve, unlocking higher levels of embodied intelligence. 
+
+c) Impact of Procedural Reasoning Blueprints.: 
+
+We further investigate the role of Procedural Reasoning Blueprints (PB). As shown in Tab. III, incorporating PB leads to improvements across all metrics. Most notably, we observe a substantial surge in OSR, jumping from 48.3% to 56.7% ( ↑8.4%). Since OSR measures whether the agent ever reached the target vicinity (regardless of stopping correctly), this significant gain indicates that the Blueprint acts as a critical long-horizon compass. Without the Blueprint (w/o PB), the agent tends to get lost in complex environments or omit intermediate landmarks. GTA ensures that the generated path remains semantically consistent with the instruction’s logical flow. This prevents early divergence and ensures the agent successfully navigates to the target area, validating that logical decomposition is essential for robust long-horizon execution. 
+
+D. Real-World Deployment 
+
+To validate the practical utility and robustness of GTA, we deployed the system on a physical robotic platform in a real-world environment. We conducted 50 navigation trials with complex language instructions. We evaluate our 
+
+Fig. 4: Zero-shot Sim-to-Real transfer across diverse robot embodiments. We demonstrate the generalization capability of GTA by deploying it on two distinct physical platforms in unseen real-world environments. Top Rows (Wheeled Robot): A TurtleBot 4 successfully executes instructions requiring obstacle negotiation and semantic grounding of large objects. Bottom Row (Drone): A custom-built aerial vehicle utilizes the same framework to locate a fine-grained target. approach across two distinct robotic platforms as shown in Fig. 4. For ground-based tasks, we utilize a TurtleBot 4 mobile base equipped with an Intel RealSense D455 RGB-D camera. The camera is mounted on a servo motor to per-form the orthogonal panoramic scanning (4 views) described in Sec. IV. The low-level motion planning is handled by the ROS 2 Nav2 stack, while the MLLM inference runs on a remote server communicating via standard HTTP requests. For aerial operations, we employ a custom-built quadrotor platform integrated with an Intel RealSense D435 RGB-D camera. The UAV utilizes a Betaflight-based flight controller, while high-level command computation and communication are executed on a CoolPi 4B onboard computer. Precise state estimation and global localization are facilitated by an external motion capture system. As shown in Tab. V, a major challenge in Embodied AI is the visual domain gap between simulation and reality. End-to-end learning methods often fail in the real world due to differences in lighting and textures such as VLN-BERT (16%) and RDP (20%). In contrast, GTA exhibits remarkable zero-shot Sim-to-Real TABLE V: Real-world navigation performance. We com-pare GTA against representative supervised (VLN-BERT, RDP) and zero-shot (SmartWay) baselines. ↑ indicates higher is better, ↓ indicates lower is better. 
+
+Method SR ↑ (%) NE ↓ (m) 
+
+Supervised Learning: 
+
+VLN-BERT [33] 16.0 5.36 RDP [41] 20.0 5.45 
+
+Zero-Shot Learning: 
+
+SmartWay [12] 32.0 4.85 
+
+GTA - Wheeled Robot (Ours) 40.0 3.66 GTA - Drone (Ours) 42.0 3.50 
+
+transferability with 40% in Wheeled Robot and 42% in Drone. This is attributed to our EWR: the MLLM never sees the raw, noisy real-world pixels directly; instead, it reasons over the synthesized top-down metric map and topological graph. Since the structural representation of a map is domain-invariant (a wall is a wall in both Sim and Real), the MLLM planner remains effective despite the domain shift. VI. C ONCLUSION 
+
+In this work, we present GTA , a hierarchical framework that enables generalist MLLMs to achieve state-of-the-art zero-shot navigation in continuous environments. Our key innovation is the construction of an Interactive Metric World Representation, allowing MLLMs to interact and reason with it, ensuring the physical validity of the produced navigation actions. We further introduce counterfactual reasoning to enhance MLLMs’ capacity. Extensive evaluations on the R2R-CE and RxR-CE benchmarks show that GTA signif-icantly outperforms existing zero-shot baselines and rivals fully supervised experts. Crucially, our real-world deploy-ment demonstrates that this metric representation serves as a robust, domain-invariant interface, abstracting low-level visual discrepancies and bridging the gap between semantic reasoning and physical execution. This enables successful zero-shot transfer to physical environments without addi-tional training. These findings suggest that the bottleneck in Embodied AI often lies not in the reasoning model itself, but in how the physical world is represented. As MLLMs continue to scale, frameworks like GTA will be essential in translating foundational intelligence into robust physical action. Our future work will focus on integrating open-vocabulary 3D perception to further enrich this representation in dynamic scenarios. REFERENCES [1] P. Anderson, Q. Wu, D. Teney, J. Bruce, M. Johnson, N. S¨ underhauf, I. Reid, S. Gould, and A. Van Den Hengel, “Vision-and-language nav-igation: Interpreting visually-grounded navigation instructions in real environments,” in Proceedings of the IEEE conference on computer vision and pattern recognition , 2018, pp. 3674–3683. [2] G. Comanici, E. Bieber, M. Schaekermann, I. Pasupat, N. Sachdeva, I. Dhillon, M. Blistein, O. Ram, D. Zhang, E. Rosen et al. , “Gemini 2.5: Pushing the frontier with advanced reasoning, multimodality, long context, and next generation agentic capabilities,” arXiv preprint arXiv:2507.06261 , 2025. [3] S. Bai, Y. Cai, R. Chen, K. Chen, X. Chen, Z. Cheng, L. Deng, W. Ding, C. Gao, C. Ge, W. Ge, Z. Guo, Q. Huang, J. Huang, F. Huang, B. Hui, S. Jiang, Z. Li, M. Li, M. Li, K. Li, Z. Lin, J. Lin, X. Liu, J. Liu, C. Liu, Y. Liu, D. Liu, S. Liu, D. Lu, R. Luo, C. Lv, R. Men, L. Meng, X. Ren, X. Ren, S. Song, Y. Sun, J. Tang, J. Tu, J. Wan, P. Wang, P. Wang, Q. Wang, Y. Wang, T. Xie, Y. Xu, H. Xu, J. Xu, Z. Yang, M. Yang, J. Yang, A. Yang, B. Yu, F. Zhang, H. Zhang, X. Zhang, B. Zheng, H. Zhong, J. Zhou, F. Zhou, J. Zhou, Y. Zhu, and K. Zhu, “Qwen3-vl technical report,” 2025. [Online]. Available: https://arxiv.org/abs/2511.21631 [4] G. Zhou, Y. Hong, and Q. Wu, “Navgpt: Explicit reasoning in vision-and-language navigation with large language models,” in Proceedings of the AAAI Conference on Artificial Intelligence , vol. 38, no. 7, 2024, pp. 7641–7649. [5] G. Zhou, Y. Hong, Z. Wang, X. E. Wang, and Q. Wu, “Navgpt-2: Unleashing navigational reasoning capability for large vision-language models,” in European Conference on Computer Vision . Springer, 2024, pp. 260–278. [6] P. Chen, X. Sun, H. Zhi, R. Zeng, T. H. Li, G. Liu, M. Tan, and C. Gan, “A2nav: Action-aware zero-shot robot navigation by exploiting vision-and-language ability of foundation models,” arXiv preprint arXiv:2308.07997 , 2023. [7] Y. Qiao, W. Lyu, H. Wang, Z. Wang, Z. Li, Y. Zhang, M. Tan, and Q. Wu, “Open-nav: Exploring zero-shot vision-and-language naviga-tion in continuous environment with open-source llms,” in 2025 IEEE International Conference on Robotics and Automation (ICRA) . IEEE, 2025, pp. 6710–6717. [8] J. Chen, B. Lin, R. Xu, Z. Chai, X. Liang, and K.-Y. Wong, “Mapgpt: Map-guided prompting with adaptive path planning for vision-and-language navigation,” in Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , 2024, pp. 9796–9810. [9] L. Zhang, X. Hao, Q. Xu, Q. Zhang, X. Zhang, P. Wang, J. Zhang, Z. Wang, S. Zhang, and R. Xu, “MapNav: A novel memory repre-sentation via annotated semantic maps for VLM-based vision-and-language navigation,” in Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , W. Che, J. Nabende, E. Shutova, and M. T. Pilehvar, Eds. Vienna, Austria: Association for Computational Linguistics, Jul. 2025, pp. 13 032–13 056. [10] H. Wang, W. Wang, W. Liang, C. Xiong, and J. Shen, “Structured scene memory for vision-language navigation,” in Proceedings of the IEEE/CVF conference on Computer Vision and Pattern Recognition ,2021, pp. 8455–8464. [11] Z. Wang, X. Li, J. Yang, Y. Liu, and S. Jiang, “Gridmm: Grid memory map for vision-and-language navigation,” in Proceedings of the IEEE/CVF International conference on computer vision , 2023, pp. 15 625–15 636. [12] X. Shi, Z. Li, W. Lyu, J. Xia, F. Dayoub, Y. Qiao, and Q. Wu, “Smart-way: Enhanced waypoint prediction and backtracking for zero-shot vision-and-language navigation,” arXiv preprint arXiv:2503.10069 ,2025. [13] J. Krantz, E. Wijmans, A. Majumdar, D. Batra, and S. Lee, “Beyond the nav-graph: Vision-and-language navigation in continuous environ-ments,” in European Conference on Computer Vision . Springer, 2020, pp. 104–120. [14] Y. Qi, Q. Wu, P. Anderson, X. Wang, W. Y. Wang, C. Shen, and A. v. d. Hengel, “Reverie: Remote embodied visual referring expression in real indoor environments,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2020, pp. 9982–9991. [15] D. Fried, R. Hu, V. Cirik, A. Rohrbach, J. Andreas, L.-P. Morency, T. Berg-Kirkpatrick, K. Saenko, D. Klein, and T. Darrell, “Speaker-follower models for vision-and-language navigation,” Advances in neural information processing systems , vol. 31, 2018. [16] M. Z. Irshad, C.-Y. Ma, and Z. Kira, “Hierarchical Cross-Modal Agent for Robotics Vision-and-Language Navigation,” Apr. 2021, arXiv:2104.10674 [cs]. [Online]. Available: http://arxiv.org/abs/2104. 10674 [17] M. Z. Irshad, N. C. Mithun, Z. Seymour, H.-P. Chiu, S. Samarasekera, and R. Kumar, “SASRA: Semantically-aware Spatio-temporal Reasoning Agent for Vision-and-Language Navigation in Continuous Environments,” Aug. 2021, arXiv:2108.11945 [cs]. [Online]. Available: http://arxiv.org/abs/2108.11945 [18] S. Raychaudhuri, S. Wani, S. Patel, U. Jain, and A. X. Chang, “Language-Aligned Waypoint (LAW) Supervision for Vision-and-Language Navigation in Continuous Environments,” Sep. 2021, arXiv:2109.15207 [cs]. [Online]. Available: http://arxiv.org/abs/2109. 15207 [19] Y. Hong, Z. Wang, Q. Wu, and S. Gould, “Bridging the gap between learning in discrete and continuous environments for vision-and-language navigation,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2022, pp. 15 439–15 449. [20] J. Krantz, A. Gokaslan, D. Batra, S. Lee, and O. Maksymets, “Way-point models for instruction-guided navigation in continuous environ-ments,” in Proceedings of the IEEE/CVF International Conference on Computer Vision , 2021, pp. 15 162–15 171. [21] Z. Li, G. Zhou, H. Hong, Y. Shao, W. Lyu, Y. Qiao, and Q. Wu, “Ground-level viewpoint vision-and-language navigation in continu-ous environments,” IEEE International Conference on Robotics and Automation , 2025. [22] D. An, H. Wang, W. Wang, Z. Wang, Y. Huang, K. He, and L. Wang, “Etpnav: Evolving topological planning for vision-language navigation in continuous environments,” IEEE Transactions on Pattern Analysis and Machine Intelligence , 2024. [23] D. An, Y. Qi, Y. Li, Y. Huang, L. Wang, T. Tan, and J. Shao, “Bevbert: Multimodal map pre-training for language-guided navigation,” Pro-ceedings of the IEEE/CVF International Conference on Computer Vision , 2023. [24] J. Zhang, K. Wang, R. Xu, G. Zhou, Y. Hong, X. Fang, Q. Wu, Z. Zhang, and H. Wang, “Navid: Video-based vlm plans the next step for vision-and-language navigation,” CoRR , 2024. [25] J. Zhang, K. Wang, S. Wang, M. Li, H. Liu, S. Wei, Z. Wang, Z. Zhang, and H. Wang, “Uni-navid: A video-based vision-language-action model for unifying embodied navigation tasks,” arXiv preprint arXiv:2412.06224 , 2024. [26] J. Zhang, A. Li, Y. Qi, M. Li, J. Liu, S. Wang, H. Liu, G. Zhou, Y. Wu, X. Li et al. , “Embodied navigation foundation model,” arXiv preprint arXiv:2509.12129 , 2025. [27] Y. Long, X. Li, W. Cai, and H. Dong, “Discuss before moving: Visual language navigation via multi-expert discussions,” in 2024 IEEE International Conference on Robotics and Automation (ICRA) .IEEE, 2024, pp. 17 380–17 387. [28] P. Chen, X. Sun, H. Zhi, R. Zeng, T. H. Li, G. Liu, M. Tan, and C. Gan, “A2nav: Action-aware zero-shot robot navigation by exploiting vision-and-language ability of foundation models,” arXiv preprint arXiv:2308.07997 , 2023. [29] J. Chen, B. Lin, X. Liu, L. Ma, X. Liang, and K.-Y. K. Wong, “Affordances-oriented planning using foundation models for contin-uous vision-language navigation,” in Proceedings of the AAAI Con-ference on Artificial Intelligence , vol. 39, no. 22, 2025, pp. 23 568– 23 576. [30] Y. Long, W. Cai, H. Wang, G. Zhan, and H. Dong, “Instructnav: Zero-shot system for generic instruction navigation in unexplored environment,” in Conference on Robot Learning . PMLR, 2025, pp. 2049–2060. [31] K. Chen, D. An, Y. Huang, R. Xu, Y. Su, Y. Ling, I. Reid, and L. Wang, “Constraint-aware zero-shot vision-language navigation in continuous environments,” IEEE Transactions on Pattern Analysis and Machine Intelligence , 2025. [32] B. Li, S. Li, W. Wang, A. Li, Z. Cao, and H. X. Liu, “Boost-ing zero-shot vln via abstract obstacle map-based waypoint predic-tion with topograph-and-visitinfo-aware prompting,” arXiv preprint arXiv:2509.20499 , 2025. [33] Y. Hong, Q. Wu, Y. Qi, C. Rodriguez-Opazo, and S. Gould, “Vln bert: A recurrent vision-and-language bert for navigation,” in Proceedings of the IEEE/CVF conference on Computer Vision and Pattern Recog-nition , 2021, pp. 1643–1653. [34] Z. Wang, X. Li, J. Yang, Y. Liu, J. Hu, M. Jiang, and S. Jiang, “Lookahead exploration with neural radiance representation for con-tinuous vision-language navigation,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2024, pp. 13 753–13 762. [35] D. Zheng, S. Huang, Y. Li, and L. Wang, “Efficient-vln: Atraining-efficient vision-language navigation model,” arXiv preprint arXiv:2512.10310 , 2025. [36] D. He, X. Gao, H. Li, J. Han, and D. Zhang, “Strider: Navigation via instruction-aligned structural decision space optimization,” arXiv preprint arXiv:2511.00033 , 2025. [37] N. P. Bhatt, Y. Yang, R. Siva, P. Samineni, D. Milan, Z. Wang, and U. Topcu, “Vln-zero: Rapid exploration and cache-enabled neu-rosymbolic vision-language planning for zero-shot transfer in robot navigation,” arXiv preprint arXiv:2509.18592 , 2025. [38] M. Savva, A. Kadian, O. Maksymets, Y. Zhao, E. Wijmans, B. Jain, J. Straub, J. Liu, V. Koltun, J. Malik et al. , “Habitat: A platform for embodied ai research,” in Proceedings of the IEEE/CVF international conference on computer vision , 2019, pp. 9339–9347. [39] A. Ku, P. Anderson, R. Patel, E. Ie, and J. Baldridge, “Room-across-room: Multilingual vision-and-language navigation with dense spatiotemporal grounding,” in Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP) , 2020, pp. 4392–4412. [40] J. Zhang, Z. Li, S. Wang, X. Shi, Z. Wei, and Q. Wu, “Spatialnav: Leveraging spatial scene graphs for zero-shot vision-and-language navigation,” arXiv preprint arXiv:2601.06806 , 2026. [41] L. Wang, X. Xia, H. Zhao, H. Wang, T. Wang, Y. Chen, C. Liu, Q. Chen, and J. Pang, “Rethinking the embodied gap in vision-and-language navigation: A holistic study of physical and visual disparities,” in Proceedings of the IEEE/CVF International Conference on Computer Vision , 2025, pp. 9455–9465.

@@ -1,0 +1,945 @@
+Title: Spatio-temporal dual-stage hypergraph MARL for human-centric multimodal corridor traffic signal control
+
+URL Source: https://arxiv.org/pdf/2602.17068v1
+
+Published Time: Fri, 20 Feb 2026 01:25:14 GMT
+
+Number of Pages: 28
+
+Markdown Content:
+# Spatio-temporal dual-stage hypergraph MARL for human-centric multimodal corridor traffic signal control 
+
+Xiaocai Zhang a, ∗, Neema Nassir a, Milad Haghani a
+
+> aDepartment of Infrastructure Engineering, Faculty of Engineering and Information Technology, The University of Melbourne, VIC 3010, Australia
+
+Abstract 
+
+Human-centric traffic signal control in corridor networks must increasingly account for multimodal travelers, partic-ularly high-occupancy public transportation, rather than focusing solely on vehicle-centric performance. This paper proposes STDSH-MARL (Spatio-Temporal Dual-Stage Hypergraph based Multi-Agent Reinforcement Learning), a scalable multi-agent deep reinforcement learning framework that follows a centralized training and decentralized execution paradigm. The proposed method captures spatio-temporal dependencies through a novel dual-stage hy-pergraph attention mechanism that models interactions across both spatial and temporal hyperedges. In addition, a hybrid discrete action space is introduced to jointly determine the next signal phase configuration and its cor-responding green duration, enabling more adaptive signal timing decisions. Experiments conducted on a corridor network under five traffic scenarios demonstrate that STDSH-MARL consistently improves multimodal performance and provides clear benefits for public transportation priority. Compared with state-of-the-art baseline methods, the proposed approach achieves superior overall performance. Further ablation studies confirm the contribution of each component of STDSH-MARL, with temporal hyperedges identified as the most influential factor driving the observed performance gains. 
+
+Keywords: Traffic signal control, hypergraph, human-centric, multi-agent, deep reinforcement learning. 
+
+1. Introduction 
+
+Traffic signals coordinate movements at intersections to enhance the efficiency of transportation networks. Ef-fective traffic signal control remains a challenging but active research problem within transportation due to its complex, dynamic, and stochastic characteristics (Wei et al., 2019; Zhang et al., 2026). Traditional fixed-time Traffic Signal Control (TSC) algorithms become inefficient in managing congestion within highly dynamic traffic scenarios. Although manual traffic control can be effective in specific situations, it often leads to inefficient use of both time and manpower. Early-stage adaptive TSC methods tackle optimization challenges to develop efficient coordination and control strategies. Notable TSC solutions, including Split Cycle Offset Optimisation Technique (SCOOT) (Hunt et al., 1982) and Sydney Coordinated Adaptive Traffic System (SCATS) (Stevanovic et al., 2009), have been implemented in many cities around the world (Chu et al., 2019). However, these adaptive TSC systems, like SCATS, mainly address vehicle traffic and often require further enhancements to better accommodate other modes, such as public transportation, pedestrians, and cyclists. To serve integrated multimodal transportation systems more effectively, SCATS and similar adaptive approaches require more innovative adaptations (McCann and Curley, 2015). In order to elevate the efficiency of TSC, the paradigm of Deep Reinforcement Learning (DRL) has been ex-tensively leveraged to handle the complex and fluctuating environmental dynamics in traffic and transportation systems (Chan et al., 2026a). DRL is particularly effective in TSC due to its ability to autonomously discover optimal strategies through a process of trial and error, effectively adapt to evolving conditions, and make informed decisions grounded in intricate and variable traffic patterns. This approach has been shown to surpass conventional transportation approaches in managing traffic flows, as evidenced by several recent studies (Yazdani et al., 2023; Zhang et al., 2025; Chan et al., 2026b). These studies highlight the substantial benefits of DRL, showcasing its po-tential to revolutionize traffic management by enhancing decision-making processes and response times to real-time traffic situations.      
+
+> ∗Corresponding author
+> Email addresses: xiaocai.zhang@unimelb.edu.au (Xiaocai Zhang), neema.nassir@unimelb.edu.au (Neema Nassir),
+> milad.haghani@unimelb.edu.au (Milad Haghani)
+> arXiv:2602.17068v1 [cs.LG] 19 Feb 2026
+
+In the early stages, the applications of DRL in TSC were primarily concentrated on individual intersections. Subsequently, techniques like Q-learning (Prabuchandran et al., 2014), DQN (Ge et al., 2019), DDDQN (Gong et al., 2019), and hybrid methods that integrate fuzzy control with DRL (Kumar et al., 2020) were gradually extended to optimize the signal control of multiple intersections. Coordinating traffic signals effectively is essential to ensure that all traffic lights within a network collaborate to enhance overall traffic flow efficiency. This paper aims to develop advanced DRL methodologies for TSC at multiple intersections within the same corridor. However, most prior DRL-based multi-intersection coordination studies primarily optimize vehicle-centric objectives, such as maximizing throughput (Duan et al., 2025) and minimizing waiting time (Xu et al., 2024) or congestion. Yet such vehicle-centric metrics can overlook how delays are distributed across modes and travelers, especially when public transport carries far more passengers per vehicle. This motivates the exploration of more humanized and human-centric objectives, such as number of passengers experiencing delay, particularly for high-occupancy public transportation, to maintain equity and human-centric utilitarian among different modalities of transportation, within DRL frameworks for traffic and social management. In this paper, we introduce a novel DRL framework tailored for multi-agent, multimodal TSC across networks of multiple intersections. The proposed framework follows an actor–critic architecture under a Centralized Training and Decentralized Execution (CTDE) paradigm, where centralized critics leverage global network-level information during training, while decentralized actors operate solely on local observations at execution time. To effectively capture complex spatial and temporal dependencies among intersections, we design a dual-stage hypergraph (DSH) representation that models both spatial and temporal interactions. Building on this design, we term our approach STDSH-MARL ( Spatio-Temporal Dual-Stage Hypergraph-based Multi-Agent Reinforcement Learning). Owing to its decentralized actor design, STDSH-MARL can scale to large corridor or network-level deployments without relying on global information at runtime. The transportation modalities involved include vehicles and public transportation of buses and trams to accommodate a large number of passengers. The proposed method is to find the optimal timing of the traffic signals for the following phase for each intersection within this corridor network, by treating every participant in the transportation network equally. As shown by Figure 1, users of the transportation services can come from various modalities, such as private cars, pedestrians, cyclists, and public transit options like buses or trams. The information such as the numbers of users for different modalities of transportation is useful for human-centric optimization. On the other hand, recent advances in sensing technologies, wireless communications, and Artificial Intelligence (AI) have significantly enhanced real-time multimodal data acquisition. For example, the number of occupants in a car can be estimated (Jiang et al., 2023; Papakis et al., 2021), the number of pedestrians can be counted using Bluetooth low energy scanners (Gong and Abdel-Aty, 2022), and on-board passenger counts for public transportation could be precisely predicted using advanced machine learning models (Roncoli et al., 2023). Advanced Sensor AI     
+
+> Real-time multimodal data acquisition
+> Wireless
+> Communications
+> Occupants Passengers Passengers
+> Multimodal transportation
+> Pedestrians Cyclists
+> MARL + Centralized training
+> Actor
+> Network
+> Critic
+> Network
+> Spatio-temporal hypergraph embedding
+> Decentralized execution
+> …
+> Agent 1
+> Agent 2
+> Agent N
+
++ +
+
+> Figure 1: Overview of the proposed STDSH-MARL framework for multimodal corridor traffic signal control.
+
+The main contributions of this study are summarized as follows: 1. We introduced the concept of forward-looking human-centric TSC at multiple intersections considering human-centric utilitarian objective by treating every participant in the transportation network equally; 2. We include multimodal transportation optimization by considering the priority for high-capacity public transit (e.g., trams) to move more passengers efficiently; 23. We design an adaptive hybrid action space including comprehensive signal configurations as well as their corresponding green timing; 4. We presented a multi-agent RL framework employing a novel spatio-temporal dual hypergraph attention mechanism in modeling corridor network; 5. We have conducted comprehensive testing across five typical traffic scenarios to validate the efficiency and robustness of our proposed DRL model in multi-agent environments. The structure of subsequent sections of this paper is organized as follows: Section 2 provides an in-depth review of existing research on multi-agent DRL approaches for TSC. Section 3 details the proposed methodology, including a preliminary overview and crucial module of the preliminary such as spatio-temporal hypergraph, dual-stage hypergraph attention, state representation, action space, reward mechanism, and MARL learning. Section 4 discusses the experimental results, analyses, and ablation studies. Finally, Section 5 concludes the study and outlines directions for future research. 
+
+2. Related work 
+
+We conducted an extensive literature review of 45 recent peer-reviewed papers on multi-agent DRL in TSC across multiple intersections. These papers were published in prestigious journals and conferences, including Trans-portation Research Part C: Emerging Technologies, IEEE Transactions on Intelligent Transportation Systems, Neurocomputing, the ACM SIGKDD Conference on Knowledge Discovery and Data Mining, and the International Joint Conference on Artificial Intelligence (IJCAI). In the following sections, we review existing TSC methods that utilize DRL, examining them from three perspectives: traffic simulation environment, reward mechanism, and multi-agent DRL framework. 
+
+2.1. Traffic simulation environment 
+
+Microscopic traffic simulation is widely used to replicate realistic traffic environments for multi-agent traffic signal control research based on DRL. Five popular simulation tools are commonly employed in this field: SUMO 1,CityFlow 2, VISSIM 3, Aimsun 4, and Paramics 5. Table 1 lists the traffic simulation tools used by each study. The majority of existing studies, around 57.78% (26 out of 45), use SUMO for environment simulation, probably due to its free availability, which is advantageous for budget-limited projects. CityFlow ranks as the second most popular choice, utilized in 10 studies. PTV VISSIM is third, used in 5 studies, Aimsun has been applied in 2 studies for multi-agent traffic signal control. While Paramics has been used in only one study. SUMO and CityFlow are freely available, while VISSIM, Aimsun, and Paramics are commercial software, which can be costly. While SUMO is functional, its visualization is less advanced compared to commercial software. CityFlow is specifically designed for reinforcement learning applications in traffic signal control, making it less versatile than other simulators. Paramics offers detailed microscopic simulation and real-time traffic management capabilities, making it particularly suitable for testing adaptive signal control and ITS applications. VISSIM excels in modeling complex vehicle interactions and mixed traffic, whereas Aimsun supports both microscopic and mesoscopic simulations and can handle large networks. Additionally, VISSIM, Aimsun, and Paramics can be integrated with other software and databases, enhancing their functionality. 
+
+2.2. Reward mechanism 
+
+The reward mechanism is a key component in developing DRL models, as it guides the learning process of an agent by providing feedback during interactions with its environment. Most of the studies reviewed primarily define rewards from the perspective of the vehicle, with only 2 studies out of 45 also considering multimodal transport, like pedestrians, in the reward function design. For example, Wu et al. (2020b) developed a comprehensive reward function based on a weighted value incorporating six factors: total vehicle queue length, cumulative vehicle waiting time, vehicle delay, total vehicle throughput, traffic light status, and pedestrian waiting times at intersections. Zhang et al. (2025) developed a fairness-based traffic signal control method that use travelers affected by delay 
+
+> 1https://eclipse.dev/sumo/
+> 2https://cityflow-project.github.io/
+> 3https://www.ptvgroup.com/en/products/ptv-vissim
+> 4https://www.aimsun.com/
+> 5https://www.systra.com/digital/solutions/transport-planning/paramics/
+
+3Table 1: Summary of traffic simulation environments 
+
+Traffic Simulation References Quantity SUMO Wang et al. (2021a); Li et al. (2021); Su et al. (2023); Song et al. (2024); Wang et al. (2024); Bie et al. (2024); Yang (2023); Yang et al. (2021); Ren et al. (2024); Xu et al. (2024); Zhang et al. (2022b); Hu and Li (2024); Tan et al. (2020); Chu et al. (2019); Wu et al. (2020b); Bokade et al. (2023); Ge et al. (2021); Luo et al. (2024); Liu and Li (2023); Nie et al. (2025); Jia and Ji (2025); Fereidooni et al. (2025); Shen (2025); Chu et al. (2016); Ma and Wu (2020); Tao et al. (2023) 26 CityFlow Zhu et al. (2023); Liu et al. (2023a); Wu et al. (2022); Liu et al. (2023b); Zhang et al. (2022a); Wang et al. (2020b); Liu et al. (2025); Lai et al. (2025); Satheesh and Powell (2025); Wang et al. (2025) 10 VISSIM Jiang et al. (2021); Wang et al. (2021b); Wu et al. (2020a); Lee et al. (2019); Zhang et al. (2025) 5Aimsun Abdoos (2020); Yoon et al. (2025) 2Paramics El-Tantawy et al. (2013) 1NM Wang et al. (2020a) 1
+
+Notes: “NM ” means “not mentioned in the paper”. as the reward function, which includes travelers from privates vehicles, public transportation and pedestrians. In studies focused solely on vehicles, reward functions are typically based on factors like vehicle delay, queue length (or the number of vehicles waiting at intersections), waiting time, throughput, and speed, either individually or in combination. Table 3 provides a detailed summary of reward definitions across studies. Queue length is a commonly used metric, with 11 studies relying exclusively on it as an indicator, as shown in the first row of Table 3. Additionally, some studies combine queue length with other indicators. For example, 5 studies use both queue length and vehicle waiting time, making this the second most popular reward mechanism. Su et al. (2023) introduced the concept of ’pressure’, defined as the difference between traffic density on incoming and outgoing lanes. Other research works used changes between consecutive time steps as rewards; for instance, Jiang et al. (2021) and Luo et al. (2024) defined rewards as the change in vehicle queue length between timesteps, capturing evolving dynamics during learning. Similarly, Li et al. (2021) leveraged the change in vehicle delay between consecutive times as the reward function. The most comprehensive reward structure was constructed by Hu and Li (2024), incorporating six indicators: vehicle throughput, queue length, phase switch penalty, minor street phase penalty, lane delay, and waiting time. Also, Shen (2025) constructed a reward based on six indicators: total delay, queue length, waiting time, throughput, average travel time and average speed. 
+
+2.3. Graph-based network representation 
+
+Graph-based representations model the traffic network as a graph, where intersections are treated as nodes and roads as edges, allowing the use of Graph Neural Networks (GNNs), Convolutional Neural Networks (CNNs), and Dynamic Spatio-Temporal Hypergraph (DSTH) to capture complex structural and relational dependencies within the network. These models are especially suited for large-scale traffic control systems, where understanding interconnections between intersections is crucial for effective coordination. A wide range of graph-based techniques have been applied. Common GNN variants include Graph Convolutional Networks (GCNs), Graph Attention Networks (GATs), Graph Sample and Aggregate Network (GraphSAGE), and hierarchical or spatial-attention models such as Stochastic Aggregation GNN (SA-GNN), Heterogeneous Graph Attention Network (HGAT), and Heterogeneous GCN (HGCN). These approaches are capable of extracting high-level, scalable representations that reflect both topological structure and dynamic traffic conditions. For instance, Wang et al. (2024) employed GATs with multi-head attention to aggregate local information within intersections. Yoon et al. (2025) modeled the road network as a bi-directional link graph and applied a message-passing GNN that iteratively updates edge and node embeddings via multi-layer perceptron with permutation-invariant aggregation to learn traffic dynamics. Chu et al. (2016) represented the traffic network as a stack of 2D images, with each pixel corresponding to a spatial location (e.g., traffic light or intersection), and image channels encoding different types of traffic-related data. CNNs were then used to extract spatial features from these images. Additionally, graph decomposition techniques such as Laplacian matrices and the Normalized Cut (Ncut) algorithm facilitate structural learning by segmenting the network into regions based on connectivity and traffic flow. In the study by Ma and Wu (2020), the network is partitioned into disjoint subgraphs, and a hierarchical structure is built to enhance global coordination. 4Similarly, Tao et al. (2023) applied the Ncut method to cluster intersections into spatially compact regions with similar congestion profiles. Wang et al. (2025) extended this concept by introducing a DSTH, where hyperedges connect multiple intersections instead of just forming pairwise relationships. These connections are determined by dynamically computed reconstruction coefficients. Nie et al. (2025) introduced a Cooperation Enhancement Module built on a GAT network, which lets each intersection dynamically aggregate neighbouring agents’ state information, so agents can better capture the complex, time-varying interactions across the network.                 
+
+> Table 2: Summary of factors considering for reward mechanism for each reference (i) Reward Components References Quantity Queue length (veh) Zhu et al. (2023); Liu et al. (2023a); Wang et al. (2020a); Liu et al. (2023b); Tan et al. (2020); Bokade et al. (2023); Zhang et al. (2022a); Wang et al. (2020b); Fereidooni et al. (2025); Liu et al. (2025); Lai et al. (2025); Chu et al. (2016); Wang et al. (2025) 13 Waiting time (veh) Wang et al. (2024); Yang (2023); Yang et al. (2021); 5Queue length (veh) Chu et al. (2019); Liu and Li (2023) Difference of queue lengths between two con-secutive timesteps (veh) Jiang et al. (2021); Luo et al. (2024) 2Waiting time (veh) Wu et al. (2022); Xu et al. (2024) 2Throughput (veh) Hu and Li (2024) 1Queue length (veh) Phase switch penalty Minor street phase penalty Lane delay/speed loss (veh) Waiting time (veh) Total delay (veh) Shen (2025) 1Queue length (veh) Waiting time (veh) Throughput (veh) Average travel time (veh) Average speed (veh) Waiting time (veh) Wu et al. (2020b) 1Waiting time (ped) Queue length (veh) Throughput (veh) Traffic light blinking condition Waiting time (veh) Ge et al. (2021) 1Queue length (veh) Total number of vehciles Speed (veh) Number of approaching vehicles Ma and Wu (2020) 1Cumulative waiting time (veh) Number of vehicles reaching destination Traffic flow liquidity Traffic density (veh) Wang et al. (2021a) 1Speed (veh) Distance between intersections
+> Notes: “veh” means vehicle and “ped” stands for pedestrian.
+
+2.4. Multi-agent DRL framework 
+
+The fundamental DRL framework for multi-agent TSC can be categorized into three types based on the learning process: value-based DRL methods, policy-based DRL methods, and hybrid DRL methods. Each of these will be explained in the following sections. 
+
+2.4.1. Value-based DRL methods 
+
+Value-based DRL focuses on learning the value of each action in a given state without explicitly learning the policy. The policy is derived by selecting actions that maximize the estimated values (McKenzie and McDonnell, 2022). For multi-agent TSC, value-based DRL methods primarily include Q-learning and deep Q-learning variants, such as Deep Q-Network (DQN), Double Deep Q-Network (DDQN), Double Dueling Deep Q-Learning Network (DDDQN), and QMIX. Table 4 summarizes the value-based DRL approaches from the reviewed papers. Traditional Q-learning methods have been employed in two studies. One study used a broad learning system instead of a deep learning framework for modeling (Zhu et al., 2023), while the other applied the standard Q-learning algorithm for decision-making (Abdoos, 2020). In particular, Zhu et al. (2023) proposed a multi-agent 5Table 3: Summary of factors considering for reward mechanism for each reference (ii) Reward Components References Quantity Travel time delay (veh) Song et al. (2024) 1Queue length (veh) Throughput (veh) Waiting time (veh) Bie et al. (2024) 1Queue length (veh) Throughput (veh) Queue length (veh) Zhang et al. (2022b) 1Traffic density (veh) Cumulative stop delay (veh) Waiting time (veh) Nie et al. (2025) 1Emission (veh) Cumulative collision risk index (veh) Waiting time (veh) Jia and Ji (2025) 1Throughput (veh) Variance of green time across phases Total number of vehicles Lee et al. (2019) 1Speed (veh) Queue length (veh) Yoon et al. (2025) 1Throughput (veh) Waiting time (veh) Ren et al. (2024) 1Emission (veh) Queue length (veh) Tao et al. (2023) 1Average speed (veh) Number of moving vehicles Satheesh and Powell (2025) 1Number of waiting vehicles Difference of delays between two consecutive timesteps (veh) Li et al. (2021) 1Average delay time (veh) Abdoos (2020) 1Cumulative delay (veh) El-Tantawy et al. (2013) 1Pressure (veh) Su et al. (2023) 1Throughput (veh) Wu et al. (2020a) 1Speed (veh) Wang et al. (2021b) 1Number of delayed travellers Zhang et al. (2025) 1
+
+Notes: “veh” means vehicle and “ped” stands for pedestrian. 
+
+6DRL approach using broad learning architectures (Gong et al., 2021), which significantly reduces model complexity and, consequently, training time, without sacrificing performance. Q-learning was utilized within this broader framework. In contrast, Abdoos (2020) introduced an innovative TSC method that integrates game theory with DRL. This method features a two-mode agent architecture in which each intersection is controlled by an agent that operates independently during normal traffic conditions and cooperatively when traffic becomes congested. Each agent utilizes Q-learning to manage its intersection under normal conditions. However, in times of congestion, the agents shift to a cooperative mode, using game theory to dynamically coordinate traffic signals with adjacent agents. El-Tantawy et al. (2013) proposed MARLIN-ATSC, a decentralized multi-agent RL system for network-wide adaptive signal control that coordinates neighboring intersections via modular Q-learning and learned neighbor-policy models. Multi-agent DRL based on DQN is the most popular method, employed by a total of 12 studies. Wang et al. (2021a) proposed a cooperative, group-based multi-agent DRL framework that uses k-Nearest-Neighbor (kNN) for state representation to enhance coordination among agents. They adapted the DQN framework to a multi-agent environment for Q-value approximation. Wang et al. (2024) introduced a multi-agent DRL approach tailored for complex, large-scale traffic networks, where each intersection is modeled as a graph with lanes acting as nodes and traffic relationships forming the edges. Graph Attention Network (GAT) is utilized to learn lane embeddings that encapsulate spatial and geometric features of intersections. These embeddings are then fed into DQN for the evaluation of Q-values. Bie et al. (2024) presented a multi-agent DRL framework that tackles intersection heterogeneity by employing Graph Attention Networks (GATs) to capture interactions and dependencies between intersections. The core element of this DRL approach is DQN, which aims to select optimal actions by maximizing Q-values. Liu et al. (2023a) employed a decentralized form of DQN, in which each agent operates independently but shares some information with neighboring agents. Xu et al. (2024) addressed the issue of missing data in TSC by introducing a Wasserstein Generative Adversarial Network (WGAN) to estimate the state space and maintain data integrity. They also utilized a Graph Neural Network (GNN) to aggregate state features from multiple agents, which is crucial for informed decision-making. Each agent then applied decentralized DQN-based learning to select the optimal action. In the study by Wang et al. (2021b), a Generative Adversarial Network (GAN) framework was employed for traffic data recovery, utilizing a decentralized model based on DQN. Tan et al. (2020) utilized the bootstrapped DQN algorithm, which enhances exploration through an ensemble of behavior policies. This approach demonstrated superior efficiency and robustness compared to standard DQN by managing uncertainty more effectively. Wu et al. (2020a) demonstrated a decentralized multi-agent DRL approach based on DQN, applying transfer learning to assess the robustness of the algorithm and traditional control methods under varying traffic scenarios, such as changes in traffic volume, flow patterns, and sensor reliability. Zhang et al. (2022a) implemented a decentralized multi-agent DRL where each agent learns independently from its own observations as well as those from neighboring intersections, utilizing Hysteretic DQN for strategy optimization. Hysteretic DQN, which is a variant of the standard DQN, introduces a novel update mechanism designed to address the complexities in multi-agent environments. Liu and Li (2023) introduced a multi-agent DRL strategy for optimizing traffic light control in areas affected by epidemics, incorporating a Convolutional Neural Network (CNN) to process state representations within the DQN framework. Meanwhile, Wang et al. (2020b) discussed a spatio-temporal multi-agent DRL framework that integrates GNN, RNN, and DQN. RNNs are employed to capture the temporal dynamics of traffic, while GNNs model cooperative structures among traffic lights based on an adjacency graph, enabling each traffic light to make decisions through deep Q-learning. Wang et al. (2020a) addressed the issue of large-scale traffic signal control with a scalable independent double DQN (DDQN) method aimed at reducing the overestimation issues found in standard DQN algorithms. The approach incorporates an upper confidence bound policy to balance the exploration-exploitation trade-off. Liu et al. (2023b) created a grouped multi-agent DRL framework for managing large-scale traffic signal control by clustering agents (intersections) based on environmental similarity. A Graph Convolutional Network (GCN) extracts features from the traffic network, modeled as a graph, and QMIX is implemented for policy learning. Agents within the same group share a neural network model and parameters, facilitating efficient learning and decision-making. Bokade et al. (2023) demonstrated a centralized training with decentralized execution approach for inter-agent communication in large-scale traffic control. Using QMIX, agents learn to identify which parts of their messages need to be shared with others to achieve effective coordination. Liu et al. (2025) proposed a method that (i) uses a multi-head GAT to extract local multi-dimensional features, (ii) mines global similarities via two representation-space losses to group distant yet similar intersections and share policy parameters, and (iii) integrates these in a QMIX learner. Hu and Li (2024) modeled traffic signal coordination using a multi-agent system that incorporates both local and global agents with a DDQN approach. The system comprises seven local agents, one for each intersection, which operate independently but are coordinated by a global agent. This setup allows for localized decision-making while aligning 7with global objectives. Jiang et al. (2021) proposed a distributed multi-agent DRL approach that utilizes graph decomposition to handle large-scale traffic signal control. The network of intersections is segmented into subgraphs according to connectivity, with each controlled by a collective of agents operating within the DRL framework. They employ the framework of DDDQN to enhance learning efficiency. DDDQN combines the advantages of DDQN to minimize Q-value overestimation. The dueling architecture in DDDQN enables more effective state-value learning. Additionally, the prioritized experience replay makes it concentrate on critical experiences to accelerate the learning process. 
+
+> Table 4: Summary of value-based DRL frameworks
+
+DRL Framework References Quantity Q-learning Zhu et al. (2023); Abdoos (2020); El-Tantawy et al. (2013); Chu et al. (2016) 4DQN Wang et al. (2021a, 2024); Bie et al. (2024); Liu et al. (2023a); Xu et al. (2024); Wang et al. (2021b); Tan et al. (2020); Wu et al. (2020a); Zhang et al. (2022a); Lee et al. (2019); Liu and Li (2023); Wang et al. (2020b); Fereidooni et al. (2025); Lai et al. (2025); Tao et al. (2023) 15 QMIX Liu et al. (2023b); Bokade et al. (2023); Liu et al. (2025) 3DDQN Hu and Li (2024); Wang et al. (2020a) 2DDDQN Jiang et al. (2021) 1
+
+2.4.2. Policy-based DRL methods 
+
+Policy-based DRL methods focus on directly learning the policy that determines the agent’s actions in a given state. Unlike value-based approaches, which learn a value function and derive a policy from it, policy-based methods optimize the policy itself without the need for an explicit value function (Li, 2017). For multi-agent TSC, policy-based DRL methods primarily include Proximal Policy Optimization (PPO) and Counterfactual Multi-Agent (COMA) Policy Gradient. Table 5 provides a summary of the policy-based DRL methods examined in the reviewed studies. Ren et al. (2024) put forward a two-tier coordinated DRL framework designed for multi-agent TSC. This framework comprises a local cooperation layer and a global cooperation layer. At the local layer, each intersection functions as an independent agent, making decisions based on its immediate traffic conditions. Meanwhile, the global layer ensures the coordination of actions across the entire intersection network. PPO is utilized as the primary reinforcement learning algorithm for agents in both layers. Similarly, Zhang et al. (2022b) employed the PPO algorithm, incorporating parameter sharing among multiple agents, to address multi-agent TSC along an arterial corridor. This method accelerates the learning process and minimizes computational overhead. Luo et al. (2024) presented a hybrid action space method for optimizing traffic signal control, integrating both discrete and continuous actions. The discrete component manages the selection of traffic light stages, while the continuous component fine-tunes the duration of green light intervals. To efficiently handle these hybrid action spaces, a DRL framework based on PPO was developed. Nie et al. (2025) proposed CMRM, a collaborative MARL method for multi-objective TSC: it augments independent PPO with a Cooperation Enhancement Module (CEM) based on graph attention to share informative neighbor context. Satheesh and Powell (2025) proposed a constrained DRL method based on PPO. A multi-agent DRL based on PPO actor–critic augmented with a learned Lagrange Cost Estimator that stabilizes updates of the Lagrange multiplier to boost throughput/reduces delay with fewer constraint violations. Song et al. (2024) suggested a novel DRL framework based on the COMA Policy Gradient method. COMA, a specialized actor-critic approach for multi-agent systems, employs a centralized critic to compute the advantage function for each agent’s actions relative to a counterfactual baseline. The actors function in a decentralized manner, utilizing both local and globally shared information. Furthermore, the framework integrates an innovative scheduler component to improve information sharing among the decentralized actors. 
+
+> Table 5: Summary of policy-based DRL frameworks
+
+DRL Framework References Quantity PPO Ren et al. (2024); Zhang et al. (2022b); Luo et al. (2024); Nie et al. (2025); Fereidooni et al. (2025); Satheesh and Powell (2025) 6COMA Policy Gradient Song et al. (2024) 182.4.3. Hybrid DRL methods 
+
+Hybrid DRL combines elements from both value-based and policy-based methods, leveraging the strengths of each to mitigate their individual limitations (Farazi et al., 2021). These hybrid DRL approaches are primarily built on an actor-critic structure. Common frameworks include Advantage Actor-Critic (A2C), Actor-Critic, Deep Deterministic Policy Gradient (DDPG), Asynchronous Advantage Actor-Critic (A3C), and Soft Actor-Critic (SAC). Table 6 provides a summary of hybrid DRL methods applied to the multi-agent TSC research problem. Yang (2023) proposed a novel approach that combines multi-granularity information fusion with a mutual information optimization framework for urban traffic signal control. Multi-granularity fusion integrates both current and historical traffic signal states across multiple time steps to capture a comprehensive view of traffic dynamics. GNNs are used to encode state information, leveraging spatial relationships among traffic nodes. The approach employs decentralized execution with centralized training using an actor-critic DRL framework. Yang et al. (2021) devised a multi-agent DRL approach that combines inductive learning with a heterogeneous GNN. In this model, the traffic network is represented as a heterogeneous graph where nodes correspond to different elements, such as vehicles, traffic signals, and intersections. The inductive learning framework can generate embeddings for nodes not encountered during training, which is especially useful in dynamic traffic networks with continuously changing vehicles and conditions. An actor-critic framework supports agent learning in this approach. Su et al. (2023) employed a multi-agent A2C-based DRL framework for managing dynamic routing and traffic signal control of emergency vehicles (EMVs). This framework integrates dynamic EMV routing with traffic signal preemption, facilitating efficient EMV movement while minimizing the impact on regular traffic. The proposed DRL framework incorporates a policy-sharing mechanism and a spatial discount factor, allowing each traffic signal, functioning as an agent, to make informed decisions based on both local and network-wide information. Wu et al. (2022) introduced two DRL algorithms enhanced by game theory principles: Nash Advantage Actor–Critic (Nash-A2C) and Nash Asynchronous Advantage Actor–Critic (Nash-A3C). Nash-A2C combines the Nash Equilibrium framework with conventional Actor-Critic methods to alleviate congestion and reduce network delays. Nash-A3C builds upon Nash-A2C by introducing asynchronous operations across multiple agents within the traffic network, utilizing a centralized training process paired with decentralized execution. Chu et al. (2019) highlighted a multi-agent DRL approach for TSC utilizing a decentralized A2C framework. The approach incorporates neighborhood fingerprints, enabling each agent to consider the recent policies of neighboring agents. This mechanism reduces uncertainty and enhances decision-making despite incomplete information. Additionally, a spatial discount factor is applied to reduce the impact of distant agents, allowing each agent to prioritize local traffic conditions effectively. 
+
+> Table 6: Summary of hybrid-based DRL frameworks
+
+DRL Framework References Quantity A2C Su et al. (2023); Wu et al. (2022); Chu et al. (2019); Ma and Wu (2020) 4A3C Wu et al. (2022) 1Actor-Critic Yang (2023); Yang et al. (2021) 2DDPG Li et al. (2021); Wu et al. (2020b); Jia and Ji (2025); Shen (2025); Yoon et al. (2025) 5SAC Ge et al. (2021); Zhang et al. (2025); Wang et al. (2025) 3Li et al. (2021) outlined a knowledge-sharing DDPG (KS-DDPG) approach for multi-agent TSC. Built on the DDPG algorithm, KS-DDPG employs centralized training with decentralized execution. During training, agents learn from the aggregated experiences of all agents in a centralized manner. However, execution is decentral-ized, allowing each agent to make independent decisions based on private observations and shared knowledge. The knowledge-sharing component accelerates model convergence without significantly increasing computational demands. Wu et al. (2020b) explored a multi-agent recurrent DDPG framework combining DDPG with Long Short-Term Memory (LSTM) to improve the handling of temporal dependencies and partial observability in traffic environments. Both the actor and critic networks in DDPG are equipped with LSTM layers. Simulations validate the model’s effectiveness, demonstrating its ability to reduce vehicle and pedestrian congestion more effectively than other methods, particularly in complex urban settings with multiple intersections. Jia and Ji (2025) proposed a hybrid MADRL traffic-signal framework that fuses spatio-temporal attention (GAT for spatial deps + LSTM for temporal trends) with hierarchical control (sub-region agents + a global coordinator) under CTDE using multi-agent DDPG learning framework. The results reports 25% lower average waiting time and the highest throughput versus fixed-time, actuated, Max-Pressure, DQN, PPO, and vanilla MADDPG baselines. 9Ge et al. (2021) designed a multi-agent DRL approach based on SAC, tailored for multi-agent environments with entropy maximization to maintain a balance between exploration and exploitation. The approach incorporates a multi-view encoder to process state inputs from diverse perspectives: a 1D vector represents local intersection data, while a 2D state representation, processed through a CNN, captures spatial traffic dynamics. Furthermore, a transfer learning mechanism with cooperative guidance enables agents to develop generalizable skills while adapting to the unique characteristics of specific intersections. Zhang et al. (2025) proposed an M 2SAC, a cooperative masked SAC for corridor-level signal control, where a hybrid actor network generate a Gaussian-sampled phase mask that can defer the last phase to the next cycle and then picks green-time splits via a masked softmax function. Ablation studies show the introduced mask mechanism yields extra gains. 
+
+2.5. Summary 
+
+The majority of existing multi-agent TSC research relies on SUMO or CityFlow for traffic environment simu-lation. Furthermore, most prior work designs reward functions to reduce vehicle-centric congestion or delay, and few explicitly optimize human-centric utilitarian outcomes or capture individual traveler experience. In multi-agent traffic signal control for urban road networks, representation learning has predominantly relied on GNNs and CNNs, while hypergraph-based formulations of the network structure have received comparatively little attention. Addi-tionally, these studies typically utilize one of three groups of DRL frameworks: value-based DRL, policy-based DRL, and hybrid DRL methods. Within these categories, DQN is predominantly used for value-based DRL, PPO for policy-based DRL, and actor-critic structures like A2C, vanilla Actor-Critic, and DDPG for hybrid DRL methods. In recent years, research has largely focused on adapting and refining established DRL frameworks for traffic signal optimization, rather than introducing fundamentally new learning paradigms. 
+
+3. Methodology 
+
+This section first provides an overview of the proposed methodology. It then presents a detailed description of each key component, including the spatio-temporal hypergraph, dual-stage hypergraph attention mechanism, state representation, action space, reward design, and the MARL training process. 
+
+3.1. Overview 
+
+Fig. 2 provides an overview of the proposed methodology. The inputs comprise spatio-temporal traffic data over a specified time window and the corridor network topology. The framework has two parallel streams: (i) construction of a spatio-temporal hypergraph followed by the dual-stage hypergraph attention (DSHA) module to learn a hypergraph-level embedding, and (ii) formation of the agent state representation for control. The spatio-temporal hypergraph consists of nodes and hyperedges, where the hyperedges include spatial and temporal hyperedges. DSHA is the core novel component and integrates two attention mechanisms: intra-hyperedge atten-tion and inter-hyperedge attention. Intra-hyperedge attention models interactions among nodes within the same hyperedge, whereas inter-hyperedge attention learns the relative importance of different hyperedges. The result-ing hypergraph-level embedding is fed into the critic network, while the state representation is fed into the policy network. The multi-agent, multimodal traffic environment is simulated in PTV VISSIM. 
+
+3.2. Spatio-temporal hypergraph 
+
+A hypergraph is a generalization of a conventional graph that allows each edge, called a hyperedge , to connect more than two nodes. Formally, a spatio-temporal hypergraph is defined as: 
+
+G = ( V, E), (1) and 
+
+E = Es ∪ E t, (2) where V = {v1, v 2, . . . , v N } denotes the set of nodes and E denotes the set of hyperedges, it includes spatial hyper-edges Es and temporal hyperedges Et. where each hyperedge connects one or more nodes. Es = {e(s)1 , e (s)2 , . . . , e (s) 
+
+> M
+
+}
+
+and Et = {e(t)1 , e (t)2 , . . . , e (t) 
+
+> P
+
+}.The relationships between nodes and hyperedges are encoded in the node–hyperedge incidence matrix H ∈
+
+RN ×(M +P ), as defined by 
+
+Hij =
+
+(1, if vi ∈ ej , e j ∈ E ,
+
+0, otherwise. (3) 10 Spatio -temporal traffic data 
+
+> Intersections at corridor network
+
++
+
+> DSHA
+> Spatial
+> hyperedges
+> (SHE)
+> Temporal
+> hyperedges
+> (THE)
+> Spatio -temporal hypergraph
+
+…
+
+…    
+
+> Intra -hyperegde attention
+> Inter -hyperegde attention
+> Hypergraph -level
+> embedding
+> State
+> Multi -agent
+> environment
+> Action
+> Reward
+> Policy 𝜋
+> Critic 𝑉
+> Agent 1
+
+…     
+
+> Policy 𝜋
+> Critic 𝑉
+> Agent 2
+> Policy 𝜋
+> Critic 𝑉
+> Agent n
+> Shared parameters
+
+𝜋 𝑉  Shared parameters Figure 2: Overview of STDSH-MARL: DSHA learns a hypergraph-level embedding from spatial and temporal hyperedges for a central-ized critic, while decentralized agents act from local state representations in a VISSIM-simulated corridor. 
+
+By extending the hypergraph formulation to corridor-level traffic signal control, we consider a corridor network consisting of n intersections. Let t denote the number of past time steps and T the current time step. The temporal index set is therefore defined as (T − t + 1 , · · · , T − 1, T ). The node set, representing intersections in the corridor, is given by 
+
+V = {v1, v 2, . . . , v n}, (4) where each node stands for an intersection. For the spatial hyperedges, we have M = t, meaning that there are t
+
+spatial hyperedges, as for each timestamp, we include all nodes into this hyperedge (only investigating the spatial interdependency), therefore we will have t spatial hyperedges. For the temporal hyperedges, we have P = n,meaning that there are n temporal hyperedges, as for each intersection/node, we include all timestamps into this hyperedge, therefore we will have n temporal hyperedges (only investigating the temporal interdependency) for each node. All intersections (or time steps) are included within each hyperedge to allow the dual-stage hypergraph attention mechanism to automatically learn relevant dependencies without requiring manual prior specification. This will prevent us from determining the exact elements by constructing more hyperedges, which is exhaustive and requires more prior knowledge about it. 
+
+3.3. Dual-stage hypergraph attention 
+
+Let X ∈ RN ×d denote the node feature matrix and H ∈ { 0, 1}N ×E the incidence matrix, where E = M + P . We use K attention heads with per-head dimension dh = d/K . For head h ∈ { 1, . . . , K }, we first obtain head-specific node embeddings 
+
+X(h) = XW (h) ∈ RN ×dh , W(h) ∈ Rd×dh . (5) where W(h) ∈ Rd×dh denotes the learnable weight matrix. We employ a dual-stage attention mechanism consisting of: (A) intra-hyperedge attention and (B) inter-hyperedge attention. Intra-hyperedge attention assigns importance scores to member nodes within each hyperedge to produce a hyperedge embedding, thereby emphasizing the most informative nodes for that hyperedge. Inter-hyperedge attention then scores the candidate hyperedges associated with each node, highlighting which hyperedge type (e.g., spatial vs. temporal) is most relevant to that node. 
+
+Stage A: Intra-hyperedge attention. Each head produces a scalar node score and reuses it across all incident hyper-edges, as shown by 
+
+x(h) 
+
+> i
+
+=  X(h) 
+
+> i:
+
+∈ Rdh , (6) 11 and 
+
+s(h) 
+
+> i
+
+= a(h)⊤x(h) 
+
+> i
+
+, a(h) ∈ Rdh . (7) The attention of node i within hyperedge e is a masked softmax over N (e) with temperature τ > 0, as formulated by 
+
+α(h) 
+
+> ie
+
+= exp  (s(h) 
+
+> i
+
+− m(h) 
+
+> e
+
+)/τ  Hie NX
+
+> j=1
+
+exp  (s(h) 
+
+> j
+
+− m(h) 
+
+> e
+
+)/τ  Hje 
+
+, m(h) 
+
+> e
+
+= max   
+
+> j:Hje =1
+
+s(h) 
+
+> j
+
+. (8) The hyperedge embedding is then computed by a weighted aggregation of member nodes: 
+
+z(h) 
+
+> e
+
+= X 
+
+> i∈N (e)
+
+α(h) 
+
+> ie
+
+x(h) 
+
+> i
+
+∈ Rdh . (9) 
+
+Stage B: Inter-hyperedge attention. Each head scores hyperedge embeddings and normalizes across the incident hyperedges of each node, as shown by 
+
+t(h) 
+
+> e
+
+= b(h)⊤z(h) 
+
+> e
+
+, b(h) ∈ Rdh , (10) and 
+
+β(h) 
+
+> ie
+
+= exp  (t(h) 
+
+> e
+
+− m(h) 
+
+> i
+
+)/τ  Hie EX
+
+> e′=1
+
+exp  (t(h) 
+
+> e′
+
+− m(h) 
+
+> i
+
+)/τ  Hie ′
+
+, m(h) 
+
+> i
+
+= max    
+
+> e′:Hie ′=1
+
+t(h) 
+
+> e′
+
+. (11) In Eq. (11) we write the denominator as PEe′=1 exp(( t(h) 
+
+> e′
+
+− m(h) 
+
+> i
+
+)/τ ) Hie ′ . Here e′ is a dummy summation index 
+
+(also called a bound variable) that ranges over all hyperedges; it is used to distinguish the variable of summation from the fixed hyperedge e appearing in the numerator. The updated node representation for head h is obtained by aggregating hyperedge embeddings back to nodes, as shown by 
+
+˜x(h) 
+
+> i
+
+=
+
+> E
+
+X
+
+> e=1
+
+β(h) 
+
+> ie
+
+Hie z(h) 
+
+> e
+
+∈ Rdh , i = 1 , . . . , N, h = 1 , . . . , K, (12) and 
+
+˜X(h) =
+
+
+
+(˜ x(h)1 )⊤
+
+...
+
+(˜ x(h) 
+
+> N
+
+)⊤
+
+ ∈ RN ×dh , h = 1 , . . . , K. (13) We then concatenate per-head outputs, as shown by 
+
+˜X = Hh=1 ˜X(h) ∈ RN ×dcat , dcat =
+
+> K
+
+X
+
+> h=1
+
+dh, (14) and project to the model width, as formulated by 
+
+ˆY = ˜XW o + bo ∈ RN ×dmodel . (15) A permutation-invariant readout produces a hypergraph-level embedding g ∈ Rdmodel . Consistent with our imple-mentation, we use max pooling: 
+
+g = MaxPool 
+
+> i=1 ,...,N
+
+ˆYi: ∈ Rdmodel . (16) Unlike conventional graph attention mechanisms that capture pairwise interactions, the proposed dual-stage hy-pergraph attention explicitly models higher-order spatial and temporal dependencies, enabling more expressive representation learning for corridor-level traffic coordination. 12 3.4. State representation 
+
+For each intersection, we adopt a lane-level state representation. Specifically, we extract a compact set of high-level traffic descriptors from each approaching lane (Fig. 3), which are sufficiently representative while avoiding excessive computational and memory overhead. The extracted information covers four aspects: vehicle count, passenger count, queue length, and speed. The detailed lane-wise features are summarized in Table 7. Overall, we use four feature categories to characterize the prevailing traffic conditions: (i) approaching vehicle demand, (ii) passenger profiles, (iii) queue length, and (iv) speed profiles. For each category, we compute both aggregate features and mode-specific features (e.g., for buses, trams, and private vehicles). Finally, we concatenate the features from all approaching lanes into a single vector, which serves as the state representation of the intersection (i.e., the node state). 
+
+> Table 7: Features to define the state representation
+
+Type Features Vehicle number Total vehicle number, number of buses, number of trams, number of private vehicles. Passenger number Total passenger number, passenger number for buses, passenger number for trams, passenger number for private vehicles. Queue length Total queue length, queue length for buses, queue length for trams, queue length for private vehicles. Speed Average speed, average speed for buses, average speed for trams, average speed for private vehicles. Current signal phase One-hot embedding of current signal phase for corresponding in-tersection. 
+
+Notes: Vehicle in this study also includes trams. Passengers in private vehicles also account for the driver. A B C 
+
+> Figure 3: Coverage of the approaching lanes for the example intersection B among a corridor network. Green stands for the vehicle lanes and pink denotes tram lanes. It’s based on left-hand traffic countries.
+
+3.5. Action space 
+
+Compared with most studies that use either the next phase or the green duration as the action, we jointly select the next phase and its corresponding green time. Phase selection is drawn from a set of four configurations, as shown in Figure 4. For each direction, two movement patterns are available: (i) through and left-turn movements, and (ii) protected right-turn movements, resulting in four phase configurations in total. At each decision step, the agent chooses one phase configuration for the next phase, and consecutive selection of the same configuration is prohibited to avoid repeated phases. The green time duration is an integer value selected from 8 seconds to 45 seconds, there are 38 possible green time actions. Between each phase transition, we have designed 3 second amber time and 2 second all-red-clearance time to make safer phase transitions. We convert the whole action combining the phase configuration and green duration as a discrete space with dimension of 152, i.e., 38 × 4 = 152 .13 S
+
+> EW
+> N
+> Through/Left-Turn - NS
+> S
+> EW
+> N
+> Protected Right-Turn - NS
+> S
+> EW
+> N
+> Through/Left-Turn - EW
+> S
+> EW
+> N
+> Protected Right-Turn - EW Figure 4: Phase configurations for action selection.
+
+3.6. Reward mechanism 
+
+The reward is defined as the negative aggregate number of passengers experiencing delay across the corridor network, with impacts measured in seconds of delay per operation. These travelers include users of various trans-portation modalities such as buses, trams, and private vehicles. The metric for passengers affected is derived from the number of passengers experiencing delays, including vehicle occupants (including those on busses, trams, and private vehicles) for all modes of transportation. Delays for vehicle occupants and passengers are assessed by monitoring the speed of their vehicles. For vehicles, delays are considered when a vehicle’s speed falls below a specific threshold, indicating being affected. Specifically, for occupants or passengers in vehicles, a delay is defined as occurring when 
+
+vveh < θ vveh , (17) where vveh denotes the instantaneous vehicle speed, and θvveh is the speed threshold, set to 5 km /h in this study. The reward at decision step k for intersection i is formulated as 
+
+ri,k = − w1
+
+m
+
+> m
+
+X
+
+> t=1
+
+N it + w2
+
+m
+
+> m
+
+X
+
+> t=1
+
+ˆNt
+
+!
+
+, (18) where m is the time duration in seconds, i is the intersection index, t is the current timestamp, N it is the number of impacted passengers within the ith intersection, and ˆNt is the total number of impacted passengers within the whole network. w1 and w2 are weighting parameters for balancing local and global delays. 
+
+3.7. MARL learning 
+
+We model corridor-level traffic signal control as a cooperative multi-agent reinforcement learning (MARL) prob-lem with agents I = {1, . . . , n }, where each agent corresponds to an intersection. At time t, agent i observes a local state o(i) 
+
+> t
+
+∈ Rdo and selects a discrete action a(i) 
+
+> t
+
+∈ A (e.g., a phase-duration option). Let ot = ( o(1)  
+
+> t
+
+, . . . , o (n) 
+
+> t
+
+) and 
+
+at = ( a(1)  
+
+> t
+
+, . . . , a (n) 
+
+> t
+
+) denote the joint observation and joint action, respectively. The environment provides a shared scalar reward rt, transitions to the next joint observation ot+1 = ( o(1) 
+
+> t+1
+
+, . . . , o (n)
+
+> t+1
+
+), and the objective is to maximise the expected discounted return with discount factor γ ∈ (0 , 1) . We adopt a CTDE paradigm instantiated with an on-policy, actor–critic PPO framework, where each agent’s actor produces its action from local observations while a critic is trained to evaluate the joint behaviour during training. 
+
+Decentralized execution with parameter sharing. We adopt a parameter-sharing scheme in which all agents use a shared actor πθ . Under this setting, the joint policy factorizes as 
+
+πθ (at | ot) = 
+
+> n
+
+Y
+
+> i=1
+
+πθ
+
+ a(i) 
+
+> t
+
+| o(i)
+
+> t
+
+, (19) enabling fully decentralized action selection at execution time. In implementation, πθ is a two-layer MLP that maps each agent’s flattened local observation to a vector of logits over the discrete action set A.
+
+Centralized training via a hypergraph critic. To facilitate credit assignment, we employ a centralized value function 
+
+Vψ (gt), where gt ∈ Rd is a hypergraph-level embedding produced by the dual-stage hypergraph attention module (Eq. (16)). The critic Vψ is implemented as a two-layer MLP that maps gt to a scalar value estimate. 14 On-policy updates with PPO. From a rollout {(ot, at, r t)}T −1 
+
+> t=0
+
+we compute the discounted returns and advantages as 
+
+ˆRt = 
+
+> T−1−t
+
+X
+
+> k=0
+
+γkrt+k, (20) and ˆAt = ˆRt − Vψ (gφt ), (21) where Vψ (gφt ) is the centralized value estimate based on the hypergraph embedding at time t. We then optimize the actor using the clipped PPO objective (evaluated per time step and aggregated over the batch): 
+
+Lactor (θ) = − E
+
+h
+
+min 
+
+
+
+rt(θ) ˆAt, clip  rt(θ), 1−ϵ, 1+ ϵ ˆAt
+
+i 
+
+− αentropy EH(πθ (· | o(i) 
+
+> t
+
+)) , (22) and 
+
+rt(θ) = exp   log πθ − log πθold 
+
+, (23) where αentropy > 0 is the entropy-regularization coefficient that encourages exploration by rewarding higher policy entropy; larger values yield more stochastic policies (better exploration, slower convergence), while smaller values produce greedier policies (faster convergence, higher risk of premature collapse). The critic loss is formulated as 
+
+Lcritic (ψ) = 12 E( ˆRt − Vψ (gφt )) 2, (24) and 
+
+Lhypergraph (φ) = Lcritic . (25) For each update, we iterate over shuffled mini-batches for multiple PPO epochs and apply optional global-norm clipping to stabilize gradients. In implementation, we perform gradient-based updates by minimizing the actor loss 
+
+Lactor (θ), which is the negative of the clipped PPO surrogate augmented with an entropy bonus (i.e., equivalently maximizing the surrogate objective). The critic (and hypergraph encoder) is trained by minimizing the value regression loss Lcritic (ψ). The hypergraph attention module is trained jointly with the critic loss by optimizing the hypergraph parameters φ.At each time step, only agents whose local trigger is active resample a new action from πθ ; the remaining agents retain their previous action (phase), thereby reducing unnecessary switching. Execution remains fully decentralized via Eq. (19), while the centralized critic exploits global hypergraph context during training. 
+
+4. Experiments and results 
+
+4.1. Experimental setup 
+
+We construct a synthetic road corridor in Australia under a left-hand driving environment consisting of six signalized intersections. Each intersection has four approaches, and each approach comprises two incoming lanes. A tram track runs along the corridor, and three tram stops are modeled within the network. The traffic environment is simulated in PTV VISSIM 6 , a microscopic traffic simulation platform. Figure 5 shows the (partial) corridor network used in the experiments. The proposed model is evaluated under five independent scenarios. Scenario 1 represents an off-peak period with low demand. Scenario 2 captures the transition from off-peak to peak conditions with moderate demand. Scenario 3 simulates rush-hour traffic with high demand. Scenarios 4 and 5 represent school-period conditions: Scenario 4 corresponds to the morning school peak with increased inbound traffic toward a specific area, whereas Scenario 5 corresponds to the afternoon school peak with increased outbound traffic away from that area. All models are implemented in Python using TensorFlow, and experiments are conducted on a Windows workstation equipped with an AMD EPYC 7702 CPU (64 cores, 1996 MHz). 
+
+> 6https://www.ptvgroup.com/en/products/ptv-vissim
+
+15 NFigure 5: Partial view of the constructed corridor network in VISSIM for experimental evaluation. 
+
+4.1.1. Evaluation metrics 
+
+We evaluate model performance using the following network-wide metrics: (1) Average number of passengers experiencing delay (ANP), which quantifies the average number of delayed passengers per second over the test horizon, aggregated across all transportation modes in the network; (2) Average vehicle queue length (AQL), defined as the average number of road vehicles queued per second upstream of intersections across the network (excluding trams); (3) Average waiting time for buses (AWT (bus)), i.e., the mean time (s) a bus spends waiting to traverse the corridor; and (4) Average waiting time for trams (AWT (tram)), i.e., the mean time (s) a tram spends waiting to traverse the corridor. The two AWT metrics primarily capture the effectiveness of public-transportation prioritization. 
+
+4.1.2. Benchmarking 
+
+To evaluate the performance of the proposed STDSH-MARL, we benchmark it against a range of baseline meth-ods, including fixed-time signal control and several DRL-based ATSC approaches, namely MADQN, MADDQN, MAA2C, MAPPO, and CMRM. 
+
+• Fixed Signal with Webster’s Formula (FS-WF) : FS-WF employs Webster’s Formula to estimate the optimal cycle time, followed by green splitting to allocate green durations for each phase. Both the optimal cycle time estimation and green splitting are based on traffic demand. 
+
+• MADQN (Wei et al., 2018): This baseline formulates traffic signal control with a discrete action space using a DQN-based approach. It adopts a fully Decentralized Training and Decentralized Execution (DTDE) paradigm, where each agent learns and operates independently in the multi-agent environment. 
+
+• MADDQN (Wang et al., 2020a): This baseline extends MADQN by incorporating a DDQN as the underlying model to mitigate the Q-value overestimation issue inherent in standard DQN. It likewise follows the same DTDE paradigm as MADQN. 
+
+• MAA2C (Su et al., 2023): MAA2C is fundamentally developed on the well-established A2C framework, which provides stable and efficient learning for policy-based reinforcement learning. It adopts a CTDE paradigm for multi-agent environments. 
+
+• MAPPO : This baseline applies standard multi-agent PPO without incorporating hypergraph-based repre-sentation learning. It is included to isolate and quantify the benefit of introducing hypergraph embeddings, by directly comparing performance with and without the hypergraph module. 
+
+• CMRM (Nie et al., 2025): It combines a GAT with PPO for multi-agent traffic signal optimization. This baseline excludes hypergraph embeddings, serving as a standard graph-based alternative to assess the added value of hypergraph representations over conventional graph embeddings. It adopts a CTDE paradigm. 
+
+4.2. Scenario 1 
+
+Table 8 illustrates the performance comparison for scenario 1. This scenario represents a typical off-peak period with relatively low demand. The best metric is labelled in bold and the second best is labelled in underline. STDSH-MARL achieves the best performance in terms of ANP, AWT (bus) and AWT (tram). As the reward is defined based on passenger counts, these results indicate that STDSH-MARL achieves the best performance under this metric, yielding the lowest average number of passengers experiencing delays. However, MADDQN is competitive 16 0 200 400 600 800 1000 1200 1400 1600 1800 
+
+Time (s) 
+
+> STDSH-MARL
+> CMRM
+> MAPPO
+> MAA2C
+> MADDQN
+> MADQN
+> FS-WF
+> 1000
+> 1200
+> 1400
+> 1600
+> 1800
+> 2000
+> 2200
+> Number of delayed pedestrians
+
+(a) Number of delayed passengers. 0 200 400 600 800 1000 1200 1400 1600 1800 
+
+Time (s) 
+
+> STDSH-MARL
+> CMRM
+> MAPPO
+> MAA2C
+> MADDQN
+> MADQN
+> FS-WF
+> 200
+> 250
+> 300
+> 350
+> 400
+> 450
+> 500
+> Number of vehicle queue length
+
+(b) Vehicle queue length. Figure 6: Time-series heatmaps of delayed passengers and vehicle queue lengths over the 1,800-s horizon in Scenario 1, comparing all control methods; color intensity indicates magnitude (cooler = lower, warmer = higher). 
+
+17 in balancing the queue length for vehicles. It obtains the best AQL at 290.34. However, STDSH-MARL obtains an AQL at 304.41, ranking slightly behind MADDQN. The difference is not significant. For the waiting time for public transportation like tram and bus, STDSH-MARL exhibits significant priority to them. STDSH-MARL achieves a low average waiting time at 296.79 seconds for buses and lower at 285.55 seconds for trams. In contrast, DQN-and DDQN-based models (MADQN and MADDQN) achieve competitive performance in AQL but perform poorly in public transport waiting times, indicating a bias toward private vehicle optimization rather than multimodal equity. STDSH-MARL is based on PPO, however, it outperforms the MAPPO at 18.65% in terms of ANP, i.e., 1381.70 vs 1534.40, which indicates the advantage of Spatio-Temporal Dual-Stage Hypergraph (STDSH) in this problem. The temporal distribution of delayed passengers under Scenario 1 is further illustrated in Figure 6. The heatmaps show that STDSH-MARL consistently produces lower intensity delay regions compared with baseline methods, particularly during peak demand intervals. The reduced concentration of high-delay segments visually confirms its superior capability in maintaining corridor-level passenger flow stability. 
+
+> Table 8: Performance comparison for different models (scenario 1)
+
+Model ANP AQL AWT (bus) AWT (tram) FS-WF 1702.75 346.84 502.73 615.05 MADQN 1561.18 291.59 900.44 1598.45 MADDQN 1534.40 290.34 834.46 1607.45 MAA2C 1575.15 370.33 332.69 287.70 MAPPO 1698.45 359.55 401.03 365.90 CMRM 1749.57 378.62 396.19 412.50 STDSH-MARL 1381.70 304.41 296.79 285.55 
+
+4.3. Scenario 2 
+
+Scenario 2 represents a typical off-peak transit to peak period with increasing traffic demand. Table 9 illustrates the performance comparison for scenario 2. STDSH-MARL obtains the best performance in terms of ANP and AWT (tram) at 1551.41 and 267.15. Regarding the ANP, STDSH-MARL outperforms the best baseline by 10.59% (1551.41 vs. 1735.13). We can observe a significant improvement in terms of reducing overall delays for passengers, improving human-centric objectives. For the AWT for buses, MAA2C obtained the lowest average waiting time at 354.34 seconds, which is slightly lower than STDSH-MARL (354.34 vs 356.45). However, its remaining metrics are inferior, a higher ANP at 1735.13 and AQL at 387.90 and a high AWT at 310.90 for trams. The delay patterns over time in Scenario 2 are presented in Figure 7. Compared with other DRL baselines, STDSH-MARL demonstrates fewer high-delay clusters and smoother temporal transitions. This indicates improved adaptability to fluctuating traffic demand and enhanced prioritisation of high-occupancy public transport. 
+
+> Table 9: Performance comparison for different models (scenario 2)
+
+Model ANP AQL AWT (bus) AWT (tram) FS-WF 2021.05 373.17 598.70 614.67 MADQN 1690.94 285.24 950.06 1556.83 MADDQN 1689.27 284.17 900.47 1565.83 MAA2C 1735.13 387.90 354.34 310.90 MAPPO 1755.27 355.66 411.59 366.55 CMRM 1859.67 396.76 387.12 448.45 STDSH-MARL 1551.41 319.91 356.45 267.15 
+
+4.4. Scenario 3 
+
+Scenario 3 represents rush hour with higher traffic volumes. Table 10 illustrates the performance comparison for scenario 3. STDSH-MARL obtains the best performance in terms of ANP, AWT (bus), and AWT (tram) at 1649.23, 373.34 and 284.90. Regarding the ANP, STDSH-MARL outperforms the best baseline (MAPPO) by 4.67% (1649.23 vs. 1730.11). We can observe a significant improvement in terms of reducing overall delays for passengers, improving human-centric objectives. For the AQL metric, MADDQN and MADQN achieve the best and second-best at 335.45 and 338.68, respectively. CMRM gets the second-best AWT for trams, at 305.45 seconds, however, its performance in ANP, AQL and AWT (bus) are inferior. As shown in Figure 8, Scenario 3 introduces more dynamic 18 0 200 400 600 800 1000 1200 1400 1600 1800 
+
+Time (s) 
+
+> STDSH-MARL
+> CMRM
+> MAPPO
+> MAA2C
+> MADDQN
+> MADQN
+> FS-WF
+> 1000
+> 1250
+> 1500
+> 1750
+> 2000
+> 2250
+> 2500
+> 2750
+> Number of delayed pedestrians
+
+(a) Number of delayed passengers. 0 200 400 600 800 1000 1200 1400 1600 1800 
+
+Time (s) 
+
+> STDSH-MARL
+> CMRM
+> MAPPO
+> MAA2C
+> MADDQN
+> MADQN
+> FS-WF
+> 250
+> 300
+> 350
+> 400
+> 450
+> 500
+> 550
+> Number of vehicle queue length
+
+(b) Vehicle queue length. Figure 7: Time-series heatmaps of delayed passengers and vehicle queue lengths over the 1,800-s horizon in Scenario 2, comparing all control methods; color intensity indicates magnitude (cooler = lower, warmer = higher). 
+
+19 0 200 400 600 800 1000 1200 1400 1600 1800 
+
+Time (s) 
+
+> STDSH-MARL
+> CMRM
+> MAPPO
+> MAA2C
+> MADDQN
+> MADQN
+> FS-WF
+> 1200
+> 1400
+> 1600
+> 1800
+> 2000
+> 2200
+> 2400
+> Number of delayed pedestrians
+
+(a) Number of delayed passengers. 0 200 400 600 800 1000 1200 1400 1600 1800 
+
+Time (s) 
+
+> STDSH-MARL
+> CMRM
+> MAPPO
+> MAA2C
+> MADDQN
+> MADQN
+> FS-WF
+> 250
+> 300
+> 350
+> 400
+> 450
+> 500
+> 550
+> Number of vehicle queue length
+
+(b) Vehicle queue length. Figure 8: Time-series heatmaps of delayed passengers and vehicle queue lengths over the 1,800-s horizon in Scenario 3, comparing all control methods; color intensity indicates magnitude (cooler = lower, warmer = higher). 
+
+20 demand variations. STDSH-MARL maintains relatively low delay intensity across most time intervals, whereas competing methods exhibit concentrated peaks. The visual comparison supports the quantitative improvements reported in Table 10. 
+
+> Table 10: Performance comparison for different models (scenario 3)
+
+Model ANP AQL AWT (bus) AWT (tram) FS-WF 1957.46 384.20 649.73 601.95 MADQN 1872.82 338.68 770.98 1592.54 MADDQN 1832.15 335.45 760.18 1601.54 MAA2C 1827.63 395.23 409.98 328.70 MAPPO 1730.11 363.42 373.67 347.80 CMRM 1902.08 424.46 419.64 305.45 STDSH-MARL 1649.23 359.24 373.34 284.90 
+
+4.5. Scenario 4 
+
+Scenario 4 represents the morning school period with increased traffic reaching at a specific area. Table 11 illustrates the performance comparison for scenario 4. STDSH-MARL obtains the best performance in terms of ANP and AWT (bus) at 1553.27 and 339.70. Regarding the AQL, MADQN obtains the best at 306.94 and MADDQN achieves the second-best at 307.43, while STDSH-MARL obtains the third-best at 331.45. For the AWT for trams, MAA2C obtained the lowest average waiting time at 262.05 seconds. STDSH-MARL is the second-best at 289.80 seconds. The robustness of the proposed framework under higher congestion levels is illustrated in Figure 9. Notably, STDSH-MARL mitigates extreme delay accumulations more effectively than other approaches, resulting in a more balanced and stable delay distribution across the evaluation horizon. 
+
+> Table 11: Performance comparison for different models (scenario 4)
+
+Model ANP AQL AWT (bus) AWT (tram) FS-WF 1951.13 357.75 571.53 613.43 MADQN 1952.03 306.94 915.68 1558.50 MADDQN 1956.66 307.43 951.51 1567.50 MAA2C 1771.49 372.29 388.41 262.05 
+
+MAPPO 1792.93 366.89 370.08 365.55 CMRM 1912.38 406.32 384.99 470.10 STDSH-MARL 1553.27 331.45 339.70 289.80 
+
+4.6. Scenario 5 
+
+In contrast to scenario 4, this scenario replicates school end periods: scenario 5 describes the afternoon school period with increasing traffic flow away from this area. Table 12 illustrates the performance comparison for scenario 5. STDSH-MARL obtains the best performance in terms of ANP and AWT (bus) at 1573.86 and 332.05. To the second-best baseline, STDSH-MARL improves 2.13% compared to the best baseline of MADQN at 1608.17. STDSH-MARL is based on PPO, however, it outperforms the MAPPO at 5.56% in terms of ANP, i.e., 1573.86 vs 1666.44, which further indicates the advantage of STDSH in this problem. The corresponding delay distributions are visualised in Fig. 10. Despite the intensified demand, STDSH-MARL suppresses large delay clusters and exhibits a more uniform temporal pattern, indicating strong scalability and generalization. 
+
+4.7. Ablation Studies 
+
+In this section, an ablation study is carried out to test the impact of each component of the proposed STDSH-MARL, especially the STDSH part. Key components include hypergraph (HG), dual-stage hypergraph attention (DSHA), spatial hyperedge (SHE), and temporal hyperedge (THE). Table 13 presents the results of the ablation studies over all scenarios. STDSH-MARL can get the best performance in terms of ANP, AQL, and AWT for bus. The AWT for tram can get a slightly poor performance than that of exclusion of DSHA (248.15 seconds) and exclusion of SHE (248.01 seconds). A ✓indicates that the component is included in the ablation model, while ×
+
+indicates that it is excluded. By analyzing the average performance, the combination of individual HG, DSHA, SHE, and THE does help improve the learning capability in our proposed STDSH-MARL for traffic signal control. 21 0 200 400 600 800 1000 1200 1400 1600 1800 
+
+Time (s) 
+
+> STDSH-MARL
+> CMRM
+> MAPPO
+> MAA2C
+> MADDQN
+> MADQN
+> FS-WF
+> 1000
+> 1200
+> 1400
+> 1600
+> 1800
+> 2000
+> 2200
+> 2400
+> Number of delayed pedestrians
+
+(a) Number of delayed passengers. 0 200 400 600 800 1000 1200 1400 1600 1800 
+
+Time (s) 
+
+> STDSH-MARL
+> CMRM
+> MAPPO
+> MAA2C
+> MADDQN
+> MADQN
+> FS-WF
+> 250
+> 300
+> 350
+> 400
+> 450
+> 500
+> Number of vehicle queue length
+
+(b) Vehicle queue length. Figure 9: Time-series heatmaps of delayed passengers and vehicle queue lengths over the 1,800-s horizon in Scenario 4, comparing all control methods; color intensity indicates magnitude (cooler = lower, warmer = higher). Table 12: Performance comparison for different models (scenario 5) 
+
+Model ANP AQL AWT (bus) AWT (tram) FS-WF 1919.64 368.44 625.69 615.19 MADQN 1608.17 296.93 802.26 1556.67 MADDQN 1614.39 297.17 792.17 1563.67 MAA2C 1673.93 379.75 358.01 330.45 MAPPO 1666.44 343.47 362.21 325.30 
+
+CMRM 1801.19 384.60 390.40 395.90 STDSH-MARL 1573.86 339.95 332.05 351.80 22 0 200 400 600 800 1000 1200 1400 1600 1800 
+
+Time (s) 
+
+> STDSH-MARL
+> CMRM
+> MAPPO
+> MAA2C
+> MADDQN
+> MADQN
+> FS-WF
+> 1200
+> 1400
+> 1600
+> 1800
+> 2000
+> 2200
+> 2400
+> 2600
+> Number of delayed pedestrians
+
+(a) Number of delayed passengers. 0 200 400 600 800 1000 1200 1400 1600 1800 
+
+Time (s) 
+
+> STDSH-MARL
+> CMRM
+> MAPPO
+> MAA2C
+> MADDQN
+> MADQN
+> FS-WF
+> 250
+> 300
+> 350
+> 400
+> 450
+> 500
+> Number of vehicle queue length
+
+(b) Vehicle queue length. Figure 10: Time-series heatmaps of delayed passengers and vehicle queue lengths over the 1,800-s horizon in Scenario 5, comparing all control methods; color intensity indicates magnitude (cooler = lower, warmer = higher). 
+
+23 In specific, the inclusion of DSHA lower the ANP from 1684.13 to 1541.89, with an improvement of 8.45%. The inclusion of SHE pose more significant impact on the inclusion of THE, as removing THE lowers the ANP to 1765.38 while removing SHE lowers ANP to 1602.44, which indicates inclusion of SHE can still get a favorable performance with ANP, while inclusion of THE cannot. HG is also important to STDSH-MARL, as the exclusion of HG suddenly lower the ANP from 1728.64 to 1541.89, with an decrease rate of 10.80%. Based on the ANp values, the order of importance of each component can be ranked as: THE > HG > DSHA > SHE. The most important component is THE. 
+
+> Table 13: Ablation study performance of each component across all scenarios
+
+HG DSHA SHE THE Scenario ANP AQL AWT (bus) AWT (tram) 
+
+× × × × 1 1698.45 359.55 401.03 365.90 
+
+× × × × 2 1755.27 355.66 411.59 366.55 
+
+× × × × 3 1730.11 363.42 373.67 347.80 
+
+× × × × 4 1792.93 366.89 370.08 365.55 
+
+× × × × 5 1666.44 343.47 362.21 325.30 
+
+× × × × Average 1728.64 357.80 383.72 354.22 
+
+✓ ✓ ✓ × 1 1639.73 375.01 348.41 336.20 
+
+✓ ✓ ✓ × 2 1741.41 372.75 404.69 335.85 
+
+✓ ✓ ✓ × 3 1856.30 409.40 400.39 448.95 
+
+✓ ✓ ✓ × 4 1868.95 398.91 426.64 368.45 
+
+✓ ✓ ✓ × 5 1720.49 377.42 442.30 324.40 
+
+✓ ✓ ✓ × Average 1765.38 386.70 404.49 362.77 
+
+✓ ✓ × ✓ 1 1540.57 366.66 360.02 225.35 
+
+✓ ✓ × ✓ 2 1561.44 330.87 365.19 212.05 
+
+✓ ✓ × ✓ 3 1692.73 383.56 373.58 243.70 
+
+✓ ✓ × ✓ 4 1607.63 345.16 338.03 178.30 
+
+✓ ✓ × ✓ 5 1609.84 336.34 342.90 380.65 
+
+✓ ✓ × ✓ Average 1602.44 352.52 355.94 248.01 
+
+✓ × ✓ ✓ 1 1560.97 356.86 379.89 189.50 
+
+✓ × ✓ ✓ 2 1661.22 362.91 398.37 214.20 
+
+✓ × ✓ ✓ 3 1729.67 391.55 382.26 284.35 
+
+✓ × ✓ ✓ 4 1763.05 376.78 383.33 265.45 
+
+✓ × ✓ ✓ 5 1705.74 385.98 386.98 287.25 
+
+✓ × ✓ ✓ Average 1684.13 374.82 386.15 248.15 
+
+✓ ✓ ✓ ✓ 1 1381.70 304.41 296.79 285.55 
+
+✓ ✓ ✓ ✓ 2 1551.41 319.91 356.45 267.15 
+
+✓ ✓ ✓ ✓ 3 1649.23 359.24 373.34 284.90 
+
+✓ ✓ ✓ ✓ 4 1553.27 331.45 339.70 289.80 
+
+✓ ✓ ✓ ✓ 5 1573.86 339.95 332.05 351.80 
+
+✓ ✓ ✓ ✓ Average 1541.89 300.99 339.67 295.82 
+
+Notes: “HG” denotes hypergraph; “DSHA” denotes dual-stage hypergraph attention; “SHE” denotes spatial hyperedge; and “THE” denotes temporal hyperedge. A ✓indicates that the component is included in the ablation model, while × indicates that it is excluded. 
+
+5. Conclusions and future work 
+
+This paper presented STDSH-MARL, a novel Spatio-Temporal Dual-Stage Hypergraph-based Multi-Agent Re-inforcement Learning framework for human-centric traffic signal control in multimodal corridor networks. By integrating a dual-stage hypergraph attention mechanism that captures both spatial and temporal dependencies across intersections, the model enables more effective and adaptive traffic signal coordination. The proposed hy-brid action space jointly selects signal phase and green duration, improving control flexibility and responsiveness, particularly for high-occupancy public transport. Comprehensive experiments across five distinct traffic scenarios demonstrate the consistent superiority of STDSH-MARL over a wide range of baseline methods, including value-based, policy-based, and graph-based DRL frameworks. The model achieved significant reductions in the average number of delayed passengers and waiting times for buses and trams, highlighting its potential for promoting public 24 transportation priority and enhancing multimodal equity. Ablation studies confirmed that temporal hyperedges within the dual-stage attention mechanism played a particularly crucial role in performance improvements. Future work will test STDSH-MARL on city-scale networks with hundreds of intersections to check how well it scales in training time, memory use, and network wide coordination. We will also evaluate performance under realistic disruptions such as incidents, sudden demand changes, and noisy detector data, and broaden the objectives to cover more multimodal priority measures. Finally, we will extend the framework toward explainable deep reinforcement learning, providing clear, auditable reasons for signal decisions to support operator trust and practical deployment. 
+
+CRediT authorship contribution statement Xiaocai Zhang: Conceptualization, Data curation, Methodology, Software, Writing - original draft. Neema Nassir: Conceptualization, Project administration, Writing - review & editing. Milad Haghani: Conceptualiza-tion, Writing - review & editing. 
+
+Declaration of competing interest 
+
+The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper. 
+
+Acknowledgment 
+
+This work was funded by ARC LP200301389, Kapsch TrafficCom Australia, RACQ, and iMOVE CRC, the Cooperative Research Centres program, an Australian Government initiative. 
+
+References 
+
+Abdoos, M., 2020. A cooperative multiagent system for traffic signal control using game theory and reinforcement learning. IEEE Intelligent Transportation Systems Magazine 13, 6–16. Bie, Y., Ji, Y., Ma, D., 2024. Multi-agent deep reinforcement learning collaborative traffic signal control method considering intersection heterogeneity. Transportation Research Part C: Emerging Technologies 164, 104663. Bokade, R., Jin, X., Amato, C., 2023. Multi-agent reinforcement learning based on representational communication for large-scale traffic signal control. IEEE Access 11, 47646–47658. Chan, L.S., Zhang, X., Nassir, N., Sarvi, M., 2026a. Multi-objective multi-step adaptive traffic control (momsatc): Prioritising pedestrians for a safe and sustainable transport development. IET Intelligent Transport Systems 20, e70150. Chan, L.S., Zhang, X., Nassir, N., Sarvi, M., 2026b. Regulating jaywalking behaviour in adaptive traffic signal control using a novel deep reinforcement learning approach. Multimodal Transportation 5, 100271. Chu, T., Qu, S., Wang, J., 2016. Large-scale traffic grid signal control with regional reinforcement learning, in: 2016 American Control Conference (acc), IEEE. pp. 815–820. Chu, T., Wang, J., Codecà, L., Li, Z., 2019. Multi-agent deep reinforcement learning for large-scale traffic signal control. IEEE Transactions on Intelligent Transportation Systems 21, 1086–1095. Duan, W., Gao, Z., He, J., Xian, J., 2025. Bayesian critique-tune-based reinforcement learning with adaptive pressure for multi-intersection traffic signal control. IEEE Transactions on Intelligent Transportation Systems . El-Tantawy, S., Abdulhai, B., Abdelgawad, H., 2013. Multiagent reinforcement learning for integrated network of adaptive traffic signal controllers (marlin-atsc): methodology and large-scale application on downtown toronto. IEEE Transactions on Intelligent Transportation Systems 14, 1140–1150. Farazi, N.P., Zou, B., Ahamed, T., Barua, L., 2021. Deep reinforcement learning in transportation research: A review. Transportation Research Interdisciplinary Perspectives 11, 100425. 25 Fereidooni, Z., Palesi, L.I., Nesi, P., 2025. Multi agent optimizing traffic light signals using deep reinforcement learning. IEEE Access . Ge, H., Gao, D., Sun, L., Hou, Y., Yu, C., Wang, Y., Tan, G., 2021. Multi-agent transfer reinforcement learning with multi-view encoder for adaptive traffic signal control. IEEE Transactions on Intelligent Transportation Systems 23, 12572–12587. Ge, H., Song, Y., Wu, C., Ren, J., Tan, G., 2019. Cooperative deep q-learning with q-value transfer for multi-intersection signal control. IEEE Access 7, 40797–40809. Gong, X., Zhang, T., Chen, C.P., Liu, Z., 2021. Research review for broad learning system: Algorithms, theory, and applications. IEEE Transactions on Cybernetics 52, 8922–8950. Gong, Y., Abdel-Aty, M., 2022. Using machine learning to estimate pedestrian and bicyclist count of intersection by bluetooth low energy. Journal of Transportation Engineering, Part A: Systems 148, 04021101. Gong, Y., Abdel-Aty, M., Cai, Q., Rahman, M.S., 2019. Decentralized network level adaptive signal control by multi-agent deep reinforcement learning. Transportation Research Interdisciplinary Perspectives 1, 100020. Hu, T.Y., Li, Z.Y., 2024. A multi-agent deep reinforcement learning approach for traffic signal coordination. IET Intelligent Transport Systems 18, 1428–1444. Hunt, P., Robertson, D., Bretherton, R., Royle, M.C., 1982. The scoot on-line traffic signal optimisation technique. Traffic Engineering & Control 23. Jia, W., Ji, M., 2025. Multi-agent deep reinforcement learning for large-scale traffic signal control with spatio-temporal attention mechanism. Applied Sciences 15, 8605. Jiang, H., Chen, S., Xiao, Z., Hu, J., Liu, J., Dustdar, S., 2023. Pa-count: passenger counting in vehicles using wi-fi signals. IEEE Transactions on Mobile Computing 23, 2684–2697. Jiang, S., Huang, Y., Jafari, M., Jalayer, M., 2021. A distributed multi-agent reinforcement learning with graph decomposition approach for large-scale adaptive traffic signal control. IEEE Transactions on Intelligent Trans-portation Systems 23, 14689–14701. Kumar, N., Rahman, S.S., Dhakad, N., 2020. Fuzzy inference enabled deep reinforcement learning-based traffic light control for intelligent transportation system. IEEE Transactions on Intelligent Transportation Systems 22, 4919–4928. Lai, S., Xu, Z., Zhang, W., Liu, H., Xiong, H., 2025. Llmlight: Large language models as traffic signal control agents, in: Proceedings of the 31st ACM SIGKDD Conference on Knowledge Discovery and Data Mining, pp. 2335–2346. Lee, J., Chung, J., Sohn, K., 2019. Reinforcement learning for joint control of traffic signals in a transportation network. IEEE Transactions on Vehicular Technology 69, 1375–1387. Li, Y., 2017. Deep reinforcement learning: An overview. arXiv preprint arXiv:1701.07274 . Li, Z., Yu, H., Zhang, G., Dong, S., Xu, C.Z., 2021. Network-wide traffic signal control optimization using a multi-agent deep reinforcement learning. Transportation Research Part C: Emerging Technologies 125, 103059. Liu, D., Li, L., 2023. A traffic light control method based on multi-agent deep reinforcement learning algorithm. Scientific Reports 13, 9396. Liu, J., Qin, S., Su, M., Luo, Y., Wang, Y., Yang, S., 2023a. Multiple intersections traffic signal control based on cooperative multi-agent reinforcement learning. Information Sciences 647, 119484. Liu, Y., Liang, J., Zhang, Y., Gong, P., Luo, G., Yuan, Q., Li, J., 2025. Globallight: Exploring global influence in multi-agent deep reinforcement learning for large-scale traffic signal control. Neurocomputing 637, 130065. Liu, Y., Luo, G., Yuan, Q., Li, J., Jin, L., Chen, B., Pan, R., 2023b. Gplight: Grouped multi-agent reinforcement learning for large-scale traffic signal control., in: IJCAI, pp. 199–207. 26 Luo, H., Bie, Y., Jin, S., 2024. Reinforcement learning for traffic signal control in hybrid action space. IEEE Transactions on Intelligent Transportation Systems . Ma, J., Wu, F., 2020. Feudal multi-agent deep reinforcement learning for traffic signal control, in: Proceedings of the 19th International Conference on Autonomous Agents and Multiagent Systems, pp. 816–824. McCann, B., Curley, R., 2015. Feet-first: Using scats to improve pedestrian provision in dublin, in: The 20th JCT Traffic Signal Symposium & Exhibition. McKenzie, M.C., McDonnell, M.D., 2022. Modern value based reinforcement learning: A chronological review. IEEE Access 10, 134704–134725. Nie, L., Qi, D., Liu, B., Li, P., Bao, H., He, H., 2025. Cmrm: Collaborative multi-agent reinforcement learning for multi-objective traffic signal control. IEEE Transactions on Consumer Electronics . Papakis, I., Sarkar, A., Svetovidov, A., Hickman, J.S., Abbott, A.L., 2021. Convolutional neural network-based in-vehicle occupant detection and classification method using second strategic highway research program cabin images. Transportation Research Record 2675, 443–457. Prabuchandran, K., AN, H.K., Bhatnagar, S., 2014. Multi-agent reinforcement learning for traffic signal control, in: 17th International IEEE Conference on Intelligent Transportation Systems (ITSC), IEEE. pp. 2529–2534. Ren, F., Dong, W., Zhao, X., Zhang, F., Kong, Y., Yang, Q., 2024. Two-layer coordinated reinforcement learning for traffic signal control in traffic network. Expert Systems with Applications 235, 121111. Roncoli, C., Chandakas, E., Kaparias, I., 2023. Estimating on-board passenger comfort in public transport vehicles using incomplete automatic passenger counting data. Transportation Research Part C: Emerging Technologies 146, 103963. Satheesh, A., Powell, K., 2025. A constrained multi-agent reinforcement learning approach to autonomous traffic signal control. Journal on Autonomous Transportation Systems . Shen, J., 2025. Hierarchical reinforcement learning-based traffic signal control. Scientific Reports 15, 32862. Song, X.B., Zhou, B., Ma, D., 2024. Cooperative traffic signal control through a counterfactual multi-agent deep actor critic approach. Transportation Research Part C: Emerging Technologies 160, 104528. Stevanovic, A., Kergaye, C., Martin, P.T., 2009. Scoot and scats: A closer look into their operations, in: 88th Annual Meeting of the Transportation Research Board. Washington DC. Su, H., Zhong, Y.D., Chow, J.Y., Dey, B., Jin, L., 2023. Emvlight: A multi-agent reinforcement learning framework for an emergency vehicle decentralized routing and traffic signal control system. Transportation Research Part C: Emerging Technologies 146, 103955. Tan, T., Chu, T., Wang, J., 2020. Multi-agent bootstrapped deep q-network for large-scale traffic signal control, in: 2020 IEEE Conference on Control Technology and Applications (CCTA), IEEE. pp. 358–365. Tao, Z., Li, C., Yang, Q., 2023. Network clustering-based multi-agent reinforcement learning for large-scale traffic signal control, in: 2023 International Annual Conference on Complex Systems and Intelligent Science (CSIS-IAC), IEEE. pp. 326–331. Wang, K., Shen, Z., Lei, Z., Liu, X., Zhang, T., 2025. Towards multi-agent reinforcement learning based traffic signal control through spatio-temporal hypergraphs. IEEE Transactions on Mobile Computing . Wang, T., Cao, J., Hussain, A., 2021a. Adaptive traffic signal control for large-scale scenario with cooperative group-based multi-agent reinforcement learning. Transportation Research Part C: Emerging Technologies 125, 103046. Wang, T., Zhu, Z., Zhang, J., Tian, J., Zhang, W., 2024. A large-scale traffic signal control algorithm based on multi-layer graph deep reinforcement learning. Transportation Research Part C: Emerging Technologies 162, 104582. Wang, X., Ke, L., Qiao, Z., Chai, X., 2020a. Large-scale traffic signal control using a novel multiagent reinforcement learning. IEEE Transactions on Cybernetics 51, 174–187. 27 Wang, Y., Xu, T., Niu, X., Tan, C., Chen, E., Xiong, H., 2020b. Stmarl: A spatio-temporal multi-agent rein-forcement learning approach for cooperative traffic light control. IEEE Transactions on Mobile Computing 21, 2228–2242. Wang, Z., Zhu, H., He, M., Zhou, Y., Luo, X., Zhang, N., 2021b. Gan and multi-agent drl based decentralized traffic light signal control. IEEE Transactions on Vehicular Technology 71, 1333–1348. Wei, H., Chen, C., Zheng, G., Wu, K., Gayah, V., Xu, K., Li, Z., 2019. Presslight: Learning max pressure control to coordinate traffic signals in arterial network, in: Proceedings of the 25th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining, pp. 1290–1298. Wei, H., Zheng, G., Yao, H., Li, Z., 2018. Intellilight: A reinforcement learning approach for intelligent traffic light control, in: Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining, pp. 2496–2505. Wu, C., Ma, Z., Kim, I., 2020a. Multi-agent reinforcement learning for traffic signal control: Algorithms and robustness analysis, in: 2020 IEEE 23rd International Conference on Intelligent Transportation Systems (ITSC), IEEE. pp. 1–7. Wu, Q., Wu, J., Shen, J., Du, B., Telikani, A., Fahmideh, M., Liang, C., 2022. Distributed agent-based deep reinforcement learning for large scale traffic signal control. Knowledge-Based Systems 241, 108304. Wu, T., Zhou, P., Liu, K., Yuan, Y., Wang, X., Huang, H., Wu, D.O., 2020b. Multi-agent deep reinforcement learning for urban traffic light control in vehicular networks. IEEE Transactions on Vehicular Technology 69, 8243–8256. Xu, D., Yu, Z., Liao, X., Guo, H., 2024. A graph deep reinforcement learning traffic signal control for multiple intersections considering missing data. IEEE Transactions on Vehicular Technology 73, 18307–18319. Yang, S., 2023. Hierarchical graph multi-agent reinforcement learning for traffic signal control. Information Sciences 634, 55–72. Yang, S., Yang, B., Kang, Z., Deng, L., 2021. Ihg-ma: Inductive heterogeneous graph multi-agent reinforcement learning for multi-intersection traffic signal control. Neural Networks 139, 265–277. Yazdani, M., Sarvi, M., Bagloee, S.A., Nassir, N., Price, J., Parineh, H., 2023. Intelligent vehicle pedestrian light (ivpl): A deep reinforcement learning approach for traffic signal control. Transportation Research Part C: Emerging Technologies 149, 103991. Yoon, J., Ahn, K., Lee, K., Park, J., Yeo, H., 2025. Decentralized and communication-based multi-agent traffic signal control model employing a graph representation for the state. IEEE Transactions on Intelligent Transportation Systems . Zhang, C., Tian, Y., Zhang, Z., Xue, W., Xie, X., Yang, T., Ge, X., Chen, R., 2022a. Neighborhood cooperative multiagent reinforcement learning for adaptive traffic signal control in epidemic regions. IEEE Transactions on Intelligent Transportation Systems 23, 25157–25168. Zhang, W., Yan, C., Li, X., Fang, L., Wu, Y.J., Li, J., 2022b. Distributed signal control of arterial corridors using multi-agent deep reinforcement learning. IEEE Transactions on Intelligent Transportation Systems 24, 178–190. Zhang, X., Chan, L.S., Nassir, N., Sarvi, M., 2025. Towards fair lights: A multi-agent masked deep reinforcement learning for efficient corridor-level traffic signal control. Communications in Transportation Research 5, 100203. Zhang, X., Nassir, N., Chan, L.S., Haghani, M., 2026. Human-centric traffic signal control for equity: A multi-agent action branching deep reinforcement learning approach. arXiv preprint arXiv:2602.02959 . Zhu, R., Li, L., Wu, S., Lv, P., Li, Y., Xu, M., 2023. Multi-agent broad reinforcement learning for intelligent traffic light control. Information Sciences 619, 509–525. 28
