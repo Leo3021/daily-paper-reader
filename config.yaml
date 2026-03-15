@@ -61,3 +61,38 @@ subscriptions:
           source: manual
           note: ''
       updated_at: '2026-03-10T09:48:55.216Z'
+    - tag: MM MAS
+      description: 多模态多智能体系统相关论文检索
+      enabled: true
+      keywords:
+        - keyword: llm
+          keyword_cn: ''
+          query: l
+        - keyword: multimodal
+          keyword_cn: ''
+          query: multimodal
+        - keyword: multi agent
+          keyword_cn: ''
+          query: m
+      intent_queries:
+        - query: multimodal multi agent
+          query_cn: 多模态多智能体
+          enabled: true
+          source: manual
+          note: ''
+        - query: recent advances in multimodal multi agent systems
+          query_cn: 多模态多智能体系统的最新进展
+          enabled: true
+          source: manual
+          note: ''
+        - query: multimodal large language models for multi agent cooperation
+          query_cn: 用于多智能体协作的多模态大语言模型
+          enabled: true
+          source: manual
+          note: ''
+        - query: benchmarks for evaluating multimodal multi agent performance
+          query_cn: 评估多模态多智能体性能的基准测试
+          enabled: true
+          source: manual
+          note: ''
+      updated_at: '2026-03-15T07:09:59.855Z'
