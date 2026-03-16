@@ -61,6 +61,7 @@ subscriptions:
           source: manual
           note: ''
       updated_at: '2026-03-10T09:48:55.216Z'
+      paused: true
     - tag: MM MAS
       description: 多模态多智能体系统相关论文检索
       enabled: true
@@ -96,3 +97,4 @@ subscriptions:
           source: manual
           note: ''
       updated_at: '2026-03-15T07:09:59.855Z'
+      paused: false
