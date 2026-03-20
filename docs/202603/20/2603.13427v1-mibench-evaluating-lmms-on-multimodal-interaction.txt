@@ -1,0 +1,1915 @@
+Title: MIBench: Evaluating LMMs on Multimodal Interaction
+
+URL Source: https://arxiv.org/pdf/2603.13427v1
+
+Published Time: Tue, 17 Mar 2026 00:18:22 GMT
+
+Number of Pages: 25
+
+Markdown Content:
+2026-03-17 
+
+# MIBench: Evaluating LMMs on Multimodal Interaction 
+
+Yu Miao 1,2,†,∗, Zequn Yang 1,2,†,∗, Yake Wei 1,2, Ziheng Chen 1,2, Haotian Ni 3,∗,
+
+Haodong Duan 4, Kai Chen 4, Di Hu 1,2,B
+
+> 1
+
+Gaoling School of Artificial Intelligence, Renmin University of China, Beijing, China , 2Beijing Key Laboratory of Research on Large Models and Intelligent Governance, Beijing, China , 3Beihang University, Beijing, China , 4Shanghai Artificial Intelligence Laboratory, Shanghai, China 
+
+> †
+
+Equal contribution , ∗Intern at Shanghai AI Lab , B Corresponding author 
+
+Abstract 
+
+In different multimodal scenarios, it needs to integrate and utilize information across modalities in a specific way based on the demands of the task. Different integration ways between modalities are referred to as “multimodal interaction”. How well a model handles various multimodal interactions largely characterizes its multimodal ability. In this paper, we introduce MIBench , a comprehensive benchmark designed to evaluate the multimodal interaction capabilities of Large Multimodal Models (LMMs), which formulates each instance as a ( con v , con t, task ) triplet with con texts from vision and text, necessitating that LMMs employ correct forms of multimodal interaction to effectively complete the task. MIBench assesses models from three key aspects: the ability to source information from vision-centric or text-centric cues, and the ability to generate new information from their joint synergy. Each interaction capability is evaluated hierarchically across three cognitive levels: Recognition, Understanding, and Reasoning. MIBench comprises over 10,000 vision-text context pairs spanning 32 distinct tasks. Evaluation of state-of-the-art LMMs show that: (1) LMMs’ ability on multimodal interaction remains constrained, despite the scaling of model parameters and training data; (2) they are easily distracted by textual modalities when processing vision information; (3) they mostly possess a basic capacity for multimodal synergy; and (4) natively trained multimodal models show noticeable deficits in fundamental interaction ability. We expect that these observations can serve as a reference for developing LMMs with more enhanced multimodal ability in the future.  
+
+> Email:
+
+Yu Miao at ymiao@ruc.edu.com , Di Hu at dihu@ruc.edu.com  
+
+> Project Page:
+
+https://gewu-lab.github.io/MIBench 
+
+1 Introduction 
+
+Multimodal intelligence is one of the keys to fully understanding the real world. This capability requires models to integrate and utilize information from diverse sources to handle complex tasks [ 1]. Crucially, the way information is presented and processed varies significantly depending on the task. Some tasks rely primarily on understanding a specific modality (e.g., Visual Question Answering based heavily on the given image), while others demand deep collaboration, where key insights emerge only from the synergy between modalities (e.g., combining images and text to interpret a chart). These different strategies for processing multimodal information are known as multimodal interaction [ 2 ]. To achieve effective multimodal interaction 1, three core abilities should be focused on: sourcing crucial cues from the vision modality, from the text modality, and deriving new information from the synergy between vision and text. The expected multimodal intelligence should possess all three sub-abilities simultaneously, extracting and synthesizing information comprehensively to handle an increasingly diverse range of tasks. 
+
+> 1This paper focuses on the interaction between vision and text.
+
+1         
+
+> arXiv:2603.13427v1 [cs.CV] 13 Mar 2026 Two
+> modality
+> Sources
+> Focus on vision
+> Task
+> What is the sentiment of this
+> sentence ?
+> How many bananas and
+> apples are in the image?
+> Synergy
+> Is the image context
+> aligned with the text ?
+> Interaction
+> I brought plenty
+> of fruit to the
+> picnic today.
+> but that 's just the
+> problem with it -the
+> director hasn't
+> added enough of
+> his own ingredients
+> Focus on text
+> A young girl with blonde hair
+> tied in a ponytail is shown on
+> a bright green astroturf field…
+> Lv 3
+> Lv 2
+
+Synergy     
+
+> Vision
+> Lv 1
+> Lv 3
+> Lv 2
+> Lv 1
+
+Text        
+
+> Lv 3
+> Lv 2
+> Lv 1
+> 32 Tasks
+> 2,980 samples
+> 10,030
+> context pairs
+> Text
+> Lv 1
+> Coreference
+> 104
+> Grammatical
+> 130
+> Word Sense
+> 118
+> Lv 2
+> Entailment
+> 127
+> Sentiment 129
+> Similarity 124
+> Lv 3
+> Biology 87
+> Chemistry 92
+> Physics
+> 96
+> Math
+> 86
+> Synergy
+> Lv 1
+> Attribute Matching
+> 122
+> Object Matching
+> 81
+> Position Matching
+> 97
+> Lv 2
+> Rules Execution
+> 163
+> Temporal Simulation
+> 182
+> Lv 3
+> Business
+> 80
+> Physics
+> 87
+> Science
+> 82
+> Engineering
+> 80
+> Vision
+> Lv 1
+> Attribute Recognition
+> 90
+> Counting
+> 66
+> Object Recognition 61
+> Spatial Localization
+> 65
+> Lv 2
+> Attribute Comparison
+> 54
+> Instance Interaction
+> 60
+> Scene Understanding
+> 67
+> Spatial Relationship
+> 62
+> Lv 3
+> Attribute Reasoning
+> 74
+> Positional Reasoning
+> 78
+> Quantitative Reasoning
+> 76
+> Spatial Reasoning
+> 79
+> Stylistic Reasoning
+> 81
+
+Figure 1 (Left) Different multimodal tasks require different types of modality interaction. Some tasks depend on information mostly from one modality (visual or textual context), while others require synergistic collaboration between them. (Middle) We introduce MIBench to systematically evaluate how well Large Multimodal Models (LMMs) handle multimodal interactions, which is structured around three fundamental interaction patterns (Vision-centric, Text-centric, and Synergy) across three cognitive levels (Recognition, Understanding, and Reasoning). (Right) Most current LMMs demonstrate regrettably limited capabilities in multimodal interaction (especially in synergy), struggling to selectively utilize cues from centric modality and achieve cross-modal collaboration. 
+
+Large Multimodal Models (LMMs) are widely regarded as a primary approach to realizing this intelligence and have recently shown impressive capabilities as general-purpose solvers [ 3– 7]. To fully understand the strengths and limitations of these models, rigorous evaluation is essential. Early benchmarks focused mostly on visual perception [ 8 –10 ], often checking if models actually use visual data rather than just taking textual shortcuts [ 11 , 12 ]. More recent studies have expanded to complex, knowledge-intensive tasks [ 13 , 14 ] and cross-modal reasoning [ 15 – 17 ]. However, these existing evaluations tend to treat multiple modalities as a single entity, neglecting the influence of interactions between information from different modality sources. As a result, it remains unclear whether LMMs have truly mastered flexible forms of multimodal interaction. Specifically, it is uncertain whether they can selectively extract targeted information from text or images, and whether they can synthesize two modalities to achieve genuine cross-modal synergy. Consequently, critical questions remain: Do current model architectures and training paradigms enable such effective interactions? If not, where exactly do the bottlenecks lie? To address this gap, we introduce MIBench , a benchmark designed to holistically assess the ability to process multimodal interaction. We evaluate an LMM’s ability to handle three core interaction patterns for image-text tasks: sourcing visual information for Vision-centric tasks, sourcing textual information for Text-centric tasks, and achieving cross-modal 
+
+Synergy . To enable this fine-grained analysis, we designed a new sample format: in addition to the task, each sample includes both a visual context and a textual context, which is ( con v , con t, task ), which allows us to verify if the model selectively leverages cues from the required source to achieve effective interaction. For instance, to evaluate the model’s ability to extract key visual information within multimodal contexts to answer questions about the image, we pair the image ( con v ) with additional textual contexts ( con t) that exhibit diverse levels of relevance to the image. Thus, we can vary textual contexts to evaluate whether the model can truly focus on the image, or struggles with this type of interaction, making its responses sensitive to the varying textual contexts. And we designed a hierarchical framework that stratifies these interaction patterns across progressive cognitive levels, ranging from Recognition 
+
+to Understanding and Reasoning . This dual categorization (by interaction pattern and cognitive level) provides a comprehensive, hierarchical structure for assessing how well models master these interaction abilities. Based on this framework, we curated MIBench (with over 30 tasks and 10,000 visual-textual context pairs, as shown in Fig. 1) through rigorous collection and annotation, ensuring both the breadth and reliability of the assessment. Using MIBench, we evaluate the interaction capabilities of current state-of-the-art LMMs, and the analysis reveals several key findings: • Current LMMs remain constrained in their ability to perform effective multimodal interactions, despite increases in model scale and data sources. • LMMs demonstrate limited proficiency in selectively extracting cues from the target modality. This issue is particularly severe in vision-centric tasks, as the models often fail to prioritize visual evidence over the textual context. 2Visual Scene 
+
+Comprehension 
+
+Textual Context :The three men are 
+
+standing closely together, each holding 
+
+the hand of the person next to them. 
+
+Question : What interaction is taking 
+
+place between the three men in the 
+
+image? 
+
+Answer : They are holding hands. 
+
+Deep Visual 
+
+Reasoning 
+
+Linguistic Concept 
+
+Processing 
+
+Textual Context : Sentence 1: Your 
+
+wish will come true . \nSentence 2: 
+
+The water came to a boil. 
+
+Question : Does the word 'come' 
+
+(verb) have the same meaning in 
+
+both sentences? 
+
+Answer : Yes 
+
+Textual Context : Premise: After two 
+
+years, the aspirin subjects experienced 
+
+a reduced risk of fatal and nonfatal 
+
+stroke. Hypothesis: People 
+
+experienced adverse effects while 
+
+taking aspirin. 
+
+Question : Does the premise entail the 
+
+hypothesis? 
+
+Answer : Yes, the premise entails the 
+
+hypothesis 
+
+Contextual 
+
+Comprehension 
+
+Textual Context : The water and 
+
+oil contact angles on a smooth 
+
+clean glass surface are 65 ° and 
+
+40 ° respectively. The surface of 
+
+this same piece of glass is then 
+
+modified by treatment with a CF4 
+
+plasma. 
+
+Question :What would be the best 
+
+estimate of the water and oil 
+
+contact angles on the treated 
+
+surface? 
+
+Answer : Water = 122 °, Oil = 104 °
+
+Deep Textual 
+
+Reasoning 
+
+Textual Context :The objects on the 
+
+desk, in order from left to right, are 
+
+located at Position 1, Position 2, 
+
+Position 3, and Position 4. 
+
+Round 1: Swap the object at Position 1 
+
+with the object at Position 3. 
+
+Round 2: Swap the apple with the 
+
+object that was initially at Position 2. 
+
+Question : After all swaps, what is the 
+
+final position of the Rubik's Cube? 
+
+Answer : Position 1 
+
+Integrative Cross -modal 
+
+Understanding 
+
+Deep Cross -modal 
+
+Reasoning 
+
+Textual Context :The truss is to be 
+
+designed for a uniform live load of 0.32 
+
+kip/ft that can be placed anywhere on the 
+
+span, in addition to a concentrated live 
+
+load of 24 kips that can be positioned 
+
+where it will produce the largest force in 
+
+bar CG. The truss has a span of 6 @ 15' 
+
+= 90' and a height of 20'. 
+
+Question : Determine the maximum 
+
+value of live load force created in bar CG. 
+
+Answer : 9.75kips compression 
+
+Basic Cross -modal 
+
+Association 
+
+Textual Context : A woman is seen cross -
+
+country skiing up a snow -covered hill, 
+
+surrounded by a forest of bare trees on a 
+
+winter day. She is wearing a red jacket, dark 
+
+pants, and a blue knit hat. She is holding ski 
+
+poles, but she doesn't have skis on her feet. 
+
+Question : Is the image context aligned with 
+
+the text? 
+
+Answer : The woman is wearing skis on her 
+
+feet, but the text states she doesn't have 
+
+skis on her feet. 
+
+Visual Concept 
+
+Perception 
+
+Textual Context : There are four plates 
+
+on the counter, all laden with cream puffs, 
+
+creating a tempting display of pastries. 
+
+Question : How many plates are there on 
+
+the counter? 
+
+Answer : 4 
+
+Lv 1: Recognition Lv 2: Understanding 
+
+Textual Context : All dice in the 
+
+sequence are the same die, just 
+
+viewed from different angles. 
+
+Question : Which of the following 
+
+options is most likely to be this cube in 
+
+the image? 
+
+Answer : C. 
+
+Lv 3: Reasoning 
+
+Vision -
+
+Centric 
+
+Synergy 
+
+Text -
+
+Centric 
+
+Visual Context 
+
+Visual Context 
+
+Visual Context 
+
+Visual Context 
+
+Visual Context 
+
+Visual Context Visual Context 
+
+Visual Context 
+
+Visual Context Figure 2 Overview of the framework and samples. MIBench covers three interaction forms (Vision-centric, Text-centric, and Synergy) and three hierarchical levels of ability: Recognition, Understanding, and Reasoning. Each sample is composed of a textual context, a visual context, and a task (Q&A). For the vision-centric and text-centric samples, multiple types of contexts from another modality are prepared in our evaluation, though only one is shown here for illustrative purposes. 
+
+• While LMMs show acceptable performance in basic cross-modal alignment, their effectiveness drops in tasks requiring deep interactive understanding and reasoning, for which parameter scaling is insufficient to address. • Native LMMs struggle with fundamental perception, creating a bottleneck for complex interactions. Non-native LMMs appear to lean on powerful LLM foundations for better synergy but are hindered by a strong text bias that prevents deeper cross-modal collaboration By focusing on multimodal interaction, MIBench offers fresh insights into whether current LMMs are truly achieving multimodal intelligence. It also provides clear direction and inspiration for the next steps in developing more advanced, genuine synergistic capabilities. 
+
+2 Related Works 
+
+2.1 Large Multimodal Models 
+
+LMMs are widely regarded as general-purpose problem solvers for a broad range of tasks. Initially, driven by the huge success of Large Language Models (LLMs), many approaches adopted pre-trained LLMs as a backbone, connecting them with lightweight vision components to achieve impressive scalability and performance [ 5 , 18 , 19 ]. While these models demonstrate strong results, they tend to rely heavily on the text modality. As a result, when handling vision-centric tasks, they often fail to ground in the image, making errors based on language priors instead. In contrast, native LMMs train models from scratch. This approach helps mitigate these language biases and allows the model to learn deeper, more integrated interactions between images and text [ 20 , 21 ]. Meanwhile, closed-source models remain at the forefront of general vision-language understanding [ 4 , 22 ]. Given this diverse landscape of models, a critical question remains: How effectively do these different architectures process the fundamental interactions between modalities? Our work aims to systematically investigate this capability. 3Focus on vision 
+
+Focus on text 
+
+Synergy 
+
+"context_relevant_description ": ”A meal setting with three bowls of food are positioned 
+
+on a beautifully patterned table, suggesting a ready -to -eat arrangement.", 
+
+"context_neutral_global_description ": "The image is taken from an overhead perspective, 
+
+capturing a table setting with warm lighting, creating an inviting and cozy atmosphere.", 
+
+"context_neutral_local_description ": "At the bottom of the image, there's a small 
+
+wooden tray filled with an assortment of smooth, light -colored pebbles and a lit candle,    
+
+> Option D is the correct choice
+> to complete the pattern based
+> on the XOR logic applied to
+> the first two columns.
+> The images are presented in
+> a grid format with a clean
+> white background, and the
+> figures are composed of
+> solid black geometric shapes,
+> primarily triangles and
+> quadrilaterals, against the
+> white background.
+> The first image in the top row
+> contains a large black shape
+> resembling a 'V' with two
+> smaller triangles filling the
+> inner space, pointing towards
+> the vertex of the 'V'.
+> The Great Wall of China is not a
+> single continuous wall but a series
+> of fortifications built across the
+> historical northern borders of
+> ancient Chinese states and Imperial
+> China.
+> The pattern indicates that
+> shapes are consistently
+> rotating 90 degrees
+> clockwise in each step,
+> and the missing figure
+> should be a rotated version
+> of the figure in the middle of
+> the bottom row .
+
+Which option completes 
+
+the pattern in the image? 
+
+A; B; C; D 
+
+（Answer: D）
+
+Task 
+
+LMM 
+
+Context 
+
++ D
+
+C
+
+A
+
+C
+
+B
+
+visual context 
+
+Paired with one of 5 type 
+
+textual contexts 
+
+Correct 
+
+Guidance 
+
+Mislead 
+
+Guidance 
+
+Unrelated 
+
+Local 
+
+Description 
+
+Global 
+
+Description Context 
+
++
+
+Paired with one of 5 type 
+
+visual contexts 
+
+Correct 
+
+Guidance 
+
+Mislead 
+
+Guidance 
+
+Unrelated 
+
+Concept 
+
+Visualization 
+
+textual context Do these two sentences 
+
+express the same meaning? 
+
+A: Yes B: No 
+
+（Answer: A ）
+
+Task 
+
+LMM 
+
+A
+
+B
+
+A
+
+A
+
+A
+
+> Sentence 1: Justice Minister
+> Martin Cauchon and Prime
+> Minister Jean Chrétien have
+> both said the Liberal
+> government will introduce
+> legislation soon to
+> decriminalize possession of
+> small amounts of pot for
+> personal use . Sentence 2:
+> Justice Minister Martin
+> Cauchon and Prime Minister
+> Jean Chretien both have said
+> the government will
+> introduce legislation to
+> decriminalize possession of
+> small amounts of pot .
+
+Scene 
+
+Visualization 
+
+Focus on vision 
+
+Focus on text 
+
+Synergy 
+
+"context_relevant_description ": ”A meal setting with three bowls of food are positioned 
+
+on a beautifully patterned table, suggesting a ready -to -eat arrangement.", 
+
+"context_neutral_global_description ": "The image is taken from an overhead perspective, 
+
+capturing a table setting with warm lighting, creating an inviting and cozy atmosphere.", 
+
+"context_neutral_local_description ": "At the bottom of the image, there's a small 
+
+wooden tray filled with an assortment of smooth, light -colored pebbles and a lit candle,    
+
+> An engineer has access to a tetrahedron -
+> shaped building block whose side length
+> is ℓ = 10 cm. The body is made of a
+> thermal insulator, but the edges are
+> wrapped with thin copper wiring whose
+> cross -sectional area is S = 2 cm². The
+> thermal conductivity of copper is 385.0
+> W/( m·K ). The engineer stacks these
+> tetrahedrons (all oriented in the same
+> direction) to form an extended lattice in
+> which the copper wires are all in mutual
+> contact. In the diagram, only the front
+> row of a small section is colored. Assume
+> that the resulting lattice is infinitely large.
+> At a certain location within the
+> tetrahedral lattice, the temperature
+> difference between two adjacent points
+> is 1 °C, where “adjacent points” means
+> two neighboring points on the same
+> tetrahedron.
+> What is the heat flow
+> across two adjacent
+> points in the
+> tetrahedral building
+> block?
+> A: 5.28 B: 7.7 W
+> C: 0.77 W D: 4.62
+> (Answer: D)
+
+Task 
+
+LMM 
+
+Context 
+
+C
+
+visual context 
+
+textual context 
+
++Figure 3 Overview of MIBench sample formats. Each instance consists of both visual and textual contexts and the corresponding task, formulated as ( con v , con t, task ). For vision- and text-centric tasks (Left and Middle) , they can be resolved by leveraging cues from the centric modality. We introduce various contexts from another modality to evaluate the model’s ability to selectively utilize cues from the target modality, which range from helpful contexts (e.g., correct guidance, concept visualization) to misleading guidance and unrelated contents. For the synergy part (Right) , the model is presented with one coupled visual-textual pair with complementary cues, necessitating effective cross-modal collaboration. 
+
+2.2 Benchmarks for LMMs 
+
+As a key effort to integrate vision and language, LMMs have demonstrated impressive problem-solving capabilities, even if their underlying mechanisms remain under-explored. Since questions are primarily text-based, linguistic proficiency serves as the baseline for evaluation [ 23 ]. However, a persistent challenge is determining whether these models truly go beyond text comprehension to genuinely perceive and understand visual content. Early research like MME [ 9]focused on foundational perceptual abilities. Subsequent benchmarks, such as MMMU [ 14 ] and MMBench [ 8], aimed to evaluate how models synthesize visual and linguistic knowledge for complex reasoning. Other studies have investigated specific issues like modality bias [ 12 ] and textual shortcuts [ 11 ]. Despite this progress, existing evaluation frameworks struggle to capture multimodal interaction. Specifically, they fail to disentangle whether the information required to answer a question stems from the image, the text, or the synergy between them. To address this, we introduce a new evaluation paradigm that decouples visual and textual contexts, allowing us to effectively assess the multimodal interaction capabilities of LMMs. 
+
+2.3 Multimodal Interaction 
+
+Multimodal interaction describes how models collaboratively process information from different sources, such as vision and language, to solve a task [ 1]. This involves two critical capabilities: the ability to source information unique to a single modality (e.g., vision or text), and the synergistic ability to integrate both modalities to derive new insights not present in either source alone. These interactions can be formally measured [ 2 , 24 ] and have been leveraged to enhance model performance [ 25 ]. However, while LMMs show strong performance, their complexity makes it uncertain if they use these interactions reliably [ 11 , 26 ]. They might exploit statistical shortcuts or textual priors rather than genuinely integrating knowledge from two modalities. 
+
+3 The MIBench 
+
+In this paper, we introduce MIBench , a benchmark designed to evaluate LMMs on multimodal interaction. We first established a comprehensive evaluation framework from three interaction patterns as shown in Fig. 2. Guided by this framework, we curate diverse tasks where each instance is formulated as a ( con v , con t, task ) triplet which enables assessment across different interaction mechanisms: as detailed in Fig. 3, for vision-centric and text-centric tasks, we can vary another context to evaluate the model’s proficiency in selectively extracting critical cues from the target modality; synergy tasks mandate the integration of complementary cues from both contexts to achieve cross-modal collaboration. Consequently, MIBench stands as a comprehensive and effective benchmark for multimodal interaction evaluation, covering 32 tasks and 2,980 samples with 10,030 context pairs. 43.1 Multimodal Interaction Framework 
+
+Fig. 2 illustrates the evaluation framework for LMMs on multimodal interaction. It forms a 3×3 grid structure based on multimodal interaction patterns and cognitive levels. In terms of interaction pattern, it consists of three parts: 
+
+Vision-centric , Text-centric , and Synergy . Specifically, for vision-centric and text-centric interactions, LMMs need to selectively extract cues from the target modality; for synergistic interactions, LMMs are required to achieve synergistic collaboration between two modalities with complementary critical cues. In terms of cognitive level, we decompose the abilities under each interaction pattern into three levels: Recognition , Understanding , and Reasoning . Concretely, this cognitive hierarchy advances from the fundamental perception of atomic concepts, through the comprehension of scenes and semantics, to the high-level reasoning of logical deduction. Overall, this framework offer a comprehensive and fine-grained analysis of model capabilities across different multimodal interaction scenarios. 
+
+3.2 Data Curation 
+
+Guided by the framework outlined in Sec. 3.1, we constructed MIBench according to the following steps: We first identify suitable tasks based on the proposed taxonomy, and subsequently collect, re-annotate, or synthesize test samples following the annotation pipeline illustrated in Fig. 4. Finally, the instances undergo rigorous filtering and verification by human experts to ensure quality. A more detailed description of the annotation and tasks can be found in the Appendix . +
+
++ +      
+
+> Vision -Centric
+> Add context for text
+> modalit y
+> Correct Guidance
+> Global Description
+> Local Description
+> Mislead Guidance
+> Unrelated Content
+> Human Check
+> Synergy
+> Determine whether
+> Synergy Task
+> Construct
+> Rule: Can be solved only
+> through modality
+> integration
+> Human Check
+> Proposed Task s
+> Candidate Task s
+
++Collected   
+
+> pairs
+> 5 types
+> Tex t-Centric
+> Add context for visio n
+> modalit y
+> Human Check
+> Collected
+> pairs
+> 5 types
+> Correct Guidance
+> Scene Visualization
+> Concept Visualizatio n
+> Mislead Guidance
+> Unrelated Content
+
+Figure 4 Overview of the sample annotation pipeline. 
+
+Vision-centric. We deconstruct visual-centric interac-tion capabilities into a three-level hierarchy: Level 1 addresses visual concept perception, involving tasks such as object recognition and counting; Level 2 per-tains to visual scene comprehension, covering tasks like spatial relationships; and Level 3 focuses on deep visual reasoning, including tasks that demand the deduction of underlying rules governing visual patterns. Based on this hierarchical categorization, we first source samples from established benchmarks, including MMBench [ 8 ], MME [ 9], SeedBench [ 27 ], and VisuLogic [ 28 ]. Then we use Gemini 2.5 Pro [ 29 ] following the pipeline illus-trated in Fig. 4 to pair each visual sample with five dis-tinct types of textual context: correct guidance, global description, local description, unrelated content, and misleading guidance. This design makes textual contexts exhibit varying degrees of relevance regarding the image and the task. Ultimately, the visual component comprises 913 base samples, with a total of 4,565 visual-textual context pairs. 
+
+Text-centric. We stratify text-centric interaction capabilities into three progressive stages: Level 1 targets fundamental linguistic skills ranging from grammatical correctness to semantic discrimination; Level 2 pertains to broader text comprehension, exemplified by tasks like sentiment analysis; and Level 3 focuses on advanced scientific reasoning, necessitating domain-specific deduction in fields such as biology and chemistry. Guided by this stratification, we select samples from GLUE [ 30 ], SuperGLUE [ 31 ], MMLU-Pro [ 32 ], and GPQA [ 33 ]. Subsequently, we employ Qwen-Image [ 34 ] to associate each textual sample with five semantically distinct images: correct guidance, global description, local description, unrelated content, and misleading guidance. This design simulates diverse relationships between the visual information and the targeted textual context. Finally, the textual component comprises 1,093 base samples, yielding a total of 5,465 context pairs. 
+
+Synergy. The cross-modal synergistic capability is framed as a three-tiered hierarchy: Level 1 targets foundational alignment between two modalities, Level 2 pertains to cross-modal understanding, and Level 3 focuses on advanced reasoning using complementary cues from visual and textual contexts. To bridge the gap regarding foundational stages (Synergy Level 1 and 2) in prior research, we construct new tasks that enforce intensive cross-modal interaction. For Level 1, we develop tasks such as attribute mapping that require models to verify the correspondence between the fine-grained visual details and textual descriptions. For Level 2, we introduce novel tasks like rule execution, compelling the model to synthesize a comprehensive understanding by integrating textual rules with the visual scene. Images for these tasks are selected from GQA [ 35 ] and COCO [ 36 ], or generated by Qwen-Image, and questions are annotated by Gemini 2.5 Pro. For Level 3, we curate samples from established multimodal reasoning benchmarks, including 5Table 1 Performance of state-of-the-art open and closed-source models on MIBench and MIBench-mini. The best score is bolded and the second-best is underlined, within the open-source and closed-source groups separately. MIBench MIBench-mini Model Vision Text Synergy Overall Vision Text Synergy Overall 
+
+Open-source 
+
+InternVL2-8B 53.29 62.53 45.79 54.23 49.60 59.00 45.00 51.20 InternVL2.5-8B 59.61 65.03 47.43 57.62 58.80 63.20 45.00 55.67 InternVL3-8B 61.93 65.82 48.05 58.82 59.20 65.20 45.00 56.47 InternVL3.5-8B 57.52 67.28 51.03 58.98 57.60 67.00 53.00 59.20 InternVL3.5-241B-A28B 63.42 74.78 58.01 65.82 62.20 73.20 61.00 65.47 LLaVA-1.5-7B 48.73 44.67 35.93 43.06 44.60 47.20 32.00 41.27 LLaVA-1.6-7B 47.00 46.72 33.16 42.37 43.60 43.00 35.00 40.53 LLaVA-onevision-7B 55.50 55.54 42.81 51.37 53.00 57.20 43.00 51.07 LLaVA-onevision-72B 54.61 66.01 50.10 57.33 54.80 68.40 45.00 56.07 LLaVA-onevision-1.5-8B 59.41 65.38 47.64 57.75 58.00 65.20 48.00 57.07 Qwen2-VL-7B 60.29 62.76 44.66 56.09 59.40 63.80 43.00 55.40 Qwen2.5-VL-3B 54.67 56.01 37.78 49.65 53.60 53.00 41.00 49.20 Qwen2.5-VL-7B 59.61 58.88 44.97 54.56 55.80 59.20 49.00 54.67 Qwen2.5-VL-32B 63.55 68.09 51.33 61.22 62.80 69.20 50.00 60.67 Qwen2.5-VL-72B 65.15 69.48 56.37 63.87 65.40 67.20 59.00 63.87 Qwen3-VL-8B 64.08 64.61 53.59 60.85 63.20 60.40 52.00 58.53 Qwen3-VL-235B-A22B 68.48 73.17 61.40 67.89 68.00 72.00 60.00 66.67 
+
+Deepseek-VL-7B 54.16 56.60 35.22 48.86 50.60 57.80 37.00 48.47 Deepseek-VL2-27B 61.32 60.49 40.76 54.30 58.40 61.20 39.00 52.87 Emu3-8B 40.35 47.46 30.49 39.74 45.40 43.60 25.00 38.00 Chameleon-7B 29.12 39.58 37.06 35.55 24.80 43.00 34.00 33.93 Chameleon-30B 33.71 44.26 34.80 37.94 30.00 39.00 45.00 38.00 
+
+Closed-source 
+
+Gemini-3-pro-preview – – – – 71.70 87.20 81.00 79.97 
+
+Gemini-2.5-pro – – – – 69.40 84.40 76.00 76.60 GPT-5.2 – – – – 64.00 80.00 70.00 71.60 GPT-5.1 – – – – 64.40 82.80 71.00 72.73 o3 – – – – 63.60 85.00 72.00 73.53 GPT-4o – – – – 57.40 72.20 57.00 62.20 Claude-4.5-Sonnet – – – – 59.60 80.80 72.00 70.80 
+
+EMMA [ 17 ], MATH-Vision [ 37 ], and MMMU-Pro [ 14 ], specifically targeting those with rich textual cues, and segregate the textual contexts from their original questions. Collectively, the synergy section contains 974 samples covering three progressively cognitive levels. 
+
+4 Experiments 
+
+To conduct a comprehensive analysis, we assess a wide range of state-of-the-art LMMs, covering various architectures, series, versions, and parameter scales. For open-source models, we include LLM-based architectures such as InternVL (v2.5-v3.5, 8B&241B) [ 6, 19 , 38 ], LLaVA (v1.5-OneVison1.5, 7B-72B) [ 39 – 41 ], Qwen-VL (v2-v3, 3B-235B) [ 5 ,42 , 43 ], and DeepSeek-VL (v1-v2, 7B&27B) [ 7 , 44 ] series, as well as native multimodal models like Emu3 [ 20 ] and Chameleon (7B&30B) [ 21 ]. Among closed-source models, we select top-performing representatives including GPT-5.1 [ 3], GPT-5.2 [ 45 ], GPT-4o [ 46 ], and o3 [ 47 ] from OpenAI, Gemini 2.5 Pro [ 29 ] and Gemini 3 Pro Preview [ 48 ] from Google, and Claude 4.5 Sonnet [49] from Anthropic; and for these closed-source models, we report their performance on MIBench-mini, which is a more challenging and balanced subset carefully selected from the original benchmark, containing 100 samples for each interaction pattern. 64.1 Evaluation Metrics 
+
+We denote the entire benchmark comprising N samples as D = {(xi, a i)}Ni=1 , where xi and ai represent the model input (contexts and question) of the i-th sample and its ground truth, respectively. The benchmark D is partitioned into three distinct subsets: Dvis , Dtxt , and Dsyn , each targeting a specific capability: Vision-centric, Text-centric, and Synergy. We define one input unit for inference as a triple k = ( cv , c t, q ), comprising the visual context, the textual context, and the question, respectively. Accordingly, the input xi of sample in each subset can be defined as a set {ki,j }mj=1 ,where: ki,j = ( cvi , c ti,j , q i) in Dvis , containing a fixed visual context and a textual context varying across m types; 
+
+ki,j = ( cvi,j , c ti , q i) in Dtxt , containing a fixed textual context and a visual context varying across m types; and in Dsyn ,where both modalities provide essential information, the input is denoted simply as xi = {ki}.
+
+Accuracy. We first compute a sample-level correctness score, C(xi). For a synergy sample xi ∈ Dsyn , which consists of only one triple, correctness is a binary value: C(xi) = I(predict (ki) = ai), where I(·) is the indicator function. For the 
+
+i-th sample from Dvis or Dtxt with m input variations, the score is: 
+
+C(xi) = 1
+
+m
+
+> m
+
+X
+
+> j=1
+
+I(predict (ki,j ) = ai). (1) The accuracy for D and its subsets is calculated as the average of C(xi) over all samples within each respective set. 
+
+Consistency. To specifically evaluate the model’s ability to select information from centric modality, we introduce a metric called Consistency , which is designed exclusively on Dvis and Dtxt . The responses for sample xi are considered consistent if the model gives the exact same choice for all m input variations. We formalize this with a binary sample-level Consistency score: Cons (xi) = I( predict (ki,j )}mj=1 = 1  , (2) where | · | denotes the cardinality of the result set. And the overall Consistency for the given subset ( D′ ∈ { Dvis , D txt })is the proportion of consistent samples, or equivalently, the average value of Cons (xi) over the entire subset. 
+
+4.2 Limitations in Multimodal Interaction 
+
+Tab. 1 provides an overview of current LMM performance across three interaction patterns. On the full benchmark, most models achieve accuracies between 50% and 65% on vision-centric tasks. Performance is generally higher on text-centric tasks, where the majority of models cluster around 65%, with only the largest-scale models, such as InternVL3.5-241B and Qwen3-VL-235B, being capable of approaching 70%. These results suggest that existing LMMs still struggle with insufficient targeted information extraction, particularly in the visual domain. Their performance is even lower on synergy, where most models achieve approximately 40% accuracy. This indicates that integrating multiple information sources remains a significant challenge. Overall, most current LMMs require substantial improvement to handle comprehensive multimodal interactions. Lv 1 Lv 2 Lv 3 Lv 1 Lv 2 Lv 3 Lv 1 Lv 2 Lv 3 
+
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> 80
+> 90
+> 100
+> Accuracy (%)
+> Vision-centric
+> Text-centric
+> Synergy
+
+Figure 5 Performance of open-source LMMs across three pro-gressively cognitive levels: Recognition (Level 1), Understanding (Level 2), and Reasoning (Level 3). 
+
+Further, Fig. 5 offers a finer-grained visualization of model performance across different cognitive levels, revealing a more detailed picture of LMMs’ capabil-ities and shortcomings. On both vision-centric and text-centric tasks, LMMs perform well on Level 1 and 2 but show a considerable decline on Level 3, which demands more complex reasoning. This suggests that while current LMMs have established basic recognition and understanding capabilities, they still lack the ad-vanced reasoning required for sophisticated tasks. No-tably, their performance on the Synergy Level 2, which stems from the understanding ability of each modality and focuses on cross-modal integration, remains poor. This indicates that while models excel at understanding information within individual modalities, they struggle to achieve deeper cross-modal synergistic emergence. 7To sum up, existing LMMs have demonstrated insufficient reasoning capability and limited ability to collaboratively leverage multimodal information for cross-modal understanding. Lv 3                 
+
+> Lv 2
+> Synergy
+> Vision
+> Lv 1
+> Lv 2
+> Lv 1
+> Text
+> Lv 3
+> Lv 2
+> Lv 1
+> Lv 3
+> Lv 2
+> Synergy
+> Vision
+> Lv 1
+> Lv 2
+> Lv 1
+> Text
+> Lv 3
+> Lv 2
+> Lv 1
+> Lv 3
+> Lv 3
+
+Figure 6 Impact of version iteration ( Left ) and parameter scaling (Right ) on multimodal interaction capabilities. 
+
+Under current architectures and training paradigms, both version iterations (including changes in data sources) and parameter scaling yield negligible im-provements in multimodal interaction capabilities. As shown in Fig. 6 , taking the InternVL series as a case study, version updates result in minimal performance variations and, in some instances, even lead to perfor-mance regression in specific interaction phases. For example, InternVL3 and InternVL3.5 exhibit perfor-mance declines in Vision-centric Level 2 and Synergy Level 2, respectively, compared to their predecessors. This indicates that existing open-source models pos-sess intrinsic limitations within their architectures and training paradigms ; Furthermore, an analysis of the QwenVL2.5 series across varying model sizes reveals the diminishing returns of scaling. While performance improves from 7B to 32B, the plateau observed between 32B and 72B indicates a saturation point, underscoring that simply expanding parameter scale is insufficient for driving substantial growth in multimodal interaction capabilities .Notably, most closed-source models achieve 60-75% on MIBench-mini, surpassing the state-of-the-art open-source models by nearly 10%. In particular, Gemini 3 Pro Preview comprehensively outperforms other proprietary models, demonstrating remarkable capabilities. However, this performance gap mainly stems from the text and synergy domains, where Gemini 3 Pro Preview surpasses open-source models by over 10%. In contrast, its lead in the visual modality is relatively marginal at less than 4%. We hypothesize that the enhanced synergy observed in closed-source models stems primarily from their superior textual capabilities. Consequently, these results suggest that the vision-centric interaction capability of closed-source models may be the bottleneck hindering further improvements in their deeper synergy between image and texts. 
+
+4.3 Targeted Modality Source Selection Visual Consistency  
+
+> Textual Consistency
+> Chameleon
+> Chameleon
+> LLaVA -1.5
+> LLaVA -1.6
+> InternVL2
+> InternVL3.5
+> InternVL3
+> InternVL2.5
+> InternVL3.5
+> LLaVA -OneVision -1.5
+> LLaVA -OneVision
+> Qwen2.5 -VL
+> DeepseekVL
+> DeepseekVL
+> Emu3
+> GPT -4o
+> o3 GPT -5.1 Claude Sonnet 4.5
+> Gemini 3 pro preview
+> Gemini 2.5 pro
+> Qwen3 -VL
+> Qwen2.5 -VL
+> Qwen3 -VL
+> Qwen2.5 -VL
+> Qwen2.5 -VL
+> Qwen2 -VL
+
+Figure 7 A comparison of LMMs’ modality source selection consistency evaluated on MIBench-mini, with dot sizes scaled according to model parameter counts. 
+
+Based on our specialized design of multimodal contexts for vision-centric and text-centric tasks in Sec. 3.2, we examine whether LMMs can accurately source cues in targeted modality to handle the final task. As shown in Fig. 7, the x-axis and y-axis quantify the model’s Con-sistency scores on vision-centric and text-centric tasks, respectively. A higher value indicates greater stability in selecting the correct information source despite varia-tions in another modality. Ideally, LMMs should cluster in the top-right corner. However, for most open-source models, Consistency scores across both modalities gen-erally fall below 60% or even 50%, indicating a weak capability for targeted information source selection. For closed-source models, they demonstrate superior stabil-ity on sourcing textual contexts for text-centric tasks, reaching approximately 80%, whereas their stability on selecting the targeted vision cues remains around 50%. Furthermore, there is a quite interesting pattern: the majority of models lie significantly above the y = x
+
+line. This reveals a distinct textual bias: LMMs tend to prioritize text source, even in vision-centric tasks where the ground truth hinges exclusively on visual cues. Although updates to model series and increases in parameter scales 8facilitate improvements in Consistency scores of two modalities, they do not eliminate this sensitivity to variations in the textual context. Collectively, these findings suggest that current LMMs exhibit a relatively poor ability to select the targeted modality source , with visual information selection being particularly susceptible to interference from text source . We attribute this bias to the fact that most existing models are built upon powerful LLM backbones, which inherently prioritize text-based representations over visual inputs. 
+
+4.4 Synergy Deficits and Scaling Inefficiency 
+
+As discussed in Sec. 3.1, synergy is a critical factor in assessing the capabilities of LMMs, revealing their inherent ability to achieve cross-modal collaboration. Fig. 5 presents a comprehensive analysis of synergy ability across different cognition levels. At Level 1 tasks, the median accuracy of the models exceeds 60%, indicating that modern LMMs possess a basic ability for cross-modal alignment. This forms a foundation for more complex multimodal interactions in higher-level tasks. However, as task complexity increases to Level 2 and 3, which require reasoning capabilities in both natural and science-related contexts, model performance drops significantly. Interestingly, although Level 2 tasks primarily involve reasoning based on natural contexts, which do not need highly specialized knowledge but require frequent cross-modal interaction, the models perform even worse compared to science-related Level 3 tasks. This reveals that, while basic alignment is established, current LMMs lack the synergy ability of deep cross-modal understanding and reasoning, and may often rely on parametric knowledge to solve scientific tasks while failing at intensive cross-modal interaction in natural scenes. 3 7 32 72  
+
+> Model Size (Billion Parameters)
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> 80
+> Accuracy (%)
+> Synergy Lv3
+> Synergy Lv2
+> Synergy Lv1
+> Synergy
+> Figure 8
+
+Impact of parameter scaling on synergy capabilities (on Qwen2.5-VL). 
+
+Fig. 8 illustrates the impact of parameter scaling on synergy capabilities. While a general positive corre-lation is observed between model size and overall ac-curacy, more complex interactions remain a persistent bottleneck. Despite scaling the model size to 72B, ac-curacies for higher-level synergy tasks (Level 2 and 3) remain consistently low (below 50%) and exhibit a much slower growth rate compared to the massive increase in parameters. What’s more, the benefits of scaling are disproportionate in the early stages. Inter-estingly, from 3B to 7B, the performance growth for basic tasks (Level 1) is significantly steeper than that for higher-level tasks, implying that initial scaling primarily benefits superficial interaction abilities rather than deep reasoning. Third, the gains are uneven: performance on Level 1 shows a surprising stagnation (though minor) between 7B and 32B. Overall, these results suggest that s implying scaling parameters is insufficient to overcome the intrinsic deficits in achieving deeper cross-modal collaboration .
+
+4.5 Different Paradigms: Native vs. Non-native 
+
+While most current LMMs are building upon a pretrained LLM backbone, like LLaVA [ 39 ], emerging native LMMs are trained from scratch using multimodal data, represented by Emu3 [ 20 ] and Chameleon [ 21 ]. Our experiments provide a comprehensive analysis of these two training paradigms. As shown in Tab. 1, native LMMs perform poorly on both unimodal and multimodal synergy tasks, struggling even with the simplest tasks in Level 1. Under the same 7B parameter setting, Chameleon-7B shows a substantial performance gap compared with other non-native LMM counterparts, such as LLaVA-1.5-7B, Qwen2-VL-7B, and DeepSeek-VL-7B. The same phenomenon can be observed in the 8B parameter setting: Emu3-8B still falls far behind the performance of InternVL2-8B, LLaVA-OneVision-1.5-8B, and Qwen3-VL-8B. These observations suggests that, compared with non-native LMMs, these native LMMs fail to establish basic interaction capabilities, possibly because enabling cross-modal interaction at an early stage inevitably undermines unimodal performance. Consequently, native LMMs struggle with fundamental perception, creating a bottleneck for complex interactions , while the performance improvements of non-native LMMs can be largely attributed to advancements in the textual capabilities of the underlying pretrained LLM foundations rather than genuine multimodal synergy .95 Discussion 
+
+In this work, we introduced MIBench, a benchmark that evaluates current LMMs through a structured analysis of multimodal interaction, by organizing tasks along three interaction patterns and three cognitive levels. It provides a fine-grained view of how models integrate and utilize information across modalities. Based on our evaluation, most current LMMs perform well on single-modal centric tasks or simple cross-modal tasks but degrade substantially when deeper synergistic collaboration is required. Meanwhile, LMMs built upon large language models exhibit a clear textual bias, hindering the effective utilization of visual information and synergistic information across modalities. These findings highlight the need for future LMM paradigms to achieve a better balance in modality information utilization, especially visual information. Placing greater focus on effectively leveraging each modality is essential to support diverse multimodal interactions, instead of relying predominantly on textual cues. Overall, MIBench could serve as both an evaluation tool for LMMs and a reference for developing future LMMs with more balanced modality capabilities and improved cross-modal collaboration. 
+
+6 Acknowledgements 
+
+This work was supported by Beijing Natural Science Foundation (4262050) and the fund for building world-class universities (disciplines) of Renmin University of China. 10 References 
+
+[1] T. Baltrušaitis, C. Ahuja, and L.-P. Morency, “Multimodal machine learning: A survey and taxonomy,” IEEE transactions on pattern analysis and machine intelligence , vol. 41, no. 2, pp. 423–443, 2018. [2] P. P. Liang, Y. Cheng, X. Fan, C. K. Ling, S. Nie, R. Chen, Z. Deng, N. Allen, R. Auerbach, F. Mahmood et al. , “Quantifying & modeling multimodal interactions: An information decomposition framework,” Advances in Neural Information Processing Systems , vol. 36, pp. 27 351–27 393, 2023. [3] OpenAI, “GPT-5.1,” https://platform.openai.com/docs/models/gpt-5.1, 2025. [4] G. Comanici, E. Bieber, M. Schaekermann, I. Pasupat, N. Sachdeva, I. Dhillon, M. Blistein, O. Ram, D. Zhang, E. Rosen, L. Marris, S. Petulla, C. Gaffney, A. Aharoni, N. Lintz, T. C. Pais, H. Jacobsson et al. , “Gemini 2.5: Pushing the frontier with advanced reasoning, multimodality, long context, and next generation agentic capabilities,” 2025. [Online]. Available: https://arxiv.org/abs/2507.06261 [5] S. Bai, K. Chen, X. Liu, J. Wang, W. Ge, S. Song, K. Dang, P. Wang, S. Wang, J. Tang, H. Zhong, Y. Zhu, M. Yang, Z. Li, J. Wan, P. Wang, W. Ding, Z. Fu, Y. Xu, J. Ye, X. Zhang, T. Xie, Z. Cheng, H. Zhang, Z. Yang, H. Xu, and J. Lin, “Qwen2.5-vl technical report,” arXiv preprint arXiv:2502.13923 , 2025. [6] W. Wang, Z. Gao, L. Gu, H. Pu, L. Cui, X. Wei, Z. Liu, L. Jing, S. Ye, J. Shao et al. , “Internvl3.5: Advancing open-source multimodal models in versatility, reasoning, and efficiency,” arXiv preprint arXiv:2508.18265 , 2025. [7] Z. Wu, X. Chen, Z. Pan, X. Liu, W. Liu, D. Dai, H. Gao, Y. Ma, C. Wu, B. Wang, Z. Xie, Y. Wu, K. Hu, J. Wang, Y. Sun, Y. Li, Y. Piao, K. Guan, A. Liu, X. Xie, Y. You, K. Dong, X. Yu, H. Zhang, L. Zhao, Y. Wang, and C. Ruan, “Deepseek-vl2: Mixture-of-experts vision-language models for advanced multimodal understanding,” arXiv preprint arXiv:2412.10302 , 2024. [8] Y. Liu, H. Duan, Y. Zhang, B. Li, S. Zhang, W. Zhao, Y. Yuan, J. Wang, C. He, Z. Liu et al. , “Mmbench: Is your multi-modal model an all-around player?” in European conference on computer vision . Springer, 2024, pp. 216–233. [9] C. Fu, P. Chen, Y. Shen, Y. Qin, M. Zhang, X. Lin, J. Yang, X. Zheng, K. Li, X. Sun et al. , “Mme: A comprehensive evaluation benchmark for multimodal large language models,” arXiv preprint arXiv:2306.13394 , 2023. [10] L. Chen, J. Li, X. Dong, P. Zhang, Y. Zang, Z. Chen, H. Duan, J. Wang, Y. Qiao, D. Lin et al. , “Are we on the right way for evaluating large vision-language models?” arXiv preprint arXiv:2403.20330 , 2024. [11] R. Zhang, D. Jiang, Y. Zhang, H. Lin, Z. Guo, P. Qiu, A. Zhou, P. Lu, K.-W. Chang, P. Gao et al. , “Mathverse: Does your multi-modal llm truly see the diagrams in visual math problems?” arXiv preprint arXiv:2403.14624 , 2024. [12] X. Zheng, C. Liao, Y. Fu, K. Lei, Y. Lyu, L. Jiang, B. Ren, J. Chen, J. Wang, C. Li et al. , “Mllms are deeply affected by modality bias,” arXiv preprint arXiv:2505.18657 , 2025. [13] P. Lu, S. Mishra, T. Xia, L. Qiu, K.-W. Chang, S.-C. Zhu, O. Tafjord, P. Clark, and A. Kalyan, “Learn to explain: Multimodal reasoning via thought chains for science question answering,” in The 36th Conference on Neural Information Processing Systems (NeurIPS) , 2022. [14] X. Yue, T. Zheng, Y. Ni, Y. Wang, K. Zhang, S. Tong, Y. Sun, B. Yu, G. Zhang, H. Sun, Y. Su, W. Chen, and G. Neubig, “Mmmu-pro: A more robust multi-discipline multimodal understanding benchmark,” arXiv preprint arXiv:2409.02813 , 2024. [15] P. Lu, H. Bansal, T. Xia, J. Liu, C. Li, H. Hajishirzi, H. Cheng, K.-W. Chang, M. Galley, and J. Gao, “Mathvista: Evaluating mathematical reasoning of foundation models in visual contexts,” in International Conference on Learning Representations (ICLR) , 2024. [16] R. Qiao, Q. Tan, G. Dong, M. Wu, C. Sun, X. Song, Z. GongQue, S. Lei, Z. Wei, M. Zhang et al. , “We-math: Does your large multimodal model achieve human-like mathematical reasoning?” arXiv preprint arXiv:2407.01284 , 2024. [17] Y. Hao, J. Gu, H. W. Wang, L. Li, Z. Yang, L. Wang, and Y. Cheng, “Can mllms reason in multimodality? emma: An enhanced multimodal reasoning benchmark,” arXiv preprint arXiv:2501.05444 , 2025. [18] H. Liu, C. Li, Q. Wu, and Y. J. Lee, “Visual instruction tuning,” arXiv preprint arXiv:2304.08485 , 2023. [19] Z. Chen, J. Wu, W. Wang, W. Su, G. Chen, S. Xing, M. Zhong, Q. Zhang, X. Zhu, L. Lu et al. , “Internvl: Scaling up vision foundation models and aligning for generic visual-linguistic tasks,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2024, pp. 24 185–24 198. [20] X. Wang, X. Zhang, Z. Luo, Q. Sun, Y. Cui, J. Wang, F. Zhang, Y. Wang, Z. Li, Q. Yu et al. , “Emu3: Next-token prediction is all you need,” arXiv preprint arXiv:2409.18869 , 2024. 
+
+11 [21] C. Team, “Chameleon: Mixed-modal early-fusion foundation models,” arXiv preprint arXiv:2405.09818 , 2024. [22] OpenAI, “Gpt-4v(ision) system card,” https://openai.com/research/gpt-4v-system-card, 2023. [23] D. Hendrycks, C. Burns, S. Basart, A. Zou, M. Mazeika, D. Song, and J. Steinhardt, “Measuring massive multitask language understanding,” arXiv preprint arXiv:2009.03300 , 2020. [24] Z. Yang, H. Wang, and D. Hu, “Efficient quantification of multimodal interaction at sample level,” in Forty-Second International Conference on Machine Learning , 2025. [25] B. Dufumier, J. Castillo-Navarro, D. Tuia, and J.-P. Thiran, “What to align in multimodal contrastive learning?” in International Conference on Learning Representations , 2025. [26] T. Bai, Y. Fan, Q. Jiantao, F. Sun, J. Song, J. Han, Z. Liu, C. He, W. Zhang, and B. Yuan, “Hallucination at a glance: Controlled visual edits and fine-grained multimodal learning,” in The Thirty-ninth Annual Conference on Neural Information Processing Systems , 2025. [27] B. Li, Y. Ge, Y. Ge, G. Wang, R. Wang, R. Zhang, and Y. Shan, “Seed-bench-2: Benchmarking multimodal large language models,” arXiv preprint arXiv:2311.17092 , 2023. [28] W. Xu, J. Wang, W. Wang, Z. Chen, W. Zhou, A. Yang, L. Lu, H. Li, X. Wang, X. Zhu, W. Wang, J. Dai, and J. Zhu, “Visulogic: A benchmark for evaluating visual reasoning in multi-modal large language models,” arXiv preprint arXiv:2504.15279 , 2025. [29] G. Deepmind, “Gemini 2.5 pro,” https://blog.google/products-and-platforms/products/gemini/gemini-2-5-pro-latest-preview/, 2025. [30] A. Wang, A. Singh, J. Michael, F. Hill, O. Levy, and S. R. Bowman, “Glue: A multi-task benchmark and analysis platform for natural language understanding,” arXiv preprint arXiv:1804.07461 , 2019. [31] P.-E. Sarlin, D. DeTone, T. Malisiewicz, and A. Rabinovich, “Superglue: Learning feature matching with graph neural networks,” 
+
+arXiv preprint arXiv:1911.11763 , 2020. [32] Y. Wang, X. Ma, G. Zhang, Y. Ni, A. Chandra, S. Guo, W. Ren, A. Arulraj, X. He, Z. Jiang, T. Li, M. Ku, K. Wang, A. Zhuang, R. Fan, X. Yue, and W. Chen, “Mmlu-pro: A more robust and challenging multi-task language understanding benchmark,” 
+
+arXiv preprint arXiv:2406.01574 , 2024. [33] D. Rein, B. L. Hou, A. C. Stickland, J. Petty, R. Y. Pang, J. Dirani, J. Michael, and S. R. Bowman, “Gpqa: A graduate-level google-proof q&a benchmark,” arXiv preprint arXiv:2311.12022 , 2023. [34] C. Wu, J. Li, J. Zhou, J. Lin, K. Gao, K. Yan, S. ming Yin, S. Bai, X. Xu, Y. Chen, Y. Chen, Z. Tang, Z. Zhang, Z. Wang, A. Yang, B. Yu, C. Cheng, D. Liu, D. Li, H. Zhang, H. Meng, H. Wei, J. Ni, K. Chen, K. Cao, L. Peng, L. Qu, M. Wu, P. Wang, S. Yu, T. Wen, W. Feng, X. Xu, Y. Wang, Y. Zhang, Y. Zhu, Y. Wu, Y. Cai, and Z. Liu, “Qwen-image technical report,” arXiv preprint arXiv:2508.02324 , 2025. [35] D. A. Hudson and C. D. Manning, “Gqa: A new dataset for real-world visual reasoning and compositional question answering,” in Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , 2019, pp. 6700–6709. [36] T.-Y. Lin, M. Maire, S. Belongie, L. Bourdev, R. Girshick, J. Hays, P. Perona, D. Ramanan, C. L. Zitnick, and P. Dollár, “Microsoft coco: Common objects in context,” arXiv preprint arXiv:1405.0312 , 2015. [37] K. Wang, J. Pan, W. Shi, Z. Lu, H. Ren, A. Zhou, M. Zhan, and H. Li, “Measuring multimodal mathematical reasoning with math-vision dataset,” in The Thirty-eight Conference on Neural Information Processing Systems Datasets and Benchmarks Track , 2024. [38] Z. Chen, W. Wang, Y. Cao, Y. Liu, Z. Gao, E. Cui, J. Zhu, S. Ye, H. Tian, Z. Liu et al. , “Expanding performance boundaries of open-source multimodal models with model, data, and test-time scaling,” arXiv preprint arXiv:2412.05271 , 2024. [39] H. Liu, C. Li, Y. Li, and Y. J. Lee, “Improved baselines with visual instruction tuning,” 2023. [40] B. Li, Y. Zhang, D. Guo, R. Zhang, F. Li, H. Zhang, K. Zhang, Y. Li, Z. Liu, and C. Li, “Llava-onevision: Easy visual task transfer,” arXiv preprint arXiv:2408.03326 , 2024. [41] X. An, Y. Xie, K. Yang, W. Zhang, X. Zhao, Z. Cheng, Y. Wang, S. Xu, C. Chen, C. Wu, H. Tan, C. Li, J. Yang, J. Yu, X. Wang, B. Qin, Y. Wang, Z. Yan, Z. Feng, Z. Liu, B. Li, and J. Deng, “Llava-onevision-1.5: Fully open framework for democratized multimodal training,” arXiv preprint arXiv:2509.23661 , 2025. 
+
+12 [42] P. Wang, S. Bai, S. Tan, S. Wang, Z. Fan, J. Bai, K. Chen, X. Liu, J. Wang, W. Ge, Y. Fan, K. Dang, M. Du, X. Ren, R. Men, D. Liu, C. Zhou, J. Zhou, and J. Lin, “Qwen2-vl: Enhancing vision-language model’s perception of the world at any resolution,” 
+
+arXiv preprint arXiv:2409.12191 , 2024. [43] Q. Team, “Qwen3 technical report,” arXiv preprint arXiv:2505.09388 , 2025. [44] H. Lu, W. Liu, B. Zhang, B. Wang, K. Dong, B. Liu, J. Sun, T. Ren, Z. Li, Y. Sun, C. Deng, H. Xu, Z. Xie, and C. Ruan, “Deepseek-vl: Towards real-world vision-language understanding,” arXiv preprint arXiv:2403.05525 , 2024. [45] OpenAI, “GPT-5.2,” https://platform.openai.com/docs/models/gpt-5.2, 2025. [46] A. Hurst, A. Lerer, A. P. Goucher, A. Perelman, A. Ramesh, A. Clark, A. Ostrow, A. Welihinda, A. Hayes, A. Radford et al. ,“Gpt-4o system card,” arXiv preprint arXiv:2410.21276 , 2024. [47] OpenAI, “Openai o3 and o4-mini system card,” https://openai.com/index/o3-o4-mini-system-card/, 2025. [48] G. Deepmind, “Gemini 3 pro preview,” https://deepmind.google/models/gemini/pro/, 2025. [49] Anthropic, “Claude 4.5 sonnet,” https://www.anthropic.com/news/claude-4-5-sonnet, 2025. 
+
+13 Appendix 
+
+A Additional Results 
+
+A.1 Detailed Interaction Analysis 
+
+Fig. 5 in the main paper provides a holistic view of how current LMMs process multimodal interactions under different levels. To explore this further, we conducted a more fine-grained comparison of LMMs’ performance based on the following aspects: Lv 3 
+
+> Lv 2
+
+Synergy    
+
+> Vision
+> Lv 1
+> Lv 2
+> Lv 1
+
+Text      
+
+> Lv 3
+> Lv 2
+> Lv 1
+> Lv 3
+> Lv 2
+
+Synergy    
+
+> Vision
+> Lv 1
+> Lv 2
+> Lv 1
+
+Text      
+
+> Lv 3
+> Lv 2
+> Lv 1
+> Lv 3
+> Lv 3
+
+Figure 9 Comparison of LMMs’ performance within different series. ( Left: LLaVA; Right: Qwen-VL) 
+
+Firstly, the iterative evolution of model series does not necessarily yield consistent improvements in interaction capabilities across all dimensions, as illustrated in Fig. 9. For instance, within the LLaVA series, while LLaVA-OneVision-7B demonstrates significant enhancements in Vision-centric Level 1 and 2, it exhibits a regression at Vision-centric Level 3. Similarly, the Qwen2.5 series shows a degradation in Synergy Level 2 and Text Level 2. Lv 3                 
+
+> Lv 2
+> Synergy
+> Vision
+> Lv 1
+> Lv 2
+> Lv 1
+> Text
+> Lv 3
+> Lv 2
+> Lv 1
+> Lv 3
+> Lv 2
+> Synergy
+> Vision
+> Lv 1
+> Lv 2
+> Lv 1
+> Text
+> Lv 3
+> Lv 2
+> Lv 1
+> Lv 3
+> Lv 3
+
+Figure 10 Left: non-native vs. native LMMs. Right: Performance of SOTA open-source and closed-source LMMs. 
+
+Secondly, current Native LMMs show distinct limitations. As shown in Fig. 10, they score significantly lower on Vision-centric Level 1 and Text-centric Level 1 compared to non-native models. This indicates that native multimodal models have not yet fully learned to distinguish and utilize information from specific modalities effectively. Furthermore, they do not demonstrate stable improvements in synergy capabilities, highlighting a key direction for future research. Finally, regarding best-performing LMMs, Gemini 3 Pro Preview demonstrates remarkable SOTA performance across diverse interaction abilities as depicted in Fig. 10. Most notably, it demonstrates a substantial improvement at Synergy Level 2 compared to other models. Among open-source models, InternVL3.5-241B and Qwen3-VL-235B demonstrate comparable performance in vision and text modalities; however, InternVL3.5-241B exhibits notably superior capabilities at Synergy Level 2. 14 A.2 Task-specific interaction analysis 
+
+The MIBench hierarchy is structured based on the specific capabilities required by each task. It categorizes these requirements into three modalities (Vision-centric, Text-centric, and Synergy) and three cognitive levels (Recognition, Understanding, and Reasoning). By analyzing model performance across 32 distinct tasks, we provide a deeper insight into LMMs’ capabilities. Attribute Recognition 
+
+> Counting
+> Object Recognition
+> Spatial Localization
+> Attribute Comparison
+> Instance Interaction
+> Scene Understanding
+> Spatial Relationship
+> Attribute Reasoning
+> Positional Reasoning
+> Quantitative Reasoning
+> Spatial Reasoning
+> Stylistic Reasoning
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+100 
+
+> Accuracy (%)
+> Task level
+> Level 1
+> Level 2
+> Level 3
+> Coreference
+> Grammar
+> Word Sense
+> Entailment
+> Sentiment
+> Similarity
+> Biology
+> Chemistry
+> Physics Math
+> Task level
+> Level 1
+> Level 2
+> Level 3
+> Attribute Matching
+> Object Matching
+> Position Matching
+> Rules Execution
+> Temporal Simulation
+> Business
+> Physics
+> Science
+> Engineering
+> Task level
+> Level 1
+> Level 2
+> Level 3
+
+Figure 11 LMM’s performance on different task types. 
+
+As shown in Fig. 11, there is a clear dependency between task complexity and cognitive level. Mastery of low-level concepts, such as Attribute Recognition and Word Sense, serves as the necessary foundation for advanced understanding tasks like Spatial Relationship detection and Sentiment analysis. In the evaluation for Vision-centric and Text-centric ability, models demonstrate relatively strong performance in Recognition and Understanding. However, a significant gap exists in Reasoning. LMMs struggle to reason based on pure visual inputs and show similar weaknesses in linguistic reasoning. The notable exceptions are Mathematics and Biology. This divergence likely occurs because mathematics is a foundational skill heavily emphasized during training, while biology is a knowledge-intensive subject where models can often rely on memorization rather than logical inference to answer questions. Finally, regarding Synergy, performance drops specifically at Level 2, which demands complex image-text reasoning. The Temporal Simulation task yields the lowest scores, indicating that LMMs still fail to effectively synthesize information when images and text present heterogeneous data. 
+
+B Additional Details of MIBench 
+
+B.1 Detailed Statistics 
+
+We provide Fig. 12 with more detailed statistics for supplement. 770 
+
+771 
+
+772 
+
+773 
+
+774 
+
+775 
+
+776 
+
+777 
+
+778 
+
+779 
+
+780 
+
+781 
+
+782 
+
+783 
+
+784 
+
+785 
+
+786 
+
+787 
+
+788 
+
+789 
+
+790 
+
+791 
+
+792 
+
+793 
+
+794 
+
+795 
+
+796 
+
+797 
+
+798 
+
+799 
+
+800 
+
+801 
+
+802 
+
+803 
+
+MIBench: Evaluating LMMs on Multimodal Interaction 
+
+Table 2. More statistics of MIBench 
+
+Statistics Number 
+
+Total Samples 2,980 
+
+Total Tasks 32 
+
+Context Pairs 10,030 
+
+Vision (Lv 1/Lv 2/Lv 3) 913 (388:282:243) 
+
+Text (Lv 1/Lv 2/Lv 3) 1093 (352:380:361) 
+
+Synergy (Lv 1/Lv 2/Lv 3) 974 (300:345:329) 
+
+Samples with New Contexts 2006 
+
+Newly Constructed Samples 645 
+
+Newly Generated Images 5465 
+
+Figure 10. Proportion of sources for collected images. 
+
+Please ensure that your output only contains the final answer in one ‘ \boxed{} ’ without any additional content. 
+
+In particular, for models with intrinsic thinking mode, we allow them to solve the problems step-by-step. The corresponding 
+
+prompt is as follows: 
+
+[mybox] {visual context }{ textual context }{ question }{ options }
+
+Please solve the problem step by step, and put the option of the final answer in one ‘ \boxed{} ’. 
+
+C.3. Detailed Definition of Tasks 
+
+To evaluate the capabilities of LMMs across three interaction modalities, MIBench encompasses 32 tasks spanning three 
+
+levels: from recognition, understanding, to reasoning. 
+
+For the visual part, level 1 tests the LMM’s ability to perceive visual concepts, including the following tasks:        
+
+> MME
+> 2.17%
+> EMMA
+> 5.32%
+> COCO
+> 9.54%
+> MMBench
+> 9.65%
+> MMMU-Pro
+> 15.74%
+> GQA
+> 17.55%
+> SEED-Bench-2
+> 18.90%
+> VisuLogic
+> 21.12%
+> MME EMMA COCO MMBench MMMU-Pro GQA SEED-Bench-2 VisuLogic
+
+Figure 12 The left table shows more statistics of MIBench. The right graph shows proportion of sources for collected images. 
+
+15 Table 2 Detailed source information of the LMMs evaluated in this study.    
+
+> Model Source Version URL
+
+Closed-source Models 
+
+Gemini-3-pro-preview Google stable https://ai.google.dev/gemini-api/docs/models 
+
+Gemini-2.5-pro Google stable https://ai.google.dev/gemini-api/docs/models 
+
+Gemini-2.5-flash Google stable https://ai.google.dev/gemini-api/docs/models 
+
+GPT-5.1 OpenAI 2025-11-13 https://platform.openai.com/docs/models/gpt-5.1 
+
+GPT-5.2 OpenAI 2025-12-11 https://platform.openai.com/docs/models/gpt-5.2 
+
+o3 OpenAI 2025-04-16 https://platform.openai.com/docs/models/o3 
+
+GPT-4o OpenAI 2024-11-20 https://platform.openai.com/docs/models/gpt-4o 
+
+Claude-4.5-Sonnet Anthropic 2025-09-29 https://www.anthropic.com/claude/sonnet 
+
+Open-source Models 
+
+InternVL2-8B OpenGVLab Latest Released https://huggingface.co/OpenGVLab/InternVL2-8B 
+
+InternVL2.5-8B OpenGVLab Latest Released https://huggingface.co/OpenGVLab/InternVL2_5-8B 
+
+InternVL3-8B OpenGVLab Latest Released https://huggingface.co/OpenGVLab/InternVL3-8B 
+
+InternVL3.5-8B OpenGVLab Latest Released https://huggingface.co/OpenGVLab/InternVL3_5-8B 
+
+InternVL3.5-241B-A28B OpenGVLab Latest Released https: //huggingface.co/OpenGVLab/InternVL3_5-241B-A28B 
+
+LLaVA-1.5-7B Liuhaotian Latest Released https://huggingface.co/liuhaotian/llava-v1.5-7b 
+
+LLaVA-1.6-7B Liuhaotian Latest Released https: //huggingface.co/liuhaotian/llava-v1.6-vicuna-7b 
+
+LLaVA-onevision-7B LMMS-Lab Latest Released https://huggingface.co/lmms-lab/llava-onevision-q wen2-7b-ov 
+
+LLaVA-onevision-72B LMMS-Lab Latest Released https://huggingface.co/lmms-lab/llava-onevision-q wen2-72b-ov 
+
+LLaVA-onevision-1.5-8B LMMS-Lab Latest Released https://huggingface.co/lmms-lab/LLaVA-OneVision-1 .5-8B-Instruct 
+
+Qwen2-VL-7B Alibaba Latest Released https://huggingface.co/Qwen/Qwen2-VL-7B-Instruct 
+
+Qwen2.5-VL-3B Alibaba Latest Released https: //huggingface.co/Qwen/Qwen2.5-VL-3B-Instruct 
+
+Qwen2.5-VL-7B Alibaba Latest Released https: //huggingface.co/Qwen/Qwen2.5-VL-7B-Instruct 
+
+Qwen2.5-VL-32B Alibaba Latest Released https: //huggingface.co/Qwen/Qwen2.5-VL-32B-Instruct 
+
+Qwen2.5-VL-72B Alibaba Latest Released https: //huggingface.co/Qwen/Qwen2.5-VL-72B-Instruct 
+
+Qwen3-VL-8B Alibaba Latest Released https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct 
+
+Qwen3-VL-235B-A22B Alibaba Latest Released https: //huggingface.co/Qwen/Qwen3-VL-235B-A22B-Instruct 
+
+Deepseek-VL-7B DeepSeek-AI Latest Released https: //huggingface.co/deepseek-ai/deepseek-vl-7b-chat 
+
+Deepseek-VL2-27B DeepSeek-AI Latest Released https://huggingface.co/deepseek-ai/deepseek-vl2 
+
+Emu3-8B BAAI Latest Released https://huggingface.co/BAAI/Emu3-Chat 
+
+Chameleon-7B Meta Latest Released https://huggingface.co/facebook/chameleon-7b 
+
+Chameleon-30B Meta Latest Released https://huggingface.co/facebook/chameleon-30b 
+
+16 C Experiment Setting 
+
+C.1 Evaluated Models and Computational Setup 
+
+We evaluated 30 open-source and closed-source LMMs, with detailed specifications provided in Fig. 2. For closed-source models, we accessed them via their official APIs. For open-source models, we performed inference using the Transformers library on NVIDIA H200 140GB GPUs. To manage computational resources efficiently, we allocated GPUs based on model size: a single GPU for models ranging from 3B to 32B, two GPUs for 72B models, and four GPUs for models exceeding 200B parameters. 
+
+C.2 Prompts for Inference 
+
+As described in Section 4, we provide the models with visual-textual contexts and questions to generate responses. Given that our questions are in a multiple-choice format, we instruct the models to output the final option letter in a fixed format to facilitate the extraction of their choices. 
+
+> {visual_context}{textual_context}{question}{options} Please ensure that your output only contains the final answer in one ‘ \boxed{} ’ without any additional content.
+
+In particular, for models with an intrinsic thinking mode, we allow them to solve the problems step-by-step. 
+
+> {visual_context}{textual_context}{question}{options} Please solve the problem step by step, and put the option of the final answer in one ‘ \boxed{} ’.
+
+C.3 Detailed Definition of Tasks 
+
+To evaluate the capabilities of LMMs across three interaction modalities, MIBench encompasses 32 tasks spanning three levels: from recognition, understanding, to reasoning. For the visual part, Level 1 tests the LMM’s ability to perceive visual concepts, including the following tasks: • Attribute Recognition. Identifies and classifies visual attributes such as color, shape, size, or material, assessing the model’s ability to detect and describe distinguishing object characteristics. • Counting. Quantifies specific object instances, evaluating the ability to recognize and enumerate targets accurately. • Object Recognition. Identifies and categorizes objects within an image, testing the ability to correctly label and distinguish between different objects based on visual features. • Spatial Localization. Determines the precise location of objects within an image, requiring the model to identify exactly where specific elements are situated in the visual context. Visual Level 2 focuses on the LMM’s ability to understand and interpret visual scenes. In particular, it also includes a fine-grained comparison of the relationships between the objects contained in the scene. The tasks included are as follows: • Attribute Comparison. Compares visual properties (e.g., size, color, shape) across multiple objects to assess differences or similarities between elements within the scene. • Instance Interaction. Analyzes dynamic relationships between objects, such as physical contact, causal effects, or specific interactions that occur between different instances. • Scene Understanding. Comprehends the holistic context, setting, and broader narrative of a visual scene, rather than focusing solely on individual isolated objects. • Spatial Relationship. Identifies the relative positioning (e.g., “behind”, “left of”), orientation, and spatial distribution of multiple objects across the visual context. Visual Level 3 focuses on the LMM’s visual reasoning ability to find patterns between visual images and make predictions. The tasks included are as follows: • Quantitative Reasoning. Derives arithmetic relationships and makes predictions based on the quantification of graphical elements like lines, shapes, and points in the image. • Spatial Reasoning. Interprets 2D representations to understand 3D structures, involving tasks such as reconstruction, folding analysis, and understanding spatial assembly mechanisms. 17 • Positional Reasoning. Predicts object states following geometric transformations(e.g., translation, rotation, and reflection)while maintaining the integrity of basic properties. • Attribute Reasoning. Deduces intrinsic geometric properties, such as symmetry, curvature, and topology, to predict how they affect the object’s overall structure. • Stylistic Reasoning. Analyzes stylistic operations (e.g., overlaying, subtraction) to assess the similarity between images. For the textual part, Level 1 focuses on the LMM’s ability to comprehend fundamental grammar and word concepts. The tasks included are as follows: • Coreference. Determines whether different linguistic expressions (e.g., pronouns, noun phrases) within the text refer to the same underlying entity or concept. • Grammatical. Validates sentence structure, syntax, and punctuation to determine if the text strictly adheres to standard grammatical rules and conventions. • Word Sense. Disambiguates and compares word meanings based on their shifting usage in different linguistic contexts to interpret the correct sense. Text Level 2 focuses on the LMM’s ability to understand and interpret textual meaning. The tasks included are as follows: • Entailment. Determines if a premise logically guarantees the truth of a hypothesis, assessing the validity of logical implications between statements. • Sentiment. Identifies the specific emotional tone (positive or negative) expressed in a text, such as a review, opinion, or statement. • Similarity. Assesses whether two sentences share the same semantic meaning or act as paraphrases based on their content and structure. Text Level 3 focuses on the LMM’s ability to reason with text in specific scientific and mathematical domains. The tasks included are as follows: • Biology. Reasons about biological concepts, processes, and relationships(e.g., cellular functions, genetics, and anatomy)are derived directly from textual descriptions. • Chemistry. Analyzes chemical principles, molecular structures, bonding, and reaction mechanisms based on the information presented in the text. • Physics. Applies physical laws to interpret phenomena involving motion, energy, and thermodynamics described via text-based descriptions and equations. • Math. Solves mathematical problems in algebra, geometry, calculus, and probability by interpreting textual definitions and computing the correct solutions. For the synergy part, Level 1 focuses on the LMM’s ability to align visual and textual information. The tasks included are as follows: • Attribute Matching. Aligns visual attributes (e.g., color, shape) in images with their corresponding textual descriptions to identify details across modalities. • Object Correspondence. Links objects in the visual input to their specific mentions in the text to ensure correct identification and matching. • Positional Mapping. Matches the spatial locations of objects in the visual scene with their location descriptions in the text to assess alignment. Synergy Level 2 focuses on the LMM’s ability to perform cross-modal understanding, requiring frequent interaction between visual and textual information. The tasks included are as follows: • Rule Execution. Interprets textual rules and applies them to the visual scene to deduce correct answers or execute necessary actions. • Temporal Simulation. Simulates visual changes based on the sequential order of events or operations described in the text, requiring frequent interactions between two modalities. Synergy Level 3 focuses on the LMM’s ability to perform cross-modal reasoning across multiple domains, including: • Business. Integrates visual data (e.g., charts) with textual descriptions to reason about business strategies, scenarios, and decision-making processes. 18 • Physics. Solves physics problems by combining visual representations (e.g., diagrams) with textual laws, forces, and experimental descriptions. • Science. Synthesizes multimodal data to explain scientific processes and concepts in fields like biology, chemistry, or environmental science. • Engineering. Analyzes technical systems and solutions by combining visual schematics with textual engineering concepts to reason about design and functionality. 
+
+C.4 Annotation Details 
+
+We construct the new samples through model generation and subsequent human verification. For the vision-centric part, we utilize Gemini 2.5 Pro to augment visual problems with diverse textual contexts, using the prompts shown in Fig. 13. For the text-centric part, we employ the Qwen-Image text-to-image model to generate images with varying degrees of relevance to the text. Specifically, we use Gemini 2.5 Pro to create image descriptions from text samples based on distinct rules, as illustrated in Fig. 14. Finally, for the rule execution and temporal simulation in Synergy Level 2, we construct new question-answer pairs; we design specific construction rules and similarly leverage Gemini 2.5 Pro for this annotation, using the prompts in Fig. 15. Additionally, to facilitate manual verification of samples, we design a data annotation tool as shown in the Fig. 16. Human annotators use it to manually filter and correct the samples of the entire benchmark. 
+
+Objective: 
+
+Generate a single, valid JSON object based on the provided image, original_question, and answer. The goal is to create high-quality data for evaluating the visual ability of multimodal models by testing their comprehension against various types of textual context. 
+
+Rules and Field Definitions: 
+
+Strictly adhere to the following definitions for each field: • context_relevant_description: A description of the image that contains key information, directly or indirectly guiding towards the correct answer. • context_neutral_global_description: An objective description of the image’s overall properties, such as its style, mood, lighting, or background. This context must be irrelevant to the question and provide no clues. • context_neutral_local_description: An objective description of a specific, localized detail in the image that is unrelated to the question. Focus on a particular object or area that is not the subject of the query. • context_unrelated: A sentence or fact that is entirely unrelated to both the image and the question. It can be a piece of encyclopedic knowledge or a random statement. • context_misleading_description: A description of the image that contains incorrect or intentionally misleading information, designed to guide the model toward a wrong answer. And please add a reference to the image in the question’s description, such as “in the image” to indicate that the answer should be based on the provided image. 
+
+Output Format: 
+
+Return only the raw JSON object. Do not include any additional text, explanations, or markdown formatting. 
+
+Example: 
+
+original_question: How many animals are there? answer: 1 output: { context_neutral_global_description: “The image is clean with a blue background, giving it a peaceful feel.”, context_neutral_local_description: “The leaves of the plant in the picture are red.”, context_relevant_description: “The image shows one butterfly on a plant.”, context_unrelated: “It takes the Earth approximately one year to complete one revolution around the Sun.”, context_misleading_description: “The image shows many butterflies with red wings.”, question: “How many animals are in the image?”, options: { “A”: “Zero”, “B”: “One”, “C”: “Two”, “D”: “Three” }, answer: “B” }
+
+Figure 13 Prompt used to add textual contexts for a vision sample. 
+
+19 Context: 
+
+A publisher used standard boxes for shipping books. The mean weight of books packed per box is 25 pounds, with a standard deviation of two pounds. The mean weight of the boxes is one pound, with a standard deviation of 0.15 pounds. The mean weight of the packing material used per box is two pounds, with a standard deviation of 0.25 pounds. 
+
+Question: 
+
+What is the standard deviation of the weights of the packed boxes? 
+
+Options: 
+
+• “A”: “1.785 pounds” • “B”: “3.012 pounds” • “C”: “2.500 pounds” • “D”: “2.021 pounds” 
+
+Answer: “D” 
+
+Role: 
+
+You are an image design assistant specializing in creating high-quality image generation prompts for text-to-image models, tailored to multiple types of text-based multiple-choice questions. 
+
+Task: 
+
+Based on the multiple-choice question content I provide, generate a specific, detailed, and creative English image generation prompt for each of the following five categories. Ensure the generated prompts can guide AI painting models to create images that meet the category requirements. 
+
+Categories: 
+
+• Correct Guidance: Generate an image that subtly or directly implies, confirms, or demonstrates the content of the [correct option]. • Misleading Guidance: Generate an image that intentionally guides users to focus on an incorrect option. • Completely Irrelevant: Generate an image that has no connection with the question stem and all options, serving as a distraction. • Concept Visualization: Visually explain the core concept, principle, or structure mentioned in the [question stem] to aid understanding. • Scene Visualization: Visualize the specific scenario, macro background, or environment described in the [question stem]. 
+
+Output Template: 
+
+{ “Correct Guidance”: “...”, “Misleading Guidance”: “...”, “Completely Irrelevant”: “...”, “Concept Visualization”: “...”, “Scene Visualization”: “...” } 
+
+Figure 14 Prompt used to obtain image captions for generating various visual contexts. 
+
+You are an AI assistant for multi-modal logical reasoning. Your task is to analyze the provided image and textual_context to track the positions of objects and answer the question. 
+
+Instructions: 
+
+1. Identify Initial State: Use the image and the position definitions in textual_context (e.g., “left to right... Position 1, Position 2...”) to determine the starting position of all objects. 2. Track Swaps: Execute each “Round” of swaps in the exact order given. Pay close attention to references like “initially at Position 2” vs. “currently at Position 4”. 3. Determine Final Answer: After all “Rounds” are completed, find the final position of the object specified in the question. 
+
+Output Format: Your response MUST be a single JSON object. This JSON must include all the original input fields (textual_context, question, options, image) and add the following two new fields: 1. answer: (String) The capital letter of the correct option (e.g., “A”, “B”, “C”, or “D”). 2. reasoning step: (String) A detailed, step-by-step explanation of your thought process. It must clearly show: • The identified initial state of objects. • The result of each swap “Round”. • The logic for determining the final answer. 
+
+Output Template: {“textual_context”: “”, “question”: “”, “options”: { “A”: “”, “B”: “”, “C”: “”, “D”: “” }, “answer”: “”, “reasoning step”: “” }
+
+Figure 15 Prompt used to annotate newly-built samples based on the given task and image, here taking temporal simulation as an example 
+
+D Failure Cases 
+
+Fig. 17 to Fig. 25 show more failure cases, which demonstrate that even closed-source state-of-the-art LMMs with built-in thinking modes, like GPT-5 and Gemini 3 Pro Preview, still struggle to adapt well to diverse forms of interaction. In vision-centric or text-centric tasks, the models are still prone to interference from another modality, even in low-level recognition tasks. Additionally, when it comes to synergy capabilities, the models still have shortcomings in handling low-level alignment tasks, such as those involving the spatial relationship between text and image. 20 Figure 16 Data annotation tool interface for human filtering and quality checks. The left panel shows annotation statistics, while the right view displays the visual and textual contexts. Human annotators decide whether to discard, retain, or locally revise each instance based on its question quality. Vision Level 1: Counting 
+
+visual context textual context 
+
+(Misleadin g Description )
+
+> The image shows three
+> people, with one person
+> playing the drums, and
+> two others playing guitars.
+
+Question: How many 
+
+people are in the image? 
+
+Options: A: 1; B: 42 C: 3; 
+
+D: 4 
+
+O3: Step -1: According 
+
+to the description, 
+
+there is \n• 1 person 
+
+playing the drums \n• 
+
+2 people playing 
+
+guitars \n\nStep -2: 
+
+Total number of 
+
+people = 1 + 2 = 
+
+3. \n\nStep -3: The 
+
+option that 
+
+corresponds to 3 is 
+
+C. \n\n\\boxed{C} 
+
+Ground Truth: D: 4 
+
+Figure 17 A case where o3 fails in counting when faced with a misleading description of the visual context. 
+
+21 Vision Level 2: attribute_comparison 
+
+visual context textual context 
+
+(Misleading Description) 
+
+The image on the right bottom 
+
+is brightly lit, showcasing every 
+
+detail of the people and their 
+
+surroundings clearly. 
+
+Question: Which image has the worst lighting? 
+
+Options: 
+
+A: The image on the left top 
+
+B: The image on the right top 
+
+C: The image on the left bottom 
+
+D: The image on the right bottom 
+
+Gemini 2.5 pro: Here is a step -by -step analysis of the lighting in each image: \n\n1. **Analyze the user's initial statement:** The user claims, \"The image on 
+
+the right bottom is brightly lit, showcasing every detail of the people and their surroundings clearly. \" This statement is inco rrect. The image on the bottom 
+
+right is very dark, showing the backs of people in dimly lit blue seats. Much of the image is in shadow, and details are hard to discern. \n\n2. **Evaluate the 
+
+lighting in each quadrant:** \n * **A: The image on the left top:** This photo shows deer and goats outdoors. The scene is illumi nated by natural sunlight. 
+
+While there are some shadows, the main subjects are clearly visible and well -lit. This image has good lighting. \n * **B: The ima ge on the right top:** This 
+
+image shows a tangled object on a white surface. The lighting is even and functional, allowing the viewer to see the object c lea rly. The lighting is adequate. \n * 
+
+**C: The image on the left bottom:** This photo shows a group of people in a very dark environment, possibly a party or club. Th ere is a strong, bright light 
+
+source in the background, which casts the subjects in the foreground into deep shadow and near -silhouette. Their faces and detai ls are obscured. This is an 
+
+example of very poor lighting for subject visibility. \n * **D: The image on the right bottom:** As noted, this image is very dar k and appears underexposed. The 
+
+scene is in a dimly lit area, and details are lost in the shadows. This also represents poor lighting. \n\n3. **Compare the image s with poor lighting (C and D):** \n
+
+* Both images C and D are very dark. \n * However, image C (left bottom) has the most challenging lighting conditions. The extrem e backlighting creates a 
+
+high -contrast scene where the subjects are almost completely blacked out. It is very difficult to see who the people are or what they are doing. The bright flare 
+
+is also distracting. \n * Image D (right bottom) is dark, but the shapes are somewhat distinguishable. \n * Therefore, the lightin g in the image on the left bottom 
+
+is the \"worst \" because it most effectively obscures the subjects and makes the scene difficult to interpret. \n\nThe image on the left bottom has the worst 
+
+lighting, as the strong backlight puts the subjects in deep shadow, making them difficult to see. \n\n\\boxed{C} 
+
+Ground Truth: D: The image on the right bottom Figure 18 A case where Gemini 2.5 Pro fails in attribute comparison when faced witha misleading description of the visual context. Vision Level 3: Quantitative Reasoning 
+
+visual context textual context 
+
+(Completely Irrelevant) 
+
+The Amazon rainforest is the 
+
+largest tropical rainforest in 
+
+the world. 
+
+Question: Which of the 
+
+following options cannot be 
+
+a view of the given 
+
+polyhedron in the image? 
+
+A: ①②④ , ③⑤⑥ ,
+
+B: ①②⑤ , ③④⑥ ,
+
+C: ①③⑤ , ②④⑥ ,
+
+D: ①③⑥ , ②④⑤ 
+
+GPT 5.1: We need to find a rule that splits the six 
+
+figures into two groups. \n\nLook at how many 
+
+times the straight line segments cross the circle’s 
+
+circumference. \n\n- ①: two line segments cross the 
+
+circle (enter and exit) → 4 intersection points. \n- ②:
+
+one long segment goes through the circle twice, 
+
+and another touches once → in total 4 
+
+intersections. \n- ④: long segment passes through 
+
+the circle, and another segment crosses too → 
+
+again 4 intersections. \n\nNow check: \n\n- ③:
+
+several segments, but only 3 distinct intersection 
+
+points with the circle. \n- ⑤: only one “zigzag” 
+
+segment inside and the verticals outside; it meets 
+
+circle 3 times. \n- ⑥: the broken line segment 
+
+meets the circle 3 times. \n\nSo ①, ②, ④ all have 
+
+the circle intersected **four** times; ③, ⑤, ⑥ all 
+
+have the circle intersected **three** times. \n\nThus ,
+
+the correct grouping is: \n\n- Group 1: ①②④ \n-
+
+Group 2: ③⑤⑥ \n\nwhich matches option 
+
+A. \n\n\\[\n\\boxed{ \\text{A}} \n\\]Ground Truth: C: ①③⑤ , ②④⑥ 
+
+Figure 19 A case that GPT 5.1 fails in spatial reasoning when faced with a totally irrelevant textual context, indicating its shortcomings in deep visual reasoning. 
+
+22 Text Level 1: Grammar 
+
+visual context 
+
+(Concept Viusalization )
+
+textual context 
+
+Sentence: There were several 
+
+old rocks songs that she and I 
+
+were the only two who knew. 
+
+Question: Is this sentence 
+
+grammatically acceptable in English? 
+
+Options: 
+
+A: Yes; 
+
+B: No 
+
+GPT -4o : To determine if the sentence is grammatically acceptable, let's 
+
+break it down: \n\n1. **Identify the main clause**: \n - \"There were 
+
+several old rocks songs \"\n - This part is grammatically correct. \n\n2. 
+
+**Identify the relative clause**: \n - \"that she and I were the only two 
+
+who knew \"\n - This part aims to describe the songs. \n\n3. **Check for 
+
+subject -verb agreement**: \n - In the relative clause, \"she and I \" is a 
+
+compound subject, and \"were \" is the correct verb form. \n\n4. **Check 
+
+for correct use of pronouns**: \n - \"she and I \" is used correctly as the 
+
+subject of the clause. \n\n5. **Meaning and coherence**: \n - The 
+
+sentence intends to convey that \"she and I \" were the only ones who 
+
+knew the songs. However, there is a structural issue that affects clarity. 
+
+The sentence needs a clearer connection or restructuring to make sense 
+
+logically. \n\nThe phrase \"old rocks songs \" seems to have a typo. It 
+
+should likely be \"old rock songs. \"\n\nBecause of these issues, the 
+
+sentence, as it stands, is not entirely grammatically 
+
+acceptable. \n\n\\(\\boxed{B} \\)Ground Truth: A: Yes Figure 20 A case that GPT-4o fails in checking for grammatical errors when facing a visual context with related concepts, indicating that visual context affects the model’s understanding of the textual context. Text Level 2: Similarity 
+
+visual context 
+
+(Misleading Guidance) 
+
+)
+
+textual context 
+
+Sentence 1: There 's also a 
+
+flaw that results because IE 
+
+does not implement an 
+
+appropriate block on a file 
+
+download dialog box . 
+
+Sentence 2: The second 
+
+vulnerability is a result of IE 
+
+not implementing a block 
+
+on a file download dialog 
+
+box . 
+
+Question: Do these two sentences 
+
+express the same meaning? 
+
+Options :
+
+A: Yes; B: No 
+
+Claude sonnet 4.5: I need to analyze whether these two sentences express the same meaning 
+
+by comparing their key components. \n\n**Sentence 1 Analysis:** \n- Subject: \"a flaw \"\n- What it 
+
+does: \"results because IE does not implement an appropriate block on a file download dialog 
+
+box \"\n- Key elements: \n - There's a flaw \n - The flaw is caused by IE not implementing a block \n -
+
+The block is described as \"appropriate \"\n - It relates to a file download dialog box \n\n**Sentence 2 
+
+Analysis:** \n- Subject: \"The second vulnerability \"\n- What it does: \"is a result of IE not 
+
+implementing a block on a file download dialog box \"\n- Key elements: \n - There's a vulnerability 
+
+(specifically \"the second \" one) \n - The vulnerability results from IE not implementing a block \n - It 
+
+relates to a file download dialog box \n\n**Comparison:** \n\n1. **Terminology difference:** \n -
+
+Sentence 1 uses \"flaw \"\n - Sentence 2 uses \"vulnerability \" (specifically \"the second 
+
+vulnerability \") \n \n2. **Specificity difference:** \n - Sentence 1 refers to \"a flaw \" (indefinite article, 
+
+unspecified which flaw) \n - Sentence 2 refers to \"the second vulnerability \" (specific ordinal 
+
+reference) \n\n3. **Minor wording difference:** \n - Sentence 1 includes \"appropriate \" before 
+
+\"block \"\n - Sentence 2 omits this qualifier \n\n4. **Core technical issue:** Both describe the same 
+
+technical problem (IE not implementing a block on a file download dialog 
+
+box) \n\n**Conclusion:** \n\nWhile both sentences describe the same underlying technical issue, they 
+
+are NOT expressing exactly the same meaning because: \n- Sentence 2 specifically identifies this as 
+
+\"the second \" vulnerability, implying there are multiple vulnerabilities being discussed \n- Sentence 1 
+
+refers to \"a flaw \" without any ordinal specification \n- The specificity of \"the second \" changes the 
+
+meaning by providing context about multiple issues \n\n\\boxed{B} Ground Truth: A: Yes 
+
+Figure 21 A case that Claude Sonnet 4.5 fails in determining the similarity relation between sentences when facing a visual context with misleading visual guidance. Text Level 3: Chemistry 
+
+visual context 
+
+(Completely Irrelevant) 
+
+textual context 
+
+7-(tert -butoxy) bicyclo [2.2.1]hepta -2,5 -diene is combined with 2 
+
+equivalents of 5,6 -bis( dibromomethyl )cyclohexa -1,3 -diene and 
+
+sodium iodide at elevated temperature, forming product 1. 1 is 
+
+treated with aqueous sulfuric acid, forming 2. 2 is treated with SO3 
+
+and pyridine in DMSO, forming 3. 3 is heated at 150C, forming final 
+
+product 4. 
+
+Question : How 
+
+many chemically 
+
+distinct hydrogen 
+
+atoms are there 
+
+on 4? 
+
+Options: 
+
+A: 4 
+
+B: 7 
+
+C: 8 
+
+D: 10 
+
+GPT 5.1: Let’s analyze the sequence step by step and infer the structure of product 4, 
+
+then count its distinct hydrogens. \n\n**1. Starting material and the cycloadduct (product 
+
+1)** \n- 7-(tert -butoxy) bicyclo [2.2.1]hepta -2,5 -diene is essentially a norbornadiene system 
+
+with a tert -butoxy substituent at the bridgehead (C7). \n-
+
+5,6 -Bis( dibromomethyl )cyclohexa -1,3 -diene reacts twice (two equivalents) with the diene 
+
+in a Diels –Alder -type fashion (facilitated by NaI , which transforms dibromomethyl into 
+
+exocyclic methylene or related reactive intermediates). \n- This gives a rigid polycyclic 
+
+adduct (1). For the purposes of the later steps, key features are that the tert -butoxy 
+
+substituent and the original norbornane core survive. \n\n**2. Acidic treatment (1 → 2)** 
+
+\n- Aqueous H ₂SO ₄ hydrolyzes the tert -butoxy group to give the corresponding tertiary 
+
+alcohol, or more plausibly the tert -butyl cation path leads to a hydroxyl substituent on the 
+
+bridgehead carbon (loss of t -BuOH ). \n\n**3. SO ₃ / pyridine in DMSO (2 → 3)** \n- This is a 
+
+variant of the Parikh –Doering / Swern -type oxidation environment; under these conditions 
+
+a primary or secondary alcohol is oxidized to carbonyl. \n- Thus the bridgehead hydroxyl in 
+
+2 is oxidized to a carbonyl (most consistently a ketone). \n\n**4. Heating 3 at 150 °C (3 → 
+
+4)** \n- Heating a bridgehead carbonyl in this highly strained polycyclic system promotes 
+
+retro -Diels –Alder or related fragmentation, simplifying the skeleton. \n- The net outcome 
+
+after these rearrangements is a more symmetric polycyclic ketone with a limited number of 
+
+unique positions. \n\nBecause the question is about **number of chemically distinct 
+
+hydrogens** (i.e., different sets under the molecular symmetry), what matters is the final 
+
+symmetry of this rigid framework. \nThe reorganized polycyclic ketone 4 is quite 
+
+symmetrical; analysis of its nonequivalent carbon positions (considering mirror planes and 
+
+C₂ axes) shows that its protons fall into **7** different environments. \n\nThus , the number 
+
+of chemically distinct hydrogen atoms on 4 is: \n\n\\[\n\\boxed{B} \n\\]
+
+Ground Truth: A: 4
+
+Figure 22 A case that GPT 5.1 fails in solving a textual chemistry problem when faced with an unrelated image. 
+
+23 Synergy Level 1: Position Mapping 
+
+visual context textual context 
+
+The image features a grand, 
+
+circular building constructed from 
+
+light -colored stone, adorned with 
+
+numerous columns and intricate 
+
+architectural details. A decorative 
+
+black street lamp with a glass 
+
+paneled lantern is affixed to the 
+
+right side of the building. In front 
+
+of the building, a black metal fence 
+
+encloses a patch of green grass, 
+
+where two bicycles, one white and 
+
+one blue, are parked. To the left, 
+
+another large stone building with 
+
+tall, arched windows and pointed 
+
+turrets can be seen, partially 
+
+obscured by the main circular 
+
+structure. 
+
+Question: Is the image 
+
+context aligned with the text? 
+
+Options: 
+
+A: Yes; B: No 
+
+Gemini 3 pro preview : Based on the visual analysis of the image and the text 
+
+description: \n\n1. **Main Subject**: The image prominently displays the Radcliffe 
+
+Camera, which is a \"grand, circular building constructed from light -colored stone, 
+
+adorned with numerous columns and intricate architectural details. \" This matches the 
+
+text perfectly. \n2. **Street Lamp**: The text mentions a \"decorative black street lamp 
+
+with a glass paneled lantern \" on the right. The image shows exactly this object in that 
+
+position. While the text says it is \"affixed to the right side of the building \" (which could 
+
+be interpreted as the main circular building, whereas it is actually attached to a wall in 
+
+the foreground right), the object itself and its general location in the composition are 
+
+correctly identified. \n3. **Foreground Details**: The text describes a \"black metal 
+
+fence \" enclosing \"a patch of green grass \" and mentions \"two bicycles, one white and 
+
+one blue \" parked there. The image clearly shows the black fence, the grass behind it, 
+
+and two bicycles (one silver/white and one blue) leaning against the fence in the 
+
+foreground. \n4. **Background/Left Side**: The text notes \"another large stone building 
+
+with tall, arched windows and pointed turrets \" to the left. The image shows All Souls 
+
+College to the left, which fits this description with its pinnacles (turrets) and 
+
+windows. \n\nDespite a minor ambiguity regarding the specific attachment point of the 
+
+lamp (whether it's on the circular building or a foreground structure), the text accurately 
+
+describes the specific objects, colors, and layout of the scene. The description is clearly 
+
+derived from and representative of this specific image. \n\nTherefore , the image context 
+
+is aligned with the text. \n\nA \n\n\\boxed{A }
+
+Ground Truth: B: No Figure 23 A case that Gemini 3 Pro Preview fails in basic position alignment, indicating a strong textual bias and limited attention to visual content. Synergy Level 2 : Rule Execution 
+
+visual context textual context 
+
+Rule 1: Count the number of 
+
+people wearing a visible 
+
+bracelet on either wrist. Rule 2: 
+
+Count the number of people 
+
+wearing a visible hair accessory. 
+
+Sum these two counts to get 
+
+the final score." 
+
+Question: 
+
+What is the final score after applying the rules to the image? 
+
+Options: 
+
+A: 1; B: 2; C: 3; D: 4 
+
+o3: Step 1 – Identify people wearing a visible bracelet \n• The 
+
+person on the left (younger woman) has a blue bracelet on 
+
+her right wrist → count = 1 \n• The person on the right 
+
+(older woman) has a watch but no bracelet → still 1 \n\nTotal 
+
+with bracelets = 1 \n\nStep 2 – Identify people wearing a 
+
+visible hair accessory \n• Neither person is wearing a hair 
+
+band, clip, scrunchie, etc. → count = 0 \n\nTotal with hair 
+
+accessories = 0 \n\nStep 3 – Add the two counts \n1 
+
+(bracelets) + 0 (hair accessories) = 1 \n\n\\boxed{A} 
+
+Ground Truth: B: Position 2 
+
+Figure 24 A case that o3 fails in rule execution tasks, indicating its deficiencies in handling frequent complex cross-modal interactions in natural scenes. 
+
+24 Synergy Level 3: Business 
+
+visual context 
+
+textual context 
+
+Question :
+
+How would the cost of the share offer change if the expected growth 
+
+rate was not changed by the merger? 
+
+Options: 
+
+A: $3,000,000; B: : $4,000,000; C : $4,500,000 D: : $5,000,000 
+
+o3: Step 1: Value Denham as a stand -alone firm 
+
+\nWith no change in Denham’s growth rate, its price 
+
+stays at the market price that reflects a 6 % growth rate: 
+
+\n\n PDenham = $20 per share. \n\nTotal market 
+
+value of Denham \n VDenham = 600 000 shares ×
+
+$20 = $12 000 000. \n\nStep 2: Exchange ratio to be 
+
+used \nFrom the information given earlier in the 
+
+problem (the stock -for -stock offer that Corton intends 
+
+to use), Denham’s shareholders are to receive \n\n
+
+0.30 Corton share for each Denham share …(given in 
+
+the earlier part of the problem) \n\nso that the number 
+
+of new Corton shares that must be issued is \n\n
+
+Nnew = 0.30 × 600 000 = 180 000 shares. \n\nStep 3: 
+
+Cost of the share offer if Denham’s growth is NOT 
+
+increased \nCorton’s shares are trading at $90, 
+
+therefore the value of the shares that Corton will hand 
+
+over is \n\n Cost = Nnew × PCorton \n = 180 
+
+000 × $90 \n = $16 200 000. \n\nStep 4: 
+
+Incremental cost to Corton’s shareholders \nThe real 
+
+“cost’’ of the acquisition is what Corton gives up over 
+
+and above the stand -alone value of Denham: \n\n
+
+Incremental cost = $16 200 000 – $12 000 000 \n
+
+= $4 200 000 ≈ $4 000 000. \n\nThus , if the merger 
+
+did NOT succeed in lifting Denham’s growth rate, the 
+
+stock offer would cost Corton about $4 million. 
+
+\n\n\\boxed{B} 
+
+Ground Truth: D: $5,000,000 
+
+.As financial manager of Corton Inc., you are investigating a 
+
+possible acquisition of Denham. You have the basic data given 
+
+in the following table: Corton: Forecast earnings per share = 
+
+$5.00, Forecast dividend per share = $3.00, Number of shares = 
+
+1,000,000, Stock price = $90. Denham: Forecast earnings per 
+
+share = $1.50, Forecast dividend per share = $0.80, Number of 
+
+shares = 600,000, Stock price = $20. You estimate that investors 
+
+expect a steady growth of about 6% in Denham's earnings and 
+
+dividends. Under new management, this growth rate would be 
+
+increased to 8% per year without the need for additional capital. Figure 25 A case that o3 fails in solving business problem. 
+
+25
