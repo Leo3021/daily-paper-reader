@@ -6,224 +6,145 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-02-15 ~ 2026-03-16
-- 运行时间：2026-03-16 06:34:26 UTC
+- 最新运行日期：2026-03-11 ~ 2026-03-20
+- 运行时间：2026-03-20 01:42:52 UTC
 - 运行状态：成功
-- 本次总论文数：68
-- 精读区：57
+- 本次总论文数：41
+- 精读区：30
 - 速读区：11
 
 ### 今日简报（AI）
-本期深度复盘 68 篇前沿论文，重点攻克多模态智能体与物理规律蒸馏等
-- 详情：[/20260215-20260316/README](/20260215-20260316/README)
+本期精选 41 篇前沿成果，深度解析具身智能空间推理与多模态智能体长效记忆的突破性进展。
+强化学习驱动的协作推理与神经符号记忆系统表现卓越，显著提升了复杂环境下智能体的逻辑执行力。
+建议关注具身智能在城市规划
+- 详情：[/20260311-20260320/README](/20260311-20260320/README)
 
 ### 精读区论文标签
-1. [Beyond Description: A Multimodal Agent Framework for Insightful Chart Summarization](/20260215-20260316/2602.18731v1-beyond-description-a-multimodal-agent-framework-for-insightful-chart-summarization)  
+1. [Ego to World: Collaborative Spatial Reasoning in Embodied Systems via Reinforcement Learning](/20260311-20260320/2603.14811v1-ego-to-world-collaborative-spatial-reasoning-in-embodied-systems-via-reinforcement-learning)  
    标签：评分：10.0/10、query:mm-mas
-   evidence：利用多模态大模型进行图表摘要的多模态多智能体框架
-2. [Pixel2Phys: Distilling Governing Laws from Visual Dynamics](/20260215-20260316/2602.19516v1-pixel2phys-distilling-governing-laws-from-visual-dynamics)  
+   evidence：针对具身多智能体系统和视觉语言模型的Ego-to-World基准测试
+2. [Advancing Multimodal Agent Reasoning with Long-Term Neuro-Symbolic Memory](/20260311-20260320/2603.15280v1-advancing-multimodal-agent-reasoning-with-long-term-neuro-symbolic-memory)  
    标签：评分：10.0/10、query:mm-mas
-   evidence：适用于任何多模态大语言模型的协作式多智能体框架
-3. [ADM-DP: Adaptive Dynamic Modality Diffusion Policy through Vision-Tactile-Graph Fusion for Multi-Agent Manipulation](/20260215-20260316/2602.21622v1-adm-dp-adaptive-dynamic-modality-diffusion-policy-through-vision-tactile-graph-fusion-for-multi-agent-manipulation)  
+   evidence：用于多智能体协作的多模态大语言模型
+3. [Intelligent Co-Design: An Interactive LLM Framework for Interior Spatial Design via Multi-Modal Agents](/20260311-20260320/2603.15341v1-intelligent-co-design-an-interactive-llm-framework-for-interior-spatial-design-via-multi-modal-agents)  
    标签：评分：10.0/10、query:mm-mas
-   evidence：结合视觉和触觉模态的多智能体操作
-4. [OmniGAIA: Towards Native Omni-Modal AI Agents](/20260215-20260316/2602.22897v2-omnigaia-towards-native-omni-modal-ai-agents)  
+   evidence：基于大模型的多模态多智能体空间设计框架
+4. [MA-VLCM: A Vision Language Critic Model for Value Estimation of Policies in Multi-Agent Team Settings](/20260311-20260320/2603.15418v1-ma-vlcm-a-vision-language-critic-model-for-value-estimation-of-policies-in-multi-agent-team-settings)  
    标签：评分：10.0/10、query:mm-mas
-   evidence：评估全模态智能体的基准测试
-5. [AgentVista: Evaluating Multimodal Agents in Ultra-Challenging Realistic Visual Scenarios](/20260215-20260316/2602.23166v1-agentvista-evaluating-multimodal-agents-in-ultra-challenging-realistic-visual-scenarios)  
+   evidence：多智能体团队设置中的视觉语言评论模型
+5. [VisBrowse-Bench: Benchmarking Visual-Native Search for Multimodal Browsing Agents](/20260311-20260320/2603.16289v1-visbrowse-bench-benchmarking-visual-native-search-for-multimodal-browsing-agents)  
    标签：评分：10.0/10、query:mm-mas
-   evidence：在现实视觉场景中评估多模态智能体的基准
-6. [AgentVista: Evaluating Multimodal Agents in Ultra-Challenging Realistic Visual Scenarios](/20260215-20260316/2602.23166v2-agentvista-evaluating-multimodal-agents-in-ultra-challenging-realistic-visual-scenarios)  
-   标签：评分：10.0/10、query:mm-mas
-   evidence：在视觉场景中评估多模态智能体的基准
-7. [LLandMark: A Multi-Agent Framework for Landmark-Aware Multimodal Interactive Video Retrieval](/20260215-20260316/2603.02888v1-llandmark-a-multi-agent-framework-for-landmark-aware-multimodal-interactive-video-retrieval)  
-   标签：评分：10.0/10、query:mm-mas
-   evidence：多模态视频检索的多智能体框架
-8. [ImageEdit-R1: Boosting Multi-Agent Image Editing via Reinforcement Learning](/20260215-20260316/2603.08059v1-imageedit-r1-boosting-multi-agent-image-editing-via-reinforcement-learning)  
-   标签：评分：10.0/10、query:mm-mas
-   evidence：利用视觉语言和生成式智能体进行图像编辑的多智能体框架
-9. [MM-tau-p$^2$: Persona-Adaptive Prompting for Robust Multi-Modal Agent Evaluation in Dual-Control Settings](/20260215-20260316/2603.09643v1-mm-tau-p2-persona-adaptive-prompting-for-robust-multi-modal-agent-evaluation-in-dual-control-settings)  
-   标签：评分：10.0/10、query:mm-mas
-   evidence：双控制设置下多模态智能体评估基准
-10. [MM-tau-p$^2$: Persona-Adaptive Prompting for Robust Multi-Modal Agent Evaluation in Dual-Control Settings](/20260215-20260316/2603.09643v2-mm-tau-p2-persona-adaptive-prompting-for-robust-multi-modal-agent-evaluation-in-dual-control-settings)  
-   标签：评分：10.0/10、query:mm-mas
-   evidence：双控制设置下评估多模态智能体的基准测试
-11. [MedMASLab: A Unified Orchestration Framework for Benchmarking Multimodal Medical Multi-Agent Systems](/20260215-20260316/2603.09909v1-medmaslab-a-unified-orchestration-framework-for-benchmarking-multimodal-medical-multi-agent-systems)  
-   标签：评分：10.0/10、query:mm-mas
-   evidence：多模态医疗多智能体系统基准测试的统一编排框架
-12. [Strategic Navigation or Stochastic Search? How Agents and Humans Reason Over Document Collections](/20260215-20260316/2603.12180v1-strategic-navigation-or-stochastic-search-how-agents-and-humans-reason-over-document-collections)  
-   标签：评分：10.0/10、query:mm-mas
-   evidence：评估文档密集型工作流中多模态智能体表现的基准测试
-13. [Does Socialization Emerge in AI Agent Society? A Case Study of Moltbook](/20260215-20260316/2602.14299v2-does-socialization-emerge-in-ai-agent-society-a-case-study-of-moltbook)  
+   evidence：多模态浏览智能体与视觉推理的基准测试
+6. [Enhancing Value Alignment of LLMs with Multi-agent system and Combinatorial Fusion](/20260311-20260320/2603.11126v1-enhancing-value-alignment-of-llms-with-multi-agent-system-and-combinatorial-fusion)  
    标签：评分：9.0/10、query:llm-ma
-   evidence：AI智能体社会中的涌现行为与社交化
-14. [MATEO: A Multimodal Benchmark for Temporal Reasoning and Planning in LVLMs](/20260215-20260316/2602.14589v1-mateo-a-multimodal-benchmark-for-temporal-reasoning-and-planning-in-lvlms)  
-   标签：评分：9.0/10、query:mm-mas
-   evidence：视觉语言智能体时间推理的多模态基准
-15. [MAC-AMP: A Closed-Loop Multi-Agent Collaboration System for Multi-Objective Antimicrobial Peptide Design](/20260215-20260316/2602.14926v1-mac-amp-a-closed-loop-multi-agent-collaboration-system-for-multi-objective-antimicrobial-peptide-design)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：基于多智能体大模型的闭环多智能体协作系统
-16. [Colosseum: Auditing Collusion in Cooperative Multi-Agent Systems](/20260215-20260316/2602.15198v1-colosseum-auditing-collusion-in-cooperative-multi-agent-systems)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：审计协作多智能体系统中的勾结行为
-17. [Team of Thoughts: Efficient Test-time Scaling of Agentic Systems through Orchestrated Tool Calling](/20260215-20260316/2602.16485v1-team-of-thoughts-efficient-test-time-scaling-of-agentic-systems-through-orchestrated-tool-calling)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：使用大语言模型的编排式多智能体系统架构
-18. [MMA: Multimodal Memory Agent](/20260215-20260316/2602.16493v1-mma-multimodal-memory-agent)  
-   标签：评分：9.0/10、query:mm-mas
-   evidence：多模态记忆智能体及针对文本-视觉矛盾的信念动力学基准
-19. [Evaluating Collective Behaviour of Hundreds of LLM Agents](/20260215-20260316/2602.16662v1-evaluating-collective-behaviour-of-hundreds-of-llm-agents)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：数百个大语言模型智能体集体行为的评估框架
-20. [AgentConductor: Topology Evolution for Multi-Agent Competition-Level Code Generation](/20260215-20260316/2602.17100v1-agentconductor-topology-evolution-for-multi-agent-competition-level-code-generation)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：具有拓扑演化的大模型驱动多智能体系统
-21. [Diffusing to Coordinate: Efficient Online Multi-Agent Diffusion Policies](/20260215-20260316/2602.18291v1-diffusing-to-coordinate-efficient-online-multi-agent-diffusion-policies)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：基于扩散策略的在线多智能体强化学习
-22. [ComplLLM: Fine-tuning LLMs to Discover Complementary Signals for Decision-making](/20260215-20260316/2602.19458v1-complllm-fine-tuning-llms-to-discover-complementary-signals-for-decision-making)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：多智能体决策流水线与协作问题解决
-23. [Interaction Theater: A case of LLM Agents Interacting at Scale](/20260215-20260316/2602.20059v1-interaction-theater-a-case-of-llm-agents-interacting-at-scale)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：大语言模型智能体大规模交互的实证研究
-24. [Cognitive Models and AI Algorithms Provide Templates for Designing Language Agents](/20260215-20260316/2602.22523v1-cognitive-models-and-ai-algorithms-provide-templates-for-designing-language-agents)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：设计模块化多大模型智能体的框架和模板
-25. [MT-PingEval: Evaluating Multi-Turn Collaboration with Private Information Games](/20260215-20260316/2602.24188v1-mt-pingeval-evaluating-multi-turn-collaboration-with-private-information-games)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：评估多智能体博弈中的多轮协作
-26. [Agentic Hives: Equilibrium, Indeterminacy, and Endogenous Cycles in Self-Organizing Multi-Agent Systems](/20260215-20260316/2603.00130v1-agentic-hives-equilibrium-indeterminacy-and-endogenous-cycles-in-self-organizing-multi-agent-systems)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：基于大语言模型的自组织多智能体系统框架
-27. [Evaluating Theory of Mind and Internal Beliefs in LLM-Based Multi-Agent Systems](/20260215-20260316/2603.00142v1-evaluating-theory-of-mind-and-internal-beliefs-in-llm-based-multi-agent-systems)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：大模型多智能体系统中的协作问题解决
-28. [DIG to Heal: Scaling General-purpose Agent Collaboration via Explainable Dynamic Decision Paths](/20260215-20260316/2603.00309v1-dig-to-heal-scaling-general-purpose-agent-collaboration-via-explainable-dynamic-decision-paths)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：通用大模型智能体中的涌现协作
-29. [MetaMind: General and Cognitive World Models in Multi-Agent Systems by Meta-Theory of Mind](/20260215-20260316/2603.00808v1-metamind-general-and-cognitive-world-models-in-multi-agent-systems-by-meta-theory-of-mind)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：多智能体系统中用于预测交互轨迹的认知世界模型
-30. [MC-Search: Evaluating and Enhancing Multimodal Agentic Search with Structured Long Reasoning Chains](/20260215-20260316/2603.00873v1-mc-search-evaluating-and-enhancing-multimodal-agentic-search-with-structured-long-reasoning-chains)  
-   标签：评分：9.0/10、query:mm-mas
-   evidence：智能体多模态检索增强生成基准
-31. [CollabEval: Enhancing LLM-as-a-Judge via Multi-Agent Collaboration](/20260215-20260316/2603.00993v1-collabeval-enhancing-llm-as-a-judge-via-multi-agent-collaboration)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：用于大模型评估的多智能体协作
-32. [MM-DeepResearch: A Simple and Effective Multimodal Agentic Search Baseline](/20260215-20260316/2603.01050v1-mm-deepresearch-a-simple-and-effective-multimodal-agentic-search-baseline)  
-   标签：评分：9.0/10、query:mm-mas
-   evidence：具有跨模态合成和多工具调用的多模态研究智能体
-33. [Can AI Agents Agree?](/20260215-20260316/2603.01213v1-can-ai-agents-agree)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：对抗性共识设置中的协作智能体
-34. [DriveCombo: Benchmarking Compositional Traffic Rule Reasoning in Autonomous Driving](/20260215-20260316/2603.01637v1-drivecombo-benchmarking-compositional-traffic-rule-reasoning-in-autonomous-driving)  
-   标签：评分：9.0/10、query:mm-mas
-   evidence：评估自动驾驶中多模态大语言模型的基准
-35. [ORCA: Orchestrated Reasoning with Collaborative Agents for Document Visual Question Answering](/20260215-20260316/2603.02438v1-orca-orchestrated-reasoning-with-collaborative-agents-for-document-visual-question-answering)  
-   标签：评分：9.0/10、query:mm-mas
-   evidence：用于文档视觉问答的多智能体框架
-36. [Agentic Mixed-Source Multi-Modal Misinformation Detection with Adaptive Test-Time Scaling](/20260215-20260316/2603.02519v1-agentic-mixed-source-multi-modal-misinformation-detection-with-adaptive-test-time-scaling)  
-   标签：评分：9.0/10、query:mm-mas
-   evidence：连接特定模态VLM智能体的智能体系统
-37. [ShareVerse: Multi-Agent Consistent Video Generation for Shared World Modeling](/20260215-20260316/2603.02697v1-shareverse-multi-agent-consistent-video-generation-for-shared-world-modeling)  
-   标签：评分：9.0/10、query:mm-mas
-   evidence：具有多视角视频生成的多智能体共享世界建模
-38. [OrchMAS: Orchestrated Reasoning with Multi Collaborative Heterogeneous Scientific Expert Structured Agents](/20260215-20260316/2603.03005v1-orchmas-orchestrated-reasoning-with-multi-collaborative-heterogeneous-scientific-expert-structured-agents)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：多协作异构智能体的编排推理
-39. [Molt Dynamics: Emergent Social Phenomena in Autonomous AI Agent Populations](/20260215-20260316/2603.03555v1-molt-dynamics-emergent-social-phenomena-in-autonomous-ai-agent-populations)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：大规模大模型多智能体群体中的涌现行为与协作
-40. [Build, Judge, Optimize: A Blueprint for Continuous Improvement of Multi-Agent Consumer Assistants](/20260215-20260316/2603.03565v1-build-judge-optimize-a-blueprint-for-continuous-improvement-of-multi-agent-consumer-assistants)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：优化紧耦合的多智能体系统
-41. [Social Norm Reasoning in Multimodal Language Models: An Evaluation](/20260215-20260316/2603.03590v1-social-norm-reasoning-in-multimodal-language-models-an-evaluation)  
-   标签：评分：9.0/10、query:mm-mas
-   evidence：多智能体系统中多模态语言模型的社会规范推理
-42. [Dual-Modality Multi-Stage Adversarial Safety Training: Robustifying Multimodal Web Agents Against Cross-Modal Attacks](/20260215-20260316/2603.04364v1-dual-modality-multi-stage-adversarial-safety-training-robustifying-multimodal-web-agents-against-cross-modal-attacks)  
-   标签：评分：9.0/10、query:mm-mas
-   evidence：多模态Web智能体与跨模态对抗训练
-43. [From Spark to Fire: Modeling and Mitigating Error Cascades in LLM-Based Multi-Agent Collaboration](/20260215-20260316/2603.04474v1-from-spark-to-fire-modeling-and-mitigating-error-cascades-in-llm-based-multi-agent-collaboration)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：大模型多智能体协作中的错误级联建模
-44. [Distributed Partial Information Puzzles: Examining Common Ground Construction Under Epistemic Asymmetry](/20260215-20260316/2603.05450v1-distributed-partial-information-puzzles-examining-common-ground-construction-under-epistemic-asymmetry)  
-   标签：评分：9.0/10、query:mm-mas
-   evidence：多方设置下的多模态通信与协作
-45. [M$^3$-ACE: Rectifying Visual Perception in Multimodal Math Reasoning via Multi-Agentic Context Engineering](/20260215-20260316/2603.08369v1-m3-ace-rectifying-visual-perception-in-multimodal-math-reasoning-via-multi-agentic-context-engineering)  
-   标签：评分：9.0/10、query:mm-mas
-   evidence：用于多模态数学推理的多智能体框架
-46. [MEMO: Memory-Augmented Model Context Optimization for Robust Multi-Turn Multi-Agent LLM Games](/20260215-20260316/2603.09022v1-memo-memory-augmented-model-context-optimization-for-robust-multi-turn-multi-agent-llm-games)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：多智能体大语言模型博弈的记忆增强上下文优化
-47. [DataFactory: Collaborative Multi-Agent Framework for Advanced Table Question Answering](/20260215-20260316/2603.09152v1-datafactory-collaborative-multi-agent-framework-for-advanced-table-question-answering)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：用于复杂推理的协作式多智能体框架
-48. [Influencing LLM Multi-Agent Dialogue via Policy-Parameterized Prompts](/20260215-20260316/2603.09890v1-influencing-llm-multi-agent-dialogue-via-policy-parameterized-prompts)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：使用策略参数化提示构建大模型多智能体系统的框架
-49. [Code-Space Response Oracles: Generating Interpretable Multi-Agent Policies with Large Language Models](/20260215-20260316/2603.10098v1-code-space-response-oracles-generating-interpretable-multi-agent-policies-with-large-language-models)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：使用大语言模型作为强化学习预言机生成多智能体策略
-50. [Learning to Negotiate: Multi-Agent Deliberation for Collective Value Alignment in LLMs](/20260215-20260316/2603.10476v1-learning-to-negotiate-multi-agent-deliberation-for-collective-value-alignment-in-llms)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：基于多智能体协商的大语言模型对齐框架
-51. [COMPASS: The explainable agentic framework for Sovereignty, Sustainability, Compliance, and Ethics](/20260215-20260316/2603.11277v2-compass-the-explainable-agentic-framework-for-sovereignty-sustainability-compliance-and-ethics)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：基于大语言模型智能体的多智能体编排系统
-52. [Agentic AI for Embodied-enhanced Beam Prediction in Low-Altitude Economy Networks](/20260215-20260316/2603.11392v1-agentic-ai-for-embodied-enhanced-beam-prediction-in-low-altitude-economy-networks)  
-   标签：评分：9.0/10、query:mm-mas
-   evidence：基于双模态数据的多智能体协作推理架构
-53. [Verified Multi-Agent Orchestration: A Plan-Execute-Verify-Replan Framework for Complex Query Resolution](/20260215-20260316/2603.11445v1-verified-multi-agent-orchestration-a-plan-execute-verify-replan-framework-for-complex-query-resolution)  
+   evidence：用于大语言模型价值对齐的多智能体系统
+7. [Verified Multi-Agent Orchestration: A Plan-Execute-Verify-Replan Framework for Complex Query Resolution](/20260311-20260320/2603.11445v2-verified-multi-agent-orchestration-a-plan-execute-verify-replan-framework-for-complex-query-resolution)  
    标签：评分：9.0/10、query:llm-ma
    evidence：协调专业化大模型智能体的框架
-54. [Language Model Teams as Distributed Systems](/20260215-20260316/2603.12229v1-language-model-teams-as-distributed-systems)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：基于分布式系统的多大模型团队原则性框架
-55. [coDrawAgents: A Multi-Agent Dialogue Framework for Compositional Image Generation](/20260215-20260316/2603.12829v1-codrawagents-a-multi-agent-dialogue-framework-for-compositional-image-generation)  
+8. [One Supervisor, Many Modalities: Adaptive Tool Orchestration for Autonomous Queries](/20260311-20260320/2603.11545v1-one-supervisor-many-modalities-adaptive-tool-orchestration-for-autonomous-queries)  
    标签：评分：9.0/10、query:mm-mas
-   evidence：用于图像生成的多智能体对话框架
-56. [Efficient and Interpretable Multi-Agent LLM Routing via Ant Colony Optimization](/20260215-20260316/2603.12933v1-efficient-and-interpretable-multi-agent-llm-routing-via-ant-colony-optimization)  
+   evidence：自主多模态查询处理的智能体框架
+9. [One Supervisor, Many Modalities: Adaptive Tool Orchestration for Autonomous Queries](/20260311-20260320/2603.11545v2-one-supervisor-many-modalities-adaptive-tool-orchestration-for-autonomous-queries)  
+   标签：评分：9.0/10、query:mm-mas
+   evidence：自主多模态查询处理的智能体框架
+10. [From Debate to Deliberation: Structured Collective Reasoning with Typed Epistemic Acts](/20260311-20260320/2603.11781v1-from-debate-to-deliberation-structured-collective-reasoning-with-typed-epistemic-acts)  
    标签：评分：9.0/10、query:llm-ma
-   evidence：多智能体大模型路由框架
-57. [LLM Constitutional Multi-Agent Governance](/20260215-20260316/2603.13189v1-llm-constitutional-multi-agent-governance)  
+   evidence：多智能体大模型系统的结构化集体推理
+11. [LABSHIELD: A Multimodal Benchmark for Safety-Critical Reasoning and Planning in Scientific Laboratories](/20260311-20260320/2603.11987v1-labshield-a-multimodal-benchmark-for-safety-critical-reasoning-and-planning-in-scientific-laboratories)  
+   标签：评分：9.0/10、query:mm-mas
+   evidence：科学实验室中多模态大模型智能体的多模态基准测试
+12. [XSkill: Continual Learning from Experience and Skills in Multimodal Agents](/20260311-20260320/2603.12056v1-xskill-continual-learning-from-experience-and-skills-in-multimodal-agents)  
+   标签：评分：9.0/10、query:mm-mas
+   evidence：多模态智能体从经验与技能中进行持续学习
+13. [XSkill: Continual Learning from Experience and Skills in Multimodal Agents](/20260311-20260320/2603.12056v2-xskill-continual-learning-from-experience-and-skills-in-multimodal-agents)  
+   标签：评分：9.0/10、query:mm-mas
+   evidence：利用经验和技能的多模态智能体持续学习框架
+14. [Orla: A Library for Serving LLM-Based Multi-Agent Systems](/20260311-20260320/2603.13605v1-orla-a-library-for-serving-llm-based-multi-agent-systems)  
    标签：评分：9.0/10、query:llm-ma
-   evidence：大模型多智能体群体的治理框架
+   evidence：用于构建和运行基于大语言模型的多智能体系统的库
+15. [InterventionLens: A Multi-Agent Framework for Detecting ASD Intervention Strategies in Parent-Child Shared Reading](/20260311-20260320/2603.13710v1-interventionlens-a-multi-agent-framework-for-detecting-asd-intervention-strategies-in-parent-child-shared-reading)  
+   标签：评分：9.0/10、query:mm-mas
+   evidence：集成多模态交互内容的协作多智能体架构
+16. [Beyond Medical Diagnostics: How Medical Multimodal Large Language Models Think in Space](/20260311-20260320/2603.13800v1-beyond-medical-diagnostics-how-medical-multimodal-large-language-models-think-in-space)  
+   标签：评分：9.0/10、query:mm-mas
+   evidence：用于医疗多模态大模型评估的多智能体协作
+17. [Beyond Self-Interest: Modeling Social-Oriented Motivation for Human-like Multi-Agent Interactions](/20260311-20260320/2603.13890v1-beyond-self-interest-modeling-social-oriented-motivation-for-human-like-multi-agent-interactions)  
+   标签：评分：9.0/10、query:llm-ma
+   evidence：模拟类人多智能体交互中的社会动机
+18. [A Multi-Agent Perception-Action Alliance for Efficient Long Video Reasoning](/20260311-20260320/2603.14052v1-a-multi-agent-perception-action-alliance-for-efficient-long-video-reasoning)  
+   标签：评分：9.0/10、query:mm-mas
+   evidence：用于多模态视频推理的多智能体联盟
+19. [A Skill-augmented Agentic Framework and Benchmark for Multi-Video Understanding](/20260311-20260320/2603.14733v1-a-skill-augmented-agentic-framework-and-benchmark-for-multi-video-understanding)  
+   标签：评分：9.0/10、query:mm-mas
+   evidence：用于多视频理解的技能增强智能体框架和基准
+20. [VTC-Bench: Evaluating Agentic Multimodal Models via Compositional Visual Tool Chaining](/20260311-20260320/2603.15030v1-vtc-bench-evaluating-agentic-multimodal-models-via-compositional-visual-tool-chaining)  
+   标签：评分：9.0/10、query:mm-mas
+   evidence：通过工具链评估多模态智能体模型的基准
+21. [Token Coherence: Adapting MESI Cache Protocols to Minimize Synchronization Overhead in Multi-Agent LLM Systems](/20260311-20260320/2603.15183v1-token-coherence-adapting-mesi-cache-protocols-to-minimize-synchronization-overhead-in-multi-agent-llm-systems)  
+   标签：评分：9.0/10、query:llm-ma
+   evidence：构建大模型多智能体系统的框架
+22. [SAGE: Multi-Agent Self-Evolution for LLM Reasoning](/20260311-20260320/2603.15255v1-sage-multi-agent-self-evolution-for-llm-reasoning)  
+   标签：评分：9.0/10、query:llm-ma
+   evidence：用于LLM推理的多智能体自我进化框架，包含协作智能体
+23. [SAGE: Multi-Agent Self-Evolution for LLM Reasoning](/20260311-20260320/2603.15255v2-sage-multi-agent-self-evolution-for-llm-reasoning)  
+   标签：评分：9.0/10、query:llm-ma
+   evidence：用于大语言模型推理的多智能体自我进化
+24. [Brain-Inspired Graph Multi-Agent Systems for LLM Reasoning](/20260311-20260320/2603.15371v1-brain-inspired-graph-multi-agent-systems-for-llm-reasoning)  
+   标签：评分：9.0/10、query:llm-ma
+   evidence：大模型多智能体环境中的协作问题解决
+25. [Don't Trust Stubborn Neighbors: A Security Framework for Agentic Networks](/20260311-20260320/2603.15809v1-dont-trust-stubborn-neighbors-a-security-framework-for-agentic-networks)  
+   标签：评分：9.0/10、query:llm-ma
+   evidence：基于LLM的多智能体系统安全框架
+26. [VisBrowse-Bench: Benchmarking Visual-Native Search for Multimodal Browsing Agents](/20260311-20260320/2603.16289v2-visbrowse-bench-benchmarking-visual-native-search-for-multimodal-browsing-agents)  
+   标签：评分：9.0/10、query:mm-mas
+   evidence：多模态浏览智能体的视觉原生搜索基准测试
+27. [Anticipatory Planning for Multimodal AI Agents](/20260311-20260320/2603.16777v1-anticipatory-planning-for-multimodal-ai-agents)  
+   标签：评分：9.0/10、query:mm-mas
+   evidence：多模态 AI 智能体的预期规划
+28. [When Only the Final Text Survives: Implicit Execution Tracing for Multi-Agent Attribution](/20260311-20260320/2603.17445v1-when-only-the-final-text-survives-implicit-execution-tracing-for-multi-agent-attribution)  
+   标签：评分：9.0/10、query:llm-ma
+   evidence：多智能体语言系统中的归因与交互拓扑重建
+29. [MALLES: A Multi-agent LLMs-based Economic Sandbox with Consumer Preference Alignment](/20260311-20260320/2603.17694v1-malles-a-multi-agent-llms-based-economic-sandbox-with-consumer-preference-alignment)  
+   标签：评分：9.0/10、query:mm-mas
+   evidence：多模态环境下的多智能体大模型沙盒
+30. [Governed Memory: A Production Architecture for Multi-Agent Workflows](/20260311-20260320/2603.17787v1-governed-memory-a-production-architecture-for-multi-agent-workflows)  
+   标签：评分：9.0/10、query:llm-ma
+   evidence：构建大模型多智能体系统的框架
 
 ### 速读区论文标签
-1. [Multi-Agent Debate: A Unified Agentic Framework for Tabular Anomaly Detection](/20260215-20260316/2602.14251v1-multi-agent-debate-a-unified-agentic-framework-for-tabular-anomaly-detection)  
+1. [MultiVer: Zero-Shot Multi-Agent Vulnerability Detection](/20260311-20260320/2602.17875v1-multiver-zero-shot-multi-agent-vulnerability-detection)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：使用基于大语言模型评论的多智能体辩论框架进行异常检测
-2. [World-Model-Augmented Web Agents with Action Correction](/20260215-20260316/2602.15384v1-world-model-augmented-web-agents-with-action-correction)  
+   evidence：用于漏洞检测的零样本多智能体系统
+2. [City Editing: Hierarchical Agentic Execution for Dependency-Aware Urban Geospatial Modification](/20260311-20260320/2602.19326v1-city-editing-hierarchical-agentic-execution-for-dependency-aware-urban-geospatial-modification)  
+   标签：评分：8.0/10、query:mm-mas
+   evidence：多模态城市地理空间修改的智能体执行
+3. [SAMAS: A Spectrum-Guided Multi-Agent System for Achieving Style Fidelity in Literary Translation](/20260311-20260320/2602.19840v1-samas-a-spectrum-guided-multi-agent-system-for-achieving-style-fidelity-in-literary-translation)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：基于大语言模型的网络智能体多智能体协作过程
-3. [Toward Scalable Verifiable Reward: Proxy State-Based Evaluation for Multi-turn Tool-Calling LLM Agents](/20260215-20260316/2602.16246v1-toward-scalable-verifiable-reward-proxy-state-based-evaluation-for-multi-turn-tool-calling-llm-agents)  
-   标签：评分：8.0/10、query:llm-ma
-   evidence：多轮工具调用大模型智能体的评估框架
-4. [Multi-Agent Temporal Logic Planning via Penalty Functions and Block-Coordinate Optimization](/20260215-20260316/2602.17434v1-multi-agent-temporal-logic-planning-via-penalty-functions-and-block-coordinate-optimization)  
-   标签：评分：8.0/10、query:llm-ma
-   evidence：时序逻辑约束下的多智能体规划
-5. [LaViDa-R1: Advancing Reasoning for Unified Multimodal Diffusion Language Models](/20260215-20260316/2602.14147v1-lavida-r1-advancing-reasoning-for-unified-multimodal-diffusion-language-models)  
-   标签：评分：7.0/10、query:mm-mas
-   evidence：结合多任务强化学习的多模态推理扩散语言模型
-6. [TikArt: Aperture-Guided Observation for Fine-Grained Visual Reasoning via Reinforcement Learning](/20260215-20260316/2602.14482v1-tikart-aperture-guided-observation-for-fine-grained-visual-reasoning-via-reinforcement-learning)  
-   标签：评分：7.0/10、query:mm-mas
-   evidence：用于视觉推理的多模态大语言模型智能体
-7. [ROSA: Roundabout Optimized Speed Advisory with Multi-Agent Trajectory Prediction in Multimodal Traffic](/20260215-20260316/2602.14780v1-rosa-roundabout-optimized-speed-advisory-with-multi-agent-trajectory-prediction-in-multimodal-traffic)  
-   标签：评分：7.0/10、query:mm-mas
-   evidence：多模态混合交通环境下的多智能体轨迹预测
-8. [Empirical Cumulative Distribution Function Clustering for LLM-based Agent System Analysis](/20260215-20260316/2602.16131v1-empirical-cumulative-distribution-function-clustering-for-llm-based-agent-system-analysis)  
+   evidence：用于文学翻译的风格自适应大模型多智能体系统
+4. [PyVision-RL: Forging Open Agentic Vision Models via RL](/20260311-20260320/2602.20739v1-pyvision-rl-forging-open-agentic-vision-models-via-rl)  
+   标签：评分：8.0/10、query:mm-mas
+   evidence：多模态智能体模型的强化学习
+5. [AgentServe: Algorithm-System Co-Design for Efficient Agentic AI Serving on a Consumer-Grade GPU](/20260311-20260320/2603.10342v1-agentserve-algorithm-system-co-design-for-efficient-agentic-ai-serving-on-a-consumer-grade-gpu)  
    标签：评分：7.0/10、query:llm-ma
-   evidence：基于LLM的智能体系统分析评估框架
-9. [Persona2Web: Benchmarking Personalized Web Agents for Contextual Reasoning with User History](/20260215-20260316/2602.17003v1-persona2web-benchmarking-personalized-web-agents-for-contextual-reasoning-with-user-history)  
+   evidence：智能体 AI 工作负载的高效服务
+6. [Safe and Scalable Web Agent Learning via Recreated Websites](/20260311-20260320/2603.10505v1-safe-and-scalable-web-agent-learning-via-recreated-websites)  
+   标签：评分：7.0/10、query:llm-ma
+   evidence：使用LLM作为环境创建者来训练自主网络智能体的框架
+7. [Task-Aware Delegation Cues for LLM Agents](/20260311-20260320/2603.11011v1-task-aware-delegation-cues-for-llm-agents)  
+   标签：评分：7.0/10、query:llm-ma
+   evidence：大模型智能体团队协作的信号机制
+8. [From Control to Foresight: Simulation as a New Paradigm for Human-Agent Collaboration](/20260311-20260320/2603.11677v1-from-control-to-foresight-simulation-as-a-new-paradigm-for-human-agent-collaboration)  
+   标签：评分：7.0/10、query:llm-ma
+   evidence：使用LLM进行多步任务的人机协作范式
+9. [Terminal Is All You Need: Design Properties for Human-AI Agent Collaboration](/20260311-20260320/2603.10664v1-terminal-is-all-you-need-design-properties-for-human-ai-agent-collaboration)  
    标签：评分：6.0/10、query:llm-ma
-   evidence：使用大语言模型评估个性化网络智能体的基准
-10. [Uncertainty-Aware Diffusion Model for Multimodal Highway Trajectory Prediction via DDIM Sampling](/20260215-20260316/2602.21319v1-uncertainty-aware-diffusion-model-for-multimodal-highway-trajectory-prediction-via-ddim-sampling)  
+   evidence：人机智能体协作的设计属性
+10. [Mind the Sim2Real Gap in User Simulation for Agentic Tasks](/20260311-20260320/2603.11245v1-mind-the-sim2real-gap-in-user-simulation-for-agentic-tasks)  
+   标签：评分：6.0/10、query:llm-ma
+   evidence：用于智能体任务和评估的LLM模拟器
+11. [Multi-Task Reinforcement Learning for Enhanced Multimodal LLM-as-a-Judge](/20260311-20260320/2603.11665v1-multi-task-reinforcement-learning-for-enhanced-multimodal-llm-as-a-judge)  
    标签：评分：6.0/10、query:mm-mas
-   evidence：具有多智能体交互的多模态轨迹预测
-11. [HotelQuEST: Balancing Quality and Efficiency in Agentic Search](/20260215-20260316/2602.23949v1-hotelquest-balancing-quality-and-efficiency-in-agentic-search)  
-   标签：评分：6.0/10、query:llm-ma
-   evidence：智能体搜索系统的基准测试
+   evidence：用于多模态大模型评估的多任务强化学习
 
 
 <div class="dpr-home-promo-card">
