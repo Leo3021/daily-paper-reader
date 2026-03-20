@@ -1,0 +1,277 @@
+Title: Which Tool Response Should I Trust? Tool-Expertise-Aware Chest X-ray Agent with Multimodal Agentic Learning
+
+URL Source: https://arxiv.org/pdf/2602.21517v1
+
+Published Time: Thu, 26 Feb 2026 01:23:11 GMT
+
+Number of Pages: 11
+
+Markdown Content:
+# Which Tool Response Should I Trust? Tool-Expertise-Aware Chest X-ray Agent with Multimodal Agentic Learning 
+
+Zheang Huai, Honglong Yang, and Xiaomeng Li 
+
+The Hong Kong University of Science and Technology, Kowloon, Hong Kong 
+
+Abstract. AI agents with tool-use capabilities show promise for inte-grating the domain expertise of various tools. In the medical field, how-ever, tools are usually AI models that are inherently error-prone and can produce contradictory responses. Existing research on medical agents lacks sufficient understanding of the tools’ realistic reliability and thus cannot effectively resolve tool conflicts. To address this gap, this paper introduces a framework that enables an agent to interact with tools and empirically learn their practical trustworthiness across different types of multimodal queries via agentic learning. As a concrete instantiation, we focus on chest X-ray analysis and present a tool-expertise-aware chest X-ray agent (TEA-CXA). When tool outputs disagree, the agent experi-mentally accepts or rejects multimodal tool results, receives rewards, and learns which tool to trust for each query type. Importantly, TEA-CXA extends existing codebases for reinforcement learning with multi-turn tool-calling that focus on textual inputs, to support multimodal con-texts effectively. In addition, we enhance the codebase for medical use scenarios by supporting multiple tool calls in one turn, parallel tool in-ference, and multi-image accommodation within a single user query. Our code framework is applicable to general medical research on multi-turn tool-calling reinforcement learning in multimodal settings. Experiments show that TEA-CXA outperforms the state-of-the-art methods and a comprehensive set of baselines. Code will be released. 
+
+Keywords: Agent · Tool-expertise awareness · Multimodal agentic learn-ing · Chest X-ray. 
+
+1 Introduction 
+
+Large language models (LLMs) and Multi-Modal Large Language Models (MLLMs) have demonstrated remarkable capabilities in decision-making in complex inter-active environments [17]. On the other hand, task-specific models have shown success in automating various aspects of medical interpretation [26, 5, 19]. How-ever, the isolated nature of these models has limited their widespread application in real-world clinical settings. Medical AI agents with tool-use have emerged as a solution to integrate the domain expertise of various AI models. An agent is driven by a policy model, 
+
+> arXiv:2602.21517v1 [cs.CV] 25 Feb 2026
+
+2 Z. Huai et al. Predetermined tool-use trace    
+
+> Function descriptions
+> Tools
+> Tools
+> Policy model
+> (a) Zero-shot tool use by description. (b) Tool-use training with predefined tool-use traces.
+> (c) Our approach: the agent learns which tool’s response to trust for different multimodal queries.
+> Policy model
+> MLLM
+> Finetuning
+> Tool 1: The answer is A.
+> Tool 2: The answer is B. Reward
+> I trust tool 1.
+
+/
+
+> (d) Performance comparison of single tool, ensemble of tool responses, and our approach.
+> Result
+> Dynamically invoke tools
+
+Fig. 1. (a)(b) Previous works use tools in a zero-shot manner or fine-tune the pol-icy model with pre-specified tool-use traces, and thus lack sufficient understanding of the tools’ realistic reliability and cannot effectively resolve tool conflicts. (c) Our approach enables the agent to learn tools’ empirical trustworthiness across different queries through multimodal agentic learning. (d) Our method outperforms any indi-vidual tool and agent-based ensembling of tool outputs. 
+
+typically an LLM or MLLM. It can understand user queries, make decisions, and choose appropriate invokable models, hereafter referred to as “tools”, to obtain expert opinions or carry out specific tasks [16, 8, 28, 3]. Current research on medical agents with tool-use primarily falls into two cat-egories, as illustrated in Fig. 1(a)(b). The first category equips a policy model with a suite of external tools and enables it to invoke these tools and integrate their outputs in a zero-shot manner based solely on their functional descriptions. For example, [6, 14, 11, 30, 7] curate domain-specific expert tools tailored to par-ticular tasks and design agents with a frozen policy model. The second category focuses on fine-tuning the policy model with pre-constructed tool-calling and tool output integration traces. For instance, [16, 23, 9, 8, 12] construct datasets with complete tool-use traces and fine-tune the policy model to enable it to invoke suitable tools with appropriate arguments and incorporate tool responses. However, prior research on medical agents lacks sufficient understanding of the tools’ real-world reliability. The tools commonly used in medical settings are AI models that are inherently prone to inaccuracies [1], and may yield contradic-tory outputs. Their performance also varies across datasets [25]. Relying solely on tool descriptions or pre-constructed tool-use traces prevents agents from having access to tools’ practical trustworthiness on the target dataset, leaving them un-able to determine which output is correct when conflicts arise. This underscores the need for medical agents to develop a nuanced understanding of each tool’s real-world strengths and limitations across different types of multimodal queries, enabling them to dynamically and appropriately trust the tool responses. In this paper, we introduce an agentic learning paradigm that enables a multimodal medical agent to empirically learn tools’ practical reliability across Title Suppressed Due to Excessive Length 3
+
+various types of queries through active interaction with them, thereby learning to trust the correct tool when their outputs conflict. As a concrete instantiation, we study visual question answering (VQA) for chest X-rays (CXRs) and develop a tool-expertise-aware chest X-ray agent (TEA-CXA). Our framework employs reinforcement learning (RL) [15, 24] to allow the MLLM to experimentally accept or reject multimodal tool outputs when they disagree, obtain reward scores, and learn which tool to trust for different types of multimodal queries, as shown in Fig. 1(c). As shown in Fig. 1(d), after training, TEA-CXA acquires awareness of each tool’s real-world expertise, and can select the appropriate tool response to trust, surpassing the performance of any single tool 1. Existing general-purpose tool-using RL frameworks are designed for text-only inputs [2, 22]. We extend and refine these frameworks to support the interaction between MLLM and mul-timodal tools. Furthermore, our enhanced codebase supports multiple tool calls per turn, parallel tool inference, and image selection for tool invocation when multiple images are in a single user query, which are capabilities well-tailored to medical scenarios. The resulting code framework is flexible and applicable to gen-eral scenarios involving RL for multi-turn tool-calling in multimodal contexts. Our algorithm does not rely on any rollout data for supervision. It uses only a simple rule-based reward function on the final answer to guide optimization. Our contributions are summarized as follows. (1) Pioneering the considera-tion of tools’ real-world trustworthiness to resolve conflicts among tool responses, moving beyond reliance solely on tools’ functional descriptions or pre-specified tool-use traces. (2) Proposing to enable the agent to empirically learn tools’ practical reliability across different query types via multimodal agentic learning. (3) Designing a robust code framework for multimodal agentic learning, which is applicable to general multi-turn tool-calling RL in multimodal contexts. (4) Evaluation of TEA-CXA on chest X-ray VQA datasets, demonstrating the supe-riority of our approach over state-of-the-art methods and a variety of baselines. 
+
+2 Method 
+
+Fig. 2 illustrates our tool-expertise-aware chest X-ray agent (TEA-CXA) frame-work via multimodal agentic learning. In Sec. 2.1, we introduce tool-expertise-awareness training, which informs the agent about tools’ real-world trustwor-thiness across different types of multimodal queries. In Sec. 2.2, we present our agentic learning codebase design that allows an MLLM to interact with multi-modal tools and incorporates several practically useful enhancements tailored to medical scenarios.     
+
+> 1Note that our method is designed for general medical agents where multiple tools with diverse functionalities are dynamically (e.g., varying tool types and arguments) invoked. In our experiments, we use two VQA tools to make the RL training af-fordable (since training time increases markedly with the number of tools) and to facilitate clear evaluation of tool-response selection performance. 4Z. Huai et al.
+
+2.1 Tool-expertise-awareness training via multimodal agentic learning with multi-turn tool calling 
+
+Tools for medical image analysis are inherently error-prone and can produce contradictory outputs. Relying solely on functional descriptions of tools [6] or pre-specified tool-use traces fails to adequately inform an MLLM about the tools’ real-world performance and reliability, and thus does not help it decide which tool output to trust when their responses conflict. To bridge this gap, we pro-pose tool-expertise-awareness training, where we leverage reinforcement learning (RL) to enable the agent to actively interact with tools to learn their real-world trustworthiness for various types of multimodal queries. 
+
+Reinforcement learning. We adopt Group Relative Policy Optimization (GRPO) [21] as the RL algorithm. Specifically, for each input prompt x, GRPO samples a group of trajectories {τ1, τ 2, . . . , τ G} from the reference policy πref . Then the advantage within the group ˆAi,t is computed as: 
+
+ˆAi,t = Rϕ(τ ) − mean( {Rϕ(τ1), . . . , R ϕ(τG)})std( {Rϕ(τ1), . . . , R ϕ(τG)}) , (1) where Rϕ is the reward function. The policy model is then optimized by maxi-mizing the following objective function: 
+
+J(θ) = 1
+
+G
+
+> G
+
+X
+
+> i=1
+
+1
+
+|τi|
+
+> |τi|
+
+X
+
+> t=1
+
+min ri,t (θ) ˆAi,t , clip( ri,t (θ), 1−ϵ, 1+ ϵ) ˆAi,t 
+
+−βDKL (πθ ∥ πref ) ,
+
+(2) where πθ is the policy MLLM, DKL is the KL divergence, and ri,t is the policy ratio ri,t (θ) = πθ (τi, (t)|τi,<t ) 
+
+> πold (τi, (t)|τi,<t )
+
+.
+
+Tool-expertise-awareness enhancement via multimodal agentic learn-ing with tool calling. We aim to boost the MLLM’s awareness of tools’ prac-tical reliability across different types of multimodal queries, and enable it to dynamically and correctly select the tool response to trust when tool results con-tradict. Our framework lets the agent call multiple tools, receive their responses, experimentally trust one of the tool outputs if they disagree, and receive reward scores. In this way, the agent obtains a sense of the tools’ realistic accuracies for different types of user queries and thus can select appropriate tools to trust. As illustrated in Fig. 2, the rollout τ in this paper is the concatenation of interleaved MLLM-generated tool-calling tokens and tool responses. We use 
+
+<tool_call> and </tool_call> to enclose a tool-calling action that is written as a JSON object, which will be parsed and executed by the tools, with the tool execution results enclosed in <tool_response> and </tool_response> . Then, the existing rollout concatenated with the tool responses will be used as the input to generate the MLLM response in the next turn. The rollout process stops when the MLLM outputs the final answer, which is wrapped in <answer></answer> .We design a system prompt that guides the policy MLLM to produce rollouts in the defined format, as demonstrated in Fig. 3(a). In this prompt, the MLLM is instructed to experimentally and randomly trust one tool if tool responses Title Suppressed Due to Excessive Length 5Policy 
+
+MLLM 
+
+Multimodal 
+
+Tools 
+
+System prompt 𝒑𝒑 
+
++ User query 𝒙𝒙 
+
+Policy MLLM 
+
+𝝉𝝉 𝟏𝟏 
+
+𝝉𝝉 2
+
+…
+
+𝝉𝝉 𝑮𝑮 
+
+> Rollout
+> <tool_call>{"name": "vqa_medgemma", "arguments": {"img_id": 1, "prompt": …}}</tool_call> <tool_call>{"name": "vqa_lingshu", "arguments": {"img_id": 1, "prompt": …}}</tool_call>
+
+Tools 
+
+> <tool_response>
+> Execute the tool vqa_medgemma. The result is: {"response": "B) mild cardiomegaly"}
+> Execute the tool vqa_lingshu. The result is: {"response": "A) severe cardiomegaly"}
+> </tool_response>
+> <answer>A</answer>
+
+Reference model 
+
+Reward 
+
+calculation 
+
+𝑹𝑹 𝟏𝟏 
+
+𝑹𝑹 2
+
+…
+
+𝑹𝑹 𝑮𝑮 
+
+𝑨𝑨 𝟏𝟏 
+
+𝑨𝑨 𝟐𝟐 
+
+…
+
+𝑨𝑨 𝑮𝑮 
+
+> Group
+> computation
+
+Update policy MLLM  
+
+> KL
+> Reward Advantage
+
+User query 𝒙𝒙   
+
+> Figure 1: <image> Which finding is in this chest X-ray? A) severe cardiomegaly B) mild cardiomegaly
+> Try trusting
+> different tools
+> across different rollouts
+> 1
+> 2
+> 3
+
+𝜏𝜏  = 𝑝𝑝 Ⓒ𝑥𝑥 Ⓒ①Ⓒ②Ⓒ③
+
+System prompt 𝒑𝒑  
+
+> <image> An X-ray image
+> Policy MLLM output / tool response
+> ①②③
+> ⒸConcatenate
+
+(a) 
+
+(b) 
+
+Fig. 2. Overview of the proposed tool-expertise-aware chest X-ray agent (TEA-CXA) framework. (a) The agentic learning pipeline with multimodal policy model and multi-modal tools. (b) Details of the generation process for a single rollout. Tool invocations are dynamically generated by MLLM. Different rollouts try out trusting different tools when tool results contradict. 
+
+conflict. This prevents the MLLM from biasing toward a specific tool (e.g., one that provides more detailed analysis), given that each tool may have its strengths and weaknesses on different types of queries. We use a tool-calling format reward Rt(τ ) to verify whether the MLLM ad-heres to our prescribed tool-calling format, and an answer format reward Ra(τ )
+
+to check the existence of the <answer></answer> tags in the rollout. Rt(τ ) and 
+
+Ra(τ ) are set to 0.1 if their respective conditions are satisfied, and 0 otherwise. The total reward is the sum of the outcome reward and the two format rewards: 
+
+R(τ ) = Ro(τ ) + Ra(τ ) + Rt(τ ), (3) where the outcome reward Ro(τ ) evaluates the final answer using exact matching. 
+
+Ro(τ ) is 1 if the answer is correct, and 0 otherwise. The rollout sequence consists of both the MLLM-generated tokens and tool responses. We apply loss masking for the tool responses [13], ensuring the policy objective gradient is computed only over MLLM-generated tokens. 
+
+2.2 Multimodal agentic learning framework design 
+
+We extend existing agentic training codebases focused on text [2, 22] to robustly support multimodal contexts, with enhancements tailored for medical scenarios. The framework is extensible to other domains beyond X-ray analysis, providing a solid base for future research on medical tool-use agents. 6 Z. Huai et al. Given a question and chest X-ray images, output the answer choice. You have access to multiple tools . Each tool may make mistakes.  In cases where tool responses disagree, avoid assuming that a more detailed or lengthy analysis is necessarily more accurate.  After calling tools, tool responses will be wrapped with <tool_response> </tool_response> tags. 
+
+> First assistant turn: Call two or more tool functions. After issuing the tool calls, stop and wait for tool responses.
+> Second and subsequent assistant turns: (1) Compare all the tool responses received so far. (2) Then, if you judge the answer is sufficiently certain, provide the final answer choice wrapped in <answer></answer>. If you judge the answer is still uncertain, you may call additional tool functions.
+> Tool signatures: <tools>{"name": (…), "description": (…), "parameters": (…)}</tools>
+> For each function call, return a json object with function name and arguments within <tool_call></tool_call> tags .
+> Figure 1: <image> Figure 2: <image> Question: (…)
+
+Policy MLLM 
+
+User query 
+
+> <image><image> Question: (…)
+
+Labeling figures 
+
+Tools   
+
+> <tool_call>{"name": "(…)", "arguments": { "img_id": 2 ,(…)}}</tool_call>
+> [image 1 path, image 2 path]
+> A data sample
+> (a) System prompt (b) Labeling figures and invoking tools with image ids
+
+Fig. 3. (a) The system prompt instructs the policy model to follow the specified output format and consider each tool’s output as potentially trustworthy when tool results contradict. (b) For queries containing multiple images, our approach directs the policy model to generate image indices instead of file paths for efficient tool invocation. Some details are abbreviated as “(...)” due to space constraints. 
+
+Interaction between MLLM and multimodal tools in RL. Existing code frameworks for reinforcement learning with tool calling, e.g., RL-Factory [2], center on LLM policy models and text-only tools, lacking verifiable multimodal support. Building on RL-Factory [2], we expand and refine functionality to enable reliable interaction between MLLM policy model and multimodal tools. Our code will be released. 
+
+Multiple tool calls per turn and parallel tool inference. Given the imper-fect accuracy of medical AI tools, it is beneficial to consult more than one tool in a single turn before proceeding to the next step. We extend [2] to allow for mul-tiple tool calls per turn, each enclosed in <tool_call> and </tool_call> . Tool results are concatenated and returned to the MLLM. In addition, some medical AI tools have large numbers of parameters and slow inference, becoming the training time bottleneck. To speed up tool responses and accelerate training, our code framework deploys multiple instances of server APIs of the same tool on different ports and performs port round-robin when making calls. 
+
+Accommodation for multi-image queries. Although we validate our method on single-image queries, our code framework is readily applicable to multi-image queries. A single query may contain more than one image (e.g., CXRs from dif-ferent views, including AP, PA, Lateral), while some medical tools accept only one or few images [20]. To allow for image selection when calling tools, we label images in the chat template (e.g., “Figure 1”, “Figure 2”) and expose the image label as a tool argument. All image paths of a data sample are passed implic-itly as a hidden argument. Fig. 3(b) illustrates this workflow. The benefits are two-fold. First, MLLMs can reliably produce short labels, avoiding errors while generating long path strings. Second, this reduces token overhead. The multi-image functionality is verified on ReXVQA [18], though quantitative results are not included due to space constraints. Title Suppressed Due to Excessive Length 7
+
+Table 1. Accuracies (%) on CheXbench, which consists of three subsets: Rad-Restruct, SLAKE, and OpenI. “MedRAX” denotes its original implementation; “MedRAX *” de-notes using the method in MedRAX but applying the same policy MLLM and tools as ours. Note that MedRAX reports mean per-class accuracy, while we use overall accuracy as metric. Method Overall Rad-Restruct SLAKE OpenI Qwen2.5-VL-7B-Instruct [27] 52.4 55.7 70.7 45.5 MedGemma-4B [20] 66.7 60.0 78.9 64.7 Lingshu-7B [29] 70.2 65.2 92.7 64.5 Agent-ensemble 69.3 67.0 87.8 63.9 Reasoning [10] 62.8 65.2 91.9 52.6 Ensemble-A 67.6 60.9 88.6 62.9 Ensemble-B 69.7 61.7 94.3 64.2 CheXagent [4] 62.4 57.1 78.1 59.0 GPT-4o 58.4 53.9 85.4 51.1 MedRAX [6] 61.6 68.7 82.9 52.6 MedRAX * 69.6 61.7 90.2 65.3 TEA-CXA (Ours) 73.8 69.6 95.9 67.9 <answer> B</answer>    
+
+> <tool_response>
+> Execute the tool vqa_medgemma. The result is: {"response": "A) right base pulmonary atelectasis "}
+> Execute the tool vqa_lingshu. The result is: {"response": " B) left base pulmonary atelectasis. The lateral view of the chest X-ray shows increased opacity and volume loss in the left lower lung field, which is consistent with left base pulmonary atelectasis. This finding is not present in the right lung base, ruling out option A."}
+> </tool_response>
+> <tool_call>{"name": "vqa_medgemma", "arguments": {"img_id": 1, "prompt": "Which finding is in this chest X-ray? A) right base pulmonary atelectasis B) left base pulmonary atelectasis"}}</tool_call>
+> <tool_call>{"name": "vqa_lingshu", "arguments": {"img_id": 1, "prompt": "Which finding is in this chest X-ray? A) right base pulmonary atelectasis B) left base pulmonary atelectasis"}}</tool_call>
+> <answer> A</answer>
+> User
+> MLLM
+> MLLM MLLM
+> Tools
+> Agent-ensemble TEA-CXA
+> Which finding is in this chest X-ray?
+> A) right base pulmonary atelectasis
+> B) left base pulmonary atelectasis
+> Agent-ensemble/TEA-CXA
+
+Fig. 4. Qualitative comparison on a sample in CheXbench. Although Lingshu offers more detailed justifications, our method correctly trusts MedGemma’s answer, thanks to its awareness of tools’ realistic reliability across multimodal query types. 
+
+3 Experiments 
+
+Datasets. We evaluate TEA-CXA on CheXbench [4] for the visual question answering (VQA) task. We follow MedRAX [6] to use the three subsets of CheXbench: Rad-Restruct, SLAKE, and OpenI, comprising a total of 618 multiple-choice questions. We conduct three-fold cross-validation experiments on CheXbench and ensemble the results across the three folds. Model performance is measured by accuracy (percentage of correct answers). 
+
+Implementations. TEA-CXA employs Qwen2.5-VL-7B-Instruct [27] as its pol-icy MLLM. We equip the agent with two high-performance VQA tools: MedGemma-4B [20] and Lingshu-7B [29], to assess the performance gain of our approach with up-to-date tools. Each tool is implemented according to its official HuggingFace 8 Z. Huai et al.                          
+
+> Table 2. Tool response selection accuracies (%) for samples where tool outputs conflict and at least one output is correct. Method Overall Rad-Restruct SLAKE OpenI Ensemble-A 46.6 42.3 62.1 43.7 Ensemble-B 54.6 46.2 86.2 48.7 Agent-ensemble 54.0 57.7 58.6 52.1 MedRAX *57.5 42.3 75.9 55.5 TEA-CXA (Ours) 63.8 69.2 89.7 56.3
+
+guidelines. Training is conducted on 8 NVIDIA H800 GPUs. We train TEA-CXA for 100 steps with a batch size of 80. More details are available in our code. 
+
+Quantitative performance. We compare our method against the following baselines and models: (1) Direct inference on Qwen2.5-VL-7B-Instruct [27] (our policy MLLM), MedGemma [20], or Lingshu [29] (our tools); (2) Agent-ensemble: invoking both tools and ensembling their outputs with the same policy MLLM, which acts as a naïve agent strategy; (3) Reasoning: training the same policy MLLM to reason and provide the answer with RL [10]. (4) Policy MLLM-tool ensembles: Ensemble-A, which combines the results of Qwen2.5-VL-7B-Instruct and tools, and Ensemble-B, which combines the RL-trained reasoning policy MLLM from (3) with tool outputs. (5) State-of-the-art (SOTA) methods, includ-ing biomedical vision-language model CheXagent [4], general-purpose MLLM GPT-4o, and CXR-focused agent MedRAX [6]. The results are shown in Ta-ble 1, TEA-CXA outperforms all baselines and prior SOTA. 
+
+Qualitative performance. We present one representative case in Fig. 4 com-paring TEA-CXA to Agent-ensemble (invoking both tools and ensembling their outputs). The two tools provide inconsistent suggestions. Agent-ensemble incor-rectly favors Lingshu, likely due to its more detailed analysis. TEA-CXA cor-rectly trusts MedGemma despite its concise conclusion without analysis. This demonstrates TEA-CXA’s ability to resolve conflicting tool outputs based on its awareness of tools’ real-world trustworthiness across different multimodal query types instead of surface features of tool outputs. 
+
+Tool response selection analysis. Table 2 presents the accuracies of choosing the correct tool response among conflicting outputs when at least one is correct. The compared methods have no prior knowledge about the tools’ real-world performance and therefore can only rely on superficial features in the tool outputs to resolve conflicts. In contrast, our approach, trained via multimodal agentic learning to internalize each tool’s reliability across different query types, selects the correct tool output with substantially higher accuracy. 
+
+4 Conclusion 
+
+This work presents a novel tool-expertise-aware chest X-ray agent. The agent empirically learns tools’ practical trustworthiness via agentic learning. When tool outputs conflict, It experimentally trusts one tool result, receives rewards, Title Suppressed Due to Excessive Length 9
+
+and then learns which tool to trust for each query type. To implement our method, we develop a code framework for multimodal agentic learning with enhancements for medical scenarios, building a foundation for future research. Experiments show that our method outperforms the state-of-the-art methods and strong baselines. 
+
+References 
+
+1. Arora, R.K., Wei, J., Hicks, R.S., Bowman, P., Quiñonero-Candela, J., Tsim-pourlas, F., Sharman, M., Shah, M., Vallone, A., Beutel, A., et al.: Healthbench: Evaluating large language models towards improved human health. arXiv preprint arXiv:2505.08775 (2025) 2. Chai, J., Yin, G., Xu, Z., Yue, C., Jia, Y., Xia, S., Wang, X., Jiang, J., Li, X., Dong, C., et al.: Rlfactory: A plug-and-play reinforcement learning post-training framework for llm multi-turn tool-use. arXiv preprint arXiv:2509.06980 (2025) 3. Chen, W.G., Spiridonova, I., Yang, J., Gao, J., Li, C.: Llava-interactive: An all-in-one demo for image chat, segmentation, generation and editing. arXiv preprint arXiv:2311.00571 (2023) 4. Chen, Z., Varma, M., Delbrouck, J.B., Paschali, M., Blankemeier, L., Van Veen, D., Valanarasu, J.M.J., Youssef, A., Cohen, J.P., Reis, E.P., et al.: Chexagent: Towards a foundation model for chest x-ray interpretation. In: AAAI 2024 Spring Symposium on Clinical Foundation Models (2024) 5. Cohen, J.P., Viviano, J.D., Bertin, P., Morrison, P., Torabian, P., Guarrera, M., Lungren, M.P., Chaudhari, A., Brooks, R., Hashir, M., et al.: Torchxrayvision: A library of chest x-ray datasets and models. In: International Conference on Medical Imaging with Deep Learning. pp. 231–249. PMLR (2022) 6. Fallahpour, A., Ma, J., Munim, A., Lyu, H., Wang, B.: Medrax: Medical reasoning agent for chest x-ray. arXiv preprint arXiv:2502.02673 (2025) 7. Ferber, D., El Nahhas, O.S., Wölflein, G., Wiest, I.C., Clusmann, J., Leßmann, M.E., Foersch, S., Lammert, J., Tschochohei, M., Jäger, D., et al.: Development and validation of an autonomous artificial intelligence agent for clinical decision-making in oncology. Nature cancer pp. 1–13 (2025) 8. Gao, S., Zhu, R., Kong, Z., Noori, A., Su, X., Ginder, C., Tsiligkaridis, T., Zitnik, M.: Txagent: An ai agent for therapeutic reasoning across a universe of tools. arXiv preprint arXiv:2503.10970 (2025) 9. Ghezloo, F., Seyfioglu, M.S., Soraki, R., Ikezogwo, W.O., Li, B., Vivekanandan, T., Elmore, J.G., Krishna, R., Shapiro, L.: Pathfinder: A multi-modal multi-agent system for medical diagnostic decision-making applied to histopathology. arXiv preprint arXiv:2502.08916 (2025) 10. Guo, D., Yang, D., Zhang, H., Song, J., Zhang, R., Xu, R., Zhu, Q., Ma, S., Wang, P., Bi, X., et al.: Deepseek-r1: Incentivizing reasoning capability in llms via reinforcement learning. arXiv preprint arXiv:2501.12948 (2025) 11. He, Y., Li, A., Liu, B., Yao, Z., He, Y.: Medorch: Medical diagnosis with tool-augmented reasoning agents for flexible extensibility. arXiv preprint arXiv:2506.00235 (2025) 12. Hoopes, A., Butoi, V., Guttag, J., Dalca, A.: Voxelprompt: A vision-language agent for grounded medical image analysis. oct. 10, 2024, arxiv. arXiv preprint arXiv:2410.08397 10 Z. Huai et al. 13. Jin, B., Zeng, H., Yue, Z., Yoon, J., Arik, S., Wang, D., Zamani, H., Han, J.: Search-r1: Training llms to reason and leverage search engines with reinforcement learning. arXiv preprint arXiv:2503.09516 (2025) 14. Jin, Q., Wang, Z., Yang, Y., Zhu, Q., Wright, D., Huang, T., Khandekar, N., Wan, N., Ai, X., Wilbur, W.J., et al.: Agentmd: Empowering language agents for risk prediction with large-scale clinical tool learning. Nature Communications 16 (1), 9377 (2025) 15. Kaelbling, L.P., Littman, M.L., Moore, A.W.: Reinforcement learning: A survey. Journal of artificial intelligence research 4, 237–285 (1996) 16. Li, B., Yan, T., Pan, Y., Luo, J., Ji, R., Ding, J., Xu, Z., Liu, S., Dong, H., Lin, Z., et al.: Mmedagent: Learning to use medical tools with multi-modal agent. arXiv preprint arXiv:2407.02483 (2024) 17. Liu, X., Yu, H., Zhang, H., Xu, Y., Lei, X., Lai, H., Gu, Y., Ding, H., Men, K., Yang, K., et al.: Agentbench: Evaluating llms as agents. arXiv preprint arXiv:2308.03688 (2023) 18. Pal, A., Lee, J.O., Zhang, X., Sankarasubbu, M., Roh, S., Kim, W.J., Lee, M., Rajpurkar, P.: Rexvqa: A large-scale visual question answering benchmark for gen-eralist chest x-ray understanding. arxiv (2025) 19. Rajpurkar, P., Irvin, J., Zhu, K., Yang, B., Mehta, H., Duan, T., Ding, D., Bagul, A., Langlotz, C., Shpanskaya, K., et al.: Chexnet: Radiologist-level pneumonia de-tection on chest x-rays with deep learning. arxiv. arXiv preprint arXiv:1711.05225 
+
+10 (2017) 20. Sellergren, A., Kazemzadeh, S., Jaroensri, T., Kiraly, A., Traverse, M., Kohlberger, T., Xu, S., Jamil, F., Hughes, C., Lau, C., et al.: Medgemma technical report. arXiv preprint arXiv:2507.05201 (2025) 21. Shao, Z., Wang, P., Zhu, Q., Xu, R., Song, J., Bi, X., Zhang, H., Zhang, M., Li, Y., Wu, Y., et al.: Deepseekmath: Pushing the limits of mathematical reasoning in open language models. arXiv preprint arXiv:2402.03300 (2024) 22. Sheng, G., Zhang, C., Ye, Z., Wu, X., Zhang, W., Zhang, R., Peng, Y., Lin, H., Wu, C.: Hybridflow: A flexible and efficient rlhf framework. arXiv preprint arXiv: 2409.19256 (2024) 23. Sun, Y., Si, Y., Zhu, C., Zhang, K., Shui, Z., Ding, B., Lin, T., Yang, L.: Cpathagent: An agent-based foundation model for interpretable high-resolution pathology image analysis mimicking pathologists’ diagnostic logic. arXiv preprint arXiv:2505.20510 (2025) 24. Sutton, R.S., Barto, A.G., et al.: Reinforcement learning. Journal of Cognitive Neuroscience 11 (1), 126–134 (1999) 25. Tang, X., Shao, D., Sohn, J., Chen, J., Zhang, J., Xiang, J., Wu, F., Zhao, Y., Wu, C., Shi, W., et al.: Medagentsbench: Benchmarking thinking models and agent frameworks for complex medical reasoning. arXiv preprint arXiv:2503.07459 (2025) 26. Tanno, R., Barrett, D.G., Sellergren, A., Ghaisas, S., Dathathri, S., See, A., Welbl, J., Lau, C., Tu, T., Azizi, S., et al.: Collaboration between clinicians and vision– language models in radiology report generation. Nature Medicine 31 (2), 599–608 (2025) 27. Wang, P., Bai, S., Tan, S., Wang, S., Fan, Z., Bai, J., Chen, K., Liu, X., Wang, J., Ge, W., Fan, Y., Dang, K., Du, M., Ren, X., Men, R., Liu, D., Zhou, C., Zhou, J., Lin, J.: Qwen2-vl: Enhancing vision-language model’s perception of the world at any resolution. arXiv preprint arXiv:2409.12191 (2024) 28. Xie, J., Chen, Z., Zhang, R., Wan, X., Li, G.: Large multimodal agents: A survey. arXiv preprint arXiv:2402.15116 (2024) Title Suppressed Due to Excessive Length 11 29. Xu, W., Chan, H.P., Li, L., Aljunied, M., Yuan, R., Wang, J., Xiao, C., Chen, G., Liu, C., Li, Z., et al.: Lingshu: A generalist foundation model for unified multimodal medical understanding and reasoning. arXiv preprint arXiv:2506.07044 (2025) 30. Zhao, W., Wu, C., Fan, Y., Zhang, X., Qiu, P., Sun, Y., Zhou, X., Wang, Y., Sun, X., Zhang, Y., et al.: An agentic system for rare disease diagnosis with traceable reasoning. arXiv preprint arXiv:2506.20430 (2025)

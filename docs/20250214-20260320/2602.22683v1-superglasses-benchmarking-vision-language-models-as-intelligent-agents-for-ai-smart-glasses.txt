@@ -1,0 +1,2153 @@
+Title: SUPERGLASSES: Benchmarking Vision Language Models as Intelligent Agents for AI Smart Glasses
+
+URL Source: https://arxiv.org/pdf/2602.22683v1
+
+Published Time: Fri, 27 Feb 2026 01:39:25 GMT
+
+Number of Pages: 25
+
+Markdown Content:
+## SUPER GLASSES : Benchmarking Vision Language Models as Intelligent Agents for AI Smart Glasses 
+
+Zhuohang Jiang 1*, Xu Yuan 1*, Haohao Qu 1, Shanru Lin 2, Kanglong Liu 1,Wenqi Fan 1†
+
+, Qing Li 1†
+
+> 1
+
+The Hong Kong Polytechnic University 2City University of Hong Kong 
+
+Abstract 
+
+The rapid advancement of AI-powered smart glasses—one of the hottest wearable devices—has unlocked new frontiers for multimodal interaction, with Visual Question Answer-ing (VQA) over external knowledge sources emerging as a core application. Existing Vision Language Models (VLMs) adapted to smart glasses are typically trained and evaluated on traditional multimodal datasets; however, these datasets lack the variety and realism needed to reflect smart glasses usage scenarios and diverge from their specific challenges, where accurately identifying the object of interest must pre-cede any external knowledge retrieval. To bridge this gap, we introduce SUPER GLASSES , the first comprehensive VQA benchmark built on real-world data entirely collected by smart glasses devices. SUPER GLASSES comprises 2,422 egocentric image-question pairs spanning 14 image do-mains and 8 query categories, enriched with full search tra-jectories and reasoning annotations. We evaluate 26 rep-resentative VLMs on this benchmark, revealing significant performance gaps. To address the limitations of existing models, we further propose the SUPER LENS , a multimodal smart glasses agent that enables retrieval-augmented an-swer generation by integrating automatic object detection, query decoupling, and multimodal web search. Our agent achieves state-of-the-art performance, surpassing the GPT-4o model by 2.19%, and highlights the need for task-specific solutions in smart glasses VQA scenarios. 
+
+1. Introduction 
+
+Recent advancements in wearable technologies have po-sitioned AI-powered Smart Glasses as a major catalyst for transforming daily human–computer interactions across various domains [13, 40, 43], such as telemedicine support in healthcare [40] and distance learning and assistance in 
+
+> *Equal contribution.
+> †Corresponding author.
+
+education [37]. Driven by progress in AI techniques, par-ticularly Large Language Models ( LLMs ) [5, 7, 33, 39, 45] and Vision Language Models ( VLMs ) [4, 17, 53, 56], mod-ern smart glasses are now capable of seamlessly integrating contextual digital information into the user’s visual field, thereby enhancing situational awareness and enables intu-itive, natural interactions with the surrounding environment. The Ray-Ban Meta AI Glasses 1, widely regarded as one of the most advanced smart glasses, have surpassed one mil-lion units in sales within a few months of their launch, ex-emplifying the growing consumer adoption and practical relevance of this technology. As adoption accelerates, such smart wearable devices are poised to redefine the bound-aries between digital augmentation and physical reality, marking a pivotal step in the evolution of pervasive, context-aware computing. A critical component of smart glasses is the built-in intelligent agent [11, 22, 31, 38, 51], which pro-cesses information from both users and onboard sensors, ef-fectively functioning as the device’s brain. Most existing in-telligent agents in smart glasses are powered by large VLMs equipped with a Retrieval-Augmented Generation (RAG) pipeline [15, 23, 34]. Currently, the development and eval-uation of intelligent agents commonly rely on benchmarks from the retrieval-augmented Visual Question Answering (VQA) domain [26, 35, 44, 46], which provide standardized tasks for assessing the models’ ability to interpret visual and textual context, retrieve relevant external knowledge, and generate accurate responses to user queries. For instance, benchmarks such as Dyn-VQA [30], LIVEVQA [16], and CRAG-MM [44] present dynamic questions that are espe-cially challenging due to their rapidly evolving answers, the need for comprehensive multimodal knowledge, and the de-mand for complex multi-hop reasoning. Despite these progresses, a substantial gap remains be-tween the typical VQA tasks focused on by these bench-marks and the real-world demands of smart glasses. First ,most images and answers in existing VQA datasets are not    
+
+> 1https://www.meta.com/ai-glasses/ray-ban-meta/
+> arXiv:2602.22683v1 [cs.CV] 26 Feb 2026 Question: What’s the connection between
+> this sweet’s maker and Hershey Company?
+> Answer: Reese’s Peanut Butter Cups are
+> an American candy by Hershey …
+
+Food -Aggregation 
+
+Transport -Comparison     
+
+> Question: Can this type of vehicle carry
+> more passengers than a sedan?
+> Answer: Yes, the type of vehicles shown
+> in the image are minivans, …
+> Question: What’s unique about this brand’s
+> headquarters city in Japan’s population?
+> Answer: The city, Yokohama, is the
+> second -largest city in Japan by population.
+
+Shopping -Multi -hop 
+
+Plants -Factual Knowledge      
+
+> Question: What roles does this play in
+> human activities?
+> Answer: Agave serves multiple human
+> uses: it is used for ornamental purposes …
+> Question: Where am I?
+> Answer: You are at Vancouver
+> International Airport (YVR), specifically
+> in the baggage claim area…
+
+Public Service -Reasoning  Culture -Factual Knowledge   
+
+> Question: Who create this statue?
+> Answer: They are the welcome Figures of
+> Vancouver International Airport, which
+> were created by artist Joe David in 1986.
+
+Screens -Simple Recognition     
+
+> Question: What does this sign mean?
+> Answer: The sign means that some traffic
+> lanes ahead are temporarily closed or
+> narrowed, so drivers should expect…
+> Question: What does this say?
+> Answer: The display says: Not All Doom
+> and Gloom Africa’s White Rhinoceros is a
+> symbol of life in crisis and …
+
+Translate -Simple Recognition Animals -Comparison   
+
+> Question: What is the difference between
+> this animal and a red panda?
+> Answer: The animal in the image is a
+> giant panda. Taxonomy Giant Panda: …
+
+Navigation -Multi -hop   
+
+> Question: What is the tallest structure in
+> the city where this building is located?
+> Answer: The Tokyo Skytree is the tallest
+> structure in Tokyo, at 634 meters.
+
+SuperGlasses Figure 1. SUPER GLASSES contains 14 image domains and 8 query categories, with 2,422 question–answer pairs. Each example includes an egocentric image captured by smart glasses, a manually annotated question–answer pair, and associated multimodal search logs. 
+
+sourced from real smart glasses usage scenarios, leading to a significant scenario gap when developing and evalu-ating intelligent agents for smart glasses-oriented systems. 
+
+Second , images in previous VQA benchmarks are typically clear and object-centric, with target items explicitly visible and easy to identify. In contrast, as illustrated in Figure 1, real-world images captured by smart glasses often include large amounts of irrelevant background noise due to their unique visual perception mechanism. Consequently, it is crucial for the agents to first detect and localize the tar-get objects before performing question answering, which makes the task substantially more challenging. Finally ,most existing benchmarks lack detailed search records or tool-use trajectories within the RAG paradigm. However, such traceability is essential for understanding agent behav-ior in AI-powered smart glasses. Therefore, there is an ur-gent need for a comprehensive benchmark that faithfully re-flects the practical usage scenarios of smart glasses. To bridge these gaps, we propose SUPER GLASSES , a retrieval-augmented VQA dataset tailored for benchmark-ing VLM agents across diverse real-world smart glasses scenarios. Our benchmark is the first of its kind, com-prising 2,422 images manually collected using three rep-resentative smart glasses (i.e., Ray-Ban Meta 1, Xiaomi 2,and RayNeo V3 3), spanning 14 domains and 8 cate-gories. Constructed through a multi-stage pipeline named 
+
+Acquirement, Annotation, Assessment, and Analysis ( A4), 
+
+> 2
+
+https://www.mi.com/prod/xiaomi-ai-glasses 
+
+> 3
+
+https://www.rayneo.com 
+
+SUPER GLASSES incorporates rigorous filtering criteria and human validation to ensure data quality. The dataset is de-signed to challenge the agents with the recognition of im-plicit visual entities from the perspective of smart glasses and the execution of multimodal, multi-hop reasoning. Each instance in S UPER GLASSES consists of a domain-specific image representing a specific usage case, along with a question-answer pair and its corresponding retrieval records. We assess and analyze the quality of our proposed dataset through four aspects: reproducibility, precision, complexity, and correctness, demonstrating its comprehen-siveness and suitability for benchmarking multimodal re-trieval and reasoning systems in wearable AI applications. We then investigate the performance of 26 representative VLM agents on the proposed S UPER GLASSES benchmark. Extensive experiments demonstrate that most of the com-pared VLMs exhibit suboptimal performance on S UPER -GLASSES , with accuracy rates falling below 40%. This de-ficiency is especially pronounced in challenging tasks that require multi-hop reasoning, information-seeking capabili-ties, and adaptation to rapidly changing scenarios. Standing out among these models, the large-scale models Gemini 2.5 Pro and GPT-4o, which estimated parameter sizes exceed-ing 400B, consistently achieve the highest overall perfor-mance, reaching accuracies of 43.02% and 41.91%, respec-tively, across all evaluation scenarios. However, wearable scenarios impose strict constraints on device size and com-putational resources, necessitating the development of com-pact models that deliver performance comparable to these Egocentric Data Acquirement 
+
+Image: 
+
+Query: 
+
+How tall is this 
+
+building? 
+
+Acquirement  Annotation  Assessment  Analysis 
+
+Benchmark Assessment  Dataset Analysis 
+
+> Search URL:
+
+Information Annotation  
+
+> Image:
+> Query:
+
+How tall is this 
+
+building?        
+
+> Domain: Public Service
+> Location: Canada
+> Language: None
+> Category :Factual -
+> Knowledge,
+> Multi -hop ...
+> Subquery:
+> Cropped
+> Image:
+> Image Search URL:
+> https://www.red
+> dit.com/xxxxxx
+> Image Search Result:
+> Went to CN tower in TO
+> and here's the Lego
+> version in the lobby.
+> Tools: Image Search
+> Subquery:
+> How tall is CN
+> Tower?
+> Tools:
+> Text Search
+> Text Search URL:
+> https://en.wikipedi
+> a.org/wiki/CN_Tower
+> Text Search Result:
+> The CN Tower is a
+> 553.3 m -high
+> (1,815.3 ft) …
+> Final Answer:
+> The CN Tower
+> is 553.3 m
+> high.
+
+Image & Query Pair  Basic Information  Web Search Records  Answer  
+
+> Step 1: Step 2:
+
+Step 2: Agent Assessment   
+
+> Reasoning Verification Domain Verification
+> Domain: Shopping
+> Domain: Public Service
+> Cross
+> Query
+> Agent Reasoning
+> Answer
+> Text & Image Search
+> Label
+
+Step 3: Expert Assessment  
+
+> Complexity
+> Reproducibility
+> Correctness
+> Precision
+> Public
+> …
+> …
+> ...
+> Candidate Website Step n:
+> Subquery
+> Tools
+> Search URL
+> Search Result
+> VLM
+> Reasoning
+> Stack of
+> books
+> Compass
+> …
+> French
+> or
+> Answer Topic Analysis
+> Query Prefix Analysis QA Length Distribution
+> Query Topic Analysis
+> How tall
+> is this
+> building?
+
+Step 1: Rule Assessment            
+
+> 1. Question Length
+> 2. Answer Length
+> 3. Hop Number
+> 4. Search Tool Usage
+> 5. Search Result
+> ...
+> Step 4: Query Filtering
+> Rule
+> Score
+> Agent
+> Score
+> Expert
+> Score
+> Back to
+> Annotation
+> Passed
+> Query Spilt Verification Category Verification Cross
+> Query: How tall is …?
+> Sub -Queries: [“What is …”,…] Score:
+> 9
+> K-hop
+> Category: Spatial Reasoning
+> Category: Factual Knowledge
+> What is this
+> building?
+
+Figure 2. The A4 Data Collection Pipeline , consisting of four stages: Acquirement , Annotatation , Assessment , and Analysis .
+
+large-scale models. Such models are essential for enabling efficient on-device agents in smart glasses applications. Building on this insight, we introduce SUPER LENS , the first smart glasses agent, designed to deliver accurate an-swers to multimodal queries by dynamically combining the internal knowledge of VLMs with external informa-tion from search engines. Specifically, S UPER LENS is em-powered by two key modules: a Demand-Adaptive An-swerer and a Dual-Lens Knowledge Retriever. The former generates direct answers through domain-specific reasoning or calls external tools on demand for retrieval-augmented generation, while the latter automatically integrates object grounding, query decomposition, and multimodal search to supply missing yet relevant knowledge. Our main contributions are highlighted as follows: • SUPER GLASSES : The First Benchmark Specifically Tailored for AI Smart Glasses. We present a com-prehensive benchmark specifically designed for smart glasses applications, featuring a reproducible collection process that spans four stages: data acquirement, annota-tion, assessment, and analysis (A 4). Unlike existing vi-sual question answering datasets, S UPER GLASSES incor-porates object grounding, multimodal retrieval, and com-prehensive retrieval/tool invocation, establishing it as a challenging and pioneering dataset in the field. • Leaderboard and Insights. We benchmark dozens of representative VLMs on S UPER GLASSES . The evalua-tion presents the latest leaderboard of representative mul-timodal agents on smart glasses-related VQA tasks. The corresponding analysis offers insights into the key chal-lenges and future opportunities for smart glasses agents. • SUPER LENS : The Pioneering Smart Glasses Agent. 
+
+We develop S UPER LENS , a demand-adaptive multimodal agent tailored to egocentric and knowledge-intensive rea-soning, achieving state-of-the-art performance on S U-
+
+PER GLASSES . By dynamically integrating search engines to access up-to-date external knowledge, the agent outper-forms existing VLMs, achieving an average improvement of 2.19% over the GPT-4o model. 
+
+2. S UPER GLASSES 
+
+In this section, we introduce S UPER GLASSES , the first-of-its-kind dataset, designed to evaluate the capabilities of cur-rent vision language models (VLMs) in addressing complex smart glasses scenarios that require outside knowledge. 
+
+2.1. A 4 Data Collection Pipeline 
+
+To construct S UPER GLASSES , we design a rigorous data collection pipeline termed A4, which consists of four tightly integrated stages: Acquirement , Annotatation , Assess-ment , and Analysis . This pipeline ensures that our dataset is realistic, comprehensive, and traceable for evaluating VLMs in diverse smart glasses scenarios (Figure 2). 
+
+Step 1: Acquirement. The first stage involves the sys-tematic collection of authentic egocentric data using smart glasses. Participants equipped with smart glasses de-vices record diverse real-world scenarios encompassing var-ious environments, objects, and human-centered activities. This stage yields a comprehensive repository of raw im-age–query pairs that serves as the foundation for subsequent annotation and reasoning-oriented processing. Table 1. Statistics of S UPER GLASSES .                    
+
+> Statistic Number
+> Total Questions 2,422 - Multiple-hop Questions 775 - Single-hop Questions 1,647 Total Scenarios 14 Total Website Sources 519 Total Number of Images 2,422 - Ray-Ban Meta 257 - Xiao Mi 797 - RayNeo V3 1,368 Average Image Size (px) 3,630 ×2,887 Maximum Question Length 51 Maximum Answer Length 171 Average Question Length 10.18 Average Answer Length 18.19 Average Hop Number 1.39 Total Tool-Usage Number 2, 011 Average Tool-usage Number 0.83
+
+Figure 3. Data distribution on Difficulty, Domain, and Category. Easy 
+
+> 64.91%
+> Medium
+> 27.70%
+> Hard
+> 7.39%
+> Plant
+> 13.96%
+> Public
+> Service
+> 12.26%
+> Food
+> 11.19%
+> Shopping
+> 9.79%
+> Translation
+> 9.70%
+> Transport
+> 8.38%
+> Culture
+> 7.89%
+> Navigation
+> 7.18%
+> Animal
+> 6.52%
+> Education
+> Screen
+> Other
+> Science
+> Tourism
+> 30.45%
+> 20.02%
+> 19.53%
+> 16.91%
+> 4.16%
+> 3.96%
+> 3.11%
+> 1.85%
+> Query Category
+> Simple
+> Recognition
+> Factual
+> Knowledge
+> Multi-hop
+> Reasoning
+> Comparison
+> Aggregation
+> Spatial
+> Reasoning
+> Temporal
+> Understanding
+
+Step 2: Annotatation. The second stage enriches the raw image–query pairs with structured metadata and re-trieval traces. Human annotators label each sample with key attributes such as category, question type, difficulty, and reasoning steps, while performing both visual and tex-tual search to simulate real-world information seeking. The focused image regions, decomposed sub-queries, and sup-porting results are recorded, forming a traceable dataset in which each answer is explicitly grounded in its evidence. 
+
+Step 3: Assessment. The third stage performs a four-step assessment: (1) Rule Assessment automatically validates basic constraints such as question length, hop count, and tool usage; (2) Agent Assessment uses a reference multi-modal model to verify query splitting, attribute labels, and answer reproducibility; (3) Expert Assessment involves hu-man reviewers rating reproducibility, precision, complex-ity, and correctness; and (4) Query Filtering aggregates the above results to retain high-quality samples, forming a ro-bust loop that continuously refines data quality. 
+
+Step 4: Analysis. The final stage analyzes the dataset from a macro perspective, ensuring balanced sample distri-butions across four key aspects: query and answer lengths, query prefixes, and common topics in queries and answers. These evaluations confirm the dataset’s suitability as a ro-bust benchmark for assessing the multimodal retrieval and reasoning capabilities of smart glasses agents. Details are provided in Appendix B. 
+
+2.2. Data Description 
+
+Dataset Statistics. As shown in Table 1, S UPER GLASSES 
+
+contains 2,422 egocentric image-question pairs collected using three representative commercial smart glasses: Ray-Ban Meta , XiaoMi , and RayNeo , which contribute 257, 797, and 1,368 images, respectively. As shown in Fig-ure 3, they span 14 practical domains and 8 fine-grained query categories, reflecting a wide range of real-world in-formation needs encountered by smart glasses users. Each instance includes a high-resolution egocentric image, anatural-language question, and the full interaction search traces, tool usage logs, and step-by-step reasoning paths. Among all instances, 775 questions involve multi-hop rea-soning, while the remaining 1,647 require a single hop. To underscore the dataset’s complexity and multimodal depth, we report several key statistics: the longest question spans 61 words, the average reasoning step is 1.39, and a total of 2,011 tool usage events are recorded across the corpus. 
+
+Comparison with Other Datasets. As Table 2 shows, early benchmarks [6, 8] mainly assess a model’s ability to retrieve external textual knowledge for question answering. However, visual information may be more advantageous or convenient than textual data in many scenarios. Recent benchmarks [16, 19, 25, 44] have sought to address this lim-itation by incorporating multimodal search, enabling mod-els to access and utilize diverse web information for im-proved performance on VQA tasks. Nevertheless, these datasets are not collected through smart glasses and neglect detailed search records or tool-usage trajectories, making them less representative of smart glasses usage scenarios and hindering the ability to trace each answer back to its supporting evidence. In contrast, our S UPER GLASSES cor-pus captures egocentric smart glasses footage and logs the full tool-use trajectory, enabling spatially grounded, step-by-step reasoning. Finally, S UPER GLASSES spans 14 do-mains and 8 query categories, supporting nuanced evalua-tion of retrieval strategies and smart glasses agents. 
+
+3. S UPER LENS 
+
+Unlike conventional VQA datasets, the proposed S UPER -GLASSES poses challenges grounded in egocentric, real-world conditions characterized by broad visual scopes, extensive knowledge demands, and multi-hop reasoning, where existing VLMs [4, 28, 49, 56] often exhibit limited effectiveness. To tackle these challenges, we introduce S U-
+
+> PER
+
+LENS , a strong baseline tailored for smart glasses sce-narios. SUPER LENS is capable of delivering accurate re-sponses to user queries by adaptively integrating the intrin-Domain    
+
+> Router
+> Answer
+> Generator Image Metadata : <location>
+> Domain Reasoning Guidelines :
+> 1. If it is a well known
+> landmark like Eiffel
+> Tower, you can ...
+> 2. If it is not a well known
+> building, you can identify
+> the building ...
+> Answer
+> Generator
+
+Domain -specific Prompt  Ripley 
+
+> Entertainment
+> <Search Tool
+> Request>
+
+1 Direct Answer Generation  Enhanced by Domain -specific Prompt    
+
+> Image Metadata : <location>
+> Please answer the question
+> based on the image and the
+> retrieved chunks.
+> Retrieved Context :
+> 1. Chunk 1 with relevance
+> score 0.95: ...
+> 2. Chunk 2 with relevance
+> score 0.80: ...
+
+RAG -based Prompt 
+
+3 RAG -based Answer Generation 
+
+2 Dual -Lens Knowledge Retriever 
+
+Final Answer 
+
+Query 
+
+Decoupler 
+
+Webpage 
+
+Reader 
+
+> <Visual Object>
+> <Textual Query>
+
+Object 
+
+Detector 
+
+> <Sub -Query 1>
+> <Sub -Query 2>
+> ...
+> Image Search
+> Text Search
+
+Multimodal 
+
+Reranker 
+
+> HTML Pages
+> Textual
+> Chunks
+> 1
+> 2
+> 3
+> 𝐾
+> Top -K Chunks
+> <Question>
+> <Image>
+> <Question>
+> <Image> <Image>
+> Cache
+> 1
+> 2
+> 3
+> 𝑁
+> Search
+> Router
+> Who built the
+> structure in
+> this image?
+
+Figure 4. Overview of the proposed S UPER LENS , composed of a Demand-Adaptive Answerer and a Dual-Lens Knowledge Retriever. All modules marked in blue are powered by VLMs, while modules in green are external tools. Table 2. Comparison with VQA and multimodal search benchmarks across multiple dimensions. 
+
+Dataset Language Hops Image Source Location MM Search Obj. Detect. Search Log #Domain #Category 
+
+WebQA [6] en multi-hop Web ✗ ✗ ✗ ✗ - 2InfoSeek [8] en single-hop Web ✗ ✗ ✗ ✗ 9 -MRAG-Bench [18] en single-hop Web ✗ ✓ ✗ ✗ 9 3LIVEVQA [16] en multi-hop News ✗ ✓ ✗ ✗ 12 -MMSearch [48] en multi-hop Web ✗ ✓ ✗ ✗ 14 -Dyn-VQA [25] en/zh multi-hop Web ✗ ✓ ✗ ✗ 9 3CRAG-MM [44] en multi-hop Glasses & Web ✗ ✓ ✓ ✗ 13 4
+
+SUPER GLASSES en/zh/jp/fr 1 - 4 hops Smart Glasses ✓ ✓ ✓ ✓ 14 8
+
+sic knowledge of VLMs with external evidence retrieved through a well-designed retrieval-augmented framework. As shown in Figure 4, S UPER LENS consists of two core components: (1) a Demand-Adaptive Answerer, which pro-duces direct answers via domain-specific reasoning or in-vokes retrieval-augmented generation when additional con-text is required; and (2) a Dual-Lens Knowledge Retriever, which gathers and ranks external information from both vi-sual and textual lenses to enrich knowledge coverage and enhance reasoning accuracy. 
+
+3.1. Demand-Adaptive Answerer 
+
+When faced with questions of varying scope and com-plexity, humans instinctively assess whether their inter-nal knowledge is sufficient or external information is needed [12]. Inspired by this behavior, we design a demand-adaptive answerer that dynamically switches between direct response and retrieval-augmented generation. Given a ques-tion–image pair, the Answerer first attempts to answer us-ing internal knowledge acquired from large-scale pretrain-ing corpora. However, as queries in S UPER GLASSES span diverse domains, such as culture, education, and public ser-vices (Figure 1), uniform processing often leads to subopti-mal reasoning due to domain mismatch and limited contex-tual grounding [21]. To address this, we instruct the VLM to act as a domain router, identifying the semantic domain of each question–image pair and applying domain-specific prompts aligned with predefined categories. This routing mechanism activates relevant internal knowledge and en-hances domain-aware reasoning. For rare or long-tailed queries beyond the model’s internal scope, the Answerer triggers a multimodal retrieval pipeline to gather external evidence, which is then integrated into an RAG prompt to synthesize the final answer. This adaptive design strikes a balance between efficiency and accuracy, enabling S UPER -LENS to perform robustly in both offline and online settings. 
+
+3.2. Dual-Lens Knowledge Retriever 
+
+As depicted at the bottom of Figure 4, S UPER LENS in-tegrates online search engines (e.g., Google) into its re-trieval process through two search branches, i.e. , image and text, reflecting the inherently multimodal nature of smart glasses QA tasks that rely on both visual and textual knowl-edge [26, 54]. To select suitable search tools, a VLM-based Search Router decomposes the required knowledge into two modalities: visual objects from the input image and textual queries from the question. For visual objects, an open-vocabulary Object Detector [10, 29] identifies pre-Table 3. S UPER GLASSES Leaderboard: Results of our S UPER LENS and 26 Vision Language Models across 3 Dimensions. 
+
+Vision Language Model RAG Type Difficulty Reasoning Steps Information-Seeking All Rank 
+
+Easy Medium Hard 1-hop ≥2-hop None Image Text Both 
+
+Ray-Ban Meta Smart Glasses 
+
+LLaMA-3.2-11B [32] Direct Answer 27.16 17.44 14.53 26.35 17.55 33.14 13.37 19.84 14.57 23.53 15 LLaMA-3.2-90B [32] Direct Answer 34.99 25.93 22.91 34.55 25.29 39.9 23.39 28.78 22.61 31.59 9
+
+RayNeo Smart Glasses 
+
+Qwen2.5-VL-3B [4] Direct Answer 30.83 20.68 18.53 29.03 21.68 36.37 17.22 21.63 12.06 25.56 12 Qwen2.5-VL-7B [4] Direct Answer 37.72 24.59 20.67 36.92 24.13 45.59 25.71 24.23 20.35 32.82 8Qwen2.5-VL-32B [4] Direct Answer 40.52 30.40 24.58 40.50 28.13 49.41 24.16 32.20 22.36 36.54 7Qwen2.5-VL-72B [4] Direct Answer 41.54 31.89 25.14 41.29 29.94 50.10 24.94 33.50 24.62 37.65 4
+
+XiaoMi Smart Glasses 
+
+MiMo-VL-7B [50] Direct Answer 29.71 18.03 10.06 28.96 16.65 36.08 16.97 20.00 12.31 25.02 12 
+
+Open-sourced VLMs 
+
+Phi-3-Vision-4B [1] Direct Answer 20.74 11.18 10.06 19.98 11.61 26.18 7.20 13.98 9.55 17.30 19 InternVL3-8B [56] Direct Answer 31.17 19.23 17.88 29.99 20.26 40.20 12.08 21.95 14.82 26.88 10 GLM-4.1V-9B [17] Direct Answer 27.35 17.88 15.08 26.53 18.06 33.82 14.14 19.02 15.08 23.82 14 LLaVA-v1.5-7B [28] Direct Answer 12.40 6.71 7.26 11.35 8.52 15.00 4.63 9.76 5.53 10.45 27 LLaVA-v1.5-13B [28] Direct Answer 13.93 7.15 9.50 13.36 8.26 16.96 4.88 10.89 6.28 11.73 26 LLaVA-Onevision-0.5B [24] Direct Answer 16.79 8.49 6.15 15.79 9.29 21.08 8.23 10.41 5.28 13.71 24 LLaVA-Onevision-7B [24] Direct Answer 25.00 13.41 13.97 23.92 14.71 31.27 10.54 17.24 10.55 20.97 16 DeepSeek-VL2-3B [49] Direct Answer 24.11 12.22 9.50 23.13 12.52 30.78 10.80 14.15 8.79 19.74 17 DeepSeek-VL2-16B [49] Direct Answer 28.75 16.10 10.61 27.5 16.26 35.88 15.42 16.75 12.56 23.91 13 DeepSeek-VL2-27B [49] Direct Answer 29.90 19.08 12.85 28.48 19.61 37.25 14.40 19.84 15.83 25.64 11 
+
+Proprietary VLMs 
+
+GPT-4o [2] Direct Answer 45.10 36.81 32.96 44.87 35.61 49.90 34.19 38.37 34.42 41.91 3Claude 4 Sonnet Direct Answer 40.14 32.34 29.05 40.32 30.45 48.63 22.88 35.12 24.87 37.16 6Gemini 2.5 Pro Direct Answer 45.10 39.94 36.31 45.36 38.06 48.92 37.02 41.95 35.43 43.02 2
+
+Heuristic RAG 
+
+LLaMA-3.2-11B Image RAG 19.97 12.97 7.82 19.06 13.03 24.41 9.00 14.80 10.05 17.13 21 LLaMA-3.2-11B Text RAG 15.90 8.79 10.61 15.30 9.81 16.57 6.43 17.07 7.29 13.54 25 LLaMA-3.2-11B Multimodal RAG 17.56 9.39 10.61 17.06 9.94 19.51 6.94 16.59 7.54 14.78 23 Qwen2.5-VL-7B Image RAG 22.58 14.01 12.29 22.71 12.52 28.73 11.83 14.80 10.30 19.45 18 Qwen2.5-VL-7B Text RAG 19.78 10.28 9.50 19.25 10.32 20.59 10.80 18.54 7.79 16.39 22 Qwen2.5-VL-7B Multimodal RAG 21.12 9.69 10.61 20.64 9.81 23.43 10.03 17.56 7.54 17.18 20 
+
+SUPER LENS † (Ours) Multimodal RAG 40.84 
+
+↑13.68 31.74 
+
+↑14.30 26.26 
+
+↑11.73 40.01 
+
+↑13.66 31.35 
+
+↑13.80 42.65 
+
+↑9.51 29.05 
+
+↑15.68 39.19 
+
+↑19.35 28.39 
+
+↑13.82 37.24 
+
+↑13.71 5
+
+SUPER LENS ‡ (Ours) Multimodal RAG 49.68 
+
+↑11.96 34.72 
+
+↑10.13 30.17 
+
+↑9.50 
+
+48.76 
+
+↑11.84 34.19 
+
+↑10.06 
+
+55.78 
+
+↑10.19 34.70 
+
+↑8.99 40.33 
+
+↑16.10 29.15 
+
+↑8.80 
+
+44.10 
+
+↑11.28 1 
+
+> ∗
+
+Our smart glasses agent builds upon two base VLMs, Llama-3.2-11B-Vision and Qwen2.5-VL-7B, denoted as SUPER LENS † and SUPER LENS ‡.Performance gains in green are measured against their respective backbones. 
+
+cise regions in the image, as relevant objects often occupy small areas in the field of view of smart glasses. For textual queries, which often require multi-hop reasoning, a Query Decoupler divides them into single-hop sub-queries to re-duce search complexity. The extracted object regions and sub-queries are then passed to the search engine api for im-age and text retrieval, returning the top-N raw HTML pages as candidate evidence. Since raw HTML pages are not VLM-friendly due to ex-cessive length, irregular layout, and redundant tags, we em-ploy a Webpage Reader [42] to extract and clean the tex-tual content. To mitigate latency from search and HTML parsing, we implement a two-layer Redis cache: the first maps text or image queries to webpage URLs, thereby avoiding redundant searches, and the second maps URLs to parsed content, preventing repeated parsing. A Multimodal Reranker [3] further ensures relevance by segmenting the cleaned content into chunks and reordering them based on weighted similarity to both textual and visual queries. Fi-nally, the top-ranked chunks are integrated into the RAG prompt to guide the Answerer in producing the final re-sponse. Please refer to Appendix D for more details. 
+
+4. Experiment 
+
+4.1. Experiment Setup 
+
+Evaluation Models. The dataset is collected using three representative commercial and various smart glasses plat-forms: Ray-Ban Meta, XiaoMi, and RayNeo. Since the ex-act vision language models deployed on these devices are not publicly disclosed, we instead evaluate representative open-source variants from their corresponding model fam-Plant     
+
+> Public Service
+> Food
+> Shopping
+> Translation
+> Transport
+> Culture
+> Navigation
+> 10 20 30 40 50
+> LLaVA-One-7B
+> MiMo-VL-7B
+> InternVL3-8B
+> GLM-4.1V-9B
+> DeepSeek-27B
+> Qwen2.5-72B
+> LLaMA-90B
+> SuperLens-7B
+
+Figure 5. Performance across domains. Aggregation      
+
+> Comparison
+> Factual Knowledge
+> Multi-hop
+> Reasoning
+> Simple Recognition
+> Spatial Reasoning
+> Temporal Understanding
+> 10 20 30 40 50
+> LLaVA-One-7B
+> MiMo-VL-7B
+> InternVL3-8B
+> GLM-4.1V-9B
+> DeepSeek-27B
+> Qwen2.5-72B
+> LLaMA-90B
+> SuperLens-7B
+
+Figure 6. Performance across categories. DeepSeek-3B                                                          
+
+> DeepSeek-27B
+> LLaMA-11B
+> LLaMA-90B
+> Qwen2.5-3B
+> Qwen2.5-7B
+> Qwen2.5-72B
+> Gemini
+> DeepSeek-3B
+> DeepSeek-27B
+> LLaMA-11B
+> LLaMA-90B
+> Qwen2.5-3B
+> Qwen2.5-7B
+> Qwen2.5-72B
+> Gemini
+> 100.00 75.73 59.62 63.81 68.20 74.48 75.31 67.57
+> 50.91 100.00 53.59 60.06 54.57 65.96 68.35 64.42
+> 50.00 66.84 100.00 76.49 59.30 72.63 78.42 69.47
+> 39.87 55.82 56.99 100.00 51.63 65.75 72.42 68.89
+> 52.67 62.68 54.60 63.81 100.00 74.47 75.93 68.66
+> 44.78 58.99 52.08 63.27 57.99 100.00 77.36 68.55
+> 39.47 53.29 49.01 60.75 51.54 67.43 100.00 68.86
+> 31.09 44.08 38.11 50.72 40.90 52.45 60.44 100.00
+> 40
+> 50
+> 60
+> 70
+> 80
+> 90
+> 100
+> Overlap Percentage
+
+Figure 7. Overlap between correct responses. 
+
+ilies 4. Specifically, we examine models from the LLaMA-3.2-Vision [32], MiMo-VL [50], and Qwen2.5-VL [4] fam-ilies. Beyond these, we include a diverse set of main-stream open-source VLMs, such as Phi-3-Vision [1], In-ternVL3 [56], GLM-4.1V [17], LLaVA-v1.5 [28], LLaVA-OneVision [24], and DeepSeek-VL2 [49], as well as propri-etary models including GPT-4o , Claude 4 Sonnet , and Gem-ini 2.5 Pro . To further assess the impact of explicit retrieval augmentation in smart glasses contexts, we develop a set of heuristic RAG variants by enhancing LLaMA-3.2-11B and Qwen2.5-VL-7B with three retrieval strategies: image-only, text-only, and multimodal RAG. In total, our evalu-ation encompasses 26 vision language models, comprising 20 foundation models and 6 RAG-enhanced variants. 
+
+Implementation Details. To accommodate high-resolution input images, we resize their shortest edge to 1024 pixels for all VLMs, preventing out-of-memory errors. In our search pipeline, both image and text queries retrieve up to 5 rele-vant webpages. The Multimodal Reranker then selects the top 10 ranked chunks, while discarding chunks with scores below 0.6. Similarity weights are set to 0.6 for questions and 0.4 for images. Refer to Appendix D for more details. 
+
+Evaluation Metrics. The LLM-as-Judge framework [48] is utilized as our evaluation metric. Specifically, we pro-vide the original question, the ground-truth answer, and the model-generated response to Qwen2.5-32B [52], which evaluates whether the response accurately captures all key information from the ground truth. The complete evaluation prompt is provided in Appendix E.1. 
+
+4.2. Leaderboard 
+
+Table 3 reports the performance of our smart glasses agent SUPER LENS , alongside 26 leading VLMs (20 in the direct-answer setting and 6 with heuristic RAG) on the pro-posed S UPER GLASSES dataset. From the results, we can make the following observations. (1) The proposed S U-
+
+PER GLASSES poses a formidable challenge to all open-source, proprietary, and RAG-based VLMs , as even the 
+
+> 4
+
+Ray-Ban Meta states its devices are powered by Llama 3, and RayNeo has announced collaborations with Qwen. 
+
+most advanced model (i.e., Gemini 2.5 Pro) achieves only around 43% accuracy. Across difficulty levels, all mod-els exhibit clear performance declines from Easy to Hard questions (e.g., GPT-4o drops from 45.10% to 32.96%). Moreover, for queries requiring multi-hop reasoning, exter-nal knowledge seeking, or fast-changing information (see Appendix F), all models consistently underperform com-pared to other queries within the same taxonomy. These results highlight that current VLMs struggle to effectively handle complex user queries in smart glasses scenarios. (2) Open-source VLMs still trail their closed-source coun-terparts by a significant margin. GPT-4o and Gemini 2.5 Pro outperform all open-source models, achieving over-all accuracies of 41.91% and 43.02%, respectively. Al-though Qwen2.5-VL-72B slightly surpasses Claude 4 Son-net, it still lags behind Gemini 2.5 Pro by 6.45%. These results indicate substantial room for advancing open-source smart glasses agents. (3) VLMs, especially those within the same family, such as Qwen and DeepSeek, follow a clear scaling law , with performance improving markedly as model size increases. This trend is particularly evident in tasks involving multi-hop reasoning and the retrieval of rare knowledge. (4) Naively applying heuristic RAG strate-gies does not yield overall performance gains. As shown in Heuristic RAG part of Table 3, ineffective retrieval of-ten disrupts the generation process, underscoring the impor-tance of appropriate multimodal RAG design for complex smart glasses scenarios. Our proposed SUPER LENS ‡, which integrates ademand-adaptive answerer with a dual-lens knowledge re-triever, achieves an overall score of 44.10% , the highest among all VLMs in Table 3. Compared to the baseline Qwen2.5-VL-7B, it attains a notable 11.28% improvement, highlighting the precision and effectiveness of our multi-modal RAG strategy for complex, knowledge-intensive user queries. Figures 5 and 6 provide a detailed breakdown across image domains and query categories, where S U-
+
+PER LENS consistently outperforms all open-source mod-els, with pronounced advantages in real-world scenarios such as Public Service and Navigation , as well as in cog-Table 4. Ablation on key designs of our S UPER LENS .                          
+
+> Setting All Decline SUPER LENS 44.10 –
+> A. No Retrieval
+> w/o Search 32.82 ↓11.28
+> B. Mandatory Retrieval
+> Image Only (w/o Object Dectector) 19.45 ↓24.65 Text Only (w/o Query Decoupler) 16.39 ↓27.71 Image + Text (w Object Dectector + w Query Decoupler) 32.04 ↓12.06 Image + Text (w/o Object Dectector + w/o Query Decoupler) 16.45 ↓27.65
+> C. Demand-Adaptive Retrieval
+> Image Only (w Object Dectector) 42.57 ↓1.53 Image Only (w/o Object Dectector) 36.58 ↓7.52 Text Only (w Query Decoupler) 43.81 ↓0.29 Text Only (w/o Query Decoupler) 38.03 ↓6.07 Image + Text (w Object Dectector + w/o Query Decoupler) 40.92 ↓3.18 Image + Text (w/o Object Dectector + w Query Decoupler) 43.44 ↓0.66
+
+nitively demanding categories like Factual Knowledge and 
+
+Spatial Reasoning . More analyses can be found in Ap-pendix F. Despite our progress, S UPER LENS represents only an initial step toward smart glasses agents, as its per-formance remains below 45% on S UPER GLASSES . Devel-oping stronger VLM-based agents for smart glasses thus remains a promising direction for future research. 
+
+4.3. Ablation study on SUPER LENS 
+
+As shown in Table 4, the performance of S UPER LENS stems from the tight coordination between the Demand-Adaptive Answerer and the Dual-Lens Knowledge Retriever. Under the Demand-Adaptive Retrieval setting, ablating retriever components highlights their respective contributions: re-moving the Query Decoupler causes a 3.18% drop, while disabling the Object Detector leads to a smaller 1.53% de-cline. Notably, using image-only search results in a 1.53% drop, much larger than the 0.29% decline from text-only search, suggesting that our S UPER LENS relies more on ac-curate textual retrieval. The importance of the Demand-Adaptive Answerer is further demonstrated in the Forced Retrieval setting: without its control, indiscriminate re-trieval severely degrades performance (-27.71% for text-only and -24.65% for image-only), showing that incorrect retrieval can be worse than no retrieval at all. While re-moving either retrieval branch individually causes only mild degradation, removing both leads to a sharp 11.28% drop, underscoring the complementarity of dual-lens retrieval. 
+
+4.4. Experimental Analysis 
+
+Appropriate Retrieval Strategy. Table 3 demonstrates that ineffective retrieval can substantially degrade model per-formance, sometimes underperforming direct-answer base-lines. For instance, LLaMA-3.2-11B reaches 23.53% with-out retrieval, whereas its heuristic RAG variants decrease to 17.13% (Image RAG), 13.54% (Text RAG), and 14.78% (Multimodal RAG). This decline arises from the com-plexity of S UPER GLASSES , which often requires detecting non-vision-centric objects and handling multi-hop queries. Heuristic RAG, relying on direct image or text retrieval, fails to capture these fine-grained search needs and in-Query 
+
+> Decoupling
+> 50.3%
+> Tool
+> Invocation
+> 44.8%
+> Retrieval
+> Demand
+> 3.8%
+> Object
+> Detection
+> 1.1%
+> SuperLens (LLaMA)
+> Query
+> Decoupling
+> 50.2%
+> Tool
+> Invocation
+> 38.9%
+> Retrieval
+> Demand
+> 9.9%
+> Object
+> Detection
+> 1.0%
+> SuperLens (Qwen)
+
+Figure 8. Distribution of error types. 
+
+stead introduces substantial noise. By contrast, S UPER -LENS combines demand-adaptive retrieval control with a dual-lens knowledge retriever to obtain high-quality evi-dence context, outperforming heuristic RAG by 24.65%. 
+
+Textual vs. Visual Retrieval. In Table 4, text-only re-trieval surpasses its image-only counterpart by 1.24%. We attribute this advantage to the fact that most knowledge is encoded in textual form, making textual retrieval more ef-fective for accessing relevant information. These findings highlight the pivotal role of textual retrieval in RAG and emphasize the need for precise, relevance-aware visual re-trieval to enable stronger multimodal RAG. 
+
+Varying Prediction Behaviors. We further analyze the overlap of correctly answered questions across different models. From Figure 7, we can see that: (1) Although Gem-ini 2.5 Pro achieves strong overall scores, its agreement with open-source models remains below 70%, suggesting dis-tinct knowledge and capability distributions. (2) High-score models do not simply excel by answering harder questions while also covering the easy ones solved by weaker models, consistent with the findings of Dyn-VQA [25]. (3) Models from the same family exhibit higher overlap, likely due to shared training data and architectural paradigms. 
+
+Error Analysis. We present a comprehensive analysis of the error types observed in S UPER LENS by comparing its intermediate responses with the annotated search logs in SUPER GLASSES . We categorize errors into four types: (1) 
+
+Retrieval Demand , where the model performs unnecessary retrieval, leading to incorrect answers influenced by noisy context; (2) Tool Invocation , where the model selects an in-appropriate search tool (text, image, or multimodal search); (3) Query Decoupling , where the model fails to decompose multi-hop queries; (4) Object Detection , where the model attends to irrelevant objects in an image, triggering incor-rect visual retrieval. As illustrated in Figure 8, both S UPER -LENS variants are primarily affected by query decoupling and tool invocation errors, highlighting current limitations in understanding complex queries and effectively utilizing external tools, a direction we leave for future work. 
+
+5. Conclusion 
+
+In this work, we propose SUPER GLASSES , the first smart glasses VQA benchmark, comprising 2,422 real-world im-age–question pairs across 14 domains and 8 categories. Our comprehensive evaluation across 26 representative VLMs reveals substantial performance gaps between exist-ing agents and real-world smart glasses usage scenarios. To address these limitations, we introduce the SUPER LENS ,a dedicated system that integrates a Demand-Adaptive An-swerer and a Dual-Lens Knowledge Retriever. The S UPER -LENS significantly outperforms existing models, including a 2.19% gain over GPT-4o, underscoring the importance of task-aligned designs for smart glasses applications. 
+
+6. Acknowledgments 
+
+We would like to express our sincere gratitude to Pangjing Wu for his invaluable support and contributions to this project. His insightful discussions and continuous encour-agement greatly facilitated the progress of our work. 
+
+References 
+
+[1] Marah Abdin, Jyoti Aneja, Hany Awadalla, Ahmed Awadal-lah, Ammar Ahmad Awan, Nguyen Bach, and Amit Bahree. Phi-3 technical report: A highly capable language model lo-cally on your phone. arXiv preprint arXiv:2404.14219 , 2024. 6, 7 [2] Josh Achiam, Steven Adler, Sandhini Agarwal, Lama Ah-mad, Ilge Akkaya, Florencia Leoni Aleman, Diogo Almeida, Janko Altenschmidt, Sam Altman, Shyamal Anadkat, et al. Gpt-4 technical report. arXiv preprint arXiv:2303.08774 ,2023. 6 [3] Jina AI. jina-reranker-m0: Multilingual multimodal docu-ment reranker, 2025. 6, 17 [4] Shuai Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, Sibo Song, Kai Dang, Peng Wang, Shijie Wang, Jun Tang, Humen Zhong, Yuanzhi Zhu, Mingkun Yang, Zhao-hai Li, Jianqiang Wan, Pengfei Wang, Wei Ding, Zheren Fu, Yiheng Xu, Jiabo Ye, Xi Zhang, Tianbao Xie, Zesen Cheng, Hang Zhang, Zhibo Yang, Haiyang Xu, and Jun-yang Lin. Qwen2.5-vl technical report. arXiv preprint arXiv:2502.13923 , 2025. 1, 4, 6, 7 [5] Tom Brown, Benjamin Mann, Nick Ryder, Melanie Sub-biah, Jared D Kaplan, Prafulla Dhariwal, Arvind Neelakan-tan, Pranav Shyam, Girish Sastry, Amanda Askell, et al. Lan-guage models are few-shot learners. Advances in neural in-formation processing systems , 33:1877–1901, 2020. 1 [6] Yingshan Chang, Mridu Narang, Hisami Suzuki, Guihong Cao, Jianfeng Gao, and Yonatan Bisk. Webqa: Multihop and multimodal qa. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 16495– 16504, 2022. 4, 5, 12, 13 [7] Yupeng Chang, Xu Wang, Jindong Wang, Yuan Wu, Linyi Yang, Kaijie Zhu, Hao Chen, Xiaoyuan Yi, Cunxiang Wang, Yidong Wang, et al. A survey on evaluation of large lan-guage models. ACM transactions on intelligent systems and technology , 15(3):1–45, 2024. 1 [8] Yang Chen, Hexiang Hu, Yi Luan, Haitian Sun, Soravit Changpinyo, Alan Ritter, and Ming-Wei Chang. Can pre-trained vision and language models answer visual information-seeking questions? In Proceedings of the 2023 Conference on Empirical Methods in Natural Language Pro-cessing , pages 14948–14968, 2023. 4, 5, 13 [9] Kanzhi Cheng, Qiushi Sun, Yougang Chu, Fangzhi Xu, Li YanTao, Jianbing Zhang, and Zhiyong Wu. Seeclick: Har-nessing gui grounding for advanced visual gui agents. In 
+
+Proceedings of the 62nd Annual Meeting of the Associa-tion for Computational Linguistics (Volume 1: Long Papers) ,pages 9313–9332, 2024. 12 [10] Tianheng Cheng, Lin Song, Yixiao Ge, Wenyu Liu, Xing-gang Wang, and Ying Shan. Yolo-world: Real-time open-vocabulary object detection. In Proceedings of the IEEE/CVF conference on computer vision and pattern recognition , pages 16901–16911, 2024. 5 [11] Yuheng Cheng, Ceyao Zhang, Zhengwen Zhang, Xiangrui Meng, Sirui Hong, Wenhao Li, Zihao Wang, Zekai Wang, Feng Yin, Junhua Zhao, et al. Exploring large language model based intelligent agents: Definitions, methods, and prospects. arXiv preprint arXiv:2401.03428 , 2024. 1 [12] Federico Cocchi, Nicholas Moratelli, Marcella Cornia, Lorenzo Baraldi, and Rita Cucchiara. Augmenting multi-modal llms with self-reflective tokens for knowledge-based visual question answering. In Proceedings of the Computer Vision and Pattern Recognition Conference , pages 9199– 9209, 2025. 5 [13] Oscar Danielsson, Magnus Holm, and Anna Syberfeldt. Augmented reality smart glasses in industrial assembly: Cur-rent status and future challenges. Journal of Industrial Infor-mation Integration , 20:100175, 2020. 1 [14] Danny Driess, Fei Xia, Mehdi SM Sajjadi, Corey Lynch, Aakanksha Chowdhery, Brian Ichter, Ayzaan Wahid, Jonathan Tompson, Quan Vuong, Tianhe Yu, et al. Palm-e: an embodied multimodal language model. In Proceedings of the 40th International Conference on Machine Learning ,pages 8469–8488, 2023. 12 [15] Wenqi Fan, Yujuan Ding, Liangbo Ning, Shijie Wang, Hengyun Li, Dawei Yin, Tat-Seng Chua, and Qing Li. A sur-vey on rag meeting llms: Towards retrieval-augmented large language models. In Proceedings of the 30th ACM SIGKDD conference on knowledge discovery and data mining , pages 6491–6501, 2024. 1 [16] Mingyang Fu, Yuyang Peng, Dongping Chen, Zetong Zhou, Benlin Liu, Yao Wan, Zhou Zhao, Philip S. Yu, and Ranjay Krishna. Seeking and updating with live visual knowledge. In The Thirty-ninth Annual Conference on Neural Informa-tion Processing Systems Datasets and Benchmarks Track ,2025. 1, 4, 5, 13 [17] Wenyi Hong, Wenmeng Yu, Xiaotao Gu, Guo Wang, Guob-ing Gan, Haomiao Tang, Jiale Cheng, Ji Qi, Junhui Ji, Li-hang Pan, et al. Glm-4.1 v-thinking: Towards versatile multi-modal reasoning with scalable reinforcement learning. arXiv preprint arXiv:2507.01006 , 2025. 1, 6, 7 [18] Wenbo Hu, Jia-Chen Gu, Zi-Yi Dou, Mohsen Fayyaz, Pan Lu, Kai-Wei Chang, and Nanyun Peng. Mrag-bench: Vision-centric evaluation for retrieval-augmented multimodal mod-els. In The Thirteenth International Conference on Learning Representations , 2025. 5, 13 [19] Dongzhi Jiang, Renrui Zhang, Ziyu Guo, Yanmin Wu, ji-ayi lei, Pengshuo Qiu, Pan Lu, Zehui Chen, Guanglu Song, Peng Gao, Yu Liu, Chunyuan Li, and Hongsheng Li. MM-Search: Unveiling the potential of large models as multi-modal search engines. In The Thirteenth International Con-ference on Learning Representations , 2025. 4, 13 [20] Zhuohang Jiang, Pangjing Wu, Ziran Liang, Peter Q Chen, Xu Yuan, Ye Jia, Jiancheng Tu, Chen Li, Peter HF Ng, and Qing Li. Hibench: Benchmarking llms capability on hi-erarchical structure reasoning. In Proceedings of the 31st ACM SIGKDD Conference on Knowledge Discovery and Data Mining V. 2 , pages 5505–5515, 2025. 12 [21] Zhuohang Jiang, Pangjing Wu, Xu Yuan, Wenqi Fan, and Li Qing. QA-dragon: Query-aware dynamic RAG system for knowledge-intensive visual question answering. In 2025 KDD Cup Workshop for Multimodal Retrieval Augmented Generation , 2025. 5, 12 [22] Fucai Ke, Zhixi Cai, Simindokht Jahangard, Weiqing Wang, Pari Delir Haghighi, and Hamid Rezatofighi. Hydra: A hy-per agent for dynamic compositional visual reasoning. In 
+
+European Conference on Computer Vision , pages 132–149. Springer, 2024. 1 [23] Patrick Lewis, Ethan Perez, Aleksandra Piktus, Fabio Petroni, Vladimir Karpukhin, Naman Goyal, Heinrich K¨ uttler, Mike Lewis, Wen-tau Yih, Tim Rockt¨ aschel, et al. Retrieval-augmented generation for knowledge-intensive nlp tasks. Advances in neural information processing systems ,33:9459–9474, 2020. 1 [24] Bo Li, Yuanhan Zhang, Dong Guo, Renrui Zhang, Feng Li, Hao Zhang, Kaichen Zhang, Peiyuan Zhang, Yanwei Li, Zi-wei Liu, and Chunyuan Li. LLaVA-onevision: Easy visual task transfer. Transactions on Machine Learning Research ,2025. 6, 7 [25] Yangning Li, Yinghui Li, Xinyu Wang, Yong Jiang, Zhen Zhang, Xinran Zheng, Hui Wang, Hai-Tao Zheng, Fei Huang, Jingren Zhou, et al. Benchmarking multimodal re-trieval augmented generation with dynamic vqa dataset and self-adaptive planning agent. In The Thirteenth International Conference on Learning Representations , 2025. 4, 5, 8, 13 [26] Weizhe Lin and Bill Byrne. Retrieval augmented visual ques-tion answering with outside knowledge. In Proceedings of the 2022 Conference on Empirical Methods in Natural Lan-guage Processing , pages 11238–11254, 2022. 1, 5 [27] Weizhe Lin, Jinghong Chen, Jingbiao Mei, Alexandru Coca, and Bill Byrne. Fine-grained late-interaction multi-modal retrieval for retrieval augmented visual question answering. 
+
+Advances in Neural Information Processing Systems , 36: 22820–22840, 2023. 12 [28] Haotian Liu, Chunyuan Li, Yuheng Li, and Yong Jae Lee. Improved baselines with visual instruction tuning. In Pro-ceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pages 26296–26306, 2024. 4, 6, 7 [29] Shilong Liu, Zhaoyang Zeng, Tianhe Ren, Feng Li, Hao Zhang, Jie Yang, Qing Jiang, Chunyuan Li, Jianwei Yang, Hang Su, et al. Grounding dino: Marrying dino with grounded pre-training for open-set object detection. In Euro-pean conference on computer vision , pages 38–55. Springer, 2024. 5, 14 [30] Zhenghao Liu, Xingsheng Zhu, Tianshuo Zhou, Xinyi Zhang, Xiaoyuan Yi, Yukun Yan, Ge Yu, and Maosong Sun. Benchmarking retrieval-augmented generation in multi-modal contexts. In Proceedings of the 33rd ACM In-ternational Conference on Multimedia , pages 4817–4826, 2025. 1 [31] Damiano Marsili, Rohun Agrawal, Yisong Yue, and Geor-gia Gkioxari. Visual agentic ai for spatial reasoning with a dynamic api. In Proceedings of the Computer Vision and Pattern Recognition Conference , pages 19446–19455, 2025. 1[32] Meta-AI. Llama 3.2: Revolutionizing edge ai and vision with open, customizable models, 2024. 6, 7 [33] Long Ouyang, Jeffrey Wu, Xu Jiang, Diogo Almeida, Car-roll Wainwright, Pamela Mishkin, Chong Zhang, Sandhini Agarwal, Katarina Slama, Alex Ray, et al. Training language models to follow instructions with human feedback. Ad-vances in neural information processing systems , 35:27730– 27744, 2022. 1 [34] Jiahua Rao, Zifei Shan, Longpo Liu, Yao Zhou, and Yue-dong Yang. Retrieval-based knowledge augmented vision language pre-training. In Proceedings of the 31st ACM In-ternational Conference on Multimedia , pages 5399–5409, 2023. 1 [35] Dustin Schwenk, Apoorv Khandelwal, Christopher Clark, Kenneth Marino, and Roozbeh Mottaghi. A-okvqa: Abenchmark for visual question answering using world knowl-edge. In European conference on computer vision , pages 146–162. Springer, 2022. 1, 12 [36] Yongliang Shen, Kaitao Song, Xu Tan, Dongsheng Li, Weiming Lu, and Yueting Zhuang. Hugginggpt: Solving ai tasks with chatgpt and its friends in hugging face. Advances in Neural Information Processing Systems , 36:38154–38180, 2023. 12 [37] Michael Spitzer, Ibrahim Nanic, and Martin Ebner. Distance learning and assistance using smart glasses. education sci-ences , 8(1):21, 2018. 1 [38] D´ ıdac Sur´ ıs, Sachit Menon, and Carl Vondrick. Vipergpt: Visual inference via python execution for reasoning. In Pro-ceedings of the IEEE/CVF international conference on com-puter vision , pages 11888–11898, 2023. 1, 12 [39] Hugo Touvron, Thibaut Lavril, Gautier Izacard, Xavier Martinet, Marie-Anne Lachaux, Timoth´ ee Lacroix, Baptiste Rozi` ere, Naman Goyal, Eric Hambro, Faisal Azhar, et al. Llama: Open and efficient foundation language models. 
+
+arXiv preprint arXiv:2302.13971 , 2023. 1 [40] Boyuan Wang, Ying Zheng, Xihao Han, Liang Kong, Gexin Xiao, Zunxiong Xiao, and Shanji Chen. A systematic lit-erature review on integrating ai-powered smart glasses into digital health management for proactive healthcare solutions. 
+
+npj Digital Medicine , 8(1):410, 2025. 1 [41] Chenyu Wang, Weixin Luo, Sixun Dong, Xiaohua Xuan, Zhengxin Li, Lin Ma, and Shenghua Gao. Mllm-tool: A multimodal large language model for tool agent learning. In 
+
+2025 IEEE/CVF Winter Conference on Applications of Com-puter Vision (WACV) , pages 6678–6687. IEEE, 2025. 12 [42] Feng Wang, Zesheng Shi, Bo Wang, Nan Wang, and Han Xiao. Readerlm-v2: Small language model for html to mark-down and json. arXiv preprint arXiv:2503.01151 , 2025. 6, 17 [43] Jialiang Wang, Daniel Scharstein, Akash Bapat, Kevin Blackburn-Matzen, Matthew Yu, Jonathan Lehman, Suhib Alsisan, Yanghan Wang, Sam Tsai, Jan-Michael Frahm, et al. A practical stereo depth system for smart glasses. In 
+
+Proceedings of the IEEE/CVF Conference on Computer Vi-sion and Pattern Recognition , pages 21498–21507, 2023. 1 [44] Jiaqi Wang, Xiao Yang, Kai Sun, Parth Suresh, Sanat Sharma, Adam Czyzewski, Derek Andersen, Surya Appini, Arkav Banerjee, Sajal Choudhary, et al. Crag-mm: Multi-modal multi-turn comprehensive rag benchmark. arXiv preprint arXiv:2510.26160 , 2025. 1, 4, 5, 12, 13 [45] Lei Wang, Chen Ma, Xueyang Feng, Zeyu Zhang, Hao Yang, Jingsen Zhang, Zhiyuan Chen, Jiakai Tang, Xu Chen, Yankai Lin, et al. A survey on large language model based au-tonomous agents. Frontiers of Computer Science , 18(6): 186345, 2024. 1 [46] Ziyue Wang, Chi Chen, Peng Li, and Yang Liu. Filling the image information gap for vqa: Prompting large language models to proactively ask questions. In The 2023 Confer-ence on Empirical Methods in Natural Language Processing ,2023. 1, 12 [47] Chenfei Wu, Shengming Yin, Weizhen Qi, Xiaodong Wang, Zecheng Tang, and Nan Duan. Visual chatgpt: Talking, drawing and editing with visual foundation models. arXiv preprint arXiv:2303.04671 , 2023. 12 [48] Jinming Wu, Zihao Deng, Wei Li, Yiding Liu, Bo You, Bo Li, Zejun Ma, and Ziwei Liu. Mmsearch-r1: Incentivizing lmms to search. arXiv preprint arXiv:2506.20670 , 2025. 5, 7, 12 [49] Zhiyu Wu, Xiaokang Chen, Zizheng Pan, Xingchao Liu, Wen Liu, Damai Dai, Huazuo Gao, Yiyang Ma, Chengyue Wu, Bingxuan Wang, et al. Deepseek-vl2: Mixture-of-experts vision-language models for advanced multimodal understanding. arXiv preprint arXiv:2412.10302 , 2024. 4, 6, 7 [50] LLM-Core-Team Xiaomi. Mimo-vl technical report, 2025. 6, 7 [51] Junlin Xie, Zhihong Chen, Ruifei Zhang, Xiang Wan, and Guanbin Li. Large multimodal agents: A survey. arXiv preprint arXiv:2402.15116 , 2024. 1 [52] An Yang, Baosong Yang, Beichen Zhang, Binyuan Hui, Bo Zheng, Bowen Yu, Chengyuan Li, Dayiheng Liu, Fei Huang, Haoran Wei, et al. Qwen2.5 technical report. arXiv preprint arXiv:2412.15115 , 2025. 7 [53] Shukang Yin, Chaoyou Fu, Sirui Zhao, Ke Li, Xing Sun, Tong Xu, and Enhong Chen. A survey on multimodal large language models. National Science Review , 11(12): nwae403, 2024. 1 [54] Xu Yuan, Liangbo Ning, Wenqi Fan, and Qing Li. mkg-rag: Multimodal knowledge graph-enhanced rag for visual question answering. arXiv preprint arXiv:2508.05318 , 2025. 5[55] Chi Zhang, Zhao Yang, Jiaxuan Liu, Yanda Li, Yucheng Han, Xin Chen, Zebiao Huang, Bin Fu, and Gang Yu. Appa-gent: Multimodal agents as smartphone users. In Proceed-ings of the 2025 CHI Conference on Human Factors in Com-puting Systems , pages 1–20, 2025. 12 [56] Jinguo Zhu, Weiyun Wang, Zhe Chen, Zhaoyang Liu, Shen-glong Ye, Lixin Gu, Hao Tian, Yuchen Duan, Weijie Su, Jie Shao, et al. Internvl3: Exploring advanced training and test-time recipes for open-source multimodal models. arXiv preprint arXiv:2504.10479 , 2025. 1, 4, 6, 7 [57] Brianna Zitkovich, Tianhe Yu, Sichun Xu, Peng Xu, Ted Xiao, Fei Xia, Jialin Wu, Paul Wohlhart, Stefan Welker, Ayzaan Wahid, et al. Rt-2: Vision-language-action models transfer web knowledge to robotic control. In Conference on Robot Learning , pages 2165–2183. PMLR, 2023. 12 We have included supplementary material to facilitate a more comprehensive understanding and in-depth analysis of the primary paper. The supplementary material is organized as follows: • Section A: Related Works 
+
+• Section B: Details of Dataset Collection 
+
+• Section C: Details of S UPER GLASSES 
+
+• Section D: Details of S UPER LENS 
+
+• Section E: Details of Evaluation 
+
+• Section F: More Experimental Results 
+
+A. Related Works 
+
+A.1. Retrieval-Augmented VQA 
+
+Retrieval-augmented Visual Question Answering (RA-VQA) [27] extends knowledge-based VQA by coupling visual grounding with external retrieval from text cor-pora, KGs, or the open web (e.g., OK-VQA [46], A-OKVQA [35], WebQA [6]). Methods span knowledge-augmented transformers and RAG-enhanced LMMs to agentic/tool-use frameworks (ViperGPT [38], CRAG-MM [44]) that decide when to search, OCR, or compose multi-step programs. Recent systems adopt multi-turn, multi-hop policies that coordinate text–image retrieval and unify retrieval–generation end-to-end, learning not only to answer but to find, select, and justify evidence. Distinct from smart glasses settings, targets often occupy a very small portion of egocentric frames, making grounding and retrieval more challenging; moreover, there remains a no-table lack of RA-VQA datasets specifically designed for smart glasses egocentric data. 
+
+A.2. Vision Language Model-based Agents 
+
+With the rapid advancement of large language models (LLMs) [20, 48], multimodal agents have become in-creasingly capable of perceiving, reasoning, and act-ing across diverse modalities. Vision Language model (VLM)–based agents [41] have progressed from tool-orchestration wrappers to systems MLLM-based agents have evolved from tool orchestrators (e.g., Visual Chat-GPT [47], HuggingGPT [36]) to systems that per-ceive–plan–act with retrieval, using prompting policies and program synthesis (ViperGPT [38]) to decompose goals and call OCR/search/vision tools. Moving beyond static images, device/UI agents operate real apps from pixels (AppAgent [55], SeeClick [9]), while embodied models (PaLM-E [14], RT-2 [57]) couple perception with action. For knowledge-heavy tasks, QA-Dragon [21] introduces a query-aware dynamic RAG, routing across text/image re-trieval for multi-turn, multi-hop evidence. However, a clear gap remains: dedicated agentic stacks, purpose-built for smart glasses’ egocentric inputs, are still lacking. 
+
+B. Details of Dataset Collection 
+
+To ensure broad visual diversity, we assembled a field team of more than 20 contributors distributed across four major cities spanning three continents. Each collector was tasked with capturing high-resolution photographs in supermarkets, caf´ es, museums, public transit hubs, and other everyday settings, following a shared shot-list that balanced lighting conditions, camera angles, and ob-ject categories. Distinct from prior datasets, all images were captured exclusively using three mainstream smart-glasses platforms—Ray-Ban Meta, Xiaomi Smart Glasses, and RayNeo AR glasses—rather than handheld phones or DSLRs. This decision provides both device heterogene-ity (different optics, sensors, and ISP pipelines) and sce-nario fidelity, yielding data that is intrinsically aligned with real smart-glasses usage. The collection took place across varied times of day, weather conditions, and indoor/out-door environments to further maximise visual diversity. Be-fore entering the annotation workflow, all raw images were passed through a YOLO-based privacy filter 5 to automati-cally redact faces, license plates, and other sensitive infor-mation that may inadvertently appear in in-the-wild capture. The curated images were then uploaded to a central server and annotated via a customised Label Studio 6 interface with task-specific templates and scripted quality checks. Every annotation underwent a dual-review process (col-lector → peer → project maintainer) to minimise label noise, standardise taxonomies, and enforce cross-annotator consistency. Category distributions were continuously monitored, and targeted sampling was employed to reduce long-tail imbalance. Collectively, these measures ensure that the resulting dataset is diverse, privacy-preserving, and faithfully representative of real-world smart-glasses VQA scenarios. 
+
+C. Details of S UPER GLASSES 
+
+C.1. Statistic Analysis 
+
+Length distribution of questions and answers. Fig-ure 9a shows the word-length distributions for all question and answer pairs in S UPER GLASSES . Questions are typi-cally concise and intent-driven, with a sharp peak around 7–10 words. In contrast, answers exhibit a much broader and flatter distribution, often extending beyond 50 words and occasionally reaching up to 100. This reflects the na-ture of smart-glasses interactions, where users issue short queries, but resolving them may require long-form reason-ing, retrieval, or multi-hop tool usage. The distribution highlights the need for agents capable of handling both suc-cinct visual prompts and compositional, evidence-grounded    
+
+> 5YOLO Model: https : / / github . com / ultralytics / ultralytics
+> 6Label Studio: https://labelstud.io
+
+0 20 40 60 80 100 
+
+Length (in words) 
+
+0.00 
+
+0.02 
+
+0.04 
+
+0.06 
+
+0.08 
+
+0.10 
+
+0.12 
+
+> Percentage
+
+Question Length 
+
+Answer Length (a) Length distribution of questions and answers. what 
+
+how 
+
+which 
+
+> where
+> when
+> who
+
+if 
+
+> why
+> is
+> what`s
+> in
+
+can 
+
+for 
+
+> i
+
+what's 
+
+> are
+> the
+> does
+> from
+> please
+
+is 
+
+does are 
+
+> kind
+> can
+> was
+
+do                            
+
+> type
+> animal
+> brand
+> types
+> material
+> time
+> role
+> other
+> style
+> breed
+> impact
+> will
+> species
+> color
+> anime
+> marketing
+> field
+> food
+> products
+> proportion
+> region
+> model
+> might
+> tree
+> technology
+> sort
+> should
+> the
+> category
+> content
+> benefits
+> artistic
+> information
+> fields
+> historical
+> glaze
+> place
+> plant
+> potential
+> price
+> problem
+> promotional
+> purpose
+> philosophical
+> reaction
+> professions
+> petrol
+> new
+> percentage  penalties  pattern  painting  operating  nutrients  religion  nationality  nationalities  must  musical  mobile  period  research  specific  series  year  were  variety  trading  topics  tool  themes  superstition  subway  subject's  subject  story  skills  significant  shape  service  method  scene  measures  categories  causes  challenges  characteristics  colors  colour  comic conditions could cuisine denomination did card(s) bus advantages and animals animated different art aspects attractions audio awards brand's distinct cultural document instruments knowledge lake language inspired lies
+> liquid
+> major
+> make
+> materials
+> meaning
+> line
+> ip's
+> in
+> exhibition
+> medal
+> film
+> flavours
+> font
+> fruit
+> industry
+> game
+> good
+> if
+
+many 
+
+much 
+
+does 
+
+long 
+
+> do
+
+tall 
+
+can 
+
+> big
+> to
+> large
+> is
+> might
+> should
+> will
+> high
+> did
+> are
+> wide
+> was
+> this
+> likely
+> far
+
+country 
+
+one 
+
+> dynasty
+> of
+> is
+> company
+> district
+> group
+> mtr
+> line
+> street
+> year
+> way
+> city
+> animal
+> food
+> exit
+> country's
+> part
+> two
+> subway
+> color
+> chinese
+> kind
+> anime
+> book
+> brand
+> continent
+> item
+> flag
+> festival
+> countries
+> bus
+> period
+> person
+> plants
+> planet
+> plant
+> plate
+> place
+> painting
+> nation`s
+> olympic
+> muscle
+> library
+> political
+> layer
+> outlet
+> product
+> province
+> kmb
+> work
+> well-known
+> value
+> university's
+> u.s.
+> products
+> three
+> station
+> sporting
+> species
+> smartphone
+> shows
+> schools
+> salad(s)
+> religion
+> kind(s)
+> content
+> japanese
+> cognac
+> class
+> city's
+> cities
+> chemical
+> century
+> car
+> buses
+> activities
+> addresses
+> animate
+> area
+> aspect
+> bird
+> black
+> bottle
+> brand's
+> breakfast
+> broad
+> companies
+> building
+> industry
+> hong
+> help
+> flower
+> floors
+> flavour(s)
+> field
+> company's
+> donut
+> divisions
+> dish
+> direction
+> diplomas
+> degrees
+> course's
+> convention
+
+is 
+
+> am
+> does
+> was
+> are
+> did
+> can
+> do
+> might
+> were
+> to
+> should
+> was
+> did
+
+is 
+
+> will
+> does
+> can
+> arranging
+> do
+> i
+> the
+> this
+
+is 
+
+> are
+> was
+> wrote
+> designed
+> might
+> should
+> would
+> create
+> administer
+> built
+> created
+> founded
+> invented
+> manages
+
+i
+
+a
+
+> today
+> the
+> you
+> this
+> my
+> i'm
+> someone
+> there
+> necessary,
+
+is 
+
+do  
+
+> are
+> does
+> did
+> the
+> might
+> isn't
+> draw
+> bring
+> can
+> was
+> there
+> stamp
+> it
+> add
+> the
+> this
+> it
+> there
+> squash
+> public
+> my
+> golf
+> france
+> the  this subway
+
+which what   
+
+> the how urban
+> total,
+> i
+> you
+> one
+> we
+> this
+> the
+> students
+> pink
+> pedestrians
+> non-polyu
+> new
+> minivans
+> illustrated
+> people
+
+the 
+
+which 
+
+have 
+
+> am
+> want
+> ordered
+> pay
+> need
+> bought
+> would
+
+the 
+
+> on
+> written
+> so
+> the
+> there
+> cactus
+> they
+> vehicles
+> brand
+> illustrated
+> boy
+> company
+> doll
+> flower
+> image
+> year
+> screen
+> poster
+> plant
+> person
+> headquarter
+> name
+
+the  
+
+> this
+> bus
+> one
+> the
+> 16:30
+> which
+> august
+> what
+> a
+> translate
+> tell
+> explain
+> help
+> speculate
+
+(b) Common question prefixes. 
+
+Figure 9. Question/answer length distribution and question prefixes of S UPER GLASSES .
+
+answers. 
+
+Distribution of question prefixes. Figure 9b visualizes the distribution of question openers in S UPER GLASSES 
+
+using a hierarchical sunburst chart. The vast majority of queries begin with “what” , reflecting object-centric and identity-focused information needs common in smart-glasses usage. Other frequent prefixes include “how” ,
+
+“which” , and “where” , indicating procedural, choice-based, and location-oriented queries. Notably, the chart also reveals deeper branching structures, such as “what is” ,
+
+“how many” , and “where is” , capturing the compositional nature of natural questions. This distribution highlights the importance of handling a wide range of query intents—from factual lookups to spatial grounding and comparative rea-soning. 
+
+Distribution of common topics in questions and answers. 
+
+Figure 10a and Figure 10b present word cloud visualiza-tions of the most frequent content words appearing in ques-tions and answers within S UPER GLASSES . On the left, we observe that questions are heavily centered around vi-sually grounded entities such as building , flower , car , sta-tion , and company , reflecting the egocentric nature of smart-glasses interactions in daily environments. The right-side word cloud shows that answers often contain semantic la-bels like price , species , people , design , and water , indi-cating a shift from visual recognition to external knowl-edge retrieval and classification. Together, the two distribu-tions highlight the dataset’s dual emphasis on visual object grounding and multi-hop, knowledge-intensive reasoning. 
+
+C.2. Comparison with Other benchmarks 
+
+Early efforts such as WebQA [6] and InfoSeek [8] demon-strated the feasibility of multi-hop or information-seeking questions but were built on heterogeneous web crawls, lacked any notion of where the salient object sits in the frame, and provided no access to the underlying retrieval traces—making systematic analysis of failure cases or tool planning impossible. Subsequent benchmarks (MRAG-Bench [18], LIVEVQA [16], MMSearch [19], Dyn-VQA [25], and CRAG-MM[44]) expanded linguistic coverage or introduced live-update scenarios, yet they still rely on static screenshots or curated news photos, treat the object’s spa-tial footprint as a latent variable, and offer only “black-box” evaluation of retrieval-augmented generation without exposing the decision path. Our S UPER GLASSES corpus addresses existing blind spots by capturing egocentric frames directly from smart-glasses users in real-world settings, precisely annotating ob-ject coverage to enable spatially grounded reasoning, and recording the full search and tool-usage trajectory to ensure that every answer is traceable to its supporting evidence. With comprehensive topical coverage across 14 distinct do-mains and 9 fine-grained query categories, this framework facilitates detailed result analysis, robust evaluation of re-trieval and reasoning strategies, and realistic benchmarking of multimodal agents operating under the perceptual and in-teraction constraints of smart-glasses platforms. 
+
+C.3. Examples in SUPER GLASSES 
+
+Figures 11, 12, and 13 illustrate a four-hop example that begins with a shelf photograph of Campbell’s soup cans. The user asks “Which country is the renowned artist who painted this item from?” . Answering requires chaining vi-sual grounding with three successive text queries: (a) Common topics in questions. (b) Common topics in answers. Figure 10. The common topics in questions and answers of S UPER GLASSES .
+
+Hop 1: Visual grounding. An image-search engine links the photo to the Wikipedia entry for Campbell’s ,confirming the product identity. 
+
+Hop 2: Artwork retrieval. A text search for the “famous painting depicting Campbell’s” returns the article on Campbell’s Soup Cans , a 32-canvas pop-art se-ries. 
+
+Hop 3: Artist identification. A follow-up query reveals that Campbell’s Soup Cans was painted by pop-art pioneer Andy Warhol .
+
+Hop 4: Nationality verification. Consulting Warhol’s bi-ography shows he was an American artist, provid-ing the target country. This case highlights three core properties of S UPER -GLASSES : (i) cross-modal grounding (image → text), (ii) 
+
+multi-document evidence aggregation across four hops, and (iii) rich metadata (device, location, difficulty, etc.) that en-able fine-grained evaluation of multimodal reasoning sys-tems. 
+
+D. Details of S UPER LENS 
+
+D.1. Demand-Adaptive Answerer 
+
+As shown in Figure 4 of the manuscript, we instruct the VLM to act as a domain router, identifying the domain of each question–image pair for domain-specific reason-ing. The domain-recognition prompts are shown in Fig-ure 14, which outlines the scenarios for each predefined do-main. To enable demand-adaptive retrieval, the model must also determine whether the question can be answered us-ing its internal knowledge or requires external information. The prompt guiding this decision is illustrated in Figure 15. Here, we employ chain-of-thought prompting to activate the VLM’s reasoning capabilities fully. Specifically, the VLM is instructed to identify precise object names in the image and explain their relationships to elements referenced in the question. If the VLM concludes that it has sufficient in-formation to answer the question, it must present a com-prehensive reasoning followed by the final answer. Con-versely, if key information is missing, it should halt reason-ing and trigger retrieval, which is subsequently handled by the Dual-Lens Knowledge Retriever. 
+
+D.2. Dual-Lens Knowledge Retriever 
+
+Given an image-question pair (v, q ), the retriever aims to extract complementary external knowledge by decompos-ing the retrieval process into two parallel pathways: a visual lens and a textual lens. First, a VLM-based Search Router is utilized to decide whether retrieval should rely on visual or textual signals, yielding two query sets: 
+
+O, Q = SearchRouter (v, q ), (1) where O = {o1, ..., o M } are visual objects referenced in the input image and Q = {q1, ..., q N } are textual queiries extracted from the orignal question. For the visual branch, we employ an open-vocabulary Object Detector (Grounding DINO [29]) to localize the re-ferred objects: V = {vi = ObjectDetector (v, o i)|oi ∈ O}.Each detected region vi is then used to index an image search engine, retrieving HTML pages or snippets associ-ated with visually similar images: 
+
+Hvis =
+
+> M
+
+[
+
+> i=1
+
+Hvis i , Hvis i = ImageSearch (vi). (2) Because textual queries may contain multi-hop reason-ing, each query qi is further decomposed into sub-queries by a Query Decoupler, yielding an expanded set Q′ =
+
+{q′
+
+> 1
+
+, ..., q ′  
+
+> N′
+
+}. After that, each sub-query is issued indepen-dently to a text search engine, resulting in retrieved web-Case Study in S UPER GLASSES :From Campbell’s Soup Can Image to Andy Warhol’s American Nationality 
+
+Question: Which country is the renowned artist who painted this item from? 
+
+Answer: Campbell’s is painted by American pop-artist Andy Warhol. 
+
+Glasses: Xiao Mi 
+
+Image quality: Normal 
+
+Domain: Food 
+
+Location: Canada 
+
+Category: Multi-hop 
+
+Question dynamism: Static 
+
+Difficulty: Hard 
+
+Hops number: 4
+
+Figure 11. Case Study in S UPER GLASSES : “Campbell’s Soup Can” Hop 1 
+
+Sub-question : What is this product? 
+
+Tool used : Image Search 
+
+Search URL : https://en.wikipedia.org/wiki/Campbell%27s 
+
+Search result (snippet) : The Campbell’s Company (doing business as Campbell’s ) . . . its flagship canned soup products. 
+
+Hop 2 
+
+Sub-question : What is the famous painting depicting this item? 
+
+Tool used : Text Search 
+
+Search keywords : What is the famous painting depicting campbell? 
+
+Search URL : https://en.wikipedia.org/wiki/Campbell%27s_Soup_Cans 
+
+Search result (snippet) : Campbell’s Soup Cans is a series of 32 paintings (1961–62) by the American pop-art artist Andy Warhol, each canvas depicting a Campbell’s soup can and now considered an icon of pop art. 
+
+Figure 12. Hop 1 and Hop 2 of “Campbell’s Soup Can” pages: 
+
+Htxt = 
+
+> N′
+
+[
+
+> j=1
+
+Htxt j , Htxt j = TextSearch (q′ 
+
+> j
+
+). (3) All retrieved webpages are merged into a unified set: H =
+
+Hvis ∪ Htxt . In our setting, both image and text retrieval are conducted using a SerpApi-powered search engine 7, re-stricted to trustworthy web sources. A Webpage Reader (ReaderLM-v2 [42]) is then used to parse raw HTML into clean, VLM-friendly text and seg-ment it into manageable chunks: C = {c1, c 2, ..., c L}. To align retrieved chunks with the input pair (v, q ), we com-pute a weighted multimodal relevance score for each chunk using a Multimodal Reranker [3]. Since the reranker cannot jointly process both modalities at once, we evaluate rele-vance against the image and the question separately: 
+
+S = {sl = w1·Reranker (cl, v )+ w2·Reranker (cl, q )|cl ∈ C}
+
+(4) where sl is the relevance score of chunk cl with input (v, q );
+
+w1 and w2 are modality-balancing weights (set to 0.4 and 0.6, respectively). Finally, we retain all chunks whose score exceeds a threshold τs (default 0.6) and select the top-K
+
+chunks as the final RAG context. 
+
+E. Details of Evaluation 
+
+E.1. LLM-as-Judge 
+
+As shown in Figure 16, we employ a structured evalua-tor prompt to assess answer correctness via an LLM-based evaluator, i.e., Qwen2.5-32B. The evaluator is instructed to act as an expert QA judge and is given clear reasoning guidelines. It determines whether a predicted answer is ac-curate by comparing it against the ground truth, allowing for surface-level variation (e.g., paraphrasing) as long as the se-mantic content is preserved. The prompt enforces strict cri-teria: missing key details or including incorrect information results in a negative judgment. The output is a JSON ob-ject with a single Boolean field, accuracy , which enables consistent downstream aggregation and scoring. 
+
+E.2. Settings of Direct Answering 
+
+In the Direct Answering setting, we adopt a concise VQA prompting scheme that forgoes chain-of-thought reason-ing and external retrieval. The model is guided only by a lightweight system prompt that constrains its behavior (e.g., “You are a helpful assistant that answers questions based on the provided image.”). During inference, we di-rectly concatenate the encoded image and user query with a brief user prompt (“Please give the answer within 1–2 sentences. Answer:”), which encourages the model to pro-duce a short, image-grounded response relying solely on 
+
+> 7SerpApi: https://serpapi.com
+
+its vision–language understanding and inherent knowledge. To reduce stochasticity in next-token prediction, we set the sampling temperature of all VLMs to 0. 
+
+E.3. Settings of Heuristic RAG 
+
+In the Heuristic RAG setting, we employ a straightforward retrieval pipeline that relies solely on external search en-gines, without incorporating any learned retrieval compo-nents. For each user query, we directly submit the tex-tual query to Google Search and collect the top-ranked web snippets as candidate evidence. In parallel, the input im-age is processed using Google Lens, which returns visually similar webpages along with their associated metadata. All retrieved webpages are then passed through the Webpage Reader used in our S UPER LENS system to extract clean tex-tual content. The resulting snippets are concatenated into a lightweight context buffer and provided to the model with-out any reranking, filtering, or structured reasoning. For 
+
+Text RAG , we use only the textual snippets retrieved from the original query. For Image RAG , we use only the image-relevant results returned by Google Lens. Overall, this heuristic design approximates a na¨ ıve “search-then-answer” pipeline, allowing us to isolate how much performance can be attributed to simple external retrieval signals versus more advanced retrieval–augmented generation mechanisms. 
+
+F. More Experimental Results 
+
+In this section, we present the detailed scores of 26 leading VLMs alongside our S UPER LENS across the top 10 image domains (Table 5) and 8 query categories (Table 6). The re-sults show that our method consistently achieves substantial improvements across all evaluated scenarios. Notably, S U-
+
+> PER
+
+LENS ‡ surpasses the performance of large-scale models such as Gemini 2.5 Pro and GPT-4o, both estimated to con-tain more than 400B parameters, on multiple domains and query categories. Table 7 presents detailed results across the Dynamism and Reasoning Hops dimensions. We observe that both S U-
+
+> PER
+
+LENS † and S UPER LENS ‡ achieve substantially larger improvements in the Fast-Changing setting than in the Static or Slow-Changing settings, highlighting the effective-ness of our approach for queries whose answers shift rapidly over time. Additionally, while LLaMA-3.2-11B with direct answering performs poorly on 3-hop and 4-hop questions, its performance improves markedly when augmented with our method (S UPER LENS †), showing gains of more than 17% and 21%, respectively. This pattern indicates that S U-
+
+> PER
+
+LENS is highly capable of tackling complex, multi-step questions even when the backbone model is relatively weak, a capability largely attributable to the Query Decoupler and the fine-grained RAG pipeline. Table 5. Detailed scores on top-10 domains of S UPER GLASSES .
+
+Model Plant Public Service Food Shopping Translation Transport Culture Navigation Animal Education 
+
+Meta-Rayben Smart Glasses 
+
+LLaMA-3.2-11B 22.49 24.58 18.82 28.27 25.11 17.24 25.13 30.46 18.35 30.00 LLaMA-3.2-90B 34.32 33.00 26.20 34.60 34.04 26.11 33.51 35.06 25.32 37.50 
+
+RayNeo Smart Glasses 
+
+Qwen2.5-VL-3B 26.04 28.96 20.30 29.96 25.11 20.20 25.13 33.91 10.76 40.00 Qwen2.5-VL-7B 31.07 34.01 22.51 35.44 39.57 25.12 26.70 48.28 25.95 45.00 Qwen2.5-VL-32B 37.87 36.36 29.89 40.08 43.83 26.11 36.65 44.83 28.48 50.00 Qwen2.5-VL-72B 37.87 39.73 28.78 42.62 43.40 31.03 34.03 48.85 31.65 46.25 
+
+XiaoMi Smart Glasses 
+
+MiMo-VL-7B 26.63 25.93 20.30 28.69 21.70 15.76 27.23 32.76 18.35 37.50 
+
+Open-sourced VLMs 
+
+Phi-3-Vision-4B 18.34 19.53 15.13 18.57 16.60 11.33 16.23 21.84 11.39 27.50 InternVL3-8B 24.26 30.98 19.19 32.49 28.51 15.27 26.18 36.78 22.15 40.00 GLM-4.1V-9B 22.78 23.57 21.03 27.43 22.98 19.70 27.23 27.01 18.35 35.00 LLaVA-v1.5-7B 11.54 9.76 11.44 12.66 7.23 6.90 12.57 13.22 6.96 12.50 LLaVA-v1.5 -13B 13.61 10.44 12.55 16.03 5.11 9.36 14.66 12.07 9.49 15.00 LLaVA-Onevision-0.5B 10.65 16.50 12.92 18.14 7.66 12.81 14.14 16.67 13.29 25.00 LLaVA-Onevision-7B 19.82 21.21 15.87 24.47 17.45 16.26 20.42 31.61 14.56 36.25 DeepSeek-VL2-3B 17.46 20.54 17.71 21.94 16.60 18.72 19.37 29.31 15.19 35.00 DeepSeek-VL2-16B 24.26 23.23 21.03 28.27 21.70 18.72 24.08 32.76 17.09 33.75 DeepSeek-VL2-27B 23.08 28.96 21.77 31.65 25.53 17.73 26.18 33.91 18.99 40.00 
+
+Proprietary VLMs 
+
+GPT-4o 46.75 43.10 40.22 44.30 42.55 33.99 38.74 44.83 39.87 53.75 Claude 4 Sonnet 31.95 37.37 38.38 42.19 41.28 29.56 36.13 43.10 27.22 53.75 Gemini 2.5 Pro 40.83 46.13 42.80 46.41 38.30 41.38 39.79 48.85 36.08 53.75 
+
+Heuristic RAG 
+
+LLaMA-3.2-11B 14.50 15.49 14.02 24.89 15.32 14.29 19.90 20.69 10.76 36.25 LLaMA-3.2-11B 11.54 12.12 12.92 14.77 12.77 12.32 16.23 14.94 8.23 20.00 LLaMA-3.2-11B 12.72 10.77 14.39 16.46 14.04 13.30 19.90 19.54 9.49 26.25 Qwen2.5-VL-7B 15.09 19.87 19.19 21.52 20.00 13.30 20.94 26.44 12.66 41.25 Qwen2.5-VL-7B 16.57 15.15 15.50 17.72 17.87 13.30 17.80 19.54 10.13 26.25 Qwen2.5-VL-7B 16.57 17.17 14.39 21.10 17.87 12.32 19.37 20.69 12.03 26.25 
+
+SUPER LENS † (Ours) 33.43 
+
+↑10.94 36.03 
+
+↑11.45 32.10 
+
+↑13.28 48.52 
+
+↑20.25 33.62 
+
+↑8.51 33.00 
+
+↑15.76 40.31 
+
+↑15.18 48.28 
+
+↑17.82 36.08 
+
+↑17.73 41.25 
+
+↑11.25 
+
+SUPER LENS ‡ (Ours) 39.64 
+
+↑8.57 
+
+47.47 
+
+↑13.46 34.32 
+
+↑11.81 
+
+47.68 
+
+↑12.24 
+
+51.91 
+
+↑12.34 38.42 
+
+↑13.30 38.74 
+
+↑12.04 
+
+56.90 
+
+↑8.62 34.81 
+
+↑8.86 
+
+56.25 
+
+↑11.25 
+
+F.1. More Findings 
+
+Humans and vision language models often diverge in their perception of question difficulty and the necessity of ex-ternal retrieval. Tasks that appear easy for humans may challenge models without additional context, while some seemingly complex questions for humans are handled well by models through memorized patterns. Notably, stronger models like GPT-4o and Gemini 2.5 Pro rely less on re-trieval, maintaining high accuracy even without external in-put, suggesting greater internal world knowledge. In con-trast, weaker models benefit more from retrieval but are also more sensitive to irrelevant results. 
+
+F.2. Case Study 
+
+To better understand how our system behaves across dif-ferent multimodal reasoning scenarios, we conduct a tar-geted case study that examines both its successes and fail-ures in real examples. Specifically, we present two success cases and two failure cases to analyze the end-to-end deci-sion process, from tool invocation to query decoupling to evidence aggregation. The success cases highlight situa-tions where the model accurately identifies the appropriate retrieval modality (image search vs. text search) and con-structs well-formed queries that lead to reliable answers. In contrast, the failure cases reveal two major failure modes: incorrect selection of the search tool and poorly structured query decoupling. Together, these examples provide a fine-Table 6. Detailed scores on query categories of S UPER GLASSES .
+
+Model Aggregation Comparison Factual Knowledge Multi-hop Reasoning Simple Recognition Spatial Reasoning Temporal Understanding 
+
+Meta-Rayben Smart Glasses 
+
+LLaMA-3.2-11B 19.42 21.23 18.09 16.79 32.38 24.53 33.94 21.54 LLaMA-3.2-90B 26.62 32.88 26.50 23.80 38.95 34.08 38.53 32.31 
+
+RayNeo Smart Glasses 
+
+Qwen2.5-VL-3B 22.30 28.08 17.52 17.52 31.03 30.43 31.19 24.62 Qwen2.5-VL-7B 30.22 34.93 21.94 23.94 41.48 39.33 34.86 30.77 Qwen2.5-VL-32B 29.50 39.73 26.21 27.30 48.57 42.13 39.45 38.46 Qwen2.5-VL-72B 37.41 42.47 28.21 28.76 50.25 42.32 37.61 35.38 
+
+XiaoMi Smart Glasses 
+
+MiMo-VL-7B 25.18 27.40 16.67 15.77 29.51 29.12 35.78 27.69 
+
+Open-sourced VLMs 
+
+Phi-3-Vision-4B 12.23 27.40 11.68 11.09 24.79 18.63 24.77 21.54 InternVL3-8B 24.46 32.19 16.81 19.85 36.76 30.99 34.86 30.77 GLM-4.1V-9B 22.30 28.77 16.52 16.35 31.87 27.72 24.77 21.54 LLaVA-v1.5-7B 10.79 17.12 6.41 7.88 13.15 11.89 20.18 12.31 LLaVA-v1.5 -13B 13.67 20.55 7.98 8.03 13.49 12.17 24.77 20.00 LLaVA-Onevision-0.5B 13.67 17.81 7.98 8.18 16.69 16.57 18.35 18.46 LLaVA-Onevision-7B 20.86 30.82 13.53 14.45 26.14 23.69 34.86 30.77 DeepSeek-VL2-3B 17.27 28.08 11.54 11.39 26.64 23.69 26.61 24.62 DeepSeek-VL2-16B 23.74 30.14 14.67 15.62 29.51 29.96 27.52 24.62 DeepSeek-VL2-27B 29.50 34.93 22.22 19.85 34.57 32.96 37.61 32.31 
+
+Proprietary VLMs 
+
+GPT-4o 34.53 41.78 37.89 34.89 50.08 44.48 52.29 38.46 Claude 4 Sonnet 35.25 38.36 29.06 29.49 49.75 41.01 41.28 43.08 Gemini 2.5 Pro 41.73 51.37 38.18 38.39 50.25 45.13 43.12 36.92 
+
+Heuristic RAG 
+
+LLaMA-3.2-11B 11.51 17.81 12.68 11.97 23.27 19.76 22.02 26.15 LLaMA-3.2-11B 12.95 21.92 12.25 9.49 16.53 13.01 14.68 21.54 LLaMA-3.2-11B 15.11 25.34 12.68 9.64 18.21 14.61 14.68 26.15 Qwen2.5-VL-7B 16.55 20.55 13.82 12.12 27.15 22.94 16.51 24.62 Qwen2.5-VL-7B 12.23 19.18 13.82 10.07 20.57 17.04 15.60 23.08 Qwen2.5-VL-7B 12.23 20.55 13.68 9.78 20.57 18.63 19.27 23.08 
+
+SUPER LENS † (Ours) 27.34 
+
+↑7.92 43.84 
+
+↑22.61 37.61 
+
+↑19.52 30.80 
+
+↑14.01 42.16 
+
+↑9.78 36.99 
+
+↑12.46 43.12 
+
+↑9.18 32.31 
+
+↑10.77 
+
+SUPER LENS ‡ (Ours) 39.57 
+
+↑9.35 45.89 
+
+↑10.96 36.47 
+
+↑14.53 34.74 
+
+↑10.80 
+
+52.28 
+
+↑10.80 
+
+49.34 
+
+↑10.01 44.95 
+
+↑10.09 
+
+44.62 
+
+↑13.85 
+
+grained, qualitative view of how the system makes deci-sions, what it does well, and where the current limitations lie. 
+
+F.2.1. Success Case 
+
+To illustrate how our system behaves under ideal conditions, we present two representative success cases, each showcas-ing a different but appropriate tool invocation strategy. In the first case (Figure 17), the model is asked to identify the vehicle model from an image. The system first performs precise visual grounding by extracting the relevant region through object detection, and then issues an image-based search query tailored to the cropped vehicle. This example illustrates that the model not only selects the correct modal-ity (image search instead of text search) but also constructs a semantically faithful and discriminative query, enabling the retriever to return the correct result for the “Honda Freed Hybrid”. In contrast, the second case (Figure 18) demonstrates a query whose answer is not visually observable, i.e., the number of founders of the Sushiro restaurant chain. Here, the model successfully recognizes that the image pro-vides insufficient information and therefore switches to text search. It generates a concise and meaningful search query (“Sushiro founders Hong Kong”) aligned with the question intent, retrieves high-quality textual evidence, and produces the correct answer (“two founders”). Together, these two examples show that when the system correctly selects the appropriate search tool, forms a well-structured query, and extracts modality-specific evidence, it is capable of produc-Table 7. Detailed scores on dynamism and hop dimensions of SuperGlasses. 
+
+Model Serach Type Dynamism Reasoning Hops 
+
+Static Slow-Changing Fast-Changing 1-hop 2-hop 3-hop 4-hop 
+
+Meta-Rayben Smart Glasses 
+
+LLaMA-3.2-11B Direct Answer 25.21 13.66 13.92 26.35 23.53 16.90 4.35 LLaMA-3.2-90B Direct Answer 32.80 22.36 26.29 34.55 29.41 24.80 17.39 
+
+RayNeo Smart Glasses 
+
+Qwen2.5-VL-3B Direct Answer 42.59 25.77 18.81 29.02 21.85 17.69 13.04 Qwen2.5-VL-7B Direct Answer 34.64 23.60 21.13 36.92 27.73 23.70 17.39 Qwen2.5-VL-32B Direct Answer 37.93 26.09 30.41 40.50 33.61 27.33 21.74 Qwen2.5-VL-72B Direct Answer 38.85 27.95 32.99 41.29 36.13 29.07 21.74 
+
+XiaoMi Smart Glasses 
+
+MiMo-VL-7B Direct Answer 26.08 16.77 20.62 28.96 15.97 16.90 13.04 
+
+Open-sourced VLMs 
+
+Phi-3-Vision-4B Direct Answer 18.05 12.42 13.40 19.98 16.81 10.58 13.04 InternVL3-8B Direct Answer 28.25 17.39 20.10 29.99 25.21 19.27 21.74 GLM-4.1V-9B Direct Answer 25.01 13.66 19.59 26.53 22.69 17.38 13.04 LLaVA-v1.5-7B Direct Answer 10.93 8.07 7.22 11.35 12.61 7.74 8.70 LLaVA-v1.5 -13B Direct Answer 12.63 4.35 8.25 13.36 13.45 7.27 8.70 LLaVA-Onevision-0.5B Direct Answer 14.32 12.42 8.25 15.79 14.29 8.37 8.70 LLaVA-Onevision-7B Direct Answer 21.82 14.91 17.01 23.92 21.01 13.59 13.04 DeepSeek-VL2-3B Direct Answer 20.37 16.15 15.98 23.13 15.13 11.85 17.39 DeepSeek-VL2-16B Direct Answer 24.67 21.12 18.04 27.50 19.33 15.96 8.70 DeepSeek-VL2-27B Direct Answer 26.42 22.36 20.10 28.48 23.53 19.12 13.04 
+
+Proprietary VLMs 
+
+GPT-4o Direct Answer 43.88 29.19 31.44 44.87 42.86 34.44 30.43 Claude 4 Sonnet Direct Answer 37.93 29.19 35.57 40.32 37.82 29.07 30.43 Gemini 2.5 Pro Direct Answer 43.73 32.92 43.81 45.36 44.54 36.18 56.52 
+
+Heuristic RAG 
+
+LLaMA-3.2-11B Image RAG 18.53 8.07 9.79 19.06 18.49 12.32 4.35 LLaMA-3.2-11B Text RAG 14.08 8.07 12.37 15.3 14.29 9.16 4.35 LLaMA-3.2-11B Multimodal RAG 15.19 10.56 13.92 17.06 14.29 9.32 4.35 Qwen2.5-VL-7B Image RAG 20.66 11.18 13.40 22.71 14.29 12.48 4.35 Qwen2.5-VL-7B Text RAG 17.56 6.21 12.37 19.25 15.97 9.32 8.70 Qwen2.5-VL-7B Multimodal RAG 18.53 9.32 9.28 20.64 10.92 9.64 8.70 
+
+SUPER LENS † (Ours) Multimodal RAG 38.90 
+
+↑13.69 26.09 
+
+↑12.43 28.87 
+
+↑14.95 40.01 
+
+↑13.66 30.96 
+
+↑7.43 34.45 
+
+↑17.55 26.09 
+
+↑21.74 
+
+SUPER LENS ‡ (Ours) Multimodal RAG 45.23 
+
+↑10.59 
+
+37.27 
+
+↑13.67 37.63 
+
+↑16.50 
+
+48.76 
+
+↑11.84 33.97 
+
+↑6.24 
+
+37.82 
+
+↑14.12 21.74 
+
+↑4.35 
+
+ing robust and accurate answers across heterogeneous ques-tion types. 
+
+F.2.2. Failure Case 
+
+In addition to the success examples, we further present two failure cases (Figures 19 and 20) to highlight the system’s failure modes and the underlying causes. The first case (Figure 19) illustrates a mis-selection of the search tool. The question asks about a red symbol visi-ble on a glass window. Instead of performing image-based search, which is necessary because the symbol is visually specific, hard to describe verbally, and not uniquely iden-tifiable by text, the system mistakenly triggers text search with the query “red sign meaning in Canada.” This textual query is overly broad and semantically disconnected from the object in the image, leading the retriever to return ir-relevant knowledge about the “Canadian Red Ensign” flag. This failure demonstrates that when the model misjudges the modality of the problem and chooses the wrong retrieval channel, even a formally well-constructed text query cannot compensate for the mismatch between modality and infor-mation need. The second case (Figure 20) showcases a different type of failure: incorrect search query generation. The ques-tion asks, “What other books has the author of this book written?” The image clearly shows only the book cover and bookshelf, meaning the system should first infer the author’s name visually and then construct a clean, author-centric search query. However, the model generates a noisy and poorly structured query (“American Payroll Association Basic Guide to Payroll author other books”), which con-flates the book title with the intent of the question and fails to isolate the key entity, i.e., the author. As a result, the re-triever returns incomplete or misleading evidence. This ex-ample indicates that even when the correct tool (hybrid im-age and text search) is selected, an ill-formed query severely degrades retrieval quality. Together, these two failure cases reveal complementary weaknesses of the system: the first arises from incorrect tool selection, while the second reflects deficient query formula-tion. These failures emphasize the importance of modality-aware decision-making and precise query construction for building robust multimodal RAG systems. Hop 3 
+
+Sub-question : Who painted this painting? 
+
+Tool used : Text Search 
+
+Search keywords : Who paint Campbell’s Soup Cans? 
+
+Search URL : https://en.wikipedia.org/wiki/Andy_Warhol 
+
+Search result (snippet) : Andy Warhol was an American visual artist, film-director and producer, widely regarded as a leading figure of the pop-art movement. 
+
+Hop 4 
+
+Sub-question : What nationality is he? 
+
+Tool used : Text Search 
+
+Search keywords : What nationality is Andy Warhol? 
+
+Search URL : https://en.wikipedia.org/wiki/Andy_Warhol 
+
+Search result (snippet) : Andy Warhol was an American artist; he is generally considered one of the most influential U.S. figures in 20th-century art. 
+
+Figure 13. Hop 3 and Hop 4 of “Campbell’s Soup Can” Domain Router Prompt 
+
+System Prompt: 
+
+You are a visual assistant that identifies the question domain based on the query and image. The question domain should be one of the following: [“Food”, “Shopping”, “Plant”, “Public Service”, “Culture”, ..., “Other”]. - Food: Questions about dishes, ingredients, nutrition, cooking methods, or the cultural/industrial origin of food items. - Shopping: Questions about consumer goods or published media—price, specifications, packaging, availability, editions, or author/publisher details. ... If you are not sure about the question domain, you should return “Other”. 
+
+User Prompt: 
+
+Given the <image> and query text: {query }.Output your predicted domain in JSON format, like {“domain”: <domain> }
+
+> Figure 14. The prompt used for domain recognition.
+
+Direct Answer Generation Prompt 
+
+System Prompt: 
+
+You are a visual assistant tasked with addressing the user’s query for the image based on your inherent knowledge. General Reasoning Guidelines: 1. Generate step-by-step reasoning to address the query using evidence from the image and your knowledge... Stop reasoning once you have enough information to answer, or you find that necessary information is lacking. 2. In your reasoning, identify the exact object that the query is about by its exact name... 3. If the query involves multiple objects or relationships, dedicate one reasoning step to each object or relationship, and then summarize the result in a final step. 4. If you find that necessary information is lacking, explicitly state: “I have no knowledge about 
+
+<lacking_knowledge> ”Domain Reasoning Guidelines: ... 
+
+User Prompt: 
+
+Given the <image> , please conduct step-by-step reasoning to address the query: {query }
+
+Image metadata: The location of the image is {location }.Output Format: 1. The exact name of the object in the image that the query is about is <specific_object_name> .2. Then, ... 3. Therefore, the answer is ... Output Summary in JSON format: {“reasoning”: <summary_reasoning_string> , “answer”: <answer> }
+
+> Figure 15. The prompt used for direct answer generation.
+
+Evaluator Prompt 
+
+System Prompt: 
+
+You are an expert evaluator of question-answering systems. 
+
+User Prompt: 
+
+General Reasoning Guidelines: “Your task is to determine if a prediction correctly answers a question based on the ground truth.” 
+
+Rules: 
+
+1. The prediction is correct if it captures all the key information from the ground truth. 2. The prediction is correct even if phrased differently as long as the meaning is the same. 3. The prediction is incorrect if it contains incorrect information or is missing essential details. “Output a JSON object with a single field ‘accuracy’ whose value is true or false.” 
+
+Question: {query }, Ground Truth: {answer }, Prediction: {prediction }
+
+Figure 16. The prompt used for answer evaluation. Query: What is the model of this vehicle? 
+
+Reasoning: 
+
+1. The exact name of the object in the image that the query "What is the 
+
+model of this vehicle?" is about is a car. 
+
+2. The car in the image appears to be a Toyota model, as indicated by 
+
+the logo on the front. 
+
+3. The specific model cannot be determined from the image alone 
+
+without more details such as the body style or additional features. 
+
+Therefore, the answer is: 
+
+{"reasoning": "The model of the vehicle in the image is a Toyota, but 
+
+the specific model cannot be determined from the image alone."} 
+
+Decision: Need RAG 
+
+Tool Decision: Need Image Search, No need Text Search 
+
+Object Detection: 
+
+"html_search" : [ 
+
+{
+
+"position" : 1,
+
+"title" : " 𝙉 𝙀 𝙒  𝘼 𝙍 𝙍 𝙄 𝙑 𝘼 𝙇 ! Discover Your Dream 
+
+Ride ..." ,
+
+"link" : "https://www.facebook.com/kromecars/posts/ -𝙉 𝙀 𝙒 -𝘼 𝙍 𝙍 𝙄 𝙑 𝘼 𝙇 -
+
+discover -your -dream -ride -in -singapore -honda -freed -hybrid -15a -g-7-
+
+se/721948503911114/" ,
+
+"source" : "Facebook" ,
+
+"thumbnail" : "https://encrypted -
+
+tbn1.gstatic.com/images?q=tbn:ANd9GcTW -rzltcBS2bJo41Lg2Pec -
+
+HN2H610GNQFJeTbejTtgAv_UDoA" ,
+
+"thumbnail_width" : 259 ,
+
+"thumbnail_height" : 194 ,
+
+"image" :
+
+"https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=7219 
+
+47653911199" ,
+
+"image_width" : 1600 ,
+
+"image_height" : 1200 
+
+},  …
+
+Search Result: 
+
+Car 
+
+Evidence 1 with relevance 
+
+score 0.88: 
+
+July 10 · 
+
+Discover Your Dream Ride in 
+
+Singapore! 
+
+Honda Freed Hybrid 1.5A G 7 -
+
+Seater Honda Sensing 
+
+Registered: 21/08/2020 
+
+Road Tax: $682/year 
+
+COE: $35,001 
+
+OMV: $29,003 
+
+ARF: $22,605 
+
+No. of Owners: 1 
+
+Key Features: 
+
+…
+
+RAG Result: 
+
+Answer: The model of the vehicle is the Honda Freed Hybrid. 
+
+Evidence 2 with relevance 
+
+score 0.88: 
+
+For sale Tokyo Japan 2009 
+
+Honda Freed 
+
+====================== 
+
+Mick Lay 
+
+Mick Lay 
+
+11.2K subscribers 
+
+Subscribe 
+
+Subscribed 
+
+Reasoning: The evidence mentions the Honda Freed Hybrid 
+
+model, which is described as a 7 -seater with features like a 7 -
+
+speed DCT transmission and Honda Sensing technology. 
+
+Ground Truth:  Honda Freed. 
+
+Figure 17. Success case of using image search. Query: How many founders founded Sushiro? 
+
+Reasoning: 
+
+1. The exact name of the object in the image that the query "How many 
+
+founders founded Sushiro?" is about is Sushiro. 
+
+2. Sushiro is a Japanese restaurant chain. 
+
+3. The founders of Sushiro are not visible in the image. 
+
+4. I cannot determine the number of founders of Sushiro based on the 
+
+image. 
+
+Therefore, the answer is: 
+
+{"reasoning": "I cannot determine the number of founders of Sushiro 
+
+based on the image."} 
+
+Decision: Need RAG 
+
+Tool Decision: No need Image Search, Need Text Search 
+
+Search Query: 
+
+Search Result:  Evidence 1 with relevance score 
+
+0.94: 
+
+From Wikipedia, the free 
+
+encyclopedia 
+
+Akindo Sushiro Co., Ltd. 
+
+Sushiro headquarters 
+
+Company typeKabushiki gaisha 
+
+IndustryRetail (Japan) 
+
+Food service (other countries) 
+
+Founded October 23, 1984; 40 
+
+years ago 
+
+Founder Yoshio Shimizu 
+
+Yutaka Shimizu 
+
+Headquarters: 564 -0063 
+
+…
+
+RAG Result: 
+
+Answer: Two people founded Sushiro. 
+
+Evidence 2 with relevance 
+
+score 0.87: 
+
+QTS Scheme restaurant 
+
+SUSHIRO, founded over 30 
+
+years ago, is the leading kaiten 
+
+sushi chain in Japan, according 
+
+to the Fuji Keizai Food service 
+
+Industry Marketing Data Book 
+
+2012 – 2022. Choose from an 
+
+extensive menu with more than 
+
+100 delightful options, 
+
+including sushi and side dishes, 
+
+all offered at reasonable prices. 
+
+Reasoning:  The evidence states that Sushiro was founded by 
+
+Yoshio Shimizu and Yutaka Shimizu, indicating that two people 
+
+founded the company. 
+
+Sushiro founders Hong Kong 
+
+"html_search" : [{ 
+
+"position" : 1,
+
+"title" : "Sushiro" ,
+
+"link" : "https://en.wikipedia.org/wiki/Sushiro" ,
+
+"thumbnail" :
+
+"https://serpapi.com/searches/68fcd0b56838633e892da973 /..."" ,
+
+"favicon" : "https://serpapi.com/searches /..." ,
+
+"snippet" : "Founder, Yoshio Shimizu Yutaka Shimizu. Headquarters, 〒
+
+564 -0063 ...." ,
+
+"snippet_highlighted_words" : [ 
+
+"Yoshio Shimizu Yutaka Shimizu" 
+
+], 
+
+"source" : "Wikipedia" 
+
+},{ 
+
+"position" : 4,
+
+"title" : "FOOD & LIFE COMPANIES LTD. / Sushiro" ,
+
+"link" : "https://hk.linkedin.com/company/food -and -life -companies -ltd" ,
+
+"favicon" :
+
+"https://serpapi.com/searches/68fcd0b56838633e892da973 /..." ,
+
+"snippet" : "Masahiro Yamamoto. CEO, FOOD & LIFE COMPANIES LTD. ; 
+
+Elshinta Linsawati...” 
+
+"snippet_highlighted_words" : [ 
+
+"Masahiro Yamamoto. CEO, FOOD & LIFE COMPANIES LTD" 
+
+], 
+
+"source" : "LinkedIn · FOOD & LIFE COMPANIES LTD. / Sushiro" 
+
+}, 
+
+Ground Truth: 2.
+
+Figure 18. Success case of using text search. Query: What does this red sign mean? 
+
+Reasoning: 
+
+1. The exact name of the object in the image that the query "What does 
+
+this red sign mean?" is about is a red line on a glass window. 
+
+2. The red line on the glass window is likely a safety feature, such as a 
+
+grab bar or a design element. 
+
+3. In many high -rise buildings, red lines on glass windows are often 
+
+used as safety features to help people hold onto the glass in case of an 
+
+emergency. 
+
+4. The red line could also be a design element, possibly part of the 
+
+building's branding or aesthetic. 
+
+Therefore, the answer is: 
+
+{"reasoning": "The red line on the glass window is likely a safety 
+
+feature, such as a grab bar or a design element."} 
+
+Decision: Need RAG 
+
+Tool Decision: No need Image Search, Need Text Search 
+
+Search Query: 
+
+Search Result:  Evidence 1 with relevance score 0.85: 
+
+From Wikipedia, the free encyclopedia  \n Canadian Red Ensign.svg 
+
+\n Red Ensign used from 1957 to 1965  \n UseCivil ensign  \n
+
+Proportion 1:2  \n Adopted 1957 (earlier versions in 1892 and 1922) 
+
+Relinquished 1965  \n Design A red field, featuring the Royal Union  \n
+
+Flag in the canton "Canton (flag)"), defaced "Defacement (flag)") with 
+
+the shield portion of the coat of arms of Canada. 
+
+RAG Result: 
+
+Answer: The red sign is the Canadian Red Ensign, a flag used as a 
+
+nautical and civil ensign for Canada from 1892 to 1965. 
+
+Reasoning:  The Canadian Red Ensign is a nautical flag and civil 
+
+ensign for Canada, featuring the Royal Union Flag in the canton 
+
+with the shield of the coat of arms of Canada, and it was used from 
+
+1892 to 1965. 
+
+red sign meaning in Canada 
+
+Ground Truth:  This red emblem is the Toronto CN Tower's logo.              
+
+> "html_search" : [{
+> "position" :1,
+> "title" :"Canadian Red Ensign" ,
+> "link" :"https://en.wikipedia.org/wiki/Canadian_Red_Ensign" ,
+> "favicon" :
+> "https://serpapi.com/searches/690da69bfbbeb5d069a23281/images/dfc
+> 4c1e0b2efa28
+> 5e4bcc2e36e1be59f382acf0293c303814462171c9fec9e26.png" ,
+> "snippet" :"During the Second World War, the ensign saw use as symbol
+> that represented
+> Canada's armed forces. In 1945, an order in council named the Canadian
+> Red Ensign a \"..." ,
+> "snippet_highlighted_words" : [ "represented Canada's armed forces" ],
+> "source" :"Wikipedia"
+> },{
+> "position" :8,
+> "title" :"Fellow Ontarians, you see this sign, what do you do if ..." ,
+> "link" :
+> "https://www.reddit.com/r/ontario/comments/zufopi/fellow_ontarians_y
+> ou_see_this_sign_
+> what_do_you_do/" ,
+> "favicon" :"https://serpapi.com/searches/690da69bfbbeb5d069a23281/i
+> mages/dfc4c1e0b2efa285e4bcc2e36e1be59fa49c64aeb9a8679bd97c100
+> 06282e74c.png" ,
+> "snippet" :"The sign is instructing you where to come"
+> }
+
+Evidence 2 with relevance score 0.82: 
+
+Design A red field, featuring the Royal Union Flag in the canton 
+
+"Canton (flag)"), defaced "Defacement (flag)") with the shield portion 
+
+of the coat of arms of Canada. 
+
+The Canadian Red Ensign served as a nautical flag and civil ensign for 
+
+Canada from 1892 to 1965, and later as the …, emblazoned with the 
+
+shield of the coat of arms of Canada. Figure 19. Failure case caused by incorrect search tool selection. Query:  What other books has the author of 
+
+this book written ？
+
+Reasoning: 
+
+1. The exact name of the object in the image that the query is about is 
+
+"American Payroll Association Basic Guide to Payroll". 
+
+2. The author of this book is not visible in the image. 
+
+3. Without the author's name, I cannot determine what other books the 
+
+author has written. 
+
+Therefore, the answer is: 
+
+{"reasoning": "I cannot determine the author of the book in the image."} 
+
+Decision: Need RAG 
+
+Tool Decision: Need Image Search, Need Text Search 
+
+Search Query:  American Payroll Association Basic Guide to Payroll 
+
+author other books 
+
+Search Result: 
+
+Evidence 1 with relevance 
+
+score 0.86: 
+
+Show less Read more 
+
+Like 
+
+2
+
+Dislike 
+
+Reply 
+
+·
+
+2 replies 
+
+RAG Result: 
+
+Answer: The author of "The Bibliophile: For the Love of Books" 
+
+has written multiple books, including "The Bibliophile: For the 
+
+Love of Books 108," "The Bibliophile: For the Love of Books 86," 
+
+and "The Bibliophile: For the Love of Books 255." 
+
+Reasoning:  The evidence lists multiple titles by the author "The 
+
+Bibliophile: For the Love of Books," including "The Bibliophile: For 
+
+the Love of Books 108," "The Bibliophile: For the Love of Books 
+
+86," and "The Bibliophile: For the Love of Books 255," indicating 
+
+that the author has written several books. 
+
+Object Detection: 
+
+Ground Truth:  Besides this book, Joanne Mitchell -George has 
+
+also written "The California Payroll Guide".             
+
+> "html_search" : [{
+> "position" :1,
+> "title" :"Ok I've more or less been avoiding this app, but this I had ..." ,
+> "link" :"https://www.instagram.com/p/DH -pXZMzQQN/" ,
+> "source" :"Instagram" ,
+> "source_icon" :
+> "https://serpapi.com/searches/690d8516b4ab723cbf81d801
+> "thumbnail" :"https://encrypted -tbn3.gstatic.com/images?q=tbn: ,
+> "thumbnail_width" :251 ,
+> "thumbnail_height" :201 ,
+> "image" :
+> "https://lookaside.instagram.com/seo/google_widget/crawler/?media_i
+> d=
+> "image_width" :1800 ,
+> "image_height" :1440
+> },{
+> "position" :2,
+> "title" :"Had to finally organize half of my …",
+> ... }
+
+Book 
+
+Evidence 2 with relevance score 
+
+0.86: 
+
+The Bibliophile: For the Love of 
+
+Books 108 
+
+The Bibliophile: For the Love of 
+
+Books 86 
+
+The Bibliophile: For the Love of 
+
+Books 255 
+
+Related Videos 
+
+Figure 20. Failure case caused by incorrect search query generation.

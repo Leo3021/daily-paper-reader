@@ -1,0 +1,328 @@
+Title: Do Multi-Agents Dream of Electric Screens? Achieving Perfect Accuracy on AndroidWorld Through Task Decomposition
+
+URL Source: https://arxiv.org/pdf/2602.07787v1
+
+Published Time: Tue, 10 Feb 2026 02:10:01 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+# Do Multi-Agents Dream of Electric Screens? Achieving Perfect Accuracy on AndroidWorld Through Task Decomposition 
+
+Pierre-Louis Favreau 1 Jean-Pierre Lo 1 Clement Guiguet 1 Charles Simon-Meunier 1
+
+Nicolas Dehandschoewercker 1 Allen G. Roush 2 Judah Goldfeder 3 Ravid Shwartz-Ziv 4
+
+# Abstract 
+
+We present Minitap’s mobile-use, a multi-agent system that achieves 100% success on the An-droidWorld benchmark, the first to fully solve all 116 tasks and surpassing human performance (80%). We first analyze why single-agent architec-tures fail: context pollution from mixed reasoning traces, silent text input failures undetected by the agent, and repetitive action loops without escape. Minitap addresses each failure through targeted mechanisms: cognitive separation across six spe-cialized agents, deterministic post-validation of text input against device state, and meta-cognitive reasoning that detects cycles and triggers strategy changes. Ablations show multi-agent decompo-sition contributes +21 points over single-agent baselines; verified execution adds +7 points; meta-cognition adds +9 points. We release Minitap as open-source software. https://github.com/minitap-ai/mobile-use 
+
+# 1. Introduction 
+
+Mobile devices are the dominant computing platform, yet no autonomous agent has fully solved mobile UI control. On the AndroidWorld benchmark, no prior system achieves 100% success, and no prior system surpasses human per-formance (80%). This limits applications from automated accessibility testing to hands-free device operation for users with motor impairments. This paper presents Minitap’s mobile-use , a multi-agent system that solves AndroidWorld completely: 100% suc-cess on all 116 tasks across 20 applications, surpassing human performance by 20 percentage points. Beyond the benchmark result, we provide a systematic analysis of why prior agents fail and demonstrate that targeted architectural 
+
+> 1
+
+minitap 2Thoughtworks 3Columbia University 4New York University. Correspondence to: Nicolas Dehandschoewercker 
+
+<nico@minitap.ai >.
+
+Preprint. February 10, 2026. 
+
+interventions can eliminate each failure mode. Why have prior agents failed? We analyze single-agent architectures and identify six failure modes spanning con-text management, execution reliability, and error recovery (Section 3.2). Minitap addresses these through three mecha-nisms: cognitive separation across six specialized agents, each maintaining a focused context; verified execution that checks text input against actual device state; and meta-cognitive reasoning that analyzes decision history to detect cycles and trigger strategy changes. We make three contributions: 1. Failure mode analysis. We systematically categorize why single-agent mobile automation fails, providing a diagnostic framework for future system design. 2. Multi-agent architecture. We introduce a six-agent decomposition (Planner, Orchestrator, Contextor, Cor-tex, Executor, Screen Analyzer) with mechanisms tar-geting each identified failure mode. 3. Complete benchmark solution. We achieve 100% success on AndroidWorld, the first system to do so. Ablations show multi-agent decomposition contributes +21 points; verified execution adds +7 points; meta-cognitive reasoning adds +9 points. Despite increased architectural complexity, Minitap com-pletes tasks in 31 seconds on average versus 68 seconds for single-agent baselines. Fewer failed actions means fewer re-tries. We release Minitap as open-source software to support further research in mobile automation. 
+
+# 2. Related Work 
+
+The AndroidWorld Benchmark. AndroidWorld (Rawles et al., 2024a) provides the standard evaluation environment for mobile UI agents, comprising 116 tasks across 20 ap-plications with programmatic success verification. Prior to this work, no system achieved 100% success, and no system surpassed human performance (80%). End-to-end models reach up to 80.2% (AutoGLM-Mobile (Liu et al., 1
+
+> arXiv:2602.07787v1 [cs.AI] 8 Feb 2026 Achieving Perfect Accuracy on AndroidWorld Through Task Decomposition
+
+2024a)), while multi-agent frameworks reach up to 97.4% (AGI-0 (AGI, Inc., 2025)). Complementary benchmarks include Android in the Wild (Rawles et al., 2024b) for large-scale demonstrations and MobileAgentBench (Wang et al., 2024c) for reproducible evaluation. See Appendix B for ad-ditional related work on web/desktop agents, reinforcement learning, and benchmarks. 
+
+End-to-End Models. Vision-language models can directly map screenshots to actions. UI-TARS (Qin et al., 2025) incorporates task decomposition and reflection, while UI-Venus (Gu et al., 2025) uses reinforcement finetuning to reach 65.9% on AndroidWorld. These approaches are effec-tive on short tasks but suffer from compounding errors over long horizons, where a single incorrect action can derail completion. 
+
+Multi-Agent Architectures. To address error compound-ing, modular systems decompose mobile interaction into specialized roles. Mobile-Agent (Wang et al., 2024b;a) sep-arates planning, perception, and execution. V-Droid (Dai et al., 2025) adds pre-execution verification, achieving 59.5% success with 6.1 × faster latency. SPlanner (Mo et al., 2025) models application control flows with finite state machines, reaching 63.8%. Survey papers (Wu et al., 2024a; Wang et al., 2024d) highlight a growing trend toward hybrid systems combining planning, memory, and verifica-tion. Minitap extends this direction with six specialized agents and three targeted mechanisms for the failure modes we identify. 
+
+Error Recovery and Robustness. Reliable agents require mechanisms to detect and correct mistakes. InfiGUI-R1 (Liu et al., 2024b) uses spatial reasoning distillation for error recovery. AppAgentX (Jiang et al., 2025) develops memory mechanisms to identify repetitive action sequences. These approaches motivate our meta-cognitive reasoning layer, which analyzes decision history to detect cycles and trigger strategy changes. 
+
+# 3. Problem Setting 
+
+3.1. The AndroidWorld Benchmark 
+
+AndroidWorld (Rawles et al., 2024a) provides a standard-ized evaluation environment for mobile UI agents. The benchmark comprises 116 programmatic tasks spanning 
+
+20 real-world Android applications , including calendar management, map navigation, contact management, media creation, expense tracking, and task organization. Tasks are constructed through dynamic parameterization, generating natural language instructions with variable con-tent (e.g., specific dates, contact names, or locations). This design prevents memorization and ensures that agents must generalize across task variations. Task complexity ranges from single-action operations to multi-step workflows re-quiring sequential navigation, form completion, and infor-mation retrieval. Success is determined through programmatic verification rather than human judgment. Each task specifies explicit success criteria evaluated against device state, ensuring re-producible and objective metrics. All results reported in this paper use the official AndroidWorld evaluation protocol without modification. 
+
+3.2. Failure Mode Analysis 
+
+To understand why prior systems fail, we analyze our first attempt, a single-agent baseline where one LLM handles planning, state assessment, action selection, and execution. This baseline achieves 64% success on AndroidWorld, fail-ing on 42 of 116 tasks. We manually categorize each failure and identify six failure modes grouped into three categories. 
+
+Context Management (16 failures, 38%). Three related failures stem from how monolithic agents manage context: • Reasoning drift : In tasks requiring more than 10 ac-tions, the agent loses track of completed steps and overall progress (9 failures). • Context pollution : Mixing planning traces with execu-tion logs in a single conversation degrades reasoning quality (5 failures). • State staleness : Decisions based on outdated UI hierar-chies lead to incorrect element targeting (2 failures). These failures motivate our multi-agent decomposition, where each agent maintains a focused context (Section 4.1). 
+
+Execution Reliability (17 failures, 41%). The largest cate-gory involves unreliable action execution: • Text input failures : Form-filling tasks fail due to key-board state management and character encoding issues. The agent believes text was entered correctly when it was not (12 failures). • Execution latency : High-level automation frameworks introduce 600–1400ms latency per action, reducing available retry attempts before timeout (5 failures). These failures motivate sequential execution with post-validation, where we verify text input against actual device state (Section 4.2). 
+
+Error Recovery (9 failures, 21%). The remaining failures involve inability to recover from errors: • Error propagation : API failures or unexpected UI states terminate task execution without recovery at-tempts (4 failures). 2Achieving Perfect Accuracy on AndroidWorld Through Task Decomposition 
+
+• Repetitive loops : The agent attempts the same fail-ing action repeatedly, unable to detect the cycle or try alternatives (5 failures). These failures motivate meta-cognitive reasoning, which an-alyzes decision history to detect cycles and trigger strategy changes (Section 4.3). 
+
+# 4. System Architecture 
+
+Minitap addresses each failure category from Section 3.2 with a targeted mechanism (Figure 1). Multi-agent decom-position addresses context management failures by isolating different reasoning types (Section 4.1). Verified execution addresses execution reliability failures by checking actions against device state (Section 4.2). Meta-cognitive reasoning addresses error recovery failures by detecting cycles and triggering strategy changes (Section 4.3). We also describe supporting mechanisms that improve efficiency and handle edge cases (Section 4.4). 
+
+4.1. Multi-Agent Decomposition 
+
+Minitap replaces monolithic agent architectures with a mod-ular system built on LangGraph (LangChain, 2024), com-prising seven graph nodes and three utility agents. This de-composition addresses the context pollution problem: rather than requiring a single model to simultaneously maintain planning context, perceptual state, and execution history, each component operates within a focused context appropri-ate to its role. 4.1.1. A GENT SPECIFICATIONS 
+
+Planner. Given a natural language task description, the Planner decomposes the goal into an ordered sequence of subgoals. Each subgoal receives a unique identifier enabling explicit tracking through the Orchestrator. The Planner is invoked at task initialization and automatically upon subgoal failures requiring replanning. 
+
+Orchestrator. The Orchestrator maintains the subgoal life-cycle, tracking which subgoals are pending, in progress, completed, or failed. It examines subgoals marked for com-pletion by the Cortex, decides whether to advance to the next subgoal or trigger replanning, and updates subgoal sta-tuses accordingly. Critically, the Orchestrator serves as the primary routing component in the execution graph, deter-mining whether execution continues, terminates, or requires replanning. 
+
+Contextor. The Contextor retrieves current device state before each decision cycle, including: (1) a screenshot of the current screen, (2) the UI accessibility hierarchy, (3) the focused application package, and (4) temporal context (current date and time). When app-lock mode is enabled, the Contextor also verifies the locked application remains in the foreground and relaunches it if necessary. 
+
+Cortex. The Cortex serves as the central decision-making component. It receives the current subgoal from the Or-chestrator and device state from the Contextor, analyzing both the structural UI hierarchy and visual screenshot to-gether to formulate actionable decisions. Based on this multimodal analysis, it may: (1) produce structured JSON decisions specifying actions for the Executor, (2) signal subgoal completion for the Orchestrator to review, or (3) both simultaneously. This dual-output capability enables the Cortex to complete a subgoal while also initiating the next action in a single cycle, optimizing execution throughput. The Cortex employs reasoning models (e.g., Gemini 2.5 Pro, Claude Sonnet 4) with structured output to ensure consistent decision formatting. 
+
+Executor. The Executor parses the structured decisions from the Cortex and translates them into tool invocations. It binds available tools to an LLM that determines the ap-propriate function calls with their parameters, including element targeting information and reasoning annotations for observability. 
+
+ExecutorToolNode. A custom LangGraph ToolNode that executes tool calls sequentially rather than in parallel. This design ensures that if any tool call fails, subsequent calls are aborted immediately, preventing cascading errors from exe-cuting against stale device state. The node interfaces with a unified controller layer that abstracts platform-specific automation details. 
+
+Summarizer. The Summarizer manages message history to prevent context overflow. When the message count exceeds a configurable threshold, it removes older messages while preserving recent context, enabling extended task execution without context length limitations. 4.1.2. U TILITY AGENTS 
+
+Three additional agents operate outside the main execution graph: • Outputter : Generates structured output from task re-sults according to user-specified schemas. • Hopper : Extracts specific data from provided content using targeted prompts. • Video Analyzer : Analyzes screen recordings using video-capable models (e.g., Gemini) for tasks requiring temporal understanding. 4.1.3. E XECUTION FLOW 
+
+The system implements a graph-based execution flow with conditional branching and parallel execution paths (Fig-3Achieving Perfect Accuracy on AndroidWorld Through Task Decomposition   
+
+> Figure 1. Minitap uses six specialized agents with the Cortex as the central reasoning bottleneck. The system decomposes mobile automation into two phases: (1) Plan, where the Planner decomposes user goals into ordered subgoals and the Orchestrator tracks their completion status, and (2) Act, where the Contextor captures device state, the Cortex reasons over the state to select actions, and the Executor validates and dispatches commands to the platform-agnostic Device Controller. The Summarizer compresses action history to manage context length. The Convergence node routes control flow: continuing to the next iteration, triggering replanning upon subgoal failure, or terminating upon task completion. Icons indicate model capacity requirements: the brain denotes high-capacity reasoning models; the lightning bolt denotes distillable components amenable to smaller, faster models.
+
+ure 1). After initialization through the Planner and Orches-trator, the primary loop proceeds as: 1. Contextor : Gathers fresh device state (screenshot, UI hierarchy, app info, timestamp) 2. Cortex : Analyzes state, interprets reasoning from all agents during past actions, and formulates actionable decisions and/or subgoal completion signals 3. Parallel branching : Based on Cortex output, the flow may branch to one or both paths simultaneously: • Orchestrator path : If subgoals are marked for completion, the Orchestrator reviews and updates their status. This enables incremental plan up-dates without full replanning—a systematic check loop that validates progress after each decision cycle. • Executor path : If actions are specified, the Ex-ecutor dispatches them to the ExecutorToolNode for sequential execution. 4. Summarizer : Manages context window after execu-tion completes 5. Convergence : A synchronization point that waits for all parallel paths to complete before proceeding. The convergence node performs no routing logic—it ex-ists solely to prevent race conditions between parallel branches. 6. Orchestrator routing : After convergence, the Orches-trator evaluates the current state and determines contin-uation: if any subgoal has failed, control returns to the Planner for replanning; if all subgoals are completed, the task terminates; otherwise, the loop continues with a fresh Contextor cycle. This parallel architecture optimizes execution throughput: the Cortex can simultaneously signal that a subgoal is com-plete (triggering Orchestrator review) while initiating the first action of the next logical step (via the Executor). The convergence synchronization ensures a consistent state be-fore routing decisions are made. 
+
+4.2. Verified Execution 
+
+Text input represents a disproportionate source of failures in mobile automation. Keyboard state management, focus detection, character encoding, and timing issues combine to produce unreliable text entry. Systems that execute actions without verification risk compounding errors: if action 1 fails silently, actions 2–5 execute against incorrect state. Minitap implements strictly sequential execution with deter-4Achieving Perfect Accuracy on AndroidWorld Through Task Decomposition 
+
+ministic post-validation for text input operations: 1. Focus with fallback : Attempt focus via resource ID; if unsuccessful, fall back to coordinates, then text match-ing 2. Cursor positioning : Move cursor to end of existing content if bounds information is available 3. Execute input : Type text through the platform automa-tion layer 4. Retrieve fresh state : Query the device for updated UI hierarchy 5. Extract actual value : Locate the target element and extract its current text content 6. Return verification feedback : Provide explicit com-parison result to the Cortex, including the complete field content The text input logic is separated from LLM reasoning. The Cortex specifies only the target element (with multiple selec-tor types for fallback) and intended text; deterministic code handles focus management, keyboard verification, field in-teraction, and character encoding. This separation ensures that fragile operations execute through verified procedures rather than LLM-generated commands. 4.2.1. P LATFORM AUTOMATION 
+
+Minitap provides unified automation across platforms through a controller abstraction layer: • Android : UIAutomator2 (codeskyblue, 2020) for UI automation with ADB shell commands as fallback • iOS Simulators : fb-idb (Meta Platforms, Inc., 2019) for comprehensive simulator control • iOS Physical Devices : WebDriverAgent (Meta Plat-forms, Inc., 2015) for physical device automation This architecture enables platform-agnostic task definitions while leveraging native automation capabilities for reliabil-ity. 
+
+4.3. Meta-Cognitive Reasoning 
+
+Agents often attempt the same unsuccessful strategy repeat-edly without adaptation. For example, an agent may scroll to find a non-existent element multiple times, exhausting available actions without progress. Minitap addresses this through meta-cognitive reasoning in the Cortex. Before each decision, the Cortex analyzes the history of prior agent outputs, examining: • Cycle detection : Identification of action sequences that return to previously visited states without progress • Strategy evaluation : Assessment of whether the cur-rent approach has failed and alternatives should be considered • Evidence accumulation : Review of execution history to identify already-completed actions, preventing re-dundant work This creates a two-tier reasoning system: standard LLMs handle routine decisions, while the Cortex monitors for failure patterns and triggers strategy pivots when necessary. This design draws on the CoALA framework (Sumers et al., 2023), which emphasizes internal memory as an actionable target for agent introspection. 
+
+4.4. Supporting Mechanisms 
+
+Three additional mechanisms improve efficiency and handle edge cases. 
+
+Hybrid Perception. UI accessibility hierarchies provide precise element coordinates but lack visual information. Vision models provide rich understanding but may lack targeting precision. Minitap uses UI hierarchies as the pri-mary source while invoking vision selectively. The Cortex receives both the UI hierarchy and a screenshot, using struc-tural information for element targeting and visual informa-tion for appearance and context. 
+
+Scratchpad Memory. Standard architectures discard infor-mation between action cycles, leading to redundant explo-ration. Minitap implements a persistent key-value scratch-pad ( save note , read note , list notes ) that main-tains information across the entire task execution. Agents accumulate knowledge as tasks progress. 
+
+Video-Based Temporal Reasoning. Static screen-shots capture only instantaneous state. Certain tasks require temporal observation: verifying animations complete correctly, observing multi-step UI transi-tions, or confirming video playback behavior. Mini-tap provides start video recording() and 
+
+stop video recording(prompt) operations that capture and analyze temporal sequences using a vision-language model. 
+
+4.5. Evaluation Infrastructure 
+
+We evaluate our agent on the full AndroidWorld benchmark using custom-built Kubernetes-based infrastructure that pro-visions Android emulator pods from a pre-warmed pool. For each task, an orchestrator requests a fresh emulator session, dispatches the natural-language goal to the agent running as a sidecar container, and monitors execution until comple-5Achieving Perfect Accuracy on AndroidWorld Through Task Decomposition 
+
+tion or timeout. The agent controls the emulator over ADB and reports its progress to a central backend that records task runs, traces, and artefacts. Once all tasks have been executed, results are aggregated into a report. 
+
+# 5. Experiments 
+
+5.1. Main Results 
+
+Takeaway: Minitap achieves 100% success on AndroidWorld, the first system to fully solve the benchmark and surpass hu-man performance (80%). 
+
+Table 1 compares Minitap against prior methods on the AndroidWorld benchmark. We categorize approaches into 
+
+agentic frameworks (multi-component systems with plan-ning and memory) and end-to-end models (single VLMs directly mapping observations to actions). 
+
+Table 1. Minitap is the first system to achieve 100% success and surpass human performance (80%). AndroidWorld benchmark results (116 tasks). SR: Success Rate (%). Agent : multi-agent frameworks. Model : end-to-end VLM. † closed-source. 
+
+Method Type SR (%) 
+
+Agentic Frameworks 
+
+Minitap (Ours) Agent 100.0 
+
+AGI-0† Agent 97.4 askui AndroidVisionAgent Agent 94.8 DroidRun Agent 91.4 Agent-Visco† Agent 88.8 gbox.ai Agent 86.2 
+
+End-to-End Models 
+
+AutoGLM-Mobile (9B) Model 80.2 MAI-UI (235B) Model 76.7 MAI-UI (8B) Model 70.7 Gemini 2.5 Computer† Model 69.7 GUI-Owl-7B (7B) Model 66.4 UI-Venus (72B) Model 65.9 Seed1.5-VL (20B) (Guo et al., 2025) Model 62.1 UI-TARS (72B) Model 46.6 MobileGUI-RL (32B) Model 44.8 Aria-UI Model 44.8 UGround Model 44.0 UI-TARS (7B) Model 33.0 MobileGUI-RL (7B) Model 30.0 Qwen2.5-VL-7B (Bai et al., 2025b) Model 22.0 Human — 80.0 
+
+Minitap achieves 100% success rate, the first system to fully solve the benchmark. Among agentic frameworks, Minitap outperforms the next-best system (AGI-0) by 2.6 percentage points. The gap between agentic frameworks and end-to-end models is substantial: the best model-only approach (AutoGLM-Mobile) achieves 80.2%, comparable to human performance but 20 points below Minitap. This gap shows the value of explicit planning, memory, and verification mechanisms for long-horizon mobile tasks. 
+
+5.2. Ablation Studies 
+
+Takeaway: Multi-agent decomposition contributes +21 points; verified execution +15 points; meta-cognitive reasoning +9 points. All components are required for 100% success. 
+
+Table 2 quantifies the contribution of each architectural com-ponent. Each row shows performance when the indicated component is removed from the full system. 
+
+Table 2. All components required for 100%; Cortex agent contributes most. Ablation on AndroidWorld (116 tasks). 
+
+Component Removed SR ∆
+
+None (full system) 100% —Multi-agent architecture 79% −21 Post-validation 85% −15 Sequential execution 88% −12 Hybrid perception 89% −11 Meta-cognitive reasoning 91% −9Scratchpad memory 92% −8UIAutomator2 → Maestro 95% −5Data fidelity prompts 97% −3Video recording 98% −2
+
+The multi-agent architecture provides the largest individual contribution (21 percentage points). Post-validation and sequential execution together account for 15 and 12 percent-age points respectively, confirming that execution reliability is critical for long-horizon tasks. No single component alone achieves perfect accuracy; the full system requires the combination of all components. Recommended All Gemini 2.5 Pro Downgraded Planner Downgraded Contextor Downgraded Orchestrator Downgraded Cortex    
+
+> 020 40 60 80 100
+> Task Success Rate (%)  100% 100% 58% 58% 51% 11%
+
+Figure 2. The Cortex is the critical reasoning bottleneck; other agents tolerate smaller models. Task success rate on a 50-task AndroidWorld subset stratified by app when individual agents are downgraded from Gemini 2.5 Pro to Qwen 8B-VL. Downgrading the Planner, Contextor, or Orchestrator reduces performance to 51–58%, while downgrading the Cortex collapses success to 11%. Dashed line indicates 50% threshold. 
+
+6Achieving Perfect Accuracy on AndroidWorld Through Task Decomposition 
+
+5.3. Efficiency Analysis 
+
+A natural question arises when deploying multi-agent sys-tems: must all agents use frontier models, or can we achieve comparable performance with a heterogeneous model al-location? We investigate this through systematic ablation studies on the AndroidWorld benchmark. 
+
+Methodology. We evaluate nine model configurations across our seven-agent architecture (Table 5). For cost es-timation, we instrument token consumption per agent and apply OpenRouter 1 pricing (January 2026); see Appendix C for details. Our configurations span two experimental con-ditions: 1. Baseline configurations : All Frontier assigns Gemini 3 Pro Preview to all seven agents, representing maxi-mum capability at highest cost. Platform Default uses Gemini 3 Pro Preview only for the Cortex agent, with budget models (Llama 4 Scout, Llama 3.1 70B/8B, GPT-OSS 120B, GPT-5 Nano) for remaining agents. 2. Agent ablations : Starting from an all-frontier baseline (Gemini 2.5 Pro), we systematically replace individual agents with a budget model (Qwen3-VL-8B) to isolate each agent’s contribution to overall performance. 
+
+Results. Figure 3 presents the cost-performance Pareto frontier. Two configurations achieve 100% success rate: All Frontier at $1.58/task and Platform Default at $1.07/task—a 
+
+32% cost reduction with no performance degradation. This demonstrates that frontier model capability is not uniformly required across all agents. The ablation studies reveal a pronounced asymmetry in agent importance. Replacing the Cortex agent with a bud-get model causes catastrophic degradation ( −89 percentage points, from 100% to 11.2%), whereas degrading other agents individually yields moderate decreases to 50–58% SR. This asymmetry reflects the distinct computational de-mands of each role: Cortex performs complex visual rea-soning over UI screenshots, while Planner, Orchestrator, Contextor, Hopper, and Outputter execute more structured coordination tasks. Four configurations lie on the Pareto frontier: (1) Platform Default (100% SR, $1.07), (2) Degrade Planner (57.8% SR, $0.93), (3) Frontier Cortex Only (51.7% SR, $0.68), and (4) Flash Cortex (28.2% SR, $0.18). Notably, All Fron-tier is dominated by Platform Default, indicating that ho-mogeneous frontier deployment is suboptimal from a cost-efficiency perspective.     
+
+> 1https://openrouter.ai 10 −110 0
+> Cost per Task ( $)
+> 20
+> 40
+> 60
+> 80
+> 100
+> Success Rate (%)
+> 12
+> 9
+> 3
+> 6
+> 4
+> 5
+> 7
+> 8
+> 1
+> Figure 3. Intelligent model allocation (Platform Default) achieves frontier performance at 32% lower cost. Cost-performance Pareto frontier across nine agent configurations on AndroidWorld. Gold halos indicate Pareto-optimal configurations. Platform Default (1) matches All Frontier’s 100% success rate while reducing cost from $1.58 to $1.07 per task by using a fron-tier model only for the reasoning-critical Cortex agent and budget models elsewhere. The dashed line connects Pareto-optimal points. Numbers correspond to: (1) Platform Default, (2) All Frontier, (3) Degrade Planner, (4) Degrade Contextor, (5) Frontier Cortex Only, (6) Degrade Orchestrator, (7) GPT-4o Cortex, (8) Flash Cortex, (9) Degrade Cortex.
+
+Discussion. These findings suggest a general principle for multi-agent system design: allocate model capacity according to task complexity . Agents performing reasoning-intensive operations (visual understanding, planning) benefit from frontier models, while agents executing well-defined coordination protocols can use substantially cheaper alter-natives. For practitioners, this implies that careful profiling of agent computational demands can yield significant cost savings without sacrificing performance. 
+
+# 6. Discussion and Conclusion 
+
+Why Multi-Agent Decomposition Works. Our results suggest that cognitive specialization provides benefits be-yond simple parallelization. Each agent maintains a fo-cused context optimized for its role: the Planner reasons about goal structure without execution noise; the Cortex makes decisions without planning traces polluting its con-text; the Executor handles low-level device interaction with-out higher-level reasoning overhead. This separation mir-rors the distinction between System 1 (fast, automatic) and System 2 (slow, deliberative) reasoning in cognitive sci-ence (Kahneman, 2011)—different reasoning types benefit from different contexts and models. 
+
+The Verification Principle. A recurring theme in our ar-chitecture is the separation of intent specification from out-7Achieving Perfect Accuracy on AndroidWorld Through Task Decomposition                                                     
+
+> Table 3. Model configurations for each experimental profile. Frontier models are shown in bold , budget models in regular font. Configuration Cortex Planner Executor Orchestrator Contextor Platform Default Gemini 3 Pro Llama 4 Scout Llama 3.1 70B GPT-OSS 120B Llama 3.1 8B All Frontier (Baseline) Gemini 3 Pro Gemini 3 Pro Gemini 3 Pro Gemini 3 Pro Gemini 3 Pro
+> Degrade Cortex Qwen3-VL-8B Gemini 2.5 Pro Gemini 2.5 Pro Gemini 2.5 Pro Gemini 2.5 Pro
+> Degrade Planner Gemini 2.5 Pro Qwen3-VL-8B Gemini 2.5 Pro Gemini 2.5 Pro Gemini 2.5 Pro
+> Degrade Orchestrator Gemini 2.5 Pro Gemini 2.5 Pro Gemini 2.5 Pro Qwen3-VL-8B Gemini 2.5 Pro
+> Degrade Contextor Gemini 2.5 Pro Gemini 2.5 Pro Gemini 2.5 Pro Gemini 2.5 Pro Qwen3-VL-8B Frontier Cortex Only Gemini 2.5 Pro Gemini 2.5 Flash Qwen3-VL-8B Qwen3-VL-8B Qwen3-VL-8B GPT-4o Cortex GPT-4o Qwen3-VL-8B Qwen3-VL-8B Qwen3-VL-8B Qwen3-VL-8B Flash Cortex Gemini 2.5 Flash Qwen3-VL-8B Qwen3-VL-8B Qwen3-VL-8B Qwen3-VL-8B
+
+come verification. LLMs excel at understanding goals and selecting strategies, but struggle with reliable execution in noisy environments. By having deterministic code verify outcomes (text input validation, package name checking, UI state comparison), we create a feedback loop where the LLM can adapt to reality rather than operating on assump-tions. This principle generalizes beyond mobile automation: any agent operating in stochastic environments should verify actions deterministically rather than assuming success. 
+
+Limitations. AndroidWorld evaluates 20 applications with well-defined task structures; performance on arbitrary ap-plications with novel UI patterns may differ. The system relies on UI accessibility hierarchies, so applications with-out accessibility support (mobile games, canvas-based inter-faces) cannot be reliably automated. Each task starts fresh without cross-task learning, missing opportunities to reduce exploration on familiar applications. Two future directions could address these limitations: vision-only automation to eliminate accessibility dependence, and cross-task learning 
+
+through persistent episodic memory. 
+
+Conclusion. This paper presents Minitap, the first sys-tem to achieve 100% success on AndroidWorld, surpassing human performance (80%) by 20 percentage points. Our ap-proach starts from failure analysis: we identified six failure modes in single-agent systems spanning context manage-ment (38%), execution reliability (41%), and error recovery (21%), then designed targeted mechanisms for each cate-gory. Three principles emerge that extend beyond mobile automa-tion: (1) cognitive specialization outperforms monolithic design, with the performance gap widening as task com-plexity increases; (2) deterministic verification of unreliable operations enables informed retry decisions—LLMs should specify intent while deterministic code verifies outcomes; and (3) meta-cognitive monitoring that detects failure pat-terns prevents the repetitive loops common in autonomous systems. More broadly, our results suggest that perfect benchmark performance is achievable with current models when com-bined with appropriate system design. The path to reliable autonomous agents lies in verified, modular architectures where models handle ambiguity and strategy while deter-ministic procedures handle execution and verification. Mini-tap is available as open-source software to support further research. 
+
+# Impact Statement 
+
+Mobile automation agents can improve accessibility for users with motor impairments and reduce tedious manual testing. However, agents with UI access can observe sen-sitive device information. Minitap operates only on user-initiated tasks and requires explicit device access. We re-lease it as open-source to enable community scrutiny. 
+
+# References 
+
+Agashe, S., Han, J., Gan, S., Yang, J., Li, A., and Wang, X. E. Agent s: An open agentic framework that uses computers like a human. arXiv preprint arXiv:2410.08164 , 2024. AGI, Inc. AGI-0: Autonomous ai agent for device con-trol. https://www.theagi.company/agent ,2025. Accessed: 2026-01-29. Agrawal, H., Schoop, E., Pan, X., Mahajan, A., Seff, A., Feng, D., Cheng, R., Teran, A. R. M. Y., Gomez, E., Sundararajan, A., Huang, F., Swearngin, A., Moorthy, M. P. S., Nichols, J., and Toshev, A. Uinavbench: A framework for comprehensive evaluation of interactive digital agents. In Proceedings of the IEEE/CVF Interna-tional Conference on Computer Vision (ICCV 2025) , pp. 23353–23363, 2025. Bai, H., Zhou, Y., Cemri, M., Pan, J., Suhr, A., Levine, S., and Kumar, A. Digirl: Training in-the-wild device-control agents with autonomous reinforcement learning. 
+
+arXiv preprint arXiv:2406.11896 , 2024. Bai, H., Zhou, Y., Li, L. E., Levine, S., and Kumar, A. Digi-q: Learning q-value functions for training device-8Achieving Perfect Accuracy on AndroidWorld Through Task Decomposition 
+
+control agents. In International Conference on Learning Representations (ICLR 2025) , 2025a. Bai, S., Chen, K., Liu, X., Wang, J., Ge, W., Song, S., Dang, K., Wang, P., Wang, S., Tang, J., Zhong, H., Zhu, Y., Yang, M., Li, Z., Wan, J., Wang, P., Ding, W., Fu, Z., Xu, Y., Ye, J., Zhang, X., Xie, T., Cheng, Z., Zhang, H., Yang, Z., Xu, H., and Lin, J. Qwen2.5-vl technical report. arXiv preprint arXiv:2502.13923 , 2025b. Burns, A., Arsan, D., Agrawal, S., Kumar, R., Saenko, K., and Plummer, B. A. Mobile app tasks with iterative feed-back (motif): Addressing task feasibility in interactive visual environments. arXiv preprint arXiv:2104.08560 ,2021. Chai, Y., Tang, S., Xiao, H., Lin, W., et al. A3: Android agent arena for mobile gui agents with essential-state procedural evaluation. arXiv preprint arXiv:2504.13805 ,2025. codeskyblue. uiautomator2: Python wrapper for android uiautomator2. https://github.com/openatx/ uiautomator2 , 2020. Python library for Android UI automation. Dai, G., Jiang, S., Cao, T., Li, Y., et al. V-droid: Advanc-ing mobile gui agents via a verifier-driven approach to practical deployment. arXiv preprint arXiv:2503.15937 ,2025. Deng, X., Gu, Y., Zheng, B., Chen, S., et al. Mind2web: Towards a generalist agent for the web. arXiv preprint arXiv:2308.06253 , 2023. Feng, L., Xue, Z., Liu, T., and An, B. Group-in-group policy optimization for llm agent training. arXiv preprint arXiv:2505.23762 , 2025. Gu, Z., Zeng, Z., Xu, Z., Zhou, X., et al. Ui-venus techni-cal report: Building high-performance ui agents with rft. 
+
+arXiv preprint arXiv:2508.10833 , 2025. Guo, D., Wu, F., Zhu, F., et al. Seed1.5-vl technical report. 
+
+arXiv preprint arXiv:2505.07062 , 2025. Hong, W., Wang, W., Lv, Q., Xu, J., et al. Cogagent: A visual language model for gui agents. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR 2024) , 2024. Humphreys, P. C., Raposo, D., Pohlen, T., Thornton, G., et al. A data-driven approach for learning to control computers. In Proceedings of the 39th International Conference on Machine Learning (ICML 2022) , 2022. Jiang, W., Zhuang, Y., Song, C., Yang, X., Zhou, J. T., and Zhang, C. Appagentx: Evolving gui agents as profi-cient smartphone users. arXiv preprint arXiv:2503.02268 ,2025. Kahlon, N., Rom, G., Efros, A., Galgani, F., et al. Agent-initiated interaction in phone ui automation. arXiv preprint arXiv:2503.19537 , 2025. Kahneman, D. Thinking, Fast and Slow . Farrar, Straus and Giroux, 2011. Kapoor, R., Butala, Y. P., Russak, M., Koh, J. Y., et al. Om-niact: A benchmark for multimodal autonomous agents for desktop and web. arXiv preprint arXiv:2402.17553 ,2024. Kim, G., Baldi, P., and McAleer, S. Language models can solve computer tasks. In Advances in Neural Information Processing Systems (NeurIPS 2024) , 2024. LangChain, I. Langgraph: A library for building stateful, multi-agent applications with llms, 2024. URL https: //github.com/langchain-ai/langgraph .Accessed: 2025. Li, N., Qu, X., Zhou, J., Wang, J., et al. Mobileuse: A gui agent with hierarchical reflection for autonomous mobile operation. arXiv preprint arXiv:2507.16853 , 2025a. Li, Y., He, J., Zhou, X., Zhang, Y., and Baldridge, J. Map-ping natural language instructions to mobile ui action sequences. In Proceedings of the 58th Annual Meeting of the Association for Computational Linguistics (ACL 2020) , 2020. Li, Z., You, K., Zhang, H., Feng, D., et al. Ferret-ui 2: Mastering universal user interface understanding across platforms. In International Conference on Learning Rep-resentations (ICLR 2025) , 2025b. Liu, G., Zhao, P., Liang, Y., Li, H., et al. Llm-powered gui agents in phone automation: Surveying progress and prospects. Transactions on Machine Learning Research (TMLR 2025) , 2025. Liu, X., Qin, B., Liang, D., Dong, G., Lai, H., Zhang, H., Zhao, H., Iong, I. L., Sun, J., Wang, J., et al. Autoglm: Autonomous foundation agents for guis. arXiv preprint arXiv:2411.00820 , 2024a. Liu, Y., Li, P., Xie, C., Hu, X., et al. Infigui-r1: Advancing multimodal gui agents from reactive actors to deliberative reasoners. arXiv preprint arXiv:2412.18116 , 2024b. Lu, F., Zhong, Z., Liu, S., Fu, C.-W., and Jia, J. Arpo: End-to-end policy optimization for gui agents with experience replay. arXiv preprint arXiv:2505.16282 , 2025. Meta Platforms, Inc. Webdriveragent: A webdriver server for ios, 2015. URL https://github.com/ facebookarchive/WebDriverAgent . Archived repository. 9Achieving Perfect Accuracy on AndroidWorld Through Task Decomposition 
+
+Meta Platforms, Inc. idb: ios development bridge, 2019. URL https://github.com/facebook/idb .Mo, F., Chen, J., Zhu, H., and Hu, X. Building a sta-ble planner: An extended finite state machine based planning module for mobile gui agent. arXiv preprint arXiv:2505.14141 , 2025. Qin, Y., Ye, Y., Fang, J., Wang, H., et al. Ui-tars: Pioneer-ing automated gui interaction with native agents. arXiv preprint arXiv:2501.12326 , 2025. Rawles, C., Clinckemaillie, S., Chang, Y., et al. An-droidworld: A dynamic benchmarking environment for autonomous agents. arXiv preprint arXiv:2405.14573 ,2024a. Rawles, C., Li, A., Rodriguez, D., Riva, O., and Lillicrap, T. Android in the wild: A large-scale dataset for an-droid device control. In Advances in Neural Information Processing Systems (NeurIPS 2024) , 2024b. Shi, Y., Yu, W., Li, Z., Wang, Y., Zhang, H., Liu, N., Mi, H., and Yu, D. Mobilegui-rl: Advancing mobile gui agent through reinforcement learning in online environment. 
+
+arXiv preprint arXiv:2507.05720 , 2025. Sumers, T. R., Yao, S., Narasimhan, K., and Griffiths, T. L. Cognitive architectures for language agents. arXiv preprint arXiv:2309.02427 , 2023. Venkatesh, S. G., Talukdar, P., and Narayanan, S. Ugif: Ui grounded instruction following. arXiv preprint arXiv:2211.07615 , 2022. Wang, J., Xu, H., Jia, H., Zhang, X., et al. Mobile-agent-v2: Mobile device operation assistant with effective nav-igation via multi-agent collaboration. arXiv preprint arXiv:2406.01014 , 2024a. Wang, J., Xu, H., Ye, J., Yan, M., et al. Mobile-agent: Autonomous multi-modal mobile device agent with visual perception. arXiv preprint arXiv:2401.16158 , 2024b. Wang, L., Deng, Y., Zha, Y., et al. Mobileagentbench: An efficient and user-friendly benchmark for mobile llm agents. arXiv preprint arXiv:2406.08184 , 2024c. Wang, S., Liu, W., Chen, J., Gan, W., et al. Gui agents with foundation models: A comprehensive survey. arXiv preprint arXiv:2411.04890 , 2024d. Wen, H., Tian, S., Pavlov, B., Du, W., et al. Autodroid-v2: Boosting slm-based gui agents via code generation. arXiv preprint arXiv:2505.10593 , 2025. Wu, B., Li, Y., Fang, M., Song, Z., et al. Foundations and recent trends in multimodal mobile agents: A survey. 
+
+arXiv preprint arXiv:2411.02006 , 2024a. Wu, Q., Liu, J., Hao, J., Wang, J., and Shao, K. Ad-vancing autonomous vlm agents via variational subgoal-conditioned reinforcement learning. arXiv preprint arXiv:2502.07949 , 2025. Wu, Z., Han, C., Ding, Z., Weng, Z., et al. Os-copilot: To-wards generalist computer agents with self-improvement. 
+
+arXiv preprint arXiv:2402.07456 , 2024b. Wu, Z., Wu, Z., Xu, F., Wang, Y., et al. Os-atlas: A founda-tion action model for generalist gui agents. arXiv preprint arXiv:2410.23218 , 2024c. Yang, C., Su, S., Liu, S., Dong, X., et al. Zerogui: Automat-ing online gui learning at zero human cost. arXiv preprint arXiv:2503.02268 , 2025. Yao, S., Zhao, J., Yu, D., Du, N., et al. React: Synergizing reasoning and acting in language models. arXiv preprint arXiv:2210.03629 , 2022. Yao, S., Chen, H., Yang, J., and Narasimhan, K. Web-shop: Towards scalable real-world web interaction with grounded language agents. In Advances in Neural Infor-mation Processing Systems (NeurIPS 2023) , 2023. Zhang, C., Yang, Z., Liu, J., Han, Y., Chen, X., Huang, Z., Fu, B., and Yu, G. Appagent: Multimodal agents as smartphone users. arXiv preprint arXiv:2312.13771 ,2023. Zhang, C., Li, L., He, S., Zhang, X., et al. Ufo: A ui-focused agent for windows os interaction. arXiv preprint arXiv:2402.07939 , 2024a. Zhang, J., Wu, J., Teng, Y., Liao, M., et al. Android in the zoo: Chain-of-action-thought for gui agents. arXiv preprint arXiv:2403.02713 , 2024b. Zhao, S., Wen, H., Du, W., Liang, C., et al. Llm-explorer: Towards efficient and affordable llm-based exploration for mobile apps. In Proceedings of ACM MobiCom 2025 ,2025. Zhou, S., Xu, F. F., Zhu, H., Zhou, X., Lo, R., Sridhar, A., Cheng, X., Ou, T., Bisk, Y., Fried, D., Alon, U., and Neu-big, G. Webarena: A realistic web environment for build-ing autonomous agents. arXiv preprint arXiv:2307.13854 ,2023. 10 Achieving Perfect Accuracy on AndroidWorld Through Task Decomposition 
+
+# A. Extended Experimental Details 
+
+This appendix provides additional experimental details and supplementary results. 
+
+A.1. Prompt Templates 
+
+The Cortex agent receives instructions emphasizing multimodal integration: 
+
+“You have two complementary perception modalities: the UI accessibility hierarchy provides precise element identifiers, coordinates, and structural relationships, the screenshot provides visual context including appearance, spatial layout, and visibility state. You must integrate both modalities, using structural information for element targeting and visual information for context and verification.” 
+
+The data fidelity instruction addresses over-helpful behavior: 
+
+“For any data-related task: transcribe, enter, or reproduce content exactly as specified unless explicitly instructed otherwise. Do not correct formatting, add punctuation, or modify content in any way.” 
+
+# B. Extended Related Work 
+
+This appendix provides additional context on related work not essential to the main narrative. 
+
+B.1. Agentic AI for Web and Desktop Applications 
+
+LLM-based agents now control computers through natural language. The ReAct paradigm (Yao et al., 2022) established the pattern of interleaving reasoning with action; subsequent systems extended this to browsers and operating systems. Humphreys et al. (Humphreys et al., 2022) showed that agents can learn desktop control directly from pixel demonstrations. Vision-language models have since enabled interaction with arbitrary GUIs by grounding UI elements in visual input (Kim et al., 2024; Zhang et al., 2024a; Wu et al., 2024b;c). Agent S (Agashe et al., 2024) combines experience-augmented planning with a specialized agent-computer interface, reaching 83% on OSWorld. Benchmarks measure this progress. WebShop (Yao et al., 2023), WebArena (Zhou et al., 2023), and Mind2Web (Deng et al., 2023) evaluate web-based tasks. OmniAct (Kapoor et al., 2024) and UINavBench (Agrawal et al., 2025) extend evaluation to desktop workflows. Across all benchmarks, agents trail human performance by 15–30 percentage points, with long-horizon tasks and error recovery posing the greatest challenges. 
+
+B.2. Additional Mobile Benchmarks 
+
+Beyond AndroidWorld, several benchmarks evaluate mobile agents. Android in the Wild (Rawles et al., 2024b) provides large-scale demonstrations of real user behavior. The A3: Android Agent Arena (Chai et al., 2025) benchmark introduced essential-state procedural evaluation using multimodal language models for progressive verification across 100 tasks from dynamic online applications. Recent surveys (Liu et al., 2025) provide taxonomies of agent frameworks, modeling approaches, and evaluation methodologies in phone automation. Early work on mobile instruction following focused on mapping language to UI actions (Li et al., 2020), interactive feedback (Burns et al., 2021), and grounded instruction following (Venkatesh et al., 2022). 
+
+B.3. Reinforcement Learning Approaches 
+
+Reinforcement learning methods fine-tune agents through online interaction with devices. DigiRL (Bai et al., 2024) demonstrated that combining offline and online RL can improve success rates from 17.7% to 67.2% on Android-in-the-Wild. Digi-Q (Bai et al., 2025a) learns Q-value functions using frozen VLM features with offline temporal-difference learning, achieving 21.2% improvement over prior methods. MobileGUI-RL (Shi et al., 2025) advances mobile GUI agents through RL in online environments, while VSC-RL (Wu et al., 2025) reformulates decision-making as variational subgoal-conditioned RL. ARPO (Lu et al., 2025) introduces end-to-end policy optimization with experience replay, and ZeroGUI (Yang et al., 2025) enables automated online learning without human annotation costs. GiPO (Feng et al., 2025) proposes group-in-group policy optimization for more efficient LLM agent training. 11 Achieving Perfect Accuracy on AndroidWorld Through Task Decomposition 
+
+B.4. Additional End-to-End and Foundation Models 
+
+Systems such as CogAgent (Hong et al., 2024) and AppAgent (Zhang et al., 2023) demonstrate that multimodal models can act as smartphone users by interpreting screenshots and issuing UI actions. Ferret-UI 2 (Li et al., 2025b) extended this paradigm to universal interface understanding across iPhone, Android, iPad, web, and AppleTV platforms through adaptive scaling and enhanced training data generation. Android in the Zoo (Zhang et al., 2024b) explores chain-of-thought-style reasoning for GUI agents. MobileUse (Li et al., 2025a) introduces hierarchical reflection mechanisms for improved reasoning at multiple abstraction levels. 
+
+B.5. Efficiency and Deployment 
+
+Efficiency considerations have led to approaches like LLM-Explorer (Zhao et al., 2025), which achieves 148 × lower cost than prior LLM-based methods, and AutoDroid-V2 (Wen et al., 2025), which enables on-device deployment through code generation with smaller language models. Recent work also addresses agent-initiated interaction (Kahlon et al., 2025), recognizing that complex tasks often require proactive user engagement. 
+
+# C. Efficiency Analysis Details 
+
+This appendix provides detailed methodology and data for the efficiency analysis presented in Section 5.3. 
+
+C.1. Experimental Methodology Limitations. Due to computational budget constraints, each configuration was evaluated with a single run. 
+
+C.2. Model Pricing 
+
+Table 4 shows the per-token pricing for all models used in our experiments as of January 2026, grouped by capability tier.                                      
+
+> Table 4. Model pricing per 1M tokens (OpenRouter, January 2026). Model Input Output Tier Gemini 3 Pro $2.00 $12.00 Frontier Gemini 2.5 Pro $1.25 $10.00 Frontier GPT-4o $2.50 $10.00 Frontier Gemini 2.5 Flash $0.30 $2.50 Mid-tier Llama 3.1 70B $0.40 $0.40 Mid-tier GPT-4o Mini $0.15 $0.60 Budget Qwen3-VL-8B $0.08 $0.50 Budget Llama 4 Scout $0.08 $0.30 Budget GPT-OSS 120B $0.04 $0.19 Budget Llama 3.1 8B $0.02 $0.05 Budget GPT-5 Nano $0.05 $0.40 Budget
+
+C.3. Configuration Details 
+
+Table 5 shows the complete model assignment for each experimental configuration. Frontier models are shown in bold. 
+
+C.4. Complete Results 
+
+Table 6 shows the complete results for all configurations. Pareto-optimal configurations are marked with ⋆. Platform Default was the configuration used to obtain the original 12 Achieving Perfect Accuracy on AndroidWorld Through Task Decomposition   
+
+> Table 5. Model configurations for each experimental profile. Gem = Gemini, Ll = Llama, P = Pro, F = Flash, Sc = Scout. Frontier models in bold .
+
+Configuration Cortex Planner Executor Orch. Context. Hopper Output. Platform Default Gem-3P Ll-4Sc Ll-70B OSS-120B Ll-8B GPT-5N GPT-5N All Frontier Gem-3P Gem-3P Gem-3P Gem-3P Gem-3P Gem-3P Gem-3P 
+
+Degrade Cortex Qwen-8B Gem-2.5P Gem-2.5P Gem-2.5P Gem-2.5P Gem-2.5P Gem-2.5P 
+
+Degrade Planner Gem-2.5P Qwen-8B Gem-2.5P Gem-2.5P Gem-2.5P Gem-2.5P Gem-2.5P 
+
+Degrade Orchestrator Gem-2.5P Gem-2.5P Gem-2.5P Qwen-8B Gem-2.5P Gem-2.5P Gem-2.5P 
+
+Degrade Contextor Gem-2.5P Gem-2.5P Gem-2.5P Gem-2.5P Qwen-8B Gem-2.5P Gem-2.5P 
+
+Frontier Cortex Only Gem-2.5P Gem-2.5F Qwen-8B Qwen-8B Qwen-8B Qwen-8B Qwen-8B GPT-4o Cortex GPT-4o Qwen-8B Qwen-8B Qwen-8B Qwen-8B Qwen-8B Qwen-8B Flash Cortex Gem-2.5F Qwen-8B Qwen-8B Qwen-8B Qwen-8B Qwen-8B Qwen-8B                            
+
+> Table 6. Ablation results. SR = Success Rate on AndroidWorld. ∆SR relative to All Frontier baseline. Configuration SR (%) ∆SR Pareto Platform Default 100.0 —⋆
+> All Frontier 100.0 —Degrade Planner 57.8 -42.2 ⋆
+> Degrade Contextor 57.8 -42.2 Frontier Cortex Only 51.7 -48.3 ⋆
+> Degrade Orchestrator 50.9 -49.1 GPT-4o Cortex 36.2 -63.8 Flash Cortex 28.2 -71.8 ⋆
+> Degrade Cortex 11.2 -88.8
+
+13

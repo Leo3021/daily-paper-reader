@@ -1,0 +1,4178 @@
+Title: On the Uncertainty of Large Language Model-Based Multi-Agent Systems
+
+URL Source: https://arxiv.org/pdf/2602.04234v1
+
+Published Time: Thu, 05 Feb 2026 01:36:27 GMT
+
+Number of Pages: 35
+
+Markdown Content:
+On the Uncertainty of Large Language Model-Based Multi-Agent Systems 
+
+Yuxuan Zhao 1 2 Sijia Chen 2 Ningxin Su 2
+
+Abstract 
+
+Multi-agent systems (MAS) have emerged as a prominent paradigm for leveraging large language models (LLMs) to tackle complex tasks. However, the mechanisms governing the effectiveness of MAS built upon publicly available LLMs, specifi-cally the underlying rationales for their success or failure, remain largely unexplored. In this paper, we revisit MAS through the perspective of uncer-tainty , considering both intra- and inter-agent dy-namics by investigating entropy transitions during problem-solving across various topologies and six benchmark tasks. By analyzing 245 features span-ning token-, trajectory-, and round-level entropy, we counterintuitively find that a single agent out-performs MAS in approximately 43.3% of cases, and that uncertainty dynamics are largely deter-mined during the first round of interaction. Fur-thermore, we provide three key observations: 1) 
+
+Certainty Preference : reducing uncertainty at any stage for any agent is critical for guaranteeing correct solutions; 2) Base Uncertainty : base mod-els with lower entropy during problem-solving directly benefit MAS performance; and 3) Task Awareness : entropy dynamics of MAS play vary-ing roles across different tasks. Building on these insights, we introduce a simple yet effective al-gorithm, the Entropy Judger , to select solutions from MAS’s pass@ k results, leading to consistent accuracy improvements across all MAS configu-rations and tasks. Our source code is available at this https URL. 
+
+1. Introduction 
+
+Multi-agent systems (MAS), with each agent built upon large language models (LLMs), are broadly applied in di-verse domains (Du et al., 2023; Hong et al., 2023; Liu et al., 2023; Paglieri et al., 2024; Xu et al., 2024; Dang et al.,  
+
+> 1Yantai Research Institute of Harbin Engineering University
+> 2Hong Kong University of Science and Technology (Guangzhou). Correspondence to: Sijia Chen <sijiachen@hkust-gz.edu.cn >.
+> Preprint. February 5, 2026.
+
+2025) and even regarded as the only choice for problem-solving (Zhang et al., 2024a). However, it remains largely unexplored whether MAS, particularly those built upon open-source LLMs, can outperform their single-agent coun-terparts, and what underlies their effectiveness. Existing literature has observed that single-agent systems (SAS) can match or even surpass MAS on certain tasks (Gao et al., 2025; Li, 2026) and the failures of MAS often stem from communication breakdowns, inter-agent misalignment, and insufficient verification (Cemri et al., 2025). In partic-ular, recent work establishes scaling principles for MAS through quantitative analysis (Kim et al., 2025). However, these studies are primarily conditioned on simple metrics such as accuracy, latency, and cost without providing a deeper understanding of the underlying mechanisms. Meanwhile, alongside these advances, research into the rea-soning of agentic LLMs has yielded further progress when uncertainty is incorporated into the analysis. By focusing exclusively on entropy, prior work has progressed from an-alyzing its role in reinforcement learning (RL) (Cui et al., 2025; Hao et al., 2025) to developing RL training algorithms that explicitly leverage entropy to balance exploration and exploitation (Chen et al., 2025a; Sharma & Chopra, 2025; Li et al., 2025; Zhang et al., 2025a; Zhu et al., 2025; Cao et al., 2025). Notably, even individual observations of corre-lations between entropy and accuracy have spawned distinct research directions, including entropy regularization (Zhang et al., 2025b; Chen et al., 2025b; Jiang et al., 2025), ad-vantage shaping (Liu et al., 2025; Cheng et al., 2025), and entropy-guided token updates (Wang et al., 2025). Therefore, for LLM-based MAS, which are inherently com-plex and exhibit uncertainty at the token, agent, and other levels, it is crucial to build a comprehensive relationship between uncertainty and reasoning reliability. Although the most recent work (He et al., 2025) provides analysis from an information-theoretic perspective, it remains limited to the compression-prediction pipeline and communication channels alone. In this paper, we revisit MAS by investigating the entire life-cycle of uncertainty across diverse levels, steps, and phases involved in reasoning, under varying MAS topologies and tasks. Specifically, by mining the fine-grained correlation between large-scale information entropy, which is derived 1
+
+> arXiv:2602.04234v1 [cs.MA] 4 Feb 2026 On the Uncertainty of Large Language Model-Based Multi-Agent Systems
+
+from both intra-agent and inter-agent interactions, and MAS performance, we demonstrate that MAS effectiveness is largely determined by early-round uncertainty dynamics, with peak uncertainty universally harmful across architec-tures. In summary, our key contributions are: • A systematic study of entropy dynamics across six bench-mark tasks and four MAS topologies, analyzing 245 fea-tures at token, trajectory, and interaction-round levels; • The counterintuitive finding that SAS outperform MAS in approximately 43.3% of cases, while reducing uncertainty to stable, low levels strongly correlates with correctness. This underscores the trade-off between system complexity and performance; • Three insights on entropy behavior: Certainty Preference (reducing uncertainty at any stage strongly correlates with correctness), Base Uncertainty (lower initial entropy in agents enhances MAS gains), and Task Awareness (en-tropy patterns differ meaningfully across different tasks); • The Entropy Judger , which selects high-quality outputs from MAS pass@ k results and consistently boosts accu-racy across all configurations and tasks. 
+
+2. Related Work 
+
+Large Language Model-based Multi-Agent Systems (MAS) decompose complex tasks into specialized agents that interact through diverse coordination topologies (Chen et al., 2023; Zhang et al., 2024b; Dang et al., 2025; Zhang et al., 2025c), thereby enhancing problem-solving capabil-ities. Beyond improving accuracy and efficiency of MAS, several studies examine the conditions under which MAS are effective. Scaling analyses show that gains from adding agents or varying coordination structures are often offset by communication overhead and inter-agent misalignment, yielding diminishing or even negative returns (Kim et al., 2025). Recent work identifies key failure modes in MAS, such as insufficient verification and communication break-downs (Cemri et al., 2025). More recently, SAS equipped with rich skill libraries have been shown to match or surpass MAS in both accuracy and efficiency (Li, 2026). While these works inform MAS practice, they rely on simple met-rics that fail to capture system complexity and therefore cannot uncover the underlying rationales governing MAS effectiveness. Recent information-theoretic analysis (He et al., 2025) offers deeper insight but is limited to specific compressor-predictor architectures. However, analyzing uncertainty in LLM reasoning , as quantified by policy entropy (Chen et al., 2025a; Cui et al., 2025; Cao et al., 2025; Zhu et al., 2025; Buffa & Del Corro, 2026), has deepened our understanding of the underlying reasoning process. In RL training, reducing entropy sharp-ens the output distribution and can improve accuracy (Karan & Du, 2025; Agarwal et al., 2025), but this benefit is highly dependent on the base model capabilities, and aggressive entropy reduction may trigger entropy collapse , wherein the model becomes overconfident and converges to subop-timal policies (Yue et al., 2025; Zhang et al., 2025d; Chen et al., 2025b; Jiang et al., 2025). To mitigate this, recent work proposes entropy-intervention methods, including en-tropy regularization (Zhang et al., 2025b; Chen et al., 2025b; Jiang et al., 2025), entropy-based advantage shaping (Liu et al., 2025; Cheng et al., 2025), and entropy-guided to-ken updates (Wang et al., 2025; Hao et al., 2025; Yang et al., 2025b). At test time, entropy also serves as an un-certainty signal to dynamically adjust reasoning depth and direction (Li et al., 2025; Sharma & Chopra, 2025; Liu et al., 2025). While these studies enhance single-agent reasoning by probing uncertainty, they largely overlook how uncer-tainty propagates across multiple interacting agents. Tradi-tional multi-agent RL leverages uncertainty for exploration in continuous action spaces (Zhang et al., 2020; Sun et al., 2020; Kim & Sung, 2023), but such methods do not transfer to discrete, language-based coordination. To address this gap, we analyze uncertainty dynamics in LLM-based MAS to explain when and why these systems succeed. 
+
+3. Preliminaries 
+
+We consider a dataset D = {(xi, y ∗ 
+
+> i
+
+)}Ni=1 , where xi is a problem and y∗ 
+
+> i
+
+its verifiable ground-truth answer. Let Mbase 
+
+be an LLM with parameters θ, inducing a policy πθ (v | s)
+
+over tokens v ∈ V given textual state s.
+
+3.1. Single- and Multi-Agent Configurations 
+
+We define each system as M = ( A, G, π θ , M, R ), where 
+
+A is a set of agents each built on Mbase , G = ( A, E ) is a directed interaction graph governing message passing, πθ
+
+is the shared Mbase policy, R is the number of interaction rounds, and M : A × { 1, . . . , R } → 2T maps each agent-round pair to its context H(r) 
+
+> a
+
+, a set of prior trajectories. Each agent generates a reasoning trajectory τ (r) 
+
+> a
+
+∼ πθ (· | 
+
+x, H(r) 
+
+> a
+
+), and the system outputs a final prediction ˆy.
+
+Single Agent System (SAS). A = {a}, G = ( {a}, ∅).The agent accumulates its own history across rounds: 
+
+H(r) 
+
+> a
+
+= {τ (r′) 
+
+> a
+
+}r′<r , with ˆy = τ (R) 
+
+> a
+
+.
+
+Sequential. A = {a1, . . . , a N }, G is a path a1 → · · · → 
+
+aN . Within each round, agents pass messages along the path; across rounds, the first agent receives aggregated his-tory: H(r) 
+
+> aj
+
+=
+
+(
+
+{τ (r′) 
+
+> a
+
+}a∈A, r ′<r j = 1 ,
+
+{τ (r) 
+
+> aj−1
+
+} j > 1, with ˆy = τ (R) 
+
+> aN
+
+.
+
+Centralized. A = Awork ∪ { ao} with working agents 
+
+Awork = {w1, . . . , w N } and orchestrator ao. G is a star graph where all agents connect to ao. The orchestrator aggregates agent outputs and broadcasts feedback: H(r) 
+
+> w
+
+=
+
+{τ (r−1)  
+
+> ao
+
+}, H(r) 
+
+> ao
+
+= {τ (r) 
+
+> w
+
+}w∈Awork , with ˆy = τ (R) 
+
+> ao
+
+.2On the Uncertainty of Large Language Model-Based Multi-Agent Systems 
+
+Debate. A = {a1, . . . , a N }, G is a directed path. Each agent observes all predecessors in the current round and all agents from previous rounds: H(r) 
+
+> aj
+
+= {τ (r) 
+
+> aj′
+
+}j′<j ∪{τ (r′) 
+
+> a
+
+}a∈A, r ′<r . A non-LLM majority voting operator ag-gregates final answers: ˆy = V({τ (R) 
+
+> a
+
+}a∈A).
+
+Hybrid. A = Awork ∪ { ao} as in Centralized. Each working agent observes orchestrator feedback, all peer out-puts from the previous round, and predecessors in the current round: H(r) 
+
+> wi
+
+= {τ (r−1)  
+
+> ao
+
+} ∪ { τ (r−1)  
+
+> w
+
+}w∈Awork ∪{τ (r) 
+
+> wj
+
+}j<i , H(r) 
+
+> ao
+
+= {τ (r) 
+
+> w
+
+}w∈Awork , with ˆy = τ (R) 
+
+> ao
+
+.
+
+3.2. Uncertainty Metrics 
+
+Entropy has emerged as a fundamental perspective for un-derstanding LLM reasoning (Li et al., 2025; Zhang et al., 2025a), with its dynamics directly influencing reasoning per-formance (Cui et al., 2025; Chen et al., 2025a). In contrast to these established roles in single-agent reasoning, we system-atically analyze uncertainty in MAS through hierarchical entropy metrics, spanning token-, agent-, round-, sample-, and system-level granularities. Specifically, for any decod-ing state s, token-level entropy is H(s) = − P 
+
+> v∈V
+
+πθ (v |
+
+s) log πθ (v | s). For sample i, agent a ∈ A, round r, and token position k ∈ τ (r) 
+
+> a
+
+, we denote the decoding state as 
+
+s(i,a,r ) 
+
+> k
+
+and its entropy as H(i,a,r ) 
+
+> k
+
+= H(s(i,a,r ) 
+
+> k
+
+). During experiments, we log H(i,a,r ) 
+
+> k
+
+, time, and token costs for every agent at each round. 
+
+4. Exploring MAS with Uncertainty Dynamics 
+
+While prior work investigates failure modes of MAS (Cemri et al., 2025; Kim et al., 2025; Li, 2026), it relies on propri-etary models and aggregate metrics, such as accuracy, la-tency, and cost, overlooking how uncertainty evolves within and across agents. We address this gap by analyzing entropy dynamics in open-source LLM-based MAS across diverse topologies and tasks. 
+
+4.1. Evaluation Protocol 
+
+Small, open-source LLMs enable cost-effective multi-agent collaboration through specialized task allocation and co-ordination (Shen et al., 2024; Chen & Varoquaux, 2024; Liang et al., 2024; Belcak et al., 2025). Their open access to token-level probabilities supports reliable uncertainty quan-tification, which is critical for agent decision-making. More discussion can be found in Appendix A. To this end, in contrast to prior work (Kim et al., 2025) which evaluates only proprietary API-based mod-els, our study focuses on publicly available LLMs, including the LLaMA series (3.1-8B-Instruct, 3.2-3B-Instruct) (Grattafiori et al., 2024) and the Qwen3 series (0.6B, 4B, 8B) (Yang et al., 2025a). All systems are built using the same Mbase , with the number of interaction rounds fixed to 2, temperature set to 0.6, top-p to 0.95, and max-imum sequence length to 8,192 tokens. Our evaluation spans three domains: mathematics ( GSM8K (Cobbe et al., 2021), MATH500 (Hendrycks et al., 2021b), AIME2024 ,
+
+AIME2025 ), code generation ( HumanEval ) (Chen, 2021), and knowledge QA ( MMLU ) (Hendrycks et al., 2021a). We use the first 100 samples for GSM8K and the first 1K samples for MMLU , while the full test sets are used for all other bench-marks. Each question is accompanied by a chain-of-thought prompt. On the challenging AIME24/25 benchmarks, the maximum sequence length is set to 16,384 tokens. We exclude debate architecture on HumanEval , as majority voting is generally ineffective for code generation tasks. Ad-ditional experimental details are provided in Appendix B. 
+
+4.2. Measuring Reasoning with Entropy and Beyond 
+
+Entropy has proven effective for analyzing single-agent rea-soning (Sharma & Chopra, 2025; Zhu et al., 2025; Zhang et al., 2025a; Su et al., 2025). Recent work has even leveraged entropy-based features to train simple machine learning models that predict LLM correctness (Buffa & Del Corro, 2026). However, this approach is limited to a sin-gle LLM and computes entropy only from the top-20 token probabilities, yielding just 11 entropy-related features. We extend entropy analysis to MAS by designing hierarchical entropy features that capture how uncertainty evolves across agents and rounds. Specifically, for each sample i, agent 
+
+a ∈ A, and round r ∈ { 1, . . . , R }, we extract 254 features from logged traces: 
+
+Entropy features (FE , 239 features) measure uncertainty across hierarchical levels: • Agent-level statistics capture per-agent reasoning trajecto-ries, including their statistical properties, variations across rounds, and inter-agent entropy divergence (156); • Round-level dynamics track aggregate entropy metrics for each round and their relative changes (27); • Sample-level statistics aggregate entropy measures across all agents involved in processing a given sample (29); • System-level aggregation provides global uncertainty mea-sures by comparing entropy patterns across different coor-dination topologies (10); • Base-model entropy (Fbase-E , 17 features) additionally cap-tures uncertainty characteristics of Mbase and quantifies shifts in entropy between Mbase and MAS; 
+
+Computational metrics (FC , 15 features) capture non-entropy-related quantities, including reasoning time, token usage, inference counts, and Mbase correctness ( Fbase-C , 4 features), at the same hierarchical levels used for FE .Excluding 9 experimental identifier columns yields 245 trainable features. We define three feature groups to isolate the influence of Mbase on MAS performance: (1) MAS only 
+
+(GMAS , d = 224 ): GMAS = ( FE ∪ F C ) \ (Fbase-E ∪ F base-C ),capturing uncertainty dynamics intrinsic to multi-agent in-teraction; (2) Base entropy (Gbase-H , d = 241 ): Gbase-H =
+
+GMAS ∪ F base-E , evaluating the impact of Mbase entropy on MAS performance; (3) Base full (Gbase-full , d = 245 ): 3On the Uncertainty of Large Language Model-Based Multi-Agent Systems L-3 L-8 Q-0.6 Q-4 Q-8                     
+
+> Model
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> Accuracy
+> AIME24
+> base
+> centralized
+> debate
+> hybrid
+> sequential
+> single
+> L-3 L-8 Q-0.6 Q-4 Q-8
+> Model
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> AIME25
+> L-3 L-8 Q-0.6 Q-4 Q-8
+> Model
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> GSM8K
+> L-3 L-8 Q-0.6 Q-4 Q-8
+> Model
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> HumanEval
+> L-3 L-8 Q-0.6 Q-4 Q-8
+> Model
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> MATH500
+> L-3 L-8 Q-0.6 Q-4 Q-8
+> Model
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> MMLU
+
+Figure 1. Accuracy comparison of SAS and MAS across models and datasets. For brevity, LLaMA-3.2-3B-Instruct and LLaMA-3.1-8B-Instruct are denoted as L-3 and L-8, respectively; Qwen3-0.6B, Qwen3-4B, and Qwen3-8B are denoted as Q-0.6, Q-4, and Q-8. The 
+
+base denotes the accuracy of a single Mbase on each dataset. 
+
+Gbase-full = Gbase-H ∪ F base-C , directly measuring how Mbase ’s reasoning capability conditions or limits MAS effectiveness. Complete feature definitions are provided in Appendix C. 
+
+4.3. Mining Effectiveness of MAS 
+
+MAS built on LLMs inherently exhibit uncertainty during individual reasoning, and their interactions among agents compound this effect (Guo et al., 2024; Cemri et al., 2025; Gao et al., 2025; Tran et al., 2025). Prior work largely relies on simple metrics that fail to capture internal uncertainty dynamics or identify the factors underlying MAS failure. To address this, we leverage the hierarchical entropy fea-tures defined in Section 4.2 to reformulate MAS evaluation as a supervised learning problem: predicting per-sample correctness yi ∈ { 0, 1} from entropy traces xi ∈ Rd. This formulation enables data-driven mining through tree-based models, XGBoost (Chen, 2016) and LightGBM (Ke et al., 2017), to uncover fine-grained factors governing MAS ef-fectiveness. Training on three feature groups with dimen-sions d ∈ { 224 , 241 , 245 }, we naturally derive the Entropy Judger , denoted as a classifier f : Rd → [0 , 1] . Beyond bi-nary prediction, f enables pass@ k selection on unseen con-figurations by identifying the candidate with the highest pre-dicted probability of correctness: ˆℓ = arg max ℓ∈[k] f (xℓ).To interpret learned patterns, we perform SHapley Ad-ditive exPlanations (SHAP) analysis (Lundberg & Lee, 2017) on both XGBoost and LightGBM. For each fea-ture j, we extract two metrics: (1) mean feature im-portance ¯Ij = 12
+
+P 
+
+> m∈M
+
+˜I(m) 
+
+> j
+
+, where ˜I(m) 
+
+> j
+
+∈ [0 , 1] is the min-max normalized importance from model m ∈M = {XGBoost , LightGBM }; and (2) SHAP correlation 
+
+ρj = 12
+
+P 
+
+> m∈M
+
+corr (xj , ϕ(m) 
+
+> j
+
+), where xj denotes feature values and ϕ(m) 
+
+> j
+
+their SHAP attributions under model m.The sign of ρj indicates direction: ρj > 0 implies higher feature values increase predicted correctness. Further details are provided in Appendix B.4. 
+
+4.4. Examining Uncertainty Impacts on MAS MAS does not always outperform SAS. Conventional assumptions suggest that more agents improve MAS perfor-mance (Zhang et al., 2024a). However, consistent with re-cent findings (Kim et al., 2025), we show that MAS does not universally surpass SAS, and we substantially extend this observation to open-source LLMs across a broader range of tasks. Specifically, across 5 models and 6 datasets, SAS achieves the highest accuracy in 13 cases (43.3%) and out-performs at least one MAS architecture in 13 additional cases, totaling 26 out of 30 scenarios where SAS matches or exceeds MAS, shown in Figure 1. In the 13 cases where SAS is best, it surpasses the average MAS accuracy by 6.28%, primarily on math tasks and smaller models. 
+
+Base model entropy limits MAS effectiveness. Prior work shows MAS performance depends on Mbase capa-bility (Zhang et al., 2025c), a trend we also observe in Figure 1; moreover, we find that Mbase uncertainty further constrains MAS effectiveness. On Gbase-H , the top predic-tors are total token-level entropy and answer length: for LLaMA, total token count ( ρ ≈ − 0.47 , ¯I = 1 .0) and en-tropy ( ρ ≈ − 0.73 , ¯I ≈ 0.72 ); for Qwen3, answer token count ( ρ ≈ − 0.18 , ¯I ≈ 0.58 ) and entropy ( ρ ≈ − 0.64 ,
+
+¯I ≈ 0.36 ). Critically, higher Mbase entropy consistently re-duces MAS accuracy across both families, as shown in Fig-ure 2(b,d), with performance dropping sharply when entropy exceeds 100. Notably, despite this shared trend, entropy scales differ: LLaMA operates in low-entropy ranges (0-100) but achieves lower accuracy, while Qwen uses higher entropy (100-1,000) yet performs better. This reflects diver-gent reasoning styles, as Qwen tends to verify and refine its answers before producing a final output, generating self-correcting trajectories that yield more reliable results and suppress error propagation in MAS, even though this pro-cess incurs higher entropy, whereas LLaMA tends to accept and reuse answers from other agents without verification, leading to uncontrolled error propagation. We provide addi-tional results in Appendix D.1 and an illustrative example in Appendix E. 
+
+MAS mainly fails on inter-agent misalignment. Prior work identifies inter-agent misalignment as a key cause of MAS failure (Cemri et al., 2025). We deepen this under-standing by analyzing fine-grained entropy dynamics within MAS. On GMAS , as shown in Figure 3, we examine the top entropy-related features ranked by ¯I. For Qwen, fail-ure is driven by high entropy variance across agents during 4On the Uncertainty of Large Language Model-Based Multi-Agent Systems 0.0 0.2 0.4 0.6 0.8 1.0 
+
+> Normalized Feature Value
+> 1.5
+> 1.0
+> 0.5
+> 0.0
+> 0.5
+> 1.0
+> SHAP Value
+
+(a)       
+
+> 0.00 0.25 0.50 0.75 1.00
+> Importance
+> base model total token
+> base model entropy
+> sample answer token coun...
+> answer token entropy cha...
+> base model answer token
+> LightGBM
+> XGBoost
+> Mean
+> Base Model Answer Token
+> (Pearson Correlation=-0.321)
+> Base Model Entropy
+> (Pearson Correlation=-0.739)
+> 010 210 3
+> Base Model Entropy
+> 10
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> 80
+> Accuracy (%)
+
+(b)      
+
+> centralized
+> debate
+> hybrid
+> sequential
+> single
+> LLaMA-3.1-8B-Instruct (Base)
+> LLaMA-3.2-3B-Instruct (Base)
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Normalized Feature Value
+> 3
+> 2
+> 1
+> 0
+> 1
+> SHAP Value
+
+(c)       
+
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Importance
+> sample variance entropy
+> base model answer token
+> sample round 1 q3 agent ...
+> sample round 1 q3 agent ...
+> base model entropy
+> LightGBM
+> XGBoost
+> Mean
+> Base Model Answer Token
+> (Pearson Correlation=-0.228)
+> Base Model Entropy
+> (Pearson Correlation=-0.637)
+> 10 210 3
+> Base Model Entropy
+> 40
+> 50
+> 60
+> 70
+> 80
+> 90
+> Accuracy (%)
+
+(d) 
+
+> centralized
+> debate
+> hybrid
+> sequential
+> single
+> Qwen3-0.6B (Base)
+> Qwen3-4B (Base)
+> Qwen3-8B (Base)
+
+Figure 2. Base model entropy limits MAS effectiveness. The left two subfigures show results for LLaMA; the right two for Qwen. (a) Relationship between feature values and SHAP values for most important entropy features on Gbase-H , sorted by ¯Ij and annotated with ρj .(b) MAS performance across deciles of Mbase entropy: Mbase entropy is partitioned into ten equal-sized bins, and average MAS accuracy (aggregated over datasets and model sizes) is computed per bin. Additionally, the average Mbase entropy and accuracy across all datasets are overlaid as markers. 0.0 0.2 0.4 0.6 0.8 1.0 
+
+> Normalized Feature Value
+> 0.6
+> 0.4
+> 0.2
+> 0.0
+> 0.2
+> SHAP Value
+
+(a)          
+
+> 0.00 0.25 0.50 0.75 1.00
+> Importance
+> answer token
+> min answer token e...
+> all agents token c...
+> round 2 infer avg ...
+> round mean agent t...
+> LightGBM
+> XGBoost
+> Mean
+> Min Answer Token Entropy (r=-0.776)
+> Round 2 Infer Avg Entropy (r=0.672)
+> 0.0 0.5 1.0 1.5 2.0 2.5
+
+Sample Min Answer Token Entropy 
+
+> 0
+> 10
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> Round 2 Infer Avg Entropy
+
+(b)      
+
+> SAS Negative
+> MAS Negative
+> SAS Positive
+> MAS Positive
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Normalized Feature Value
+> 0.6
+> 0.4
+> 0.2
+> 0.0
+> 0.2
+> 0.4
+> SHAP Value
+
+(c)         
+
+> 0.00 0.25 0.50 0.75 1.00
+> Importance
+> var entropy
+> answer token
+> r1 q3 var entropy
+> round 1 q3 agent s...
+> round 1 max agent ...
+> LightGBM
+> XGBoost
+> Mean
+> Variance Entropy
+> (Pearson Correlation -0.918)
+> Round 1 Q3 Var Entropy
+> (Pearson Correlation -0.868)
+> 0.00 0.05 0.10 0.15 0.20
+
+Sample Variance Entropy 
+
+> 0.05
+> 0.10
+> 0.15
+> 0.20
+> 0.25
+> Sample Round 1 Q3 Agent Variance Entropy
+
+(d) 
+
+> SAS Negative
+> MAS Negative
+> SAS Positive
+> MAS Positive
+
+Figure 3. MAS mainly fails on inter-agent misalignment. The left two subfigures show results for LLaMA; the right two for Qwen. (a) Same as Figure 2(a), but for entropy features in GMAS . (b) Impact of these features on sample predicted correctness: for each sample in the LightGBM and XGBoost test sets, we plot feature values against the average predicted probability of correctness from both models. 
+
+problem solving ( ρ ≈ − 0.92 , ¯I ≈ 0.83 ) and strong agent disagreement in round 1 (measured by third-quartile en-tropy variance: ρ ≈ − 0.87 , ¯I ≈ 0.47 ), indicating that early divergence leads to increasingly incompatible reasoning tra-jectories. This pattern is further corroborated in Figure 3 (d): at comparable levels of entropy variance, SAS exhibits consistently lower agent disagreement in round 1 than MAS, partially explaining SAS’s superior performance. In con-trast, LLaMA failures are characterized by verbose and un-certain final answers, with answer-token count ( ρ ≈ − 0.63 ,
+
+¯I ≈ 0.78 ) and minimum answer-token entropy ( ρ ≈ − 0.78 ,
+
+¯I ≈ 0.56 ) as dominant predictors. Notably, for LLaMA, average per-agent entropy in round 2 shows a positive corre-lation with correctness, a pattern absent in Qwen, suggesting that higher uncertainty in later rounds reflects productive exploration rather than confusion, whereas Qwen achieves reliability through early convergence. More analysis can be found in the Appendix D.2. 
+
+5. Deep Analysis 
+
+5.1. Effective MAS Requires Stable Deliberation 
+
+Based on average MAS accuracy across datasets, we cate-gorize mathematical reasoning tasks into three difficulty levels: easy ( GSM8K ), medium ( Math500 ), and hard (AIME24/25 ). We analyze entropy features in GMAS across these levels to understand how uncertainty shapes MAS ef-fectiveness under varying task difficulty. 
+
+Stable and Low Entropy for Simple Problems. On 
+
+GSM8K , the top features include final answer length and dispersion of early-round agent uncertainty (with ¯I ∈
+
+[0 .51 , 0.56] and |ρ| ≤ 0.15 ), indicating only a mild influ-ence on predicted correctness. In contrast, overall round-1 entropy ( ¯I ≈ 0.47 , ρ ≈ − 0.64 ) and the stability in-dex which measures consistency of entropy across agents ( ¯I ≈ 0.44 , ρ ≈ − 0.79 ), are both highly predictive and strongly negatively correlated with success. This suggests that simple problems are best solved when agents converge quickly to low-entropy, stable answers. 
+
+Balanced Exploration for Medium Problems. On 
+
+Math500 , high average per-agent reasoning entropy ( ¯I ≈
+
+0.77 , ρ ≈ 0.63 ) and longer reasoning time in round 1 ( ¯I ≈ 0.15 , ρ ≈ 0.71 ) correlate positively with MAS suc-cess, suggesting that medium-difficulty problems benefit from sustained, moderately uncertain exploration. Con-versely, excessive early uncertainty, measured by maximum 5On the Uncertainty of Large Language Model-Based Multi-Agent Systems 0.0 0.2 0.4 0.6 0.8 1.0                        
+
+> Normalized Feature Value
+> 2.0
+> 1.5
+> 1.0
+> 0.5
+> 0.0
+> 0.5
+> 1.0
+> 1.5
+> SHAP Value
+> (a)
+> AIME25
+> AIME24
+> MATH500
+> GSM8K
+> HE
+> MMLU
+> Round 1 Max Agent Entropy
+> Average Agent Entropy
+> AIME25 AIME24 MATH500 GSM8K HE MMLU
+> Dataset
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Normalized Feature Value
+> 25% 32% 55% 82% 49% 68%
+> (b)
+> Round 1 Max Agent Entropy
+> Average Agent Entropy
+> Mean
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> Normalized Feature Value
+> 1.0
+> 0.5
+> 0.0
+> 0.5
+> 1.0
+> SHAP Value
+> (c)
+> Centralized
+> Debate
+> Hybrid
+> Sequential
+> Single
+> R1 Q3 Agent Max Entropy
+> R1 Max Agent Std Entropy
+> Centralized Debate Hybrid Sequential Single
+> Architecture
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Normalized Feature Value
+> 54% 54% 53% 48% 55%
+> (d)
+> R1 Q3 Agent Max Entropy
+> R1 Max Agent Std Entropy
+> Mean
+
+Figure 4. Uncertainty in MAS exerts distinct effects depending on task difficulty and the coordination architecture. (a, c) Feature-SHAP relationships for top entropy features in GMAS , grouped by dataset (a) and architecture (c). (b, d) Corresponding box plots across all models, annotated with average MAS correctness per dataset (b) or per architecture (d). 
+
+total entropy across agents in round 1 ( ρ ≈ − 0.73 ), and verbose final answers ( ρ ≈ − 0.48 ) strongly predict fail-ure. Notably, median round-1 entropy also shows a negative correlation ( ρ ≈ − 0.36 ), indicating that while some un-certainty aids discovery, uncontrolled divergence hinders consensus. Together, these findings show that on medium-difficulty problems, MAS succeeds when agents explore long enough with moderate uncertainty, but avoid excessive early divergence, and converge on a concise answer. 
+
+Structured Deliberation for Hard Problems. On 
+
+AIME24/25 , round-1 total reasoning time is the top pre-dictor ( ¯I = 1 .0, ρ ≈ 0.73 ), confirming that olympiad-level problems require substantial early effort. Crucially, entropy-related features reveal a sharp trade-off: excessive early uncertainty harms performance, evident in strong negative correlations for round-1 max entropy ( ρ ≤ − 0.70 ) and per-token entropy ( ρ ≈ − 0.37 ), while moderate average output entropy shows a positive correlation ( ρ ≥ 0.37 ). Entropy dispersion in later rounds also degrades accuracy, with high inter-agent variance in round-2 strongly predicting failure (|ρ| ≥ 0.66 ). Together, these results show that success on hard problems demands not just long reasoning, but con-trolled uncertainty: early exploration must be bounded, and agent uncertainty must remain aligned. 
+
+Stable Uncertainty for Code Generation. On 
+
+HumanEval , total reasoning time is the strongest predic-tor, and moderate average entropy improves performance, while both overconfident and erratic uncertainty profiles degrade it. This echoes the principle observed in mathe-matical reasoning: deliberation benefits MAS only when uncertainty remains structured and stable. 
+
+Inter-Agent Agreement for Knowledge QA. On MMLU ,MAS performance depends on inter-agent agreement, not deliberation length. Entropy variance is the top predic-tor, and larger teams reduce accuracy. Unlike in math or code, slightly longer answers help, though high-entropy tails remain harmful. Extended interaction yields no benefit, confirming that consensus, not duration, drives success in knowledge-intensive QA. Overall, entropy-performance relationships are task-aware : simple tasks demand rapid convergence to low, sta-ble entropy, whereas medium and hard tasks benefit from moderate average entropy but are harmed by peak or dis-persed uncertainty. This reveals that harder problems require more exploratory reasoning, yet uncontrolled entropy spikes remain universally detrimental. Additionally, extended rea-soning consistently improves MAS performance on hard tasks , with trajectory length strongly predictive of success ( ¯I ≥ 0.75 , ρ ≥ 0.63 ). This aligns with findings in LLM reinforcement learning, where longer reasoning chains re-flect stronger underlying reasoning capabilities (Yeo et al., 2025; Chen et al., 2025c). Beyond per-dataset analyses, we examine the two most important entropy features across all models and datasets: round-1 maximum agent entropy and average entropy of agents’ outputs during problem solving. Figure 4(a) shows that harder tasks exhibit wider SHAP value distributions and benefit from moderate average en-tropy, whereas high early uncertainty consistently harms performance. In contrast, easier datasets gain little from higher entropy. Figure 4(b) further reveals that as dataset ac-curacy declines, from 82% on GSM8K to 25% on AIME25 ,both entropy features increase in magnitude and dispersion, with round-1 max entropy showing the strongest sensitivity to task difficulty. This suggests that difficult problems not only induce higher uncertainty, but also amplify inter-agent disagreement, making early entropy control increasingly critical as task complexity grows. Finally, these results show that MAS succeeds by reasoning more while keep-ing uncertainty low and consistent across agents . We show these findings with token-level entropy case studies in Appendix F and provide further analysis in Appendix D.3. 
+
+5.2. Peak Entropy Is Universally Harmful in MAS 
+
+We analyze how entropy features influence MAS effective-ness across five architectures on GMAS .
+
+Centralized systems are highly sensitive to early uncer-tainty: peak agent entropy in round 1 and peak answer entropy strongly predict failure, as the orchestrator’s single-6On the Uncertainty of Large Language Model-Based Multi-Agent Systems Math500 AIME25         
+
+> Dataset
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Accuracy (%)
+> (a)
+> Qwen3-0.6B
+> Qwen3-4B
+> R=2
+> R=5
+> Single
+> Debate
+> Centralized
+> Sequential
+> Hybrid
+> 12345
+> Round Number
+> 0
+> 1000
+> 2000
+> 3000
+> Entropy Value
+> (b)
+> Total Entropy
+> Mean Agent Entropy
+> Max Agent Entropy
+> 01000 2000 3000 4000
+> Round 1 Max Agent Total Entropy
+> 0
+> 5000
+> 10000
+> 15000
+> 20000
+> Sample Total Entropy
+> (c)
+> SAS Negative
+> MAS Negative
+> SAS Positive
+> MAS Positive
+> 0
+> 5
+> 10
+> 15
+> 20
+> 25
+> 30
+> 35
+> Total Tokens (100K)
+
+Figure 5. More rounds do not necessarily improve MAS performance. (a) Accuracy and token consumption for different MAS architectures with R = 2 and R = 5 on two benchmarks. (b) Evolution of three key entropy metrics across rounds. (c) The impact of two prominent entropy features, notable for their high importance ( ¯I) and strong correlation ( |ρ|) with sample correctness. 
+
+context aggregation allows any erratic agent to contaminate the entire reasoning process. Debate architectures depend critically on early consensus: high initial agent divergence reflect how initial divergence amplifies across rounds, pre-venting convergence; yet once aligned, cumulative entropy becomes beneficial, indicating productive exploration. Hy-brid systems balance robustness and depth: early peak en-tropy remains harmful, but dual feedback from peers and orchestrator enables recovery through extended delibera-tion. Sequential systems are most fragile: answer-level entropy dominates the top predictors, reflecting error propa-gation through strict role chaining with no cross-checking. 
+
+Single (SAS) prioritize brevity and penalize both high an-swer entropy and entropy variance, indicating that internal consistency is critical for success. 
+
+Architecture determines which entropy matters. 
+
+Aggregation-based systems (centralized, debate) fail on inter-agent dispersion, as noisy inputs corrupt shared contexts. Sequential systems fail on answer-level entropy, where specialized roles propagate errors without cross-verification. Hybrid systems are most robust, reconciling conflicts through dual feedback. Universally, peak entropy harms, while cumulative entropy helps , showing MAS succeeds by shaping entropy distribution, not eliminating uncertainty. Beyond per-architecture analysis, we compare two key features across all architectures: upper-quartile agent peak entropy and maximum entropy dispersion across agents in round 1. Figure 4(c) shows both negatively predict correctness within each architecture. Surprisingly, Figure 4(d) reveals an inverse trend across architectures: sequential (lowest-performing) shows lowest feature averages, while single (highest-performing) shows highest. This indicates that the relationship between entropy and performance depends on architectural capacity to control uncertainty , not merely on minimizing entropy. More analysis can be found in Appendix D.4. 
+
+5.3. More Rounds Are Not Always Better 
+
+All experiments above default to R = 2 rounds. To in-vestigate whether more rounds help, we extend analysis to 
+
+R = 5 using Qwen3-0.6B and Qwen3-4B on MATH500 
+
+(first 100 samples) and AIME2025 , expanding the feature space from 224 to 494 dimensions. Comparing R = 2 and R = 5 , we find that extending delib-eration rarely improves performance and often harms it ,even at the cost of higher token consumption, as shown in Figure 5(a). On challenging benchmarks like AIME25 and 
+
+MATH500 , most architectures, including debate and hybrid, exhibit performance degradation with additional rounds, especially for smaller models. The only consistent gains occur in centralized systems, where strong orchestration enables effective aggregation over longer trajectories. In contrast, peer-based architectures (debate, hybrid) appear to suffer from prolonged disagreement, as repeated interac-tions without convergence amplify noise rather than refine reasoning. This is further supported by entropy dynamics: as Figure 5(b) shows, key uncertainty metrics, maximum, mean, and total entropy, drop sharply from round 1 to round 2, but remain nearly flat from round 2 to round 5, indicating that agents largely stabilize after the second round. Together, these results demonstrate that simply increasing the num-ber of rounds does not enhance MAS performance; instead, 
+
+the benefit of extended deliberation depends critically on an architecture’s ability to align agents and stabilize uncertainty early in the process .Despite the expanded feature space with R = 5 , early-round uncertainty remains the dominant failure mode, as shown in Figure 5(c). Round-1 features dominate the top predictors: peak cumulative agent entropy in round 1 ranks second ( ¯I ≈ 0.60 , ρ ≈ − 0.91 ), and upper-quartile inter-agent entropy dispersion also appears in the top five ( ¯I ≈ 0.50 ), underscoring the critical role of early consensus. Even cumulative sample-level entropy is strongly harmful ( ρ ≈−0.73 ), reinforcing that uncontrolled uncertainty, not just its timing, is detrimental. These results confirm a central 7On the Uncertainty of Large Language Model-Based Multi-Agent Systems AIME24 AIME25 HE Math500 MMLU GSM8K           
+
+> Dataset
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Accuracy (%)
+> (a)
+> base
+> centralized
+> debate
+> hybrid
+> sequential
+> single
+> 020 40 60 80
+> Base Model Entropy
+> 50
+> 60
+> 70
+> 80
+> Accuracy (%)
+> (b)
+> centralized
+> debate
+> hybrid
+> sequential
+> single
+> Qwen-2.5-7B-RL (Base)
+> 025 50 75 100 125 150
+> Round 2 Total Entropy
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> 120
+> Round 1 Median Agent Entropy
+> (c)
+> SAS Negative
+> MAS Negative
+> SAS Positive
+> MAS Positive
+
+Figure 6. The role of uncertainty is reshaped in MAS built on Qwen2.5-7B-SimpleRL-Zoo. (a) The performance of different MAS architectures across datasets. (b) Relationship between base-model entropy and MAS accuracy. (c) Most predictive features in GMAS .
+
+principle: MAS effectiveness is largely determined in the first round, and additional deliberation cannot reliably recover from initial misalignment . More analysis can be found in Appendix D.5. 
+
+5.4. RL Training Inverts the Role of Uncertainty 
+
+Few studies have investigated whether using a specialized, fine-tuned model as the base can improve MAS performance on reasoning tasks. We explore this using Qwen2.5-7B-SimpleRL-Zoo (Zeng et al., 2025), denoted MRL-base , an RL-fine-tuned model trained on 8K MATH problems. Figure 6 highlights three findings. (1) MRL-base consistently enables MAS to outperform SAS , whereas with the stan-dard Mbase , SAS surpasses MAS in 43.3% of cases, but never does with MRL-base . (2) The base model entropy-accuracy relationship is reshaped : for Mbase , higher en-tropy monotonically reduces accuracy, but for MRL-base , ac-curacy first declines then recovers with increasing entropy, as shown in Figure 6(b), indicating that moderate uncer-tainty supports productive exploration. (3) On GMAS , the top predictors are round-1 median entropy ( ρ ≈ − 0.758 ) and round-2 entropy ( ρ ≈ 0.267 ), as shown in Figure 6(c), sug-gesting early convergence is beneficial, while later entropy reflects refinement rather than noise. Further comparison across Figure 2(b,d) and Figure 6(b) shows that MRL-base achieves both lower entropy and higher correctness than Mbase . This indicates that RL training yields better reasoning and more reliable uncer-tainty estimates. Unlike standard models, where high en-tropy often signals hallucination, MRL-base harnesses un-certainty to drive effective exploration, enabling MAS to generate diverse, valuable reasoning paths that are itera-tively refined. Consequently, MAS leverages this enhanced base capability to outperform SAS. More analysis can be found in Appendix D.6. 
+
+5.5. Uncertainty Predicts MAS Correctness 
+
+The Entropy Judger achieves strong classification accuracy using only MAS-derived entropy features from GMAS , as shown in Table 1, demonstrating that uncertainty dynamics 
+
+Table 1. Entropy Judger cross-validation accuracy. Results are averaged over five folds, and standard deviations are below 0.02 across all settings; these values are omitted for brevity. 
+
+Feature Group Description LLaMA Qwen 
+
+GMAS MAS only 0.726 0.791 
+
+Gbase-H + base entropy 0.745 0.807 
+
+Gbase-full + base correctness 0.812 0.916 
+
+alone are highly predictive of correctness. Beyond binary prediction, the Entropy Judger enables label-free pass@ k
+
+selection and consistently improves accuracy across all MAS configurations. Incorporating base model features from Gbase-H and Gbase-full yields further gains, confirming that base model characteristics influence MAS effective-ness. This practical capability, selecting high-quality out-puts without ground-truth labels, makes the Entropy Judger 
+
+well suited for real-world deployment. Additional details are provided in Appendix G. 
+
+6. Conclusion 
+
+This study presents a comprehensive analysis of uncertainty dynamics in LLM-based multi-agent systems, examining 245 entropy features across six benchmarks and four MAS topologies. Our findings challenge prevailing assumptions: single agents outperform MAS in 43.3% of cases, and MAS effectiveness is largely determined by first-round entropy dy-namics rather than extended deliberation. We identify three principles governing MAS performance: (1) Certainty Pref-erence , where reducing uncertainty at any stage correlates with correctness; (2) Base Uncertainty , where lower base model entropy directly benefits MAS; and (3) Task Aware-ness , where optimal entropy profiles vary by task difficulty. Building on these insights, the Entropy Judger leverages learned entropy patterns to select high-quality outputs from MAS pass@ k candidates, achieving consistent accuracy gains without ground-truth labels. Our work establishes uncertainty as a principled perspective for understanding and improving multi-agent reasoning. 8On the Uncertainty of Large Language Model-Based Multi-Agent Systems 
+
+Impact Statement 
+
+This work provides a principled understanding of uncer-tainty dynamics in LLM-based multi-agent systems, offer-ing practical value for both researchers and practitioners. For the research community, our entropy-based analysis framework establishes a new perspective for diagnosing MAS failures and guiding architectural design decisions. For practitioners, our findings that single agents outperform MAS in 43.3% of cases, combined with the insight that first-round dynamics largely determine outcomes, can in-form more resource-efficient deployment strategies. The En-tropy Judger further enables quality-aware output selection without requiring ground-truth labels, reducing annotation costs in real-world applications. We do not foresee spe-cific negative societal consequences beyond those generally associated with advancing LLM capabilities. 
+
+References 
+
+Agarwal, S., Zhang, Z., Yuan, L., Han, J., and Peng, H. The unreasonable effectiveness of entropy minimization in llm reasoning. arXiv preprint arXiv:2505.15134 , 2025. Belcak, P., Heinrich, G., Diao, S., Fu, Y., Dong, X., Mu-ralidharan, S., Lin, Y. C., and Molchanov, P. Small lan-guage models are the future of agentic ai. arXiv preprint arXiv:2506.02153 , 2025. Buffa, P. M. and Del Corro, L. Entropy sentinel: Continuous llm accuracy monitoring from decoding entropy traces in stem. arXiv preprint arXiv:2601.09001 , 2026. Cao, H., Bai, Z., Peng, Z., Wang, B., Yang, T., Huo, J., Zhang, Y., and Gao, Y. Efficient reinforcement learning with semantic and token entropy for llm reasoning. arXiv preprint arXiv:2512.04359 , 2025. Cemri, M., Pan, M. Z., Yang, S., Agrawal, L. A., Chopra, B., Tiwari, R., Keutzer, K., Parameswaran, A., Klein, D., Ramchandran, K., et al. Why do multi-agent llm systems fail? arXiv preprint arXiv:2503.13657 , 2025. Chen, L. and Varoquaux, G. What is the role of small models in the llm era: A survey. arXiv preprint arXiv:2409.06857 , 2024. Chen, M. Evaluating large language models trained on code. 
+
+arXiv preprint arXiv:2107.03374 , 2021. Chen, M., Chen, G., Wang, W., and Yang, Y. Seed-grpo: Semantic entropy enhanced grpo for uncertainty-aware policy optimization. arXiv preprint arXiv:2505.12346 ,2025a. Chen, P., Li, X., Li, Z., Yin, W., Chen, X., and Lin, T. Explo-ration vs exploitation: Rethinking rlvr through clipping, entropy, and spurious reward. In The 5th Workshop on Mathematical Reasoning and AI at NeurIPS 2025 , 2025b. Chen, Q., Qin, L., Liu, J., Peng, D., Guan, J., Wang, P., Hu, M., Zhou, Y., Gao, T., and Che, W. Towards reasoning era: A survey of long chain-of-thought for reasoning large language models. arXiv preprint arXiv:2503.09567 ,2025c. Chen, T. Xgboost: A scalable tree boosting system. Cornell University , 2016. Chen, W., Su, Y., Zuo, J., Yang, C., Yuan, C., Chan, C.-M., Yu, H., Lu, Y., Hung, Y.-H., Qian, C., et al. Agentverse: Facilitating multi-agent collaboration and exploring emer-gent behaviors. In The Twelfth International Conference on Learning Representations , 2023. Cheng, D., Huang, S., Zhu, X., Dai, B., Zhao, W. X., Zhang, Z., and Wei, F. Reasoning with exploration: An entropy perspective. In Annual AAAI Conference on Artificial Intelligence , 2025. Cobbe, K., Kosaraju, V., Bavarian, M., Chen, M., Jun, H., Kaiser, L., Plappert, M., Tworek, J., Hilton, J., Nakano, R., et al. Training verifiers to solve math word problems. 
+
+arXiv preprint arXiv:2110.14168 , 2021. Cui, G., Zhang, Y., Chen, J., Yuan, L., Wang, Z., Zuo, Y., Li, H., Fan, Y., Chen, H., Chen, W., et al. The entropy mech-anism of reinforcement learning for reasoning language models. arXiv preprint arXiv:2505.22617 , 2025. Dang, Y., Qian, C., Luo, X., Fan, J., Xie, Z., Shi, R., Chen, W., Yang, C., Che, X., Tian, Y., et al. Multi-agent collab-oration via evolving orchestration. In Advances in neural information processing systems , 2025. Du, Y., Li, S., Torralba, A., Tenenbaum, J. B., and Mordatch, I. Improving factuality and reasoning in language models through multiagent debate. In Forty-first International Conference on Machine Learning , 2023. Gao, M., Li, Y., Liu, B., Yu, Y., Wang, P., Lin, C.-Y., and Lai, F. Single-agent or multi-agent systems? why not both? arXiv preprint arXiv:2505.18286 , 2025. Grattafiori, A., Dubey, A., Jauhri, A., Pandey, A., Kadian, A., Al-Dahle, A., Letman, A., Mathur, A., Schelten, A., Vaughan, A., et al. The llama 3 herd of models. arXiv preprint arXiv:2407.21783 , 2024. Guo, T., Chen, X., Wang, Y., Chang, R., Pei, S., Chawla, N. V., Wiest, O., and Zhang, X. Large language model based multi-agents: A survey of progress and challenges. 
+
+arXiv preprint arXiv:2402.01680 , 2024. Hao, Z., Wang, H., Liu, H., Luo, J., Yu, J., Dong, H., Lin, Q., Wang, C., and Chen, J. Rethinking entropy interventions in rlvr: An entropy change perspective. arXiv preprint arXiv:2510.10150 , 2025. 9On the Uncertainty of Large Language Model-Based Multi-Agent Systems 
+
+He, S., Narayan, A., Khare, I. S., Linderman, S. W., R ´e, C., and Biderman, D. An information theoretic perspective on agentic system design. arXiv preprint arXiv:2512.21720 , 2025. Hendrycks, D., Burns, C., Basart, S., Zou, A., Mazeika, M., Song, D., and Steinhardt, J. Measuring massive multitask language understanding. In International Conference on Learning Representations , 2021a. Hendrycks, D., Burns, C., Kadavath, S., Arora, A., Basart, S., Tang, E., Song, D., and Steinhardt, J. Measuring mathematical problem solving with the math dataset. Ad-vances in Neural Information Processing Systems , 2021b. Hong, S., Zhuge, M., Chen, J., Zheng, X., Cheng, Y., Wang, J., Zhang, C., Wang, Z., Yau, S. K. S., Lin, Z., et al. Metagpt: Meta programming for a multi-agent collabora-tive framework. In The Twelfth International Conference on Learning Representations , 2023. HuggingFace. Math-verify. 2025. URL https:// github.com/huggingface/Math-Verify .Jiang, Y., Li, Y., Chen, G., Liu, D., Cheng, Y., and Shao, J. Rethinking entropy regularization in large reasoning models. arXiv preprint arXiv:2509.25133 , 2025. Karan, A. and Du, Y. Reasoning with sampling: Your base model is smarter than you think. arXiv preprint arXiv:2510.14901 , 2025. Ke, G., Meng, Q., Finley, T., Wang, T., Chen, W., Ma, W., Ye, Q., and Liu, T.-Y. Lightgbm: A highly efficient gradient boosting decision tree. Advances in neural infor-mation processing systems , 30, 2017. Kim, W. and Sung, Y. An adaptive entropy-regularization framework for multi-agent reinforcement learning. In In-ternational Conference on Machine Learning , pp. 16829– 16852. PMLR, 2023. Kim, Y., Gu, K., Park, C., Park, C., Schmidgall, S., Heydari, A. A., Yan, Y., Zhang, Z., Zhuang, Y., Malhotra, M., et al. Towards a science of scaling agent systems. arXiv preprint arXiv:2512.08296 , 2025. Li, X. When single-agent with skills replace multi-agent systems and when they fail. arXiv preprint arXiv:2601.04748 , 2026. Li, X., Callanan, E., Ghassel, A., and Zhu, X. Entropy-gated branching for efficient test-time reasoning. arXiv preprint arXiv:2503.21961 , 2025. Liang, X., He, Y., Tao, M., Xia, Y., Wang, J., Shi, T., Wang, J., and Yang, J. Cmat: A multi-agent collaboration tuning framework for enhancing small language models. arXiv preprint arXiv:2404.01663 , 2024. Liu, J., He, C., Lin, Y., Yang, M., Shen, F., and Liu, S. Ettrl: Balancing exploration and exploitation in llm test-time reinforcement learning via entropy mechanism. arXiv preprint arXiv:2508.11356 , 2025. Liu, X., Yu, H., Zhang, H., Xu, Y., Lei, X., Lai, H., Gu, Y., Ding, H., Men, K., Yang, K., et al. Agentbench: Evalu-ating llms as agents. arXiv preprint arXiv:2308.03688 ,2023. Lundberg, S. M. and Lee, S.-I. A unified approach to inter-preting model predictions. In Advances in neural infor-mation processing systems , volume 30, 2017. Paglieri, D., Cupiał, B., Coward, S., Piterbarg, U., Wolczyk, M., Khan, A., Pignatelli, E., Kuci ´nski, Ł., Pinto, L., Fer-gus, R., et al. Balrog: Benchmarking agentic llm and vlm reasoning on games. arXiv preprint arXiv:2411.13543 ,2024. Sharma, A. and Chopra, P. Think just enough: Sequence-level entropy as a confidence signal for llm reasoning. 
+
+arXiv preprint arXiv:2510.08146 , 2025. Shen, W., Li, C., Chen, H., Yan, M., Quan, X., Chen, H., Zhang, J., and Huang, F. Small llms are weak tool learn-ers: A multi-llm agent. In Proceedings of the 2024 Con-ference on Empirical Methods in Natural Language Pro-cessing , pp. 16658–16680, 2024. Su, T., Zhang, M., and He, G. Entropy-aware speculative decoding toward improved llm reasoning. arXiv preprint arXiv:2512.23765 , 2025. Sun, J., Zheng, Y., Hao, J., Meng, Z., and Liu, Y. Continuous multiagent control using collective behavior entropy for large-scale home energy management. In Proceedings of the AAAI Conference on Artificial Intelligence , pp. 922– 929, 2020. Tran, K.-T., Dao, D., Nguyen, M.-D., Pham, Q.-V., O’Sullivan, B., and Nguyen, H. D. Multi-agent collab-oration mechanisms: A survey of llms. arXiv preprint arXiv:2501.06322 , 2025. Wang, S., Yu, L., Gao, C., Zheng, C., Liu, S., Lu, R., Dang, K., Chen, X., Yang, J., Zhang, Z., et al. Beyond the 80/20 rule: High-entropy minority tokens drive effective reinforcement learning for llm reasoning. In Advances in Neural Information Processing Systems , 2025. Xu, F. F., Song, Y., Li, B., Tang, Y., Jain, K., Bao, M., Wang, Z. Z., Zhou, X., Guo, Z., Cao, M., et al. Theagentcom-pany: benchmarking llm agents on consequential real world tasks. arXiv preprint arXiv:2412.14161 , 2024. Yang, A., Li, A., Yang, B., Zhang, B., Hui, B., Zheng, B., Yu, B., Gao, C., Huang, C., Lv, C., et al. Qwen3 technical report. arXiv preprint arXiv:2505.09388 , 2025a. 10 On the Uncertainty of Large Language Model-Based Multi-Agent Systems 
+
+Yang, K., Xu, X., Chen, Y., Liu, W., Lyu, J., Lin, Z., Ye, D., and Yang, S. Entropic: Towards stable long-term train-ing of llms via entropy stabilization with proportional-integral control. arXiv preprint arXiv:2511.15248 , 2025b. Yeo, E., Tong, Y., Niu, X., Neubig, G., and Yue, X. Demys-tifying long chain-of-thought reasoning in llms. In ICLR 2025 Workshop on Deep Generative Model in Machine Learning: Theory, Principle and Efficacy , 2025. Yue, Y., Chen, Z., Lu, R., Zhao, A., Wang, Z., Song, S., and Huang, G. Does reinforcement learning really incen-tivize reasoning capacity in llms beyond the base model? In Advances in Neural Information Processing Systems ,2025. Zeng, W., Huang, Y., Liu, Q., Liu, W., He, K., Ma, Z., and He, J. Simplerl-zoo: Investigating and taming zero reinforcement learning for open base models in the wild. In Conference on Language Models , 2025. Zhang, J., Wang, X., Mo, F., Zhou, Y., Gao, W., and Liu, K. Entropy-based exploration conduction for multi-step reasoning. In Association for Computational Linguistics ,2025a. Zhang, K., Sun, T., Tao, Y., Genc, S., Mallya, S., and Basar, T. Robust multi-agent reinforcement learning with model uncertainty. In Advances in neural information processing systems , volume 33, pp. 10571–10583, 2020. Zhang, Q., Yu, Y., FU, Q., Ye, D., et al. More agents is all you need. Transactions on Machine Learning Research ,2024a. Zhang, X., Yuan, X., Huang, D., You, W., Hu, C., Ruan, J., Chen, K., and Hu, X. Rediscovering entropy regular-ization: Adaptive coefficient unlocks its potential for llm reinforcement learning. arXiv preprint arXiv:2510.10959 ,2025b. Zhang, Y., Sun, R., Chen, Y., Pfister, T., Zhang, R., and Arik, S. Chain of agents: Large language models collaborating on long-context tasks. In Advances in Neural Informa-tion Processing Systems , volume 37, pp. 132208–132237, 2024b. Zhang, Y., Liu, X., and Xiao, C. Metaagent: Automati-cally constructing multi-agent systems based on finite state machines. In Proceedings of the 42nd International Conference on Machine Learning , 2025c. Zhang, Y., Zhang, Z., Guan, H., Cheng, Y., Duan, Y., Wang, C., Wang, Y., Zheng, S., and He, J. No free lunch: Rethinking internal feedback for llm reasoning. arXiv preprint arXiv:2506.17219 , 2025d. Zhu, Y., Sun, L., Zhao, G., Lin, W., and Zhang, X. Un-certainty under the curve: A sequence-level entropy area metric for reasoning llm. In Annual AAAI Conference on Artificial Intelligence , 2025. 11 On the Uncertainty of Large Language Model-Based Multi-Agent Systems 
+
+A. Rationale for Open-Source Small LLMs 
+
+Our study exclusively uses open-source small LLMs from the LLaMA and Qwen3 series rather than proprietary API-based models, not merely as a practical choice but as a necessity for entropy-based uncertainty analysis. 
+
+Full Probability Access. Proprietary APIs typically return only generated text or at most top-k logprobs with k ≤ 20 (Buffa & Del Corro, 2026). This truncation prevents accurate entropy computation, which requires the complete token-level probability distribution P (xt | x<t ) over the full vocabulary. Open-weight models provide full access to these probabilities, enabling the 245-dimensional hierarchical entropy features that span agent, round, and trajectory levels. Without this access, our core uncertainty analysis would be impossible. 
+
+Reproducibility and API Instability. Proprietary models often undergo silent updates that change their behavior without notice, making longitudinal studies unreliable. In contrast, open-source models with fixed weights guarantee that our experimental protocol can be exactly replicated. This stability is essential for scientific validity, as entropy dynamics measured today must match those observed in future reproductions. 
+
+Cost-Effective Multi-Agent Scaling. Exploring diverse MAS configurations across five architectures, five models, six datasets, and multiple rounds requires thousands of LLM calls. Using proprietary APIs would incur prohibitive costs, whereas local inference with small models makes comprehensive evaluation feasible. Furthermore, multiple specialized small agents can match or even exceed the performance of a single large model through task decomposition (Shen et al., 2024; Chen & Varoquaux, 2024; Liang et al., 2024; Belcak et al., 2025). 
+
+Complementing Prior Work. Existing MAS studies rely on proprietary models and report only aggregate metrics such as accuracy, latency, or cost, thereby overlooking internal uncertainty dynamics. Our focus on open-source models reveals how entropy evolves within and across agents, providing mechanistic insights that remain inaccessible under API-only evaluation. This approach complements rather than duplicates prior findings. 
+
+B. Experimental Details 
+
+B.1. Evaluation 
+
+We evaluate on six benchmarks spanning three task types: mathematical reasoning ( GSM8K , 100 samples; Math500 ,500; AIME2024 and AIME2025 , 30 each), code generation ( HumanEval , 164), and knowledge QA ( MMLU , 1,000). For mathematics and MMLU , models enclose final answers in \boxed {} , and correctness is verified using the Math Verify 
+
+tool (HuggingFace, 2025) or exact string matching. For HumanEval , code blocks are extracted from markdown output and validated by executing the provided test cases with a 10-second timeout per sample. All experiments are conducted on four RTX 5090 GPUs. 
+
+B.2. MAS Architecture Details 
+
+All architectures use LangGraph for workflow orchestration. Each architecture runs for R = 2 rounds by default. Table 2 summarizes the key differences. 
+
+Single Agent (SAS). A single SingleSolver agent processes the input and iteratively refines its answer across rounds. Each round receives the accumulated history from previous rounds. LLM calls: R × 1.
+
+Sequential. Four specialized agents form a pipeline: Planner → Solver → Critic → Judger . The planner generates step-by-step instructions (no calculations), the solver executes the plan, the critic reviews and identifies errors, and the judger produces the final answer. Each agent receives only its immediate predecessor’s output. LLM calls: R × 4.
+
+Centralized. Three domain experts ( MathAgent , ScienceAgent , CodeAgent ) execute in parallel, and an 
+
+OrchestratorAgent aggregates their outputs. In rounds r < R , the orchestrator provides feedback to all work-ers; in round R, it produces the final answer. LLM calls: R × 3 + R × 1 = R × 4.
+
+Debate. Three debate agents ( Agent1 , Agent2 , Agent3 ) execute sequentially. Each agent observes all prior agents’ outputs from both current and previous rounds. The final answer is determined by majority voting over \boxed {} 
+
+extractions, without additional LLM inference. LLM calls: R × 3.
+
+Hybrid. Combines centralized and debate structures. Workers receive both orchestrator feedback and peer outputs, enabling dual feedback channels. The orchestrator provides guidance while workers can observe how peers interpret that guidance. LLM calls: R × 3 + R × 1 = R × 4.12 On the Uncertainty of Large Language Model-Based Multi-Agent Systems                                  
+
+> Table 2. Comparison of MAS architectures. N: number of worker agents; R: communication rounds.
+> Architecture NLLM Calls Orchestrator Decision Rule Agent Roles & Functions
+> Single (SAS) 1RNone Last round output SingleSolver: solves and iteratively refines answer Sequential 44RNone Judger output Planner: generates plans Solver: executes plans Critic: reviews solutions Judger: outputs final answer Centralized 3+1 4RLLM-based Orchestrator Math / Science / CodeAgent: domain-specific reasoning Orchestrator: aggregates feedback and outputs final answer Debate 33RVoting Majority vote Agent 1-3: independent solvers observing all prior outputs Hybrid 3+1 4RLLM-based Orchestrator Math / Science / CodeAgent: domain-specific reasoning Orchestrator: aggregates + peer feedback
+
+B.3. Agent Prompts 
+
+The prompts for the Sequential architecture are detailed in Appendix E. Here we present the prompts for the Centralized architecture on mathematical reasoning tasks. Prompts for code generation and knowledge QA follow similar patterns and can be found in the source code. 
+
+First-Layer Expert Agents. Each expert agent receives a system prompt defining its role and a user prompt containing the question. All agents may receive orchestrator feedback from previous rounds. 
+
+MathAgent: 
+
+• System : “You are the MathAgent. Solve the given question with clear steps. Your input may include feedback from the Orchestrator from the previous round.” • User : “Question: {question } Provide a concise mathematical solution, showing key steps.” 
+
+ScienceAgent: 
+
+• System : “You are the ScienceAgent. Analyze and solve the given question with scientific reasoning. Your input may include feedback from the Orchestrator from the previous round.” • User : “Question: {question } Explain your scientific reasoning and provide a final result.” 
+
+CodeAgent: 
+
+• System : “You are the CodeAgent. Provide a self-contained Python function that solves the problem. Your input may include feedback from the Orchestrator from the previous round.” • User : “Question: {question } Write a single self-contained Python function in a markdown code block that solves the problem.” 
+
+Orchestrator Agent. The orchestrator operates in two modes: 
+
+Feedback Mode (intermediate rounds): 
+
+• System : “You are the Orchestrator Agent. Your task is to review the solutions provided by the first-layer agents in the current round. Analyze the provided solutions, identify any issues or areas for improvement, and provide constructive feedback. You may rewrite content, provide specific feedback, and offer improvement suggestions as needed. Your feedback will be used by the agents in the next round to improve their solutions.” • User : “Question: {question } Here are the solutions from the expert agents in the current round: === Solutions === 
+
+{block } === Solutions === Review these solutions and provide feedback for the next round. If corrections are needed, specify the issues and suggest improvements. If the solutions are satisfactory, acknowledge them and provide guidance for further refinement.” 
+
+Aggregation Mode (final round): 
+
+• System : “You are the Orchestrator Agent. Your task is to aggregate the solutions provided by the first-layer agents and produce a final answer wrapped in \boxed {} .” • User : “Question: {question } Here are the solutions from the expert agents: === Solutions === {block } === Solutions === Based on these inputs, provide the final answer wrapped in \boxed {} .” 13 On the Uncertainty of Large Language Model-Based Multi-Agent Systems 
+
+B.4. Data Mining 
+
+We employ an ensemble of XGBoost and LightGBM rather than a single model to obtain more robust and stable feature importance estimates. These two algorithms use different tree construction strategies: XGBoost grows trees level-wise, whereas LightGBM grows trees leaf-wise. By averaging their attributions, we capture a broader range of feature interactions and reduce variance due to correlated features or random data splits, yielding rankings that better reflect true relevance. For each feature j, we compute two key metrics. The mean feature importance ¯Ij is obtained by: (1) extracting raw feature importances I(m)
+
+j from each model m ∈ { XGB , LGB }; (2) applying min-max normalization to obtain 
+
+˜I(m)
+
+j = ( I(m)
+
+j − min k I(m)
+
+k )/(max k I(m)
+
+k − min k I(m)
+
+k ) ∈ [0 , 1] ; and (3) averaging: ¯Ij = 12 ( ˜IXGB 
+
+j + ˜ILGB 
+
+j ). The SHAP correlation ρj is computed as the average Pearson correlation between feature values xj = ( x1j , . . . , x nj ) and their SHAP attributions ϕ(m)
+
+j = ( ϕ(m)1j , . . . , ϕ (m)
+
+nj ) across both models: ρj = 12
+
+P
+
+m∈M corr (xj , ϕ(m)
+
+j ). The magnitude |ρj | quantifies the strength of feature j’s influence on predicted correctness, while sign (ρj ) indicates its direction. 
+
+C. Entropy Features 
+
+We design a hierarchical feature set to capture uncertainty dynamics across agents and rounds in MAS. This section provides formal definitions for all 254 features used in our analysis. architecture base_model_is_finally_correct base_model_format_compliance base_model_answer_token_count base_model_max_answer_token_entropy base_model_mean_answer_token_entropy base_model_min_answer_token_entropy base_model_std_answer_token_entropy base_model_median_answer_token_entropy sample_answer_token_count sample_max_answer_token_entropy sample_mean_answer_token_entropy sample_min_answer_token_entropy sample_std_answer_token_entropy sample_median_answer_token_entropy sample_total_entropy sample_max_entropy sample_min_entropy sample_mean_entropy sample_median_entropy sample_std_entropy sample_variance_entropy sample_q1_entropy sample_q3_entropy sample_num_agents sample_all_agents_token_count sample_avg_entropy_per_token sample_entropy_stability_index sample_avg_entropy_per_agent exp_total_entropy exp_infer_average_entropy exp_total_time exp_total_token base_model_accuracy base_model_format_compliance_rate answer_token_entropy_change answer_token_entropy_change_direction base_model_vs_sample_final_answer_entropy_diff base_model_vs_sample_final_answer_entropy_ratio base_sample_avg_entropy_per_token base_sample_token_count base_sample_total_entropy sample_avg_entropy_per_token_diff_vs_base sample_avg_entropy_per_token_ratio_vs_base sample_entropy_bowley_skewness sample_entropy_cv sample_entropy_iqr sample_entropy_median_over_mean sample_entropy_range sample_entropy_ratio_vs_base_total sample_entropy_reduction_vs_base_total sample_entropy_relative_iqr_mean sample_entropy_relative_iqr_range sample_entropy_tail_weight sample_round_1_2_change_entropy sample_round_1_2_change_tokens sample_round_1_agent_mean_entropy_bowley_skewness sample_round_1_agent_mean_entropy_cv sample_round_1_agent_mean_entropy_spread sample_round_1_agent_total_entropy_spread sample_round_1_all_agents_entropy_per_token sample_round_1_all_agents_total_entropy sample_round_1_all_agents_total_token sample_round_1_max_agent_max_entropy sample_round_1_max_agent_mean_entropy sample_round_1_max_agent_median_entropy sample_round_1_max_agent_min_entropy sample_round_1_max_agent_q1_entropy sample_round_1_max_agent_q3_entropy sample_round_1_max_agent_std_entropy sample_round_1_max_agent_total_entropy sample_round_1_max_agent_variance_entropy sample_round_1_mean_agent_max_entropy sample_round_1_mean_agent_mean_entropy sample_round_1_mean_agent_median_entropy sample_round_1_mean_agent_min_entropy sample_round_1_mean_agent_q1_entropy sample_round_1_mean_agent_q3_entropy sample_round_1_mean_agent_std_entropy sample_round_1_mean_agent_total_entropy sample_round_1_mean_agent_variance_entropy sample_round_1_median_agent_max_entropy sample_round_1_median_agent_mean_entropy sample_round_1_median_agent_median_entropy sample_round_1_median_agent_min_entropy sample_round_1_median_agent_q1_entropy sample_round_1_median_agent_q3_entropy sample_round_1_median_agent_std_entropy sample_round_1_median_agent_total_entropy sample_round_1_median_agent_variance_entropy sample_round_1_min_agent_max_entropy sample_round_1_min_agent_mean_entropy sample_round_1_min_agent_median_entropy sample_round_1_min_agent_min_entropy sample_round_1_min_agent_q1_entropy sample_round_1_min_agent_q3_entropy sample_round_1_min_agent_std_entropy sample_round_1_min_agent_total_entropy sample_round_1_min_agent_variance_entropy sample_round_1_q1_agent_max_entropy sample_round_1_q1_agent_mean_entropy sample_round_1_q1_agent_median_entropy sample_round_1_q1_agent_min_entropy sample_round_1_q1_agent_q1_entropy sample_round_1_q1_agent_q3_entropy sample_round_1_q1_agent_std_entropy sample_round_1_q1_agent_total_entropy sample_round_1_q1_agent_variance_entropy sample_round_1_q3_agent_max_entropy sample_round_1_q3_agent_mean_entropy sample_round_1_q3_agent_median_entropy sample_round_1_q3_agent_min_entropy sample_round_1_q3_agent_q1_entropy sample_round_1_q3_agent_q3_entropy sample_round_1_q3_agent_std_entropy sample_round_1_q3_agent_total_entropy sample_round_1_q3_agent_variance_entropy sample_round_1_std_agent_max_entropy sample_round_1_std_agent_mean_entropy sample_round_1_std_agent_median_entropy sample_round_1_std_agent_min_entropy sample_round_1_std_agent_q1_entropy sample_round_1_std_agent_q3_entropy sample_round_1_std_agent_std_entropy sample_round_1_std_agent_total_entropy sample_round_1_std_agent_variance_entropy sample_round_1_variance_agent_max_entropy sample_round_1_variance_agent_mean_entropy sample_round_1_variance_agent_median_entropy sample_round_1_variance_agent_min_entropy sample_round_1_variance_agent_q1_entropy sample_round_1_variance_agent_q3_entropy sample_round_1_variance_agent_std_entropy sample_round_1_variance_agent_total_entropy sample_round_1_variance_agent_variance_entropy sample_round_2_agent_mean_entropy_bowley_skewness sample_round_2_agent_mean_entropy_cv sample_round_2_agent_mean_entropy_spread sample_round_2_agent_total_entropy_spread sample_round_2_all_agents_entropy_per_token sample_round_2_all_agents_total_entropy sample_round_2_all_agents_total_token sample_round_2_max_agent_max_entropy sample_round_2_max_agent_mean_entropy sample_round_2_max_agent_median_entropy sample_round_2_max_agent_min_entropy sample_round_2_max_agent_q1_entropy sample_round_2_max_agent_q3_entropy sample_round_2_max_agent_std_entropy sample_round_2_max_agent_total_entropy sample_round_2_max_agent_variance_entropy sample_round_2_mean_agent_max_entropy sample_round_2_mean_agent_mean_entropy sample_round_2_mean_agent_median_entropy sample_round_2_mean_agent_min_entropy sample_round_2_mean_agent_q1_entropy sample_round_2_mean_agent_q3_entropy sample_round_2_mean_agent_std_entropy sample_round_2_mean_agent_total_entropy sample_round_2_mean_agent_variance_entropy sample_round_2_median_agent_max_entropy sample_round_2_median_agent_mean_entropy sample_round_2_median_agent_median_entropy sample_round_2_median_agent_min_entropy sample_round_2_median_agent_q1_entropy sample_round_2_median_agent_q3_entropy sample_round_2_median_agent_std_entropy sample_round_2_median_agent_total_entropy sample_round_2_median_agent_variance_entropy sample_round_2_min_agent_max_entropy sample_round_2_min_agent_mean_entropy sample_round_2_min_agent_median_entropy sample_round_2_min_agent_min_entropy sample_round_2_min_agent_q1_entropy sample_round_2_min_agent_q3_entropy sample_round_2_min_agent_std_entropy sample_round_2_min_agent_total_entropy sample_round_2_min_agent_variance_entropy sample_round_2_q1_agent_max_entropy sample_round_2_q1_agent_mean_entropy sample_round_2_q1_agent_median_entropy sample_round_2_q1_agent_min_entropy sample_round_2_q1_agent_q1_entropy sample_round_2_q1_agent_q3_entropy sample_round_2_q1_agent_std_entropy sample_round_2_q1_agent_total_entropy sample_round_2_q1_agent_variance_entropy sample_round_2_q3_agent_max_entropy sample_round_2_q3_agent_mean_entropy sample_round_2_q3_agent_median_entropy sample_round_2_q3_agent_min_entropy sample_round_2_q3_agent_q1_entropy sample_round_2_q3_agent_q3_entropy sample_round_2_q3_agent_std_entropy sample_round_2_q3_agent_total_entropy sample_round_2_q3_agent_variance_entropy sample_round_2_std_agent_max_entropy sample_round_2_std_agent_mean_entropy sample_round_2_std_agent_median_entropy sample_round_2_std_agent_min_entropy sample_round_2_std_agent_q1_entropy sample_round_2_std_agent_q3_entropy sample_round_2_std_agent_std_entropy sample_round_2_std_agent_total_entropy sample_round_2_std_agent_variance_entropy sample_round_2_variance_agent_max_entropy sample_round_2_variance_agent_mean_entropy sample_round_2_variance_agent_median_entropy sample_round_2_variance_agent_min_entropy sample_round_2_variance_agent_q1_entropy sample_round_2_variance_agent_q3_entropy sample_round_2_variance_agent_std_entropy sample_round_2_variance_agent_total_entropy sample_round_2_variance_agent_variance_entropy sample_round_agent_mean_entropy_spread_first_last_diff sample_round_agent_total_entropy_spread_first_last_diff sample_round_all_agents_entropy_per_token_first_last_diff sample_round_all_agents_entropy_per_token_first_last_ratio sample_round_all_agents_entropy_per_token_slope_per_round sample_round_all_agents_entropy_per_token_volatility sample_round_all_agents_total_entropy_first_last_diff sample_round_all_agents_total_entropy_first_last_ratio sample_round_all_agents_total_token_first_last_diff sample_round_all_agents_total_token_first_last_ratio sample_round_mean_agent_mean_entropy_first_last_diff sample_round_mean_agent_mean_entropy_first_last_ratio sample_round_mean_agent_mean_entropy_slope_per_round sample_round_mean_agent_mean_entropy_trend_sign sample_round_mean_agent_mean_entropy_volatility sample_round_mean_agent_total_entropy_first_last_diff sample_round_mean_agent_total_entropy_first_last_ratio sample_round_mean_agent_total_entropy_slope_per_round sample_round_mean_agent_total_entropy_volatility round_1_2_change_entropy round_1_2_change_tokens round_1_infer_avg_entropy round_1_num_inferences round_1_total_entropy round_1_total_time round_1_total_token round_2_infer_avg_entropy round_2_num_inferences round_2_total_entropy round_2_total_time round_2_total_token is_finally_correct 
+
+Features 
+
+architecture base_model_is_finally_correct base_model_format_compliance base_model_answer_token_count base_model_max_answer_token_entropy base_model_mean_answer_token_entropy base_model_min_answer_token_entropy base_model_std_answer_token_entropy base_model_median_answer_token_entropy sample_answer_token_count sample_max_answer_token_entropy sample_mean_answer_token_entropy sample_min_answer_token_entropy sample_std_answer_token_entropy sample_median_answer_token_entropy sample_total_entropy sample_max_entropy sample_min_entropy sample_mean_entropy sample_median_entropy sample_std_entropy sample_variance_entropy sample_q1_entropy sample_q3_entropy sample_num_agents sample_all_agents_token_count sample_avg_entropy_per_token sample_entropy_stability_index sample_avg_entropy_per_agent exp_total_entropy exp_infer_average_entropy exp_total_time exp_total_token base_model_accuracy base_model_format_compliance_rate answer_token_entropy_change answer_token_entropy_change_direction base_model_vs_sample_final_answer_entropy_diff base_model_vs_sample_final_answer_entropy_ratio base_sample_avg_entropy_per_token base_sample_token_count base_sample_total_entropy sample_avg_entropy_per_token_diff_vs_base sample_avg_entropy_per_token_ratio_vs_base sample_entropy_bowley_skewness sample_entropy_cv sample_entropy_iqr sample_entropy_median_over_mean sample_entropy_range sample_entropy_ratio_vs_base_total sample_entropy_reduction_vs_base_total sample_entropy_relative_iqr_mean sample_entropy_relative_iqr_range sample_entropy_tail_weight sample_round_1_2_change_entropy sample_round_1_2_change_tokens sample_round_1_agent_mean_entropy_bowley_skewness sample_round_1_agent_mean_entropy_cv sample_round_1_agent_mean_entropy_spread sample_round_1_agent_total_entropy_spread sample_round_1_all_agents_entropy_per_token sample_round_1_all_agents_total_entropy sample_round_1_all_agents_total_token sample_round_1_max_agent_max_entropy sample_round_1_max_agent_mean_entropy sample_round_1_max_agent_median_entropy sample_round_1_max_agent_min_entropy sample_round_1_max_agent_q1_entropy sample_round_1_max_agent_q3_entropy sample_round_1_max_agent_std_entropy sample_round_1_max_agent_total_entropy sample_round_1_max_agent_variance_entropy sample_round_1_mean_agent_max_entropy sample_round_1_mean_agent_mean_entropy sample_round_1_mean_agent_median_entropy sample_round_1_mean_agent_min_entropy sample_round_1_mean_agent_q1_entropy sample_round_1_mean_agent_q3_entropy sample_round_1_mean_agent_std_entropy sample_round_1_mean_agent_total_entropy sample_round_1_mean_agent_variance_entropy sample_round_1_median_agent_max_entropy sample_round_1_median_agent_mean_entropy sample_round_1_median_agent_median_entropy sample_round_1_median_agent_min_entropy sample_round_1_median_agent_q1_entropy sample_round_1_median_agent_q3_entropy sample_round_1_median_agent_std_entropy sample_round_1_median_agent_total_entropy sample_round_1_median_agent_variance_entropy sample_round_1_min_agent_max_entropy sample_round_1_min_agent_mean_entropy sample_round_1_min_agent_median_entropy sample_round_1_min_agent_min_entropy sample_round_1_min_agent_q1_entropy sample_round_1_min_agent_q3_entropy sample_round_1_min_agent_std_entropy sample_round_1_min_agent_total_entropy sample_round_1_min_agent_variance_entropy sample_round_1_q1_agent_max_entropy sample_round_1_q1_agent_mean_entropy sample_round_1_q1_agent_median_entropy sample_round_1_q1_agent_min_entropy sample_round_1_q1_agent_q1_entropy sample_round_1_q1_agent_q3_entropy sample_round_1_q1_agent_std_entropy sample_round_1_q1_agent_total_entropy sample_round_1_q1_agent_variance_entropy sample_round_1_q3_agent_max_entropy sample_round_1_q3_agent_mean_entropy sample_round_1_q3_agent_median_entropy sample_round_1_q3_agent_min_entropy sample_round_1_q3_agent_q1_entropy sample_round_1_q3_agent_q3_entropy sample_round_1_q3_agent_std_entropy sample_round_1_q3_agent_total_entropy sample_round_1_q3_agent_variance_entropy sample_round_1_std_agent_max_entropy sample_round_1_std_agent_mean_entropy sample_round_1_std_agent_median_entropy sample_round_1_std_agent_min_entropy sample_round_1_std_agent_q1_entropy sample_round_1_std_agent_q3_entropy sample_round_1_std_agent_std_entropy sample_round_1_std_agent_total_entropy sample_round_1_std_agent_variance_entropy sample_round_1_variance_agent_max_entropy sample_round_1_variance_agent_mean_entropy sample_round_1_variance_agent_median_entropy sample_round_1_variance_agent_min_entropy sample_round_1_variance_agent_q1_entropy sample_round_1_variance_agent_q3_entropy sample_round_1_variance_agent_std_entropy sample_round_1_variance_agent_total_entropy sample_round_1_variance_agent_variance_entropy sample_round_2_agent_mean_entropy_bowley_skewness sample_round_2_agent_mean_entropy_cv sample_round_2_agent_mean_entropy_spread sample_round_2_agent_total_entropy_spread sample_round_2_all_agents_entropy_per_token sample_round_2_all_agents_total_entropy sample_round_2_all_agents_total_token sample_round_2_max_agent_max_entropy sample_round_2_max_agent_mean_entropy sample_round_2_max_agent_median_entropy sample_round_2_max_agent_min_entropy sample_round_2_max_agent_q1_entropy sample_round_2_max_agent_q3_entropy sample_round_2_max_agent_std_entropy sample_round_2_max_agent_total_entropy sample_round_2_max_agent_variance_entropy sample_round_2_mean_agent_max_entropy sample_round_2_mean_agent_mean_entropy sample_round_2_mean_agent_median_entropy sample_round_2_mean_agent_min_entropy sample_round_2_mean_agent_q1_entropy sample_round_2_mean_agent_q3_entropy sample_round_2_mean_agent_std_entropy sample_round_2_mean_agent_total_entropy sample_round_2_mean_agent_variance_entropy sample_round_2_median_agent_max_entropy sample_round_2_median_agent_mean_entropy sample_round_2_median_agent_median_entropy sample_round_2_median_agent_min_entropy sample_round_2_median_agent_q1_entropy sample_round_2_median_agent_q3_entropy sample_round_2_median_agent_std_entropy sample_round_2_median_agent_total_entropy sample_round_2_median_agent_variance_entropy sample_round_2_min_agent_max_entropy sample_round_2_min_agent_mean_entropy sample_round_2_min_agent_median_entropy sample_round_2_min_agent_min_entropy sample_round_2_min_agent_q1_entropy sample_round_2_min_agent_q3_entropy sample_round_2_min_agent_std_entropy sample_round_2_min_agent_total_entropy sample_round_2_min_agent_variance_entropy sample_round_2_q1_agent_max_entropy sample_round_2_q1_agent_mean_entropy sample_round_2_q1_agent_median_entropy sample_round_2_q1_agent_min_entropy sample_round_2_q1_agent_q1_entropy sample_round_2_q1_agent_q3_entropy sample_round_2_q1_agent_std_entropy sample_round_2_q1_agent_total_entropy sample_round_2_q1_agent_variance_entropy sample_round_2_q3_agent_max_entropy sample_round_2_q3_agent_mean_entropy sample_round_2_q3_agent_median_entropy sample_round_2_q3_agent_min_entropy sample_round_2_q3_agent_q1_entropy sample_round_2_q3_agent_q3_entropy sample_round_2_q3_agent_std_entropy sample_round_2_q3_agent_total_entropy sample_round_2_q3_agent_variance_entropy sample_round_2_std_agent_max_entropy sample_round_2_std_agent_mean_entropy sample_round_2_std_agent_median_entropy sample_round_2_std_agent_min_entropy sample_round_2_std_agent_q1_entropy sample_round_2_std_agent_q3_entropy sample_round_2_std_agent_std_entropy sample_round_2_std_agent_total_entropy sample_round_2_std_agent_variance_entropy sample_round_2_variance_agent_max_entropy sample_round_2_variance_agent_mean_entropy sample_round_2_variance_agent_median_entropy sample_round_2_variance_agent_min_entropy sample_round_2_variance_agent_q1_entropy sample_round_2_variance_agent_q3_entropy sample_round_2_variance_agent_std_entropy sample_round_2_variance_agent_total_entropy sample_round_2_variance_agent_variance_entropy sample_round_agent_mean_entropy_spread_first_last_diff sample_round_agent_total_entropy_spread_first_last_diff sample_round_all_agents_entropy_per_token_first_last_diff sample_round_all_agents_entropy_per_token_first_last_ratio sample_round_all_agents_entropy_per_token_slope_per_round sample_round_all_agents_entropy_per_token_volatility sample_round_all_agents_total_entropy_first_last_diff sample_round_all_agents_total_entropy_first_last_ratio sample_round_all_agents_total_token_first_last_diff sample_round_all_agents_total_token_first_last_ratio sample_round_mean_agent_mean_entropy_first_last_diff sample_round_mean_agent_mean_entropy_first_last_ratio sample_round_mean_agent_mean_entropy_slope_per_round sample_round_mean_agent_mean_entropy_trend_sign sample_round_mean_agent_mean_entropy_volatility sample_round_mean_agent_total_entropy_first_last_diff sample_round_mean_agent_total_entropy_first_last_ratio sample_round_mean_agent_total_entropy_slope_per_round sample_round_mean_agent_total_entropy_volatility round_1_2_change_entropy round_1_2_change_tokens round_1_infer_avg_entropy round_1_num_inferences round_1_total_entropy round_1_total_time round_1_total_token round_2_infer_avg_entropy round_2_num_inferences round_2_total_entropy round_2_total_time round_2_total_token is_finally_correct 
+
+> Features
+
+Top 20 Strongest Correlations 
+
+1. sample_mean_answer_token_entropy × sample_median_answer_token_entropy r = +0.991 2. base_model_min_answer_token_entropy × base_model_median_answer_token_entropy r = +0.989 3. sample_round_1_max_agent_std_entropy × sample_round_1_max_agent_variance_entropy r = +0.961 4. architecture × exp_infer_average_entropy r = -0.723 5. architecture × sample_total_entropy r = -0.683 6. architecture × sample_entropy_reduction_vs_base_total r = +0.678 7. architecture × sample_round_1_all_agents_total_entropy r = -0.677 8. architecture × round_1_total_token r = -0.652 9. base_model_min_answer_token_entropy × answer_token_entropy_change_direction r = +0.651 10. base_model_min_answer_token_entropy × base_model_vs_sample_final_answer_entropy_diff r = +0.651 11. base_model_min_answer_token_entropy × answer_token_entropy_change r = +0.645 12. architecture × sample_entropy_range r = -0.614 13. architecture × sample_max_entropy r = -0.614 14. architecture × sample_num_agents r = -0.612 15. architecture × exp_total_entropy r = -0.608 16. architecture × exp_total_token r = -0.588 17. base_model_is_finally_correct × is_finally_correct r = +0.554 18. exp_infer_average_entropy × sample_round_2_all_agents_total_entropy r = +0.536 19. architecture × sample_round_1_mean_agent_max_entropy r = -0.529 20. base_model_format_compliance × base_model_format_compliance_rate r = +0.521 
+
+0.75 
+
+0.50 
+
+0.25 
+
+0.00 0.25 0.50 0.75 1.00 Correlation Coefficient 
+
+Figure 7. Feature correlation heatmap for GMAS on LLaMA models. The lower triangle shows pairwise Pearson correlations; the upper-right inset lists the top 20 most strongly correlated feature pairs. 
+
+14 On the Uncertainty of Large Language Model-Based Multi-Agent Systems 
+
+C.1. Feature Hierarchy 
+
+Our features are organized into four hierarchical levels, reflecting the nested structure of MAS execution: 
+
+Token Level. For each generated token t in agent a’s output, we compute Shannon entropy from the softmax distribution over vocabulary V: Ht = − P 
+
+> v∈V
+
+p(v|x<t ) log p(v|x<t ).
+
+Agent Level. For each agent a ∈ A in round r, we aggregate token-level entropy into summary statistics: total entropy 
+
+H(r) 
+
+> a
+
+= P 
+
+> t
+
+Ht, and distributional measures (mean, max, min, std, variance, median, Q1, Q3). 
+
+Round Level. For each round r ∈ {1, . . . , R }, we aggregate agent-level statistics across all agents: ¯H(r) =
+
+> 1
+> |A|
+
+P 
+
+> a∈A
+
+H(r) 
+
+> a
+
+.
+
+Sample Level. For each input sample i, we aggregate round-level statistics and compute cross-round dynamics. 
+
+C.2. Feature Groups 
+
+We organize features into semantically coherent groups for analysis. 
+
+Entropy Features ( FE , 239 features). Hierarchical structure: 
+
+Agent-level statistics (156 features) capture per-agent reasoning trajectories: • Per-round agent entropy: For each round r and statistic s ∈ { max , mean , std , . . . }, we compute s({H(r) 
+
+> a
+
+}a∈A), yielding features like sample round 1 max agent total entropy .• Inter-agent divergence: Variance and coefficient of variation across agents within each round. 
+
+Round-level dynamics (27 features) track temporal evolution: • Round totals: Total entropy and token count per round. • Cross-round changes: First-to-last difference ∆H = H(R) − H(1) , ratio H(R)/H (1) , and slope per round. • Volatility: Standard deviation of entropy across rounds. 
+
+Sample-level statistics (29 features) aggregate across the full MAS execution: • Basic statistics: P
+
+> r
+
+P 
+
+> a
+
+H(r) 
+
+> a
+
+, mean, max, min, std, variance, quartiles. • Distribution shape: Range, IQR, Bowley skewness (Q3 + Q1 − 2 · median )/IQR , coefficient of variation σ/μ , tail weight 
+
+(max −Q3)/IQR. • Stability index: 1 − σH /μ H , measuring consistency across agents. • Answer token entropy: Statistics computed over tokens in the final \boxed {} output. 
+
+System-level aggregation (10 features) provides global measures: • Architecture-specific: Number of agents, total inference count. • Experiment totals: Aggregate entropy, average entropy per inference. 
+
+Base-model entropy ( Fbase-E , 17 features) captures the single-agent baseline: • Base model statistics: Total token-level entropy Hbase , token count, average entropy per token of Mbase .• Comparison between MAS and base model: Entropy ratio HMAS /H base , reduction Hbase − HMAS .• Answer entropy shift: Difference and ratio between base model and MAS final answer entropy. 
+
+Computational Metrics ( FC , 15 features). Non-entropy quantities at the same hierarchical levels: • Timing: Total reasoning time, per-round time. • Token usage: Total tokens generated, per-agent token count, answer length. • Inference counts: Number of LLM calls per round and total. • Base-model correctness ( Fbase-C , 4 features): Whether Mbase answered correctly, format compliance. 
+
+C.3. Key Feature Definitions 
+
+Table 3 lists representative features from each category with their formal definitions. 15 On the Uncertainty of Large Language Model-Based Multi-Agent Systems 
+
+Table 3. Representative entropy features and their definitions. 
+
+Feature Level Definition 
+
+sample total entropy Sample P 
+
+> r,a
+
+H(r)
+
+> a
+
+sample entropy stability index Sample 1 − σH /μ H
+
+sample entropy cv Sample σH /μ H (coefficient of variation) 
+
+sample entropy bowley skewness Sample (Q3 + Q1 − 2 · med )/IQR 
+
+sample max answer token entropy Sample max t Ht for t ∈ answer tokens 
+
+round 1 total entropy Round P 
+
+> a∈A
+
+H(1) 
+
+> a
+
+round 1 2 change entropy Round P 
+
+> a
+
+H(2)  
+
+> a
+
+− P 
+
+> a
+
+H(1) 
+
+> a
+
+sample round 1 max agent max entropy Agent max a∈A(max t H(a, 1)  
+
+> t
+
+)
+
+sample round 1 mean agent std entropy Agent 1
+
+> |A|
+
+P 
+
+> a
+
+σ(H(a, 1)  
+
+> t
+
+)
+
+sample round 1 variance agent total entropy Agent Var ({H(1)  
+
+> a
+
+}a∈A)
+
+base sample total entropy Base Hbase , trajectory-level entropy of Mbase 
+
+sample entropy ratio vs base total Base Entropy ratio HMAS /H base 
+
+C.4. Feature Correlation Analysis 
+
+To examine redundancy and dependencies among features, we visualize the pairwise Pearson correlation matrix for all features in GMAS using LLaMA models, as shown in Figure 7. High correlations among statistically similar features, such as sample mean * and sample median * , or std * and variance * , are expected due to their definitional overlap. More notably, base model entropy features show strong associations with MAS entropy dynamics, including 
+
+base model min answer token entropy correlated with answer token entropy change direction ,while base model is finally correct correlates with is finally correct . These patterns reinforce our find-ing in Section 4.4 that Mbase entropy and correctness directly condition MAS effectiveness. Additionally, architecture 
+
+exhibits strong correlations with numerous entropy features ( |ρ| > 0.5), confirming that different MAS topologies induce distinct uncertainty dynamics, consistent with Section 5.2. 
+
+D. More Experimental Results 
+
+This section extends the main text analysis by (1) expanding feature scope from top 2-5 to top 10, and (2) incorporating the mean SHAP impact ¯S, which quantifies each feature’s average contribution to predicted correctness across all samples. The following subsections apply this extended analysis to each experimental setting. 
+
+(a) Qwen models. (b) LLaMA models. 
+
+Figure 8. Top 20 features on Gbase-H for Qwen (a) and LLaMA (b), ranked by mean normalized importance ¯I. Each panel is divided into four subplots: top-left shows feature importance from XGBoost and LightGBM; bottom-left shows mean SHAP impact ¯S, representing the average contribution of each feature to model predictions; right column displays scatter plots of feature values versus SHAP values, with Pearson correlation ρ annotated in red. All subsequent figures follow this layout except for the SHAP waterfall plots. 
+
+16 On the Uncertainty of Large Language Model-Based Multi-Agent Systems          
+
+> (a) Qwen (LightGBM) (b) Qwen (XGBoost)
+> (c) LLaMA (LightGBM) (d) LLaMA (XGBoost)
+> Figure 9. SHAP waterfall plots on Gbase-H for representative samples: Qwen and LLaMA, with LightGBM and XGBoost. Each bar shows the contribution of a feature to the predicted MAS correctness.
+
+D.1. Base Model Entropy Dominates MAS Prediction 
+
+Section 4.4 establishes that higher base model entropy consistently reduces MAS effectiveness. Figure 8 visualizes the top 20 features on Gbase-H , and Figure 9 presents representative SHAP waterfall plots. 
+
+Qwen: Entropy Variance as Primary Failure Signal. The top features reveal a consistent pattern: inter-agent entropy dispersion dominates prediction. The leading predictor, sample variance entropy ( ¯I = 0 .74 , ρ = −0.89 ), exhibits strong negative correlation, confirming that higher entropy variance reliably signals MAS failure. This pattern extends to round-1 agent disagreement metrics, with Q3 agent variance entropy showing similarly strong effects ( ρ = −0.78 ). Interestingly, answer length features show divergent behavior: base model answer token count correlates negatively at sample level (ρ = −0.18 ) but contributes positively globally ( ¯S = +0 .024 ), suggesting richer context benefits aggregation despite local failure signals. The lower-ranked features reinforce a key insight: nearly all entropy-related features push predictions toward failure, with per-token entropy ( ρ = −0.87 ) and mean entropy ( ρ = −0.77 ) consistently harmful. Operating in a higher entropy regime (100-1,000), Qwen exhibits coherent failure signals through entropy dispersion (Figures 9a-9b). 
+
+LLaMA: Token Count and Base Entropy Drive Prediction. LLaMA’s feature hierarchy differs markedly, with output length dominating. The top predictor, base sample token count ( ¯I = 1 .0, ρ = −0.47 , ¯S = −0.053 ), shows bidirec-tional failure signals: longer base outputs harm both sample and global prediction. Base model entropy ( ρ = −0.73 )and answer entropy change ( ρ = −0.70 ) reinforce this pattern. A notable divergence emerges for round-2 features: 
+
+round 2 infer avg entropy shows positive sample correlation ( ρ = +0 .65 ) but negative global contribution ( ¯S = −0.002 ), suggesting an optimal entropy ceiling beyond which deliberation becomes counterproductive. Peak answer entropy (ρ = −0.84 ) and architecture type ( ρ = −0.76 ) confirm that extreme uncertainty universally harms performance. Oper-ating in a low-entropy regime (0-100), LLaMA yields less confident predictions due to competing feature contributions (Figures 9c-9d), reflecting inherent difficulty in generating self-consistent reasoning trajectories. 
+
+Base Model Correctness Overwhelms All Other Features. On Gbase-full (Figure 10), base model is finally correct 
+
+achieves ¯I = 1 .0, ρ = 0 .96 , and ¯S = +0 .45 (Qwen) / +0 .07 (LLaMA). The near-perfect correlation and strongly positive 
+
+¯S confirm that base model correctness is the single most powerful predictor: MAS succeeds largely when the base model is 17 On the Uncertainty of Large Language Model-Based Multi-Agent Systems            
+
+> Figure 10. Feature importance and SHAP analysis on Gbase-full for Qwen (left) and LLaMA (right) models. Both show that
+> base model is finally correct achieves ¯I= 1 .0and ρ≈0.96 , vastly surpassing all other features with nearly linear correlation to MAS correctness.
+
+already correct. 
+
+D.2. Inter-Agent Misalignment Causes MAS Failure 
+
+Section 4.4 demonstrates that MAS failures stem primarily from inter-agent misalignment, with entropy variance dominating for Qwen and answer-level features for LLaMA. Figure 11 presents the top 20 features on GMAS . Figure 12 presents SHAP waterfall plots for individual MAS failure predictions.       
+
+> (a) Qwen (b) LLaMA
+> Figure 11. Top 20 features on GMAS for MAS failure analysis: Qwen (a) and LLaMA (b). Qwen’s top predictor is entropy variance (sample variance entropy ), while LLaMA is dominated by answer-level features ( sample answer token count ).
+
+Qwen: Entropy Variance and Round-1 Features Dominate. Entropy dispersion metrics cluster at the top of the feature ranking. The leading predictor, sample variance entropy ( ¯I = 0 .83 , ρ = −0.92 ), confirms that inter-agent disagreement reliably predicts failure. Round-1 features dominate the top 10 (5 of 10), with Q3 agent variance entropy ( ρ = −0.86 ) and agent std entropy ( ρ = −0.88 ) showing strong negative correlations, suggesting that early-stage agent behavior is most predictive. A critical finding emerges from sample num agents (ρ = −0.44 , ¯S = −0.051 ): more agents harm performance at both levels, indicating coordination overhead. Interestingly, sample answer token count exhibits divergent behavior (ρ = −0.16 , ¯S = +0 .18 ), where longer answers correlate with sample failure but contribute positively globally. 18 On the Uncertainty of Large Language Model-Based Multi-Agent Systems          
+
+> (a) Qwen (LightGBM) (b) Qwen (XGBoost)
+> (c) LLaMA (LightGBM) (d) LLaMA (XGBoost)
+> Figure 12. SHAP waterfall plots on GMAS for representative MAS failure samples. Qwen (a-b) shows entropy dispersion features (variance, Q3 agent) as dominant contributors; LLaMA (c-d) reveals answer-level features (token count, answer entropy) driving failure predictions.
+
+LLaMA: Answer-Level Features Reveal Distinct Failure Mode. LLaMA’s failure mechanism differs fundamentally, with answer-level features dominating. The top predictor, sample answer token count ( ¯I = 0 .78 , ρ = −0.63 ), and total agent token count ( ρ = −0.87 ) indicate that verbose outputs signal confusion rather than productive deliberation. Even the most certain agent’s entropy correlates with failure ( sample min answer token entropy , ρ = −0.78 ). A key divergence appears in round-2 entropy ( ρ = +0 .65 , ¯S = −0.003 ): while higher later-round entropy correlates with sample success, its global contribution remains harmful, revealing an optimal uncertainty ceiling. Architecture type shows strong negative effects ( ρ = −0.84 ), and moderate average inference entropy benefits both levels ( ρ = +0 .50 , ¯S = +0 .007 ). This contrast with Qwen highlights model-specific failure mechanisms: Qwen fails on inter-agent dispersion, while LLaMA fails on output verbosity. 
+
+D.3. Task Difficulty Determines Optimal Uncertainty Dynamics 
+
+Section 5 establishes that the entropy-performance relationship is difficulty-dependent: simple tasks demand rapid conver-gence to low entropy, while harder tasks benefit from moderate entropy but suffer from peak uncertainty. Figures 13 and 14 present results across six diverse datasets. 
+
+Easy Math: Insensitivity to Entropy Dynamics. For easy arithmetic problems ( GSM8K ), entropy plays a minimal role. The top features show weak correlations ( |ρ| ≤ 0.15 ), indicating that answer length and early-round entropy dispersion are important for prediction but not directionally tied to performance. A notable exception is entropy variance ( ρ = −0.73 )and answer-token entropy ( ρ = −0.91 ), which show strong sample-level correlations but opposite global effects ( ¯S > 0), suggesting divergent sample-vs-global dynamics. Total experiment time shows positive correlation ( ρ = +0 .79 ), confirming that even simple tasks benefit from deliberation. 
+
+Medium Math: Moderate Entropy Benefits Performance. Medium-difficulty tasks ( MATH500 ) exhibit a distinct pattern where average entropy helps. The top predictor, exp infer average entropy ( ¯I = 0 .77 , ρ = +0 .63 , ¯S = +0 .12 ), shows consistent positive effects at both levels, confirming that moderate deliberation uncertainty benefits medium tasks. However, excessive early uncertainty remains harmful: max agent total entropy ( ρ = −0.73 ) and peak answer entropy 19 On the Uncertainty of Large Language Model-Based Multi-Agent Systems                           
+
+> (a) GSM8K (Easy) (b) MATH500 (Medium)
+> (c) AIME2024 (Hard) (d) AIME2025 (Hard)
+> Figure 13. Top 20 features on GMAS for mathematical reasoning tasks grouped by difficulty: (a) GSM8K (easy, |ρ| ≤ 0.15 for top features), (b) MATH500 (medium, positive ρand ¯Sfor average entropy), (c-d) AIME2024 /AIME2025 (hard, round-2 uncertainty harms performance).
+
+(ρ = −0.89 ) strongly predict failure. Cumulative round-1 entropy shows positive effects ( ρ = +0 .48 , ¯S = +0 .003 ), indicating that bounded exploration aids discovery. 
+
+Hard Math: Peak Uncertainty Harms Performance. Both AIME datasets show that extreme entropy hurts. Round-1 total time is the top predictor ( ¯I = 1 .0, ρ = +0 .72 ), but exhibits negative global contribution ( ¯S = −0.13 ), revealing that longer deliberation correlates with success locally but harms global performance when uncontrolled. The critical finding is the strong negative effect of entropy changes: round 1 2 change entropy (ρ = −0.80 , ¯S = −0.157 ) confirms that inter-round entropy shifts strongly harm hard-task performance. Average inference entropy shows strongly positive correlation (ρ = +0 .83 ) but strongly negative contribution ( ¯S = −0.22 ), suggesting an optimal entropy range for olympiad-level problems. 
+
+Code Generation: Answer Entropy Dominates. HumanEval reveals unique patterns where total experiment time dominates ( ¯I = 1 .0, ρ = +0 .83 ), but with negative global contribution ( ¯S = −0.07 ). Peak answer entropy ( ρ = −0.70 )and Q3 entropy ( ρ = −0.75 ) confirm that high uncertainty in final outputs harms code generation. Lower-ranked entropy features show weak importance ( ¯I < 0.05 ), indicating that code tasks depend more on output quality than deliberation dynamics. 20 On the Uncertainty of Large Language Model-Based Multi-Agent Systems                     
+
+> (a) HumanEval (Code Generation) (b) MMLU (Knowledge QA)
+> Figure 14. Top 20 features on GMAS for (a) code generation ( HumanEval ) and (b) knowledge QA ( MMLU ). HumanEval shows negative
+> ρand ¯Sfor answer-level features; MMLU shows that more agents hurt performance ( ρ < 0,¯S < 0for sample num agents ).
+
+Knowledge QA: Agent Count Harms Performance. MMLU shows distinct behavior where inter-agent agreement, not de-liberation length, determines success. Entropy variance dominates ( ¯I = 1 .0, ρ = −0.83 ), and critically, sample num agents 
+
+(ρ = −0.48 , ¯S = −0.12 ) shows that more agents hurt performance at both levels, unique among all tasks. Peak answer entropy remains strongly harmful ( ρ = −0.92 ), while total experiment time shows near-zero global impact ( ¯S ≈ 0), confirming that consensus, not duration, drives knowledge QA success. 
+
+D.4. Architecture Determines Which Uncertainty Matters 
+
+Section 5 establishes that architecture fundamentally shapes which entropy dimensions matter: aggregation-based systems fail on inter-agent dispersion, while sequential systems fail on answer-level entropy. Figures 15 and 16a present per-architecture analysis. 
+
+Centralized: Verbose Answers Signal Failure. Centralized MAS shows unique sensitivity to answer length. The top predictor, sample answer token count ( ¯I = 0 .96 ), exhibits weak sample correlation ( ρ = −0.08 ) but strong negative global contribution ( ¯S = −0.062 ), indicating that longer answers harm performance regardless of sample-level patterns. Early-round entropy features show consistently strong negative correlations: mean agent max entropy ( ρ = −0.83 ), max answer-token entropy ( ρ = −0.84 ), and sample max entropy ( ρ = −0.79 ). Interestingly, moderate average inference entropy shows positive correlation ( ρ = +0 .59 ), suggesting that centralized aggregation benefits from bounded deliberation uncertainty. 
+
+Debate: Cumulative Entropy Benefits Aligned Agents. Debate reveals a nuanced pattern where timing matters. Early-round peak entropy is harmful: Q3 agent max entropy ( ¯I = 1 .0, ρ = −0.81 ) and max agent std entropy ( ρ = −0.85 ) show that initial divergence amplifies across rounds. However, exp total entropy (ρ = +0 .68 , ¯S = +0 .005 ) shows consistent positive effects, confirming that cumulative entropy benefits debate once agents align. This reveals a critical principle: debate succeeds when agents converge early but maintain productive exploration thereafter. Entropy reduction between rounds is beneficial ( ρ = −0.44 for change entropy). 
+
+Hybrid: Extended Deliberation Helps. Hybrid systems benefit from longer processing. Total experiment time ( ρ =+0 .76 , ¯S = +0 .018 ) shows consistent positive effects, confirming that dual feedback from peers and orchestrator enables effective synthesis. However, round-2 expansion harms performance: round-2 total tokens ( ρ = −0.57 ) and round-2 entropy (ρ = −0.27 ) show negative effects. The top entropy feature shows divergent behavior ( ρ = −0.84 , ¯S = +0 .031 ), indicating that while high early-round entropy correlates with sample failure, some uncertainty benefits global aggregation. 
+
+Sequential: Answer-Level Entropy is Primary Failure Mode. Sequential systems show distinctive vulnerability to answer uncertainty. Answer token count ( ρ = −0.18 , ¯S = −0.009 ) and peak answer-token entropy ( ρ = −0.90 ,
+
+¯S = −0.003 ) both show consistent negative effects, confirming that answer-level uncertainty propagates through the chain. Round-1 features dominate (3 of top 5), with max agent std entropy ( ¯I = 0 .72 , ρ = −0.71 ) leading. Cumulative 21 On the Uncertainty of Large Language Model-Based Multi-Agent Systems          
+
+> (a) Centralized (b) Debate
+> (c) Hybrid (d) Sequential
+> Figure 15. Top 20 features on GMAS for multi-agent architectures: (a) Centralized (verbose answers harm performance), (b) Debate (cumulative entropy benefits once agents align), (c) Hybrid (extended deliberation helps), and (d) Sequential (answer-level entropy is the primary failure mode).
+
+entropy harms sequential systems globally ( ¯S = −0.006 for total entropy) despite positive sample correlation ( ρ = +0 .38 ), revealing that error propagation is the primary failure mechanism. 
+
+Single-Agent System: Round-2 Entropy Shows Inverted Pattern. SAS provides a control comparison, showing distinct patterns. Answer length dominates ( ¯I = 1 .0), and peak answer entropy shows strong negative effects ( ρ = −0.88 ). Notably, round-2 inference entropy exhibits positive sample correlation ( ρ = +0 .39 ) but negative global contribution ( ¯S = −0.014 ), indicating that later-round exploration benefits sample-level success but not global performance. Cumulative entropy shows consistent positive effects ( ρ = +0 .72 , ¯S = +0 .012 ), contrasting with sequential systems where it harms performance. 
+
+D.5. Round-1 Uncertainty Dominates Despite Extended Deliberation 
+
+Section 5.3 establishes that additional rounds provide diminishing predictive value, with round-1 features remaining dominant even when R = 5 . Figure 16b presents results from the expanded 494-dimensional feature space. 
+
+Extended Feature Analysis Confirms Round-1 Dominance. Despite the 494-dimensional feature space from five rounds, round-1 features cluster at the top. The second-ranked feature, sample round 1 max agent total entropy ( ¯I = 0 .60 ,
+
+ρ = −0.91 ), shows strong negative correlation, and Q3 agent variance entropy ranks third ( ¯I = 0 .50 ). Answer token count leads overall ( ¯I = 0 .67 , ρ = −0.75 ) but with positive global contribution ( ¯S = +0 .064 ), indicating that final answer 22 On the Uncertainty of Large Language Model-Based Multi-Agent Systems 
+
+(a) SAS is dominated by answer token-level features. Unlike MAS, SAS exhibits a positive ρ but negative 
+
+¯S for round-2 entropy. 
+
+(b) At R = 5 rounds, Round-1 features dominate the top predictors (ranks 2-3), and almost no features from Rounds 3-5 appear in the top 10. 
+
+(c) GMAS : MAS-only features (d) Gbase-H : Including base model entropy 
+
+Figure 16. Top 20 features for (a) SAS and (b) MAS with R = 5 rounds on GMAS , and for MAS using MRL-base on (c) GMAS and (d) Gbase-H .Early-round uncertainty dominates prediction in all cases. In (c), round-2 entropy shows positive ρ but negative ¯S, suggesting moderate later-round uncertainty is optimal. In (d), increased entropy from base to MAS still harms performance. 
+
+length matters for prediction regardless of entropy dynamics. Cumulative sample entropy shows consistent negative effects (ρ = −0.73 , ¯S = −0.012 ). 
+
+Later Rounds Provide Diminishing Signal. The extended ranking confirms that later-round features provide minimal predictive value. Critically, only one round-5 feature appears in the top 10 ( sample round 5 q3 agent q3 entropy , ¯I = 0 .24 ), and no feature from rounds 3-4 appears at all. Per-agent average entropy shows strong sample-level effects ( ρ = −0.90 )but positive global contribution ( ¯S = +0 .004 ). Token changes in later rounds correlate with failure ( ρ = −0.49 for round 4-5 changes). This pattern reveals a fundamental limitation: MAS success is largely determined by round-1 dynamics, and the absence of rounds 3-4 features in the top 20 suggests these intermediate rounds represent noise rather than productive refinement. 
+
+D.6. RL Training Inverts Uncertainty’s Role in MAS 
+
+Section 5 establishes that RL training fundamentally transforms the entropy-performance relationship: with MRL-base 
+
+(Qwen2.5-7B-SimpleRL-Zoo), later-round entropy reflects productive refinement rather than noise. Figure 16c and Figure 16d present results on both GMAS and Gbase-H .23 On the Uncertainty of Large Language Model-Based Multi-Agent Systems 
+
+GMAS : Round-2 Entropy Shows Inverted Pattern. RL training reveals a transformed entropy landscape. Answer token count leads ( ¯I = 0 .67 ) with strong positive contribution ( ¯S = +0 .160 ) despite negative correlation ( ρ = −0.49 ), indicating that longer answers benefit RL-trained systems. The key finding is round 2 total entropy ( ¯I = 0 .56 , ρ = +0 .27 ,
+
+¯S = −0.011 ): positive sample correlation but negative global contribution suggests an optimal entropy range where moderate later-round uncertainty is beneficial, but excessive deliberation still harms performance. Round-1 median agent entropy ( ρ = −0.77 ) and entropy change ( ¯S = −0.016 ) confirm that early convergence remains important even with RL training. 
+
+Gbase-H : Base Model Entropy Remains Predictive. On the base-entropy feature set, base model characteristics remain highly predictive. Answer token count again shows strong positive contribution ( ¯S = +0 .162 ). Base model output length ( ¯I = 0 .88 ) and entropy ( ¯I = 0 .87 , ρ = −0.74 ) rank among the top features. Critically, entropy changes from base to MAS still harm performance: answer token entropy change (ρ = −0.70 , ¯S = −0.001 ) shows consistent negative effects. Round-2 inference entropy ( ¯S = −0.085 ) confirms that later-round uncertainty has strong negative global contribution even with RL training. 
+
+Implications for RL-Trained Systems. The inverted pattern for round-2 entropy suggests that RL training teaches models to use later-round deliberation productively, transforming noise into meaningful refinement. However, the persistence of negative effects for entropy change features indicates that RL does not eliminate the fundamental challenge of managing uncertainty transitions between base model and MAS deliberation. 
+
+E. Divergent Reasoning Styles of Qwen and LLaMA 
+
+We illustrate the divergent reasoning styles between Qwen3-4B and LLaMA-3.2-3B-Instruct using a representative example from AIME 2025 . As discussed in Section 4.4, Qwen employs a self-correcting strategy, verifying and refining answers before producing final output, yielding more reliable results that suppress error propagation in MAS, albeit with higher entropy. In contrast, LLaMA tends to accept and reuse answers from other agents without verification, leading to uncontrolled error propagation. 
+
+Question. Find the sum of all integer bases b > 9 for which 17 b is a divisor of 97 b. Ground Truth: 70. 
+
+E.1. Qwen3-4B (Sequential Architecture) Planner Agent.                                                                                                
+
+> System Prompt
+> You are the planner agent. Generate plans that are the general instructions only. Do not execute the plan, do not perform any calculations, and do not produce any answers or intermediate numerical results. Output astructured, numbered plans.
+> User Prompt
+> For the question: Find the sum of all integer bases b>9for which 17 bis adivisor of 97 b.Please only generate plans that are guidances required for the subsequent reasoning for the problem-solving. Do not include any specific calculation or numerical results. Your input may include previous round outputs content. You can consider the given contents as the initial state of the problem-solving.
+
+24 On the Uncertainty of Large Language Model-Based Multi-Agent Systems Response (excerpt from <think> block) 
+
+“...if I subtract 9*(b + 7) from 9b + 7, that would be 9b + 7 - 9b - 63 = -56. Therefore, (b + 7) divides -56. Since divisors can be positive or negative, but since b ¿ 9, b + 7 is positive, so (b + 7) must be a positive divisor of 56... the possible divisors of 56 that are greater than 16 are 28 and 56. So, b + 7 = 28 → b = 21, and b + 7 = 56 → b = 49. Therefore, the sum would be 21 + 49 = 70.” 
+
+Final Output: 
+
+1. Convert the base-b numbers 17 b and 97 b to decimal form, resulting in 1 · b + 7 and 9 · b + 7 , respectively. 2. Establish the divisibility condition: 9b + 7 must be divisible by b + 7 , i.e., 9b+7  
+
+> b+7
+
+is an integer. 3. Perform algebraic manipulation to simplify the divisibility condition, leading to the conclusion that b + 7 divides −56 
+
+(equivalently, b + 7 divides 56 ). 4. Identify all positive divisors of 56 that satisfy b + 7 > 16 (since b > 9). 5. For each valid divisor d = b + 7 , compute b = d − 7 and ensure b > 9.6. Sum all valid integer values of b obtained from step 5. 7. Compute b = 21 , 49 ; sum = 70 
+
+Analysis: Qwen performs deep reasoning within the <think> block, independently deriving the complete solution before outputting a structured plan. 
+
+Solver Agent. 
+
+System Prompt 
+
+You are the solver agent. Solve strictly according to the provided plans. Execute each step precisely and produce the final result. Output the final result into 
+
+\boxed {{}} .
+
+User Prompt 
+
+Question: Find the sum of all integer bases $b>9$ for which $17 {b}$ is a divisor of $97 {b}$. ### Plans ### 
+
+[Planner’s output from previous step] 
+
+### Plans ### Follow the plans to solve the question step by step and place the final answer in 
+
+\boxed {} .
+
+Response (verification step) 
+
+“For b = 21 : 17 21 = 21 + 7 = 28 , 97 21 = 9 × 21 + 7 = 196 , and 196 ÷ 28 = 7 , which is an integer. For b = 49 :
+
+17 49 = 49 + 7 = 56 , 97 49 = 9 × 49 + 7 = 448 , and 448 ÷ 56 = 8 , which is also an integer. Both values are valid.” 
+
+Final Answer: 70 
+
+Analysis: Solver independently verifies each candidate value before accepting, catching potential errors. 
+
+Critic Agent. 
+
+System Prompt 
+
+You are the critic agent. Review the solver’s solution in detail, re-derive independently, and correct any mistakes. Keep the review terse. 
+
+25 On the Uncertainty of Large Language Model-Based Multi-Agent Systems User Prompt 
+
+Review the solution for: Find the sum of all integer bases $b>9$ for which $17 {b}$is a divisor of $97 {b}$. ### Solution ### 
+
+[Solver’s output from previous step] 
+
+### Solution ### If corrections are needed, output the mistaken steps and the analysis, otherwise output ‘Correct’. 
+
+Response 
+
+“The remainder is indeed −56 , so the fraction is an integer if b + 7 divides 56. The divisors of 56 are: 1, 2, 4, 7, 8, 14, 28, 56. From these, the divisors greater than 16 are 28 and 56. This is correct.” 
+
+Verdict: The solution is correct . All steps are logically sound and verified. The final answer is 70 .
+
+Analysis: Critic independently re-derives the solution and confirms correctness. 
+
+Judger Agent. 
+
+System Prompt 
+
+You are the final judge. Audit only the final candidate and ensure it is correct. 
+
+User Prompt (instructs to output only the final answer) 
+
+Final check for: Find the sum of all integer bases $b>9$ for which $17 {b}$ is adivisor of $97 {b}$. ### Solution ### 
+
+[Critic’s output from previous step] 
+
+### Solution ### 
+
+If correct, only output the final answer without words, labels, and steps , and wrapped in \boxed {} .
+
+Response (self-verification in <think> block despite instruction) 
+
+<think> 
+
+“Okay, let’s go through the problem again to make sure everything checks out... First, converting those numbers to decimal makes sense. So 17 in base b is 1 · b + 7 = b + 7 . Similarly, 97 in base b is 9b + 7 ... The next step is to set up the division: 
+
+(9 b + 7) /(b + 7) . The user did polynomial division here, which gives 9 with a remainder of -56... Therefore, for the division to be an integer, b + 7 must divide 56. That’s correct... The divisors of 56 greater than 16 are 28 and 56. Therefore, b + 7 = 28 gives 
+
+b = 21 , and b + 7 = 56 gives b = 49 ... Checking those values: For b = 21 , 17 21 = 28 , 97 21 = 196 , and 196 ÷ 28 = 7 (integer). For b = 49 , 17 49 = 56 , 97 49 = 448 , and 448 ÷ 56 = 8 (integer). So both bases are valid, and their sum is 21 + 49 = 70 . The solution seems correct. All steps are logically sound and verified.” 
+
+</think> 
+
+Final Answer: 70 ✓
+
+Analysis: Despite the explicit instruction to “ only output the final answer without words, labels, and steps ”, Qwen 
+
+voluntarily re-derives the entire solution within its <think> block before outputting the answer. This self-verification behavior, even when not required, exemplifies Qwen’s tendency to validate correctness independently, which suppresses error propagation but incurs higher entropy. 
+
+E.2. LLaMA-3.2-3B-Instruct (Sequential Architecture) 
+
+Note: LLaMA uses identical system and user prompts as Qwen; only responses are shown below. 
+
+26 On the Uncertainty of Large Language Model-Based Multi-Agent Systems 
+
+Planner Agent. 
+
+Response (flawed reasoning) 
+
+“... (9 b + 7) /(b + 7) can be rewritten as 9 − 2b + 7 /(b + 7) , which simplifies to (16 − 2b)/(b + 7) ...” 
+
+✗ Error at Step 6: Incorrect algebraic simplification. The correct form is: 
+
+9b + 7 
+
+b + 7 = 9 + −56 
+
+b + 7 
+
+not (16 − 2b)/(b + 7) .
+
+“...Given that b + 7 must divide 2( b + 7) , b + 7 must divide 14. The factors of 14 are 1, 2, 7, and 14. Therefore b can be -6, -5, 0, or 7. Only b = 7 is a valid solution.” 
+
+✗ Error at Step 21: Filters for b > 9 but incorrectly concludes b = 7 (which violates b > 9). 
+
+Analysis: LLaMA makes an algebraic error early in the reasoning chain, which propagates through all subsequent steps. 
+
+Solver Agent. 
+
+Response 
+
+“## Step 1: Identify the problem requirements... ## Step 5: Simplify the expression (9 b + 7) /(b + 7) can be rewritten as 
+
+9 − 2b + 7 /(b + 7) , which simplifies to 16 − 2b/ (b + 7) ... ## Step 21: Determine the final possible values of b: Only b = 7 is a valid solution.” 
+
+Final Answer: 7 ✗
+
+Analysis: Solver follows the flawed plan exactly without independent verification , directly accepting the erroneous conclusion. 
+
+Critic Agent. 
+
+Response 
+
+“Correct. The provided solution was mostly correct. However, the analysis was overly complicated... Here’s a simplified version: Since 2( b + 7) is always divisible by b + 7 , all b > 9 are valid. The sum of all valid b values is 10 + 11 + 12 + ... + 16 = 204 .” 
+
+✗ New Error: Critic introduces an entirely new error while attempting to “simplify”. 
+
+Analysis: Critic fails to catch the original error and introduces additional errors. 
+
+Judger Agent. 
+
+Response 
+
+Final Answer: 204 ✗
+
+Analysis: In stark contrast to Qwen, LLaMA’s judger directly accepts the flawed analysis without any independent verification , even though its role is to “audit and ensure correctness”. This lack of self-verification behavior, while producing lower entropy, allows errors to propagate unchecked through the entire reasoning chain, ultimately yielding an incorrect final answer. 
+
+F. Case Study: Token-Level Entropy Dynamics 
+
+To complement our feature-level analysis, we visualize token-level entropy dynamics for representative samples from each dataset. This fine-grained examination reveals how uncertainty evolves within and across agents during multi-round deliberation, providing intuitive support for our main findings. 27 On the Uncertainty of Large Language Model-Based Multi-Agent Systems 
+
+For each dataset, we select the first sample and visualize the token-level entropy trajectory across all agents and rounds. In each figure, white backgrounds denote round 1 and gray backgrounds denote round 2. Black dashed lines separate different agents’ outputs within each round. The correctness indicator (checkmark or cross) in the upper-right corner shows the final MAS prediction outcome. This visualization captures the finest granularity of uncertainty dynamics, enabling direct observation of how entropy patterns relate to MAS success or failure. 
+
+Qwen3-0.6B: High Entropy Persistence. Figure 17 shows that the smallest Qwen model exhibits persistently high entropy across both rounds, with frequent spikes throughout the reasoning trajectory. On harder tasks ( AIME , MATH500 ), the entropy rarely stabilizes, and most predictions fail. This aligns with our finding that uncontrolled uncertainty harms MAS performance. Notably, even when round-2 entropy decreases, it often collapses to near-zero rather than converging to a stable moderate level, indicating premature termination rather than confident resolution. 
+
+Qwen3-4B: Improved Stability with Task-Dependent Patterns. Figure 18 reveals that scaling to 4B parameters improves entropy stability. On simpler tasks ( GSM8K , MMLU ), agents converge to low, stable entropy in round 2, yielding correct predictions. On medium-difficulty tasks ( MATH500 , HumanEval ), moderate entropy is maintained, supporting productive exploration. However, on AIME , entropy dynamics remain erratic, suggesting that even larger models struggle with olympiad-level problems. This pattern supports our Task Awareness principle: optimal entropy profiles vary by task difficulty. 
+
+Qwen3-8B: Structured Deliberation Emerges. Figure 19 demonstrates that the largest Qwen model exhibits the most structured entropy dynamics. Round-1 entropy shows controlled exploration with clear peaks at decision points, followed by gradual stabilization. In round 2, entropy either maintains a productive moderate level (on hard tasks where deliberation helps) or converges smoothly to low values (on simple tasks). This structured pattern correlates with higher accuracy, confirming that Certainty Preference benefits MAS when achieved through genuine convergence rather than premature collapse. 
+
+LLaMA-3.2-3B-Instruct: Distinct Reasoning Style. Figure 20 shows that LLaMA models exhibit fundamentally different entropy dynamics compared to Qwen. Round-2 entropy frequently drops to near-zero across all agents, indicating a more decisive (but potentially overconfident) reasoning style. While this yields correct predictions on simpler tasks, it often leads to failure on harder problems where sustained exploration is beneficial. This contrast highlights how different model families develop distinct uncertainty profiles, with implications for MAS architecture selection. 
+
+LLaMA-3.1-8B-Instruct: Scale Improves but Style Persists. Figure 21 reveals that scaling LLaMA to 8B parameters improves overall accuracy but preserves the characteristic low-entropy style in round 2. The model shows better calibration, with entropy remaining non-zero on harder tasks where exploration helps. However, the tendency toward rapid entropy reduction remains more pronounced than in Qwen models of comparable size. This suggests that model family (not just scale) shapes uncertainty dynamics, reinforcing our Base Uncertainty finding that base model characteristics directly influence MAS effectiveness. 
+
+Summary. These case studies provide visual evidence for our main findings: (1) Round-1 dynamics are critical : entropy patterns established in the first round largely persist or determine the trajectory in round 2; (2) Moderate, stable entropy correlates with success : both excessively high entropy (erratic reasoning) and near-zero entropy (premature collapse) predict failure; (3) Model family shapes uncertainty style : Qwen and LLaMA exhibit distinct entropy profiles that influence MAS effectiveness across different tasks. These observations complement our quantitative analysis by revealing the fine-grained mechanisms underlying entropy-performance relationships. 
+
+G. Entropy Judger 
+
+This section provides implementation details for the Entropy Judger , including data preprocessing, hyperparameter configu-ration, and cross-validation protocols. 
+
+G.1. Training Data Construction Data Aggregation Strategy. We conduct data mining at two granularities. First, for each model series (LLaMA or Qwen), we aggregate samples from all experimental configurations, spanning GSM8K , MATH500 , AIME 2024/2025 , MMLU , and 
+
+HumanEval datasets across Centralized , Debate , Hybrid , Sequential , and Single architectures, yielding a diverse training corpus that ensures the classifier generalizes across task types and interaction patterns. Second, to enable fine-grained analysis, we train separate classifiers for each individual configuration: 5 models × 6 datasets × 3 feature groups, totaling 180 configuration-specific classifiers. Results from these fine-grained analyses are partially reported in Appendix D. 28 On the Uncertainty of Large Language Model-Based Multi-Agent Systems 
+
+Feature Preprocessing. All features are standardized to zero mean and unit variance via ˜xij = ( xij − μj )/σ j , where μj
+
+and σj are computed from the training fold. Missing values (e.g., when an architecture has fewer agents) are imputed with zero after standardization. 
+
+G.2. Model Hyperparameters XGBoost Configuration. We set max depth = 6, learning rate = 0.1, n estimators = 100, subsample = 0.8, colsam-ple bytree = 0.8, with L1 regularization (reg alpha = 0.1) and L2 regularization (reg lambda = 1.0). To handle class imbalance, scale pos weight is computed as Nneg /N pos .
+
+LightGBM Configuration. We use num leaves = 31, learning rate = 0.1, n estimators = 100, subsample = 0.8, colsam-ple bytree = 0.8, reg alpha = 0.1, and reg lambda = 1.0, with class weight = ‘balanced’ for automatic class imbalance adjustment. 
+
+G.3. Cross-Validation Protocol Stratified 5-Fold Splitting. To ensure robust evaluation, we employ stratified 5-fold cross-validation: the full dataset is split into 5 folds while preserving the class distribution (Npos : Nneg ); for each fold i ∈ { 1, . . . , 5}, we train on folds 
+
+{1, . . . , 5} \ { i} and validate on fold i; the reported accuracy is the mean across all 5 folds. 
+
+Early Stopping. During training, we monitor validation loss and stop if no improvement is observed for 10 consecutive boosting rounds, preventing overfitting. 
+
+G.4. Per-Dataset Classification Performance 
+
+To understand how prediction difficulty varies across tasks, we train classifiers on GMAS for each dataset independently, aggregating samples across all models and architectures. Table 4 reports XGBoost and LightGBM accuracy.   
+
+> Table 4. Per-dataset classification accuracy on GMAS . Results are averaged over 5-fold cross-validation.
+
+Dataset XGBoost LightGBM 
+
+GSM8K 0.876 0.862 
+
+AIME2024 0.860 0.873 
+
+AIME2025 0.833 0.827 
+
+MATH500 0.787 0.787 
+
+HumanEval 0.748 0.732 
+
+MMLU 0.739 0.742 
+
+All (Aggregated) 0.771 0.769 
+
+Task Difficulty Influences Predictability. Classification accuracy varies substantially across datasets (0.732-0.876), revealing that entropy-based prediction is easier for some tasks than others. Notably, the easiest task ( GSM8K , 82% MAS accuracy) and the hardest tasks ( AIME24/25 , 25-31% MAS accuracy) both achieve high classification accuracy ( >0.82), while medium-difficulty tasks ( MATH500 , HumanEval , MMLU ) prove more challenging to classify (0.73-0.79). This suggests that extreme cases, where MAS either succeeds reliably or fails predictably, exhibit more distinctive entropy signatures, whereas intermediate performance involves subtler uncertainty patterns. 
+
+Mathematical Reasoning Shows Clearest Entropy Signals. Among the six datasets, mathematical reasoning tasks (GSM8K , AIME24/25 ) consistently achieve the highest classification accuracy. This aligns with our main finding that entropy dynamics are most informative for tasks requiring structured deliberation. In contrast, MMLU (knowledge QA) shows the lowest accuracy, consistent with our observation that MMLU performance depends primarily on inter-agent agreement rather than entropy magnitude. 
+
+Aggregated Training Slightly Reduces Accuracy. The aggregated classifier (0.771) underperforms the best per-dataset classifiers (0.876 for GSM8K ), indicating that task-specific entropy patterns exist. However, the aggregated model still achieves competitive accuracy across all tasks, demonstrating that the Entropy Judger generalizes reasonably well without task-specific tuning. 29 On the Uncertainty of Large Language Model-Based Multi-Agent Systems 
+
+G.5. Pass@ k Selection 
+
+Beyond binary classification, the Entropy Judger enables label-free selection from multiple MAS candidates. Given k
+
+candidate solutions {x1, . . . , xk} generated by different MAS configurations (e.g., varying architectures or random seeds), the Entropy Judger selects the candidate with the highest predicted probability of correctness: ˆℓ = arg max ℓ∈[k] f (xℓ),where f : Rd → [0 , 1] is the trained classifier. This formulation requires no ground-truth labels at inference time, making it practical for real-world deployment. 
+
+Selection Protocol. For pass@ k evaluation, we generate k candidate solutions per problem using different MAS architec-tures or sampling runs. The Entropy Judger ranks candidates by predicted correctness probability and selects the top-ranked solution. We compare against two baselines: (1) Random : uniformly select one candidate; (2) Oracle : select the correct candidate if any exists (upper bound). 
+
+Practical Utility. The pass@ k selection capability addresses a key practical challenge: when deploying MAS, practitioners often run multiple configurations but lack ground-truth to evaluate outputs. The Entropy Judger provides a principled, label-free mechanism to select high-quality solutions, reducing the need for expensive human evaluation or oracle access. 30 On the Uncertainty of Large Language Model-Based Multi-Agent Systems 0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> AIME24
+> Sing-1
+> Sing-2
+
+Single 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+> Math-1
+> Scie-2
+> Code-3
+> Math-5
+> Code-7
+
+Centralized 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+> agen-1
+> agen-2
+> agen-3
+
+Debate 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+> Math-1
+> Orch-8
+
+Hybrid 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+> plan-1
+> solv-6
+> judg-8
+
+Sequential 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+> AIME25
+> Sing-1
+> Sing-2
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+> Math-1
+> Scie-2
+> Code-3
+> Math-5
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+> agen-1
+> agen-2
+> agen-3
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Code-7
+> Orch-8
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+> plan-1
+> crit-3
+> solv-6
+> judg-8
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0.30 
+
+> GSM8K
+> Sing-1
+> Sing-2
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+> Orch-8
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+> agen-1
+> agen-2
+> agen-3
+> agen-4
+> agen-5
+> agen-6
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+> Orch-8
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+> plan-1
+> solv-2
+> crit-3
+> judg-4
+> plan-5
+> solv-6
+> crit-7
+> judg-8
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+> HumanEval
+> Sing-1
+> Sing-2
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+> Math-1
+> Scie-2
+> Code-3
+> Math-5
+> Scie-6
+> Code-7
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+> agen-1
+> agen-2
+> agen-3
+> agen-4
+> agen-5
+> agen-6
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+> Orch-8
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+> plan-1
+> solv-2
+> crit-3
+> judg-4
+> plan-5
+> solv-6
+> crit-7
+> judg-8
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> Math500
+> Sing-1
+> Sing-2
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+> Orch-8
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+> agen-1
+> agen-2
+> agen-3
+> agen-4
+> agen-5
+> agen-6
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Code-7
+> Orch-8
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+> plan-1
+> solv-2
+> crit-3
+> plan-5
+> solv-6
+> crit-7
+> judg-8
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> MMLU
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+Token-Level Entropy Dynamics: Qwen3-0.6B 
+
+Round 1 Round 2 Agent Boundary Correct Wrong 
+
+Figure 17. Token-level entropy dynamics for Qwen3-0.6B across six datasets. High entropy persistence and frequent spikes characterize this smaller model, with entropy either remaining elevated or collapsing abruptly to zero in round 2. 
+
+31 On the Uncertainty of Large Language Model-Based Multi-Agent Systems 0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+> AIME24
+> Sing-1
+> Sing-2
+
+Single 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> Math-1
+> Scie-2
+> Code-3
+> Math-5
+> Scie-6
+> Code-7
+> Orch-8
+
+Centralized 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> agen-1
+> agen-2
+> agen-3
+> agen-4
+> agen-5
+> agen-6
+
+Debate 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+> Orch-8
+
+Hybrid 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> plan-1
+> solv-2
+> crit-3
+> judg-4
+> plan-5
+> solv-6
+> judg-8
+
+Sequential 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+> AIME25
+> Sing-1
+> Sing-2
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> agen-1
+> agen-2
+> agen-3
+> agen-4
+> agen-5
+> agen-6
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0.30 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+> Orch-8
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0.30 
+
+> plan-1
+> solv-2
+> crit-3
+> judg-4
+> plan-5
+> solv-6
+> judg-8
+
+0.00 
+
+0.02 
+
+0.04 
+
+0.06 
+
+0.08 
+
+0.10 
+
+0.12 
+
+> GSM8K
+> Sing-1
+> Sing-2
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+> Orch-8
+
+0.000 
+
+0.025 
+
+0.050 
+
+0.075 
+
+0.100 
+
+0.125 
+
+> agen-1
+> agen-2
+> agen-3
+> agen-4
+> agen-5
+> agen-6
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+> Orch-8
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+> plan-1
+> solv-2
+> crit-3
+> judg-4
+> plan-5
+> solv-6
+> crit-7
+> judg-8
+
+0.000 
+
+0.025 
+
+0.050 
+
+0.075 
+
+0.100 
+
+0.125 
+
+0.150 
+
+> HumanEval
+> Sing-1
+> Sing-2
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+> Orch-8
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0.30 
+
+> agen-1
+> agen-2
+> agen-3
+> agen-4
+> agen-5
+> agen-6
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+> Orch-8
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+> plan-1
+> solv-2
+> crit-3
+> judg-4
+> solv-6
+> crit-7
+> judg-8
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0.30 
+
+> Math500
+> Sing-1
+> Sing-2
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0.30 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+> agen-1
+> agen-2
+> agen-3
+> agen-4
+> agen-5
+> agen-6
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0.30 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+> Orch-8
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+> plan-1
+> solv-2
+> crit-3
+> judg-4
+> plan-5
+> solv-6
+> crit-7
+> judg-8
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+> MMLU
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0.30 
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0.30 
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+Token-Level Entropy Dynamics: Qwen3-4B 
+
+Round 1 Round 2 Agent Boundary Correct Wrong 
+
+Figure 18. Token-level entropy dynamics for Qwen3-4B. Increased model capacity yields more stable entropy on easier tasks, while harder tasks still induce erratic uncertainty patterns. 
+
+32 On the Uncertainty of Large Language Model-Based Multi-Agent Systems 0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> AIME24
+> Sing-1
+> Sing-2
+
+Single 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+> Math-1
+> Scie-2
+> Code-3
+> Math-5
+> Scie-6
+
+Centralized 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> agen-1
+> agen-2
+> agen-3
+> agen-4
+> agen-5
+> agen-6
+
+Debate 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+> Math-1
+> Scie-2
+> Orch-4
+> Math-5
+> Scie-6
+
+Hybrid 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> plan-1
+> solv-2
+> judg-4
+> plan-5
+> solv-6
+> crit-7
+> judg-8
+
+Sequential 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+> AIME25
+> Sing-1
+> Sing-2
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Scie-6
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> agen-1
+> agen-2
+> agen-3
+> agen-4
+> agen-5
+> agen-6
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+> Math-1
+> Orch-4
+> Orch-8
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0.30 
+
+> plan-1
+> solv-2
+> judg-4
+> plan-5
+> solv-6
+> judg-8
+
+0.00 
+
+0.02 
+
+0.04 
+
+0.06 
+
+0.08 
+
+0.10 
+
+0.12 
+
+> GSM8K
+> Sing-1
+> Sing-2
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0.30 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Scie-6
+> Orch-8
+
+0.00 
+
+0.02 
+
+0.04 
+
+0.06 
+
+0.08 
+
+0.10 
+
+0.12 
+
+> agen-1
+> agen-2
+> agen-3
+> agen-4
+> agen-5
+> agen-6
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0.30 
+
+> Math-1
+> Scie-2
+> Orch-4
+> Math-5
+> Scie-6
+> Orch-8
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+> plan-1
+> solv-2
+> judg-4
+> plan-5
+> solv-6
+> judg-8
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0.30 
+
+> HumanEval
+> Sing-1
+> Sing-2
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> agen-1
+> agen-2
+> agen-3
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+> Math-1
+> Scie-2
+> Orch-4
+> Math-5
+> Scie-6
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+> plan-1
+> crit-3
+> judg-4
+> plan-5
+> solv-6
+> crit-7
+> judg-8
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+> Math500
+> Sing-1
+> Sing-2
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Scie-6
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0.30 
+
+> agen-1
+> agen-2
+> agen-3
+> agen-4
+> agen-5
+> agen-6
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0.30 
+
+> Math-1
+> Scie-2
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0.30 
+
+> plan-1
+> solv-2
+> judg-4
+> plan-5
+> solv-6
+> judg-8
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> MMLU
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0.30 
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0.30 
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+Token-Level Entropy Dynamics: Qwen3-8B 
+
+Round 1 Round 2 Agent Boundary Correct Wrong 
+
+Figure 19. Token-level entropy dynamics for Qwen3-8B. The largest Qwen model shows structured deliberation with controlled exploration in round 1 and smooth convergence in round 2. 
+
+33 On the Uncertainty of Large Language Model-Based Multi-Agent Systems 0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0.30 
+
+> AIME24
+> Sing-1
+
+Single 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+
+Centralized 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+> agen-1
+> agen-2
+> agen-3
+> agen-5
+
+Debate 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> Math-1
+> Code-3
+> Orch-4
+> Math-5
+> Code-7
+
+Hybrid 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+> solv-2
+> crit-3
+> plan-5
+> crit-7
+
+Sequential 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> AIME25
+> Sing-1
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+> agen-2
+> agen-3
+> agen-4
+> agen-6
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+> Math-1
+> Code-3
+> Orch-4
+> Math-5
+> Code-7
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+> plan-1
+> solv-2
+> crit-3
+> plan-5
+> solv-6
+> crit-7
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+> GSM8K
+> Sing-1
+> Sing-2
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+> agen-1
+> agen-2
+> agen-3
+> agen-4
+> agen-5
+> agen-6
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+> plan-1
+> solv-2
+> crit-3
+> plan-5
+> solv-6
+> crit-7
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+> HumanEval
+> Sing-1
+> Sing-2
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+> Orch-8
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> agen-1
+> agen-2
+> agen-3
+> agen-4
+> agen-5
+> agen-6
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+> Orch-8
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+> plan-1
+> solv-2
+> crit-3
+> judg-4
+> plan-5
+> solv-6
+> crit-7
+> judg-8
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+> Math500
+> Sing-1
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+0.30 
+
+> agen-1
+> agen-2
+> agen-3
+> agen-5
+> agen-6
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+> plan-1
+> solv-2
+> crit-3
+> plan-5
+> solv-6
+> crit-7
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.00 
+
+0.05 
+
+0.10 
+
+0.15 
+
+0.20 
+
+0.25 
+
+> MMLU
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+Token-Level Entropy Dynamics: LLaMA-3.2-3B-Instruct 
+
+Round 1 Round 2 Agent Boundary Correct Wrong 
+
+Figure 20. Token-level entropy dynamics for LLaMA-3.2-3B-Instruct. LLaMA exhibits lower round-2 entropy compared to Qwen, often collapsing to near-zero, reflecting a more decisive but potentially overconfident reasoning style. 
+
+34 On the Uncertainty of Large Language Model-Based Multi-Agent Systems 0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+> AIME24
+> Sing-1
+
+Single 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+> Math-1
+> Scie-2
+> Scie-6
+
+Centralized 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+> agen-1
+> agen-2
+> agen-3
+> agen-5
+> agen-6
+
+Debate 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+> Math-1
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+
+Hybrid 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+> plan-1
+> solv-2
+> crit-3
+> plan-5
+> solv-6
+> crit-7
+
+Sequential 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> AIME25
+> Sing-1
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+> Math-1
+> Math-5
+> Scie-6
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+> agen-2
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+> Math-1
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+> plan-1
+> solv-2
+> crit-3
+> plan-5
+> solv-6
+
+0.000 
+
+0.025 
+
+0.050 
+
+0.075 
+
+0.100 
+
+0.125 
+
+0.150 
+
+> GSM8K
+> Sing-1
+> Sing-2
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+> agen-1
+> agen-2
+> agen-3
+> agen-5
+> agen-6
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0.6 
+
+> plan-1
+> solv-2
+> crit-3
+> plan-5
+> solv-6
+> crit-7
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+> HumanEval
+> Sing-1
+> Sing-2
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+> Orch-8
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> agen-1
+> agen-2
+> agen-3
+> agen-4
+> agen-5
+> agen-6
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+> Orch-8
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+> plan-1
+> solv-2
+> crit-3
+> judg-4
+> plan-5
+> solv-6
+> crit-7
+> judg-8
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+> Math500
+> Sing-1
+> Sing-2
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+> agen-1
+> agen-2
+> agen-3
+> agen-4
+> agen-5
+> agen-6
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+> Math-1
+> Scie-2
+> Code-3
+> Orch-4
+> Math-5
+> Scie-6
+> Code-7
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+> plan-1
+> solv-2
+> crit-3
+> plan-5
+> solv-6
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+> MMLU
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+0.5 
+
+0 200 400 600 800 1000 
+
+Normalized Token Position 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3 
+
+0.4 
+
+Token-Level Entropy Dynamics: LLaMA-3.1-8B-Instruct 
+
+Round 1 Round 2 Agent Boundary Correct Wrong 
+
+Figure 21. Token-level entropy dynamics for LLaMA-3.1-8B-Instruct. Scaling improves calibration, but the characteristic rapid entropy reduction in round 2 persists compared to Qwen models. 
+
+35

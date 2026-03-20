@@ -1,0 +1,313 @@
+Title: Active Asymmetric Multi-Agent Multimodal Learning under Uncertainty
+
+URL Source: https://arxiv.org/pdf/2602.04763v1
+
+Published Time: Thu, 05 Feb 2026 02:25:41 GMT
+
+Number of Pages: 11
+
+Markdown Content:
+# Active Asymmetric Multi-Agent Multimodal Learning under Uncertainty 
+
+Rui Liu 1 Pratap Tokekar 1 Ming Lin 1
+
+# Abstract 
+
+Multi-agent systems are increasingly equipped with heterogeneous multimodal sensors, en-abling richer perception but introducing modality-specific and agent-dependent uncertainty. Exist-ing multi-agent collaboration frameworks typi-cally reason at the agent level, assume homoge-neous sensing, and handle uncertainty implicitly, limiting robustness under sensor corruption. We propose Active Asymmetric Multi-Agent Multi-modal Learning under Uncertainty (A2MAML), a principled approach for uncertainty-aware, modality-level collaboration. A2MAML mod-els each modality-specific feature as a stochas-tic estimate with uncertainty prediction, ac-tively selects reliable agent–modality pairs, and aggregates information via Bayesian inverse-variance weighting. This formulation enables fine-grained, modality-level fusion, supports asymmet-ric modality availability, and provides a principled mechanism to suppress corrupted or noisy modal-ities. Extensive experiments on connected au-tonomous driving scenarios for collaborative acci-dent detection demonstrate that A2MAML consis-tently outperforms both single-agent and collab-orative baselines, achieving up to 18.7% higher 
+
+accident detection rate. 
+
+# 1. Introduction 
+
+The transition from single-agent systems (Shen et al., 2023) to multi-agent systems (Liu et al., 2025b;c) represents a fun-damental paradigm shift in autonomous systems. By sharing information across agents, collaborative systems can over-come limitations of single agents, such as occlusion and limited sensor range. As a result, multi-agent collaboration has become a key mechanism for improving performance and situational awareness in complex, safety-critical scenar-ios, such as robotics (Liu et al., 2025b; Arai et al., 2002) and autonomous driving (Rahman et al., 2021; Talebpour &  
+
+> 1University of Maryland, College Park. Correspondence to: Rui Liu <ruiliu@umd.edu >.
+> Preprint.
+
+Mahmassani, 2016; Ye & Yamamoto, 2019). In practice, most systems are subject to uncertainties and robustness concerns, stemming from factors such as sen-sor noise and environmental disturbance. Prior work in multi-agent system has explored how agents can act under uncertainty using belief updates, probabilistic reasoning, or robust policies (Oliehoek et al., 2016; Foerster et al., 2018; Zhang et al., 2021). However, these approaches typically as-sume homogeneous sensing modality shared across agents, and uncertainty is modeled at the agent or environment level rather than at the modality level. In addition, most existing multi-agent collaboration frameworks make communication and fusion decisions at the agent level, treating each agent’s sensor suite as an indivisible unit (Liu et al., 2020a;b; Hu et al., 2022). Such collaboration is coarse-grained, the sys-tem must either accept all modalities from a collaborator, risking contamination from corrupted sensors, or reject the agent entirely, discarding useful information from reliable modalities. Moreover, uncertainty in these communica-tion channels is typically handled implicitly via attention weights, which lack a principled probabilistic interpretation and can lead to overconfident and poorly calibrated predic-tions under sensor corruption (Jain & Wallace, 2019; Guo et al., 2017). As autonomous systems evolve, agents are increasingly equipped with heterogeneous multimodal sensors (Liu et al., 2025b;c), such as RGB cameras, LiDAR, and text. This shift fundamentally changes the nature of uncertainty in multi-agent systems. In multimodal settings, different sens-ing modalities exhibit distinct noise profiles and failure modes, and these effects vary across agents and over time (Matos et al., 2024). For example, an agent’s camera may be degraded by lighting or weather while its LiDAR re-mains reliable, whereas another agent may experience the opposite. These varying sensing degradations introduce modality-specific and agent-dependent uncertainties, which cannot be adequately captured by existing formulations. These limitations introduce an open challenge: How can multi-agent systems collaboratively leverage heterogeneous multimodal information while explicitly modeling uncer-tainty, actively selecting what to communicate ? To address this problem, we propose Active Asymmetric Multi-Agent Multimodal Learning under Uncertainty (A2MAML). Un-1
+
+> arXiv:2602.04763v1 [cs.LG] 4 Feb 2026
+
+𝑥 0,𝑚 
+
+𝑥 1,𝑚 
+
+𝑥 𝑁 ,𝑚 
+
+Encoder 
+
+𝐸 𝑚 
+
+> 𝒇 0,𝑚
+> 𝒖 0,𝑚
+> 𝒇 1,𝑚
+> 𝒖 1,𝑚
+> 𝒇 𝑁 ,𝑚
+> 𝒖 𝑁 ,𝑚
+
+Bayesian 
+
+Aggregation Reject 
+
+Accept 
+
+Prediction 
+
+Head 
+
+Output 
+
+Encoder 
+
+𝐸 𝑚 
+
+Encoder 
+
+𝐸 𝑚 
+
+> …
+
+𝜌 0,𝑚 
+
+𝜌 1,𝑚 
+
+𝜌 𝑁 ,𝑚  𝜋 𝜃 
+
+𝐴 0
+
+𝐴 1
+
+𝐴 𝑁 Figure 1. Overview of the A2MAML pipeline. A0 denotes the ego agent, while A1 to AN represent collaborative agents. The framework consists of three stages. In the first stage, given corrupted raw sensor observations xi,m from agent i under modality m, a Gaussian feature representation is extracted, comprising a feature embedding fi,m and an uncertainty representation ui,m . In the second stage, a scalar uncertainty token ρi,m is obtained via global average pooling over ui,m , serving as a compact estimate of the sensor’s noise level. A lightweight selection policy πθ takes the ego agent’s uncertainty token ρ0,m and a collaborative agent’s token ρi,m as input to determine whether to accept or reject that modality. In the third stage, the selected feature embeddings are fused via Bayesian aggregation and passed through a prediction head to produce the ego agent’s final prediction. 
+
+like prior attention-based or heuristic methods, our approach supports modality-level reasoning and asymmetric modality availability. By modeling features as Gaussian distribu-tions with learned uncertainty, we enable principled uncer-tainty quantification and propagation across both agents and modalities. A2MAML introduces a unified three-stage ap-proach, as illustrated in Figure 1, consisting of: (1) stochas-tic local encoding with modality-specific uncertainty predic-tion, (2) uncertainty-guided active selection, and (3) asym-metric Bayesian aggregation via inverse-variance weighting. This formulation enables fine-grained, modality-level col-laboration within heterogeneous fleets and provides closed-form guarantees that unreliable modalities contribute negli-gibly to the fused representation. We validate A2MAML through extensive experiments on connected autonomous driving for collaborative accident detection. The results show that A2MAML consistently outperforms both single-agent and collaborative baselines across all accident-prone scenarios, achieving up to 18.7% 
+
+higher mean accident detection rate. These gains demon-strate the advantage of modality-level active selection and uncertainty-aware fusion, which avoid blind or agent-level aggregation and enable robust collaboration under sensor corruption. In summary, this work offers the following key contribu-tions: • We introduce A2MAML, an approach that explicitly mod-els uncertainty for modality-level and uses it to guide active selections, thereby enabling fine-grained, reliable information sharing. • We employ an uncertainty-aware asymmetric aggregation mechanism, ensuring that corrupted or noisy modalities contribute minimally to the fused representation. • Through extensive experiments, we demonstrate that A2MAML consistently outperforms single-agent and col-laborative baselines, achieving up to 18.7% higher acci-dent detection rate under challenging, sensor-corrupted scenarios. 
+
+# 2. Related Work 
+
+2.1. Multi-Agent Collaboration 
+
+Collaborative learning in multi-agent systems have attracted extensive attention across multiple domains. In autonomous driving, existing studies have investigated diverse coor-dination paradigms, ranging from LiDAR-centric end-to-end collaborative driving frameworks (Cui et al., 2022) to spatio-temporal graph-based perception and control (Gao et al., 2024), as well as decentralized strategies for coopera-tive lane changing (Nie et al., 2016) and decision-making grounded in game theory (Hang et al., 2021). Collaboration has also been widely explored in robotics. For instance, Mandi et al. (2024) introduced a hierarchical multi-robot coordination framework leveraging large language mod-els, while Zhou et al. (2022) proposed a graph neural net-work–based perception system for cooperative robots. Com-prehensive surveys on collaborative robotics in search-and-rescue missions were presented by (Queralta et al., 2020), and reinforcement learning approaches for multi-robot path planning have been developed in (Bae et al., 2019). Sev-eral communication learning schemes have also been pro-posed, including selective communication policies such as Who2Com (Liu et al., 2020b) and When2Com (Liu et al., 2020a), which aim to regulate what and when information should be shared. 2However, existing frameworks largely treat collaboration at the agent level, forcing a binary decision to accept or reject an entire neighbor regardless of the status of their individual sensors. Furthermore, they typically assume homogeneous sensor suites across the fleet, which fails in realistic “asym-metric” settings where agents possess different or degraded modalities. In contrast, A2MAML introduces a fine-grained, modality-level selection policy. By decoupling the deci-sion for each sensor, our framework handles asymmetric fleets and allows the ego agent to dynamically select reliable modalities. 
+
+2.2. Multimodal Learning 
+
+Multimodal learning seeks to jointly model and reason over information from multiple sensory modalities to ob-tain richer representations. Early work explored shared latent spaces across modalities such as audio and vision (Ngiam et al., 2011), while large-scale contrastive pretrain-ing methods such as CLIP (Radford et al., 2021) enabled ef-fective alignment between visual and textual representations. Transformer-based fusion architectures, including ViLBERT (Lu et al., 2019) and LXMERT (Tan & Bansal, 2019), fur-ther advanced multimodal interaction through cross-modal attention mechanisms. Beyond representation fusion, Shen et al. (2023) investigated auxiliary modality learning, where auxiliary and main modalities are jointly leveraged during training but only the main modality is used at inference, a paradigm later extended to multi-agent settings by Liu et al. (2025b). More recently, multimodal learning has been widely explored in multimodal large language models (MLLMs) reasoning, including self-rewarding strategies (Li et al., 2025), RL based policy exploration (Liu et al., 2025e), and compute-efficient single-rollout RL methods (Liu et al., 2025d). Despite these advances, standard multimodal frameworks often rely on high-quality, synchronized sensor inputs. Com-mon fusion strategies, such as concatenation or static av-eraging, lack the ability to identify and suppress corrupted modalities dynamically. When a sensor becomes noisy or fails (e.g., camera blackout), the corrupted signal contam-inates the joint representation rather than being discarded. While robustness has been explored in certain multimodal settings, such as missing modalities (Liu et al., 2025b;c), most existing methods do not leverage uncertainty for ac-tive, per-sample modality selection under corruption. Con-sequently, uncertainty is rarely used as a control signal to dynamically regulate collaboration and fusion in accident-prone environments. Our approach addresses this gap by introducing an active, uncertainty-driven selection mecha-nism that treats fusion not as a static summation, but as a dynamic, stochastic inference process. 
+
+2.3. Learning under Uncertainty in Collaborative Systems 
+
+Learning under uncertainty (Liu et al., 2023; 2024; 2025a) is fundamental for autonomous agents operating in com-plex environments. Traditional approaches utilize Bayesian neural networks (BNNs) (Jospin et al., 2022), monte carlo dropout (Milan ´es-Hermosilla et al., 2021), or deep ensem-bles to quantify uncertainty (Lakshminarayanan et al., 2017). In collaborative systems, agents need to reason about the reli-ability of their peers. Works on Multi-Agent Reinforcement Learning (MARL) and planning typically model this using partially observable markov decision processes (POMDPs) or belief-space planning, where agents maintain a proba-bilistic belief over the joint state space to act safely under noisy observations (Kaelbling et al., 1998; Bai et al., 2015; Oliehoek et al., 2016). These methods demonstrate that uncertainty quantification substantially improves robustness compared to deterministic point estimates. However, current frameworks for learning under uncertainty exhibit limitations when applied to multimodal collabora-tion. First, uncertainty is typically modeled at the agent level rather than the modality level. This granularity is insuffi-cient for asymmetric sensor failures. Second, uncertainty is often used passively, for risk-sensitive control or safety constraints, rather than actively driving the learning and fusion process. In contrast, our approach uses uncertainty as an explicit control signal to gate communication through the selection policy and to regulate multimodal fusion via inverse-variance weighting, enabling reliable learning in multi-agent multimodal systems. 
+
+# 3. Approach 
+
+3.1. Problem Formulation 
+
+We first formulate the problem. Formally, let there are N +1 
+
+agents indexed by i ∈ { 0, 1, . . . , N }, where i = 0 denotes the ego agent and i ∈ { 1, 2, . . . , N } denote the collabora-tive agents. The ego agent can receive information from collaborative agents within a communication range τ . Let 
+
+M be the set of global modalities of all agents (e.g., M =
+
+{RGB, LiDAR, Text }). Each agent processes a subset of modalities Mi ∈ M , and these subsets may differ across agents. The raw observation of agent i under modality 
+
+m ∈ M i is denoted as xi,m . At time t, the multimodal ob-servation of agent i is xti = {xti,m | m ∈ M i}, and the joint ego–collaborator observation set is Xt = {xt
+
+> 0
+
+, xt
+
+> 1
+
+, . . . , xtN }.Given Xt, we aim to predict the ego agent’s action, such as braking for autonomous vehicles, particularly in accident-prone scenarios. 33.2. Active Asymmetric MAML under Uncertainty 
+
+We model the observation process under uncertainty. We assume the raw sensor data xi,m is a corrupted manifestation of the true environmental state y:
+
+xi,m = fm(y) + ϵi,m , ϵi,m ∼ N (0 , Σi,m (ξ)) , (1) where the noise covariance Σi,m (ξ) depends on the current environmental context ξ (e.g., occlusion, sensor degradation, weather). The goal of the ego agent is to estimate the posterior distribu-tion p(y | x0, XS ), where x0 denotes the ego agent’s local observation and XS = {xi,m | Zi,m = 1 } is the subset of neighboring observations actively selected for collaboration. We introduce a binary decision matrix Z ∈ { 0, 1}N ×|M| ,where Zi,m = 1 indicates that the ego agent requests the information of modality m from collaborative agent i.To achieve this goal, we propose Active Asymmetric Multi-Agent Multimodal Learning under Uncertainty , a three-stage approach with differentiable variational relaxation, consist-ing of: (1) stochastic local encoding, (2) uncertainty-guided active selection, and (3) asymmetric Bayesian aggregation. 
+
+Stochastic Local Encoding. To enable uncertainty-aware collaboration, agents must quantify their own reliability before communication. Standard deep networks yield de-terministic point estimates, which are insufficient for iden-tifying corruption. We employ a Gaussian encoder Em(·).For every input xi,m , the encoder predicts a tuple defining a Gaussian distribution over the feature space: 
+
+fi,m , ui,m = E m(xi,m ), (2) where fi,m is the feature embedding. ui,m is the predicted uncertainty (variance) map, representing σ2
+
+> i,m
+
+.
+
+Uncertainty-Guided Active Selection. We introduce a learnable communication protocol designed to optimize the trade-off between prediction accuracy and bandwidth con-sumption. This process operates in two stages: a lightweight handshake to exchange metadata, followed by a granular decision-making step to request feature data. 
+
+1) Uncertainty Compression. Prior to feature transmis-sion, every agent i first broadcasts a negligible “meta-packet” summarizing the reliability of its sensors. For each modality 
+
+m, we compute a scalar uncertainty token ρi,m by apply-ing global average pooling to the predicted variance map 
+
+ui,m . This scalar ρi,m serves as a compact proxy for the overall noise level of that sensor (e.g., a high value indicates a blinded camera or occluded LiDAR). 
+
+2) Selection Policy. The ego agent receives these tokens from all neighbors. Since direct computation of the mu-tual information I is intractable in high-dimensional feature spaces, we approximate this objective by optimizing the downstream task loss Ltask, which serves as a tractable sur-rogate for information gain. To decide which data is worth requesting, we employ a lightweight MLP network. The policy network πθ takes the ego’s own uncertainty ρ0,m and a neighbor’s uncertainty ρi,m as input pairs. It learns to estimate the utility of collaboration based on the relative uncertainty gap: 
+
+li,m = πθ (concat [ρ0,m , ρ i,m ]) , (3) where li,m ∈ R2 contains the unnormalized logits for the binary actions: k = 0 (Reject) and k = 1 (Accept). Intu-itively, the network learns to output high Accept logits when the ego is uncertain ( ρ0 is high) but the neighbor is confi-dent ( ρi is low). The policy treats the communication as an unordered set rather than a fixed sequence. This ensures that the system’s decisions are robust to dynamic changes in the network topology (e.g., agents entering or leaving the communication range) without requiring architecture retraining. 
+
+3) Differentiable Learning of Discrete Selection. A stan-dard discrete decision (Accept/Reject) is non-differentiable, which prevents backpropagation. To train this policy end-to-end, we employ a stochastic reparameterization technique. We inject random noise g into the logits to decouple the stochastic sampling process from the learnable parameters. Let g0, g 1 be i.i.d. noise samples drawn from the standard extreme value distribution. This noise ensures that the dis-crete samples argmax (l + g) strictly follow the categorical distribution parameterized by softmax( l) (Jang et al., 2016). We compute the soft selection probability pi,m for the Ac-cept action using softmax: 
+
+pi,m = exp(( l1 
+
+> i,m
+
++ g1)) 
+
+P 
+
+> k∈{ 0,1}
+
+exp(( lki,m + gk)) . (4) This reparameterization decouples the stochasticity into the independent noise terms g, allowing gradients to flow effi-ciently through the logits l during backpropagation. For the actual transmission, we require a binary decision 
+
+Zi,m ∈ { 0, 1} rather than a probability. We first com-pute this discrete mask, denoted as Zhard  
+
+> i,m
+
+, by selecting the action with the highest noisy log-probability: Zhard  
+
+> i,m
+
+=argmax k∈{ 0,1}(lki,m + gk). This operation results in a strict 0 or 1 value. However, the argmax function is non-differentiable (it has zero gradient almost everywhere), which would normally break backpropagation. To fix this, we employ a gradient bypass technique. We construct a sur-rogate variable Ztrain  
+
+> i,m
+
+that behaves differently in the forward and backward passes: 
+
+Ztrain  
+
+> i,m
+
+= stopgrad( Zhard  
+
+> i,m
+
+− pi,m ) + pi,m . (5) 4When calculating predictions in the forward pass, the term 
+
+(Zhard − p) + p mathematically cancels out to become just 
+
+Zhard . This ensures the network effectively uses a strict binary mask (0 or 1). When calculating gradients in the backward pass, the stopgrad operator blocks the discrete term. The gradient flows directly through the smooth prob-ability pi,m , allowing the optimizer to update the policy logits. 
+
+Asymmetric Bayesian Aggregation. We propose aprecision-weighted fusion derived from Bayesian principles. Unlike standard attention mechanisms that infer weights from feature similarity, we treat the received feature em-beddings as independent Gaussian estimates . The optimal rule for combining independent Gaussian estimates is in-verse variance weighting, therefore, the aggregated feature 
+
+f corresponding to the same modality is computed as: 
+
+f =
+
+PNi=0 
+
+P 
+
+> m∈M i
+
+Zi,m · ωi,m · fi,m 
+
+PNi=0 
+
+P 
+
+> m∈M i
+
+Zi,m · ωi,m 
+
+(6) where the weighting term ωi,m is the precision (inverse variance): 
+
+ωi,m = exp( −ui,m ) (7) This formulation provides a double-layer of robustness: (1) Coarse-grained rejection ( Z = 0 ). If the policy πθ deems a modality redundant, it is strictly excluded from the sum. (2) Fine-grained suppression ( ω ≈ 0). If a modality is selected (Z = 1 ) but contains local noise (e.g., a specific occluded region), the encoder predicts high uncertainty ( u → ∞ ). This drives the precision ω → 0, causing the fusion layer to mathematically ignore that specific region. We then fuse (e.g., via projection and concatenation) the aggregated feature f of different modalities to create a com-prehensive multimodal embedding F. We train the multi-agent, multimodal system end-to-end using the following objective: 
+
+Ltotal = Ltask (ˆ y, y) + 
+
+> N
+
+X
+
+> i=0
+
+X
+
+> m∈M i
+
+ui,m , (8) where ˆy denotes the ego agent’s final prediction obtained by passing the fused representation F through a task-specific prediction head, and Ltask is the supervised task loss (e.g., cross-entropy loss) computed using the ground-truth label y.Crucially, gradients from Ltask backpropagate through the fusion module and the uncertainty-aware selection mech-anism, thereby updating both the modality encoders and the selector policy πθ . This encourages the model to as-sign higher weights to modalities from collaborators that improve task performance. The second term regularizes the predicted variance ui,m ,preventing all inputs are assigned infinite uncertainty. When  
+
+> Figure 2. Accident-prone traffic scenarios in the AUTOCAST-SIM benchmark for connected autonomous vehicles, including overtaking, left turn, and red light violation (Qiu et al., 2021; Liu et al., 2025b). Additional details for each scenario can be found in Appendix A.1.1.
+
+a modality from a collaborator provides noisy, corrupted, or misaligned features that harm the fused representation, the resulting increase in Ltask induces gradients that raise the corresponding uncertainty ui,m , effectively down-weighting its contribution during fusion. This mechanism enables the ego agent to automatically suppress unreliable collaborators sensors. 
+
+# 4. Experiments 
+
+In this section, we evaluate the effectiveness of A2MAML through a series of experiments on accident-prone connected autonomous driving scenarios. We com-pare it against both single-agent and collaborative baselines and assess its performance under varying levels of sensor noise. Additionally, we conduct ablation studies to quantify the contributions of key components, including modality-level active selection and Bayesian fusion. 
+
+4.1. Data Collection 
+
+The dataset is generated using the AUTOCASTSIM bench-mark (Qiu et al., 2021), which comprises three realistic, complex, and accident-prone traffic scenarios designed for connected autonomous vehicles. These scenarios feature limited sensor coverage and frequent occlusions, as illus-trated in Figure 2. Following the experimental protocol of prior work (Gao et al., 2024; Liu et al., 2025b), the ego vehicle can have up to three collaborative vehicles at each timestep, provided they are within a 150-meter communica-tion range. We collect data trails with randomized scenario configurations, where each trail includes synchronized RGB images and LiDAR point clouds from both the ego vehicle and collaborative vehicles, along with the ego vehicle’s con-trol actions. The resulting dataset contains approximately 13K frames for training and 13K frames for testing. Addi-tional dataset details are provided in Appendix A.1.1. To simulate realistic sensor corruption and communication uncertainty, we inject noise during both training and testing. Specifically, at each frame, with probability p, we corrupt 5the RGB and LiDAR observations of all vehicles. For RGB data, the corruption is randomly sampled from Gaussian noise, motion blur, or blackout. For LiDAR data, we ran-domly apply ray dropping or blackout. 
+
+4.2. Experimental Setup 
+
+After data collection, we train all models using binary cross-entropy loss as the task loss for the ego vehicle to detect accidents at each frame, following the experimental setup of prior work (Gao et al., 2024; Liu et al., 2025b). For train-ing, we employ a batch size of 32 and the Adam optimizer (Kingma, 2014) with an initial learning rate of 1e−3, and a cosine annealing scheduler (Loshchilov & Hutter, 2016) to adjust the learning rate over time. The model is trained on an Nvidia RTX 3090 GPU with AMD Ryzen 9 5900 CPU for 200 epochs. All experiments are repeated four times with different random seeds, and we report the mean and standard deviation of the results. We evaluate performance using two metrics: (1) Accident Detection Rate (ADR): the proportion of accident-prone cases correctly identified by the model among all ground-truth accident-prone cases. An accident-prone case is de-fined as a frame in which the expert ego vehicle executes a braking action. The objective is to assess whether the cur-rent situation is dangerous or not, enabling the ego vehicle to take braking or continue driving. (2) Expert Imitation Rate (EIR): the percentage of expert actions correctly pre-dicted by the model across all frames, measuring how well the learned policy imitates expert driving behavior. For RGB observations, images are resized to 224 × 224 and processed using ResNet-18 (He et al., 2016) as the stochastic local encoder, producing a 512-dimensional feature embed-ding along with a 512-dimensional uncertainty representa-tion. For LiDAR observations, we adopt the Point Encoder from Cui et al. (2022) as the stochastic local encoder to ob-tain corresponding feature and uncertainty representations. These multimodal features are fused as described in Sec-tion 3 and passed to a three-layer MLP prediction head to output the ego vehicle’s action. 
+
+4.3. Baselines 
+
+We compare A2MAML against multiple collaborative meth-ods. To ensure fair comparison, all baselines are adapted to support multimodal inputs via intermediate fusion con-catenation and replace their final detection head with the same MLP prediction head where applicable: (1) Single-Agent: The ego vehicle operates solely on its local sen-sors. (2) V2VNet (Wang et al., 2020): A Graph Neural Network (GNN) approach that aggregates compressed fea-tures from all neighbors, but lacks selectivity mechanism. (3) Who2com (Liu et al., 2020b): Utilizes a handshake mechanism to learn attention weights for neighbor selection. Ego view  C1 view  C2 view              
+
+> 𝜌 =0.001 𝜌 =0.002 Accept 𝜌 =0.093 Reject
+> Figure 3. Qualitative analysis of active selection. An illustra-tive example demonstrates the effect of the proposed selection mechanism. The ego vehicle’s sensor data and Collaborator 1’s RGB observations are clean, while Collaborator 2’s RGB input is corrupted by Gaussian noise, resulting in a higher uncertainty token ρ. Consequently, the selection policy rejects the corrupted modality from Collaborator 2 while accepting the reliable features from Collaborator 1.
+
+Crucially, selection is performed at the agent level , forcing a binary decision (accept/reject) for the entire agent regard-less of partial sensor corruption. (4) When2com (Liu et al., 2020a): Extends Who2com but relies on implicit attention rather than explicit uncertainty quantification. (5) V2X-ViT (Xu et al., 2022), Leverages Vision Transformers to fuse information across multiple agents. 
+
+4.4. Main Results 
+
+We corrupt the sensor data in each frame with probabil-ity p = 0 .3 and evaluate A2MAML against the baselines. We present the results in Table 1, which demonstrate a clear performance advantage of A2MAML across all three accident-prone scenarios. Compared to the single-agent baseline, A2MAML achieves substantial improvements in mean ADR across all scenarios: 17.0% in overtaking, 18.7% in left turn, and 17.7% in red light violation. These gains highlight the benefits of collabo-rative perception, which enables the ego vehicle to aggregate complementary sensory information from connected agents. This enriched multi-agent perspective improves situational awareness, allowing the ego vehicle to detect accident-prone conditions and brake proactively to avoid collisions. Compared to V2VNet (Wang et al., 2020), A2MAML im-proves mean ADR by up to 16.0%. V2VNet aggregates features from all collaborative agents without any selec-tive mechanism; when some agents’ sensors are corrupted, blindly fusing unreliable information degrades performance. Relative to Who2Com (Liu et al., 2020b) and When2Com (Liu et al., 2020a), A2MAML achieves up to 14.5% and 13.8% higher mean ADR, and 10.9% and 9.3% higher mean EIR, respectively. These methods perform com-munication selection at the agent level, enforcing a bi-nary accept/reject decision for an entire agent regardless of modality-specific corruption, which can either discard 6Table 1. Performance comparison (%) of A2MAML against the baseline and state-of-the-art methods. A2MAML consistently outperforms single-agent and collaborative methods across all accident-prone scenarios, achieving up to 18.7% higher mean ADR. Compared to V2VNet, Who2Com, and When2Com, A2MAML shows superior performance by avoiding blind or agent-level fusion through modality-level active selection. It also surpasses V2X-ViT (Xu et al., 2022) by up to 13.1% in ADR and 8.0% in EIR, demonstrating the benefit of uncertainty-aware selective fusion under sensor corruption. 
+
+Approach PS (KB) Overtaking Left Turn Red Light Violation ADR ↑ EIR ↑ ADR ↑ EIR ↑ ADR ↑ EIR ↑
+
+Single-Agent – 64.4 ±2.5 67.2 ±2.1 40.1 ±2.8 57.4 ±2.4 39.5 ±2.9 58.8 ±2.5 V2VNet (Wang et al., 2020) 4.0 66.8 ±2.2 69.1 ±2.0 42.5 ±2.4 58.2 ±2.2 41.2 ±2.6 61.5 ±2.4 Who2com (Liu et al., 2020b) 2.5 67.2 ±1.9 70.5 ±1.8 44.3 ±2.1 62.1 ±1.9 42.8 ±2.3 63.2 ±2.1 When2com (Liu et al., 2020a) 2.2 68.1 ±1.8 71.2 ±1.7 45.0 ±2.0 63.5 ±1.8 43.5 ±2.2 64.8 ±1.9 V2X-ViT (Xu et al., 2022) 4.2 69.5 ±2.0 72.8 ±1.9 47.1 ±1.7 64.8 ±2.0 44.1 ±2.3 66.1 ±1.8 A2MAML (Ours) 2.0 81.4 ±1.5 78.2 ±1.2 58.8 ±1.8 72.4 ±1.5 57.2 ±2.0 74.1 ±1.8 useful sensor information or propagate corrupted signals. In contrast, A2MAML operates at the modality level, actively selecting reliable sensor inputs from each agent, enabling finer-grained collaboration and more robust fusion. Finally, compared to V2X-ViT (Xu et al., 2022), A2MAML improves mean ADR and mean EIR by up to 13.1% and 8.0%, respectively, demonstrating the advantage of uncertainty-aware selective fusion over transformer-based blind aggregation under sensor corruption. We further provide a qualitative example in Figure 3 to illus-trate the effect of the active selection mechanism. While the ego vehicle’s sensor data and Collaborator 1’s RGB observa-tions remain clean, Collaborator 2’s RGB input is corrupted by Gaussian noise, resulting in a higher uncertainty token 
+
+ρ. Accordingly, the selection policy rejects the corrupted modality from Collaborator 2 while accepting the reliable features from Collaborator 1. 
+
+4.5. Efficiency Analysis 
+
+We evaluate the communication efficiency of A2MAML against other collaborative methods. Fol-lowing the protocol of prior work (Gao et al., 2024; Liu et al., 2025c;b), we adopt the shared package size (PS) metric to quantify communication bandwidth, which measures the amount of data exchanged among connected vehicles and serves as an indicator of communication cost in collaborative decision-making. The results are reported in Table 1. As shown, A2MAML achieves lower shared package size than other collaborative approaches, demonstrating superior communication efficiency. This improvement stems from its active selection mechanism, which avoids unnecessary communication by selectively collaborating with reliable agents and modalities rather than indiscriminately aggregat-ing all available information, thereby reducing bandwidth consumption. 
+
+4.6. Performance Analysis under Varying Noise Levels 
+
+We conduct a performance analysis on ADR under vary-ing noise levels to evaluate the robustness of our approach against the collaborative baseline V2X-ViT (Xu et al., 2022). During both training and testing, we inject noise into the sensor data of each frame with three corruption probabili-ties, p = {0.3, 0.5, 0.7}. The results, presented in Figure 4, show that A2MAML consistently outperforms V2X-ViT across all noise levels. While both methods experience per-formance degradation as noise increases, the decline for A2MAML is smaller, highlighting its robustness to sen-sor corruption. This resilience arises from two key com-ponents of our framework: first, the modality-level active selection mechanism dynamically identifies and prioritizes reliable sensor inputs from each agent, avoiding contam-ination from corrupted modalities; second, the Bayesian fusion via inverse-variance weighting effectively suppresses noisy features during aggregation, ensuring that the fused representation remains accurate even under high uncertainty. These results demonstrate that explicitly modeling uncer-tainty and leveraging it to guide both selection and fusion significantly enhances the reliability of multi-agent multi-modal decision-making in accident-prone scenarios. 
+
+4.7. Ablation Studies 
+
+In the ablation studies, we analyze the individual contribu-tions of active selection and Bayesian fusion in A2MAML. We evaluate four variants: (1) the full method; (2) without active selection, where all modalities from all agents are transmitted while retaining Bayesian fusion; (3) without Bayesian fusion, where features are fused via projection and concatenation instead of inverse-variance weighting while preserving active selection; and (4) without both active se-lection and Bayesian fusion. We summarize the results in Table 2. Compared to the full method, removing active selection leads to a mean ADR drop of up to 2.7%, while removing Bayesian fusion 7(a) Overtaking (b) Left Turn (c) Red Light Violation                  
+
+> Figure 4. Performance analysis on ADR under varying noise levels. We evaluate robustness against the strong baseline V2X-ViT (Xu et al., 2022), by injecting sensor noise with corruption probabilities p={0.3,0.5,0.7}during training and testing. A2MAML consistently outperforms V2X-ViT across all noise levels and exhibits smaller performance degradation as noise increases, demonstrating improved robustness from modality-level active selection and uncertainty-aware Bayesian fusion.
+> Table 2. Ablation studies on active selection and Bayesian fusion. Compared to the full method, removing active selection reduces mean ADR by up to 2.7% and EIR by up to 3.1%, while removing Bayesian fusion leads to a larger performance degradation of up to
+> 9.4% in ADR and 7.2% in EIR. Eliminating both components results in the most severe decline of up to 17.3% in ADR and 13.5% in EIR, highlighting the effects of both mechanisms for robust collaborative decision-making in A2MAML.
+
+Approach Overtaking Left Turn Red Light Violation ADR ↑ EIR ↑ ADR ↑ EIR ↑ ADR ↑ EIR ↑
+
+Full method 81.4 ±1.5 78.2 ±1.2 58.8 ±1.8 72.4 ±1.5 57.2 ±2.0 74.1 ±1.8 w/o Active selection 78.8 ±1.6 75.1 ±1.4 56.1 ±1.9 70.2 ±1.6 54.8 ±2.1 71.9 ±1.9 w/o Bayesian fusion 72.5 ±1.8 71.0 ±1.5 49.4 ±2.1 65.5 ±1.8 48.1 ±2.3 67.2 ±2.0 w/o Active selection & Bayesian fusion 65.8 ±2.2 67.5 ±2.0 41.5 ±2.5 59.4 ±2.3 40.2 ±2.7 60.8 ±2.4 causes a larger degradation. Eliminating both components results in further performance decline. Overall, these re-sults demonstrate that active modality-level selection and Bayesian uncertainty-aware fusion are complementary and jointly critical to achieving robust multi-agent multimodal collaboration. 
+
+# 5. Conclusions 
+
+We present A2MAML, an active, uncertainty-aware frame-work for multi-agent multimodal collaboration under sensor corruption. The approach operates in three stages: stochas-tic local encoding, uncertainty-guided active selection, and asymmetric Bayesian aggregation. By modeling features as Gaussian distributions, A2MAML captures modality-specific uncertainty, which is then used to actively select reliable sensor inputs from each agent, while Bayesian fu-sion via inverse-variance weighting ensures that noisy or corrupted modalities contribute minimally to the joint rep-resentation. This enables robust, fine-grained information sharing across heterogeneous agents, improving situational awareness in complex, safety-critical environments. Exten-sive experiments on connected autonomous driving scenar-ios demonstrate that A2MAML consistently outperforms both single-agent and collaborative baselines, achieving up to 18.7% higher mean accident detection rate, while main-taining robustness under varying levels of sensor noise. 
+
+Limitations and Future Work: The characteristic of our framework is its “double-layer” defense mechanism, where active selection acts as a coarse-grained gatekeeper to reject uninformative neighbors, while Bayesian fusion serves as a fine-grained filter to suppress local sensory anomalies. This probabilistic formulation renders the system self-calibrating, allowing it to adapt to varying noise profiles without manual tuning. Our current selection policy is to operate on a binary “Accept/Reject” basis for each modality. Future work could explore adaptive compression rates, where the uncertainty token ρ dictates not just if data is sent, but at what resolution it is transmitted. 
+
+# Impact Statement 
+
+This paper presents work, whose goal is to advance the field of Multi-Agent Multimodal Learning. There are many po-tential societal benefits of this work. First, A2MAML can considerably reduce accident rates, when connected vehi-cles can communicate and share traffic information, such as jams, speedy cars exceeding road limits, etc. Extending beyond vehicles, such a framework can be applicable to ensure more robust distributed smart sensing of any place and spaces, including building security, environmental mon-itoring, underwater observation, and more. 8References 
+
+Arai, T., Pagello, E., Parker, L. E., et al. Advances in multi-robot systems. IEEE Transactions on robotics and automation , 18(5):655–661, 2002. Bae, H., Kim, G., Kim, J., Qian, D., and Lee, S. Multi-robot path planning method using reinforcement learning. 
+
+Applied sciences , 9(15):3057, 2019. Bai, H., Cai, S., Ye, N., Hsu, D., and Lee, W. S. Intention-aware online pomdp planning for autonomous driving in a crowd. In 2015 ieee international conference on robotics and automation (icra) , pp. 454–460. IEEE, 2015. Cui, J., Qiu, H., Chen, D., Stone, P., and Zhu, Y. Cooper-naut: End-to-end driving with cooperative perception for networked vehicles. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition ,pp. 17252–17262, 2022. Foerster, J., Farquhar, G., Afouras, T., Nardelli, N., and Whiteson, S. Counterfactual multi-agent policy gradi-ents. In Proceedings of the AAAI conference on artificial intelligence , volume 32, 2018. Gao, P., Shen, Y., and Lin, M. C. Collaborative decision-making using spatiotemporal graphs in connected auton-omy. In 2024 IEEE International Conference on Robotics and Automation (ICRA) , pp. 4983–4989. IEEE, 2024. Guo, C., Pleiss, G., Sun, Y., and Weinberger, K. Q. On calibration of modern neural networks. In International conference on machine learning , pp. 1321–1330. PMLR, 2017. Hang, P., Huang, C., Hu, Z., Xing, Y., and Lv, C. De-cision making of connected automated vehicles at an unsignalized roundabout considering personalized driv-ing behaviours. IEEE Transactions on Vehicular Technol-ogy , 70(5):4051–4064, 2021. He, K., Zhang, X., Ren, S., and Sun, J. Deep residual learn-ing for image recognition. In Proceedings of the IEEE conference on computer vision and pattern recognition ,pp. 770–778, 2016. Hu, Y., Fang, S., Lei, Z., Zhong, Y., and Chen, S. Where2comm: Communication-efficient collaborative perception via spatial confidence maps. Advances in neu-ral information processing systems , 35:4874–4886, 2022. Jain, S. and Wallace, B. C. Attention is not explanation. 
+
+arXiv preprint arXiv:1902.10186 , 2019. Jang, E., Gu, S., and Poole, B. Categorical repa-rameterization with gumbel-softmax. arXiv preprint arXiv:1611.01144 , 2016. Jospin, L. V., Laga, H., Boussaid, F., Buntine, W., and Bennamoun, M. Hands-on bayesian neural networks—a tutorial for deep learning users. IEEE Computational Intelligence Magazine , 17(2):29–48, 2022. Kaelbling, L. P., Littman, M. L., and Cassandra, A. R. Plan-ning and acting in partially observable stochastic domains. 
+
+Artificial intelligence , 101(1-2):99–134, 1998. Kingma, D. P. Adam: A method for stochastic optimization. 
+
+arXiv preprint arXiv:1412.6980 , 2014. Lakshminarayanan, B., Pritzel, A., and Blundell, C. Simple and scalable predictive uncertainty estimation using deep ensembles. Advances in neural information processing systems , 30, 2017. Li, Z., Yu, W., Huang, C., Liu, R., Liang, Z., Liu, F., Che, J., Yu, D., Boyd-Graber, J., Mi, H., et al. Self-rewarding vision-language model via reasoning decom-position. arXiv preprint arXiv:2508.19652 , 2025. Liu, R., Shi, G., and Tokekar, P. Data-driven distributionally robust optimal control with state-dependent noise. In 
+
+2023 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) , pp. 9986–9991. IEEE, 2023. Liu, R., Gupta, A., Noorani, E., and Tokekar, P. Towards efficient risk-sensitive policy gradient: An iteration com-plexity analysis. arXiv preprint arXiv:2403.08955 , 2024. Liu, R., Gao, P., Shen, Y., Lin, M., and Tokekar, P. Aukt: Adaptive uncertainty-guided knowledge transfer with conformal prediction. arXiv preprint arXiv:2502.16736 ,2025a. Liu, R., Shen, Y., Gao, P., Tokekar, P., and Lin, M. Caml: Collaborative auxiliary modality learning for multi-agent systems. arXiv preprint arXiv:2502.17821 , 2025b. Liu, R., Wang, Z., Gao, P., Shen, Y., Tokekar, P., and Lin, M. Mmcd: Multi-modal collaborative decision-making for connected autonomy with knowledge distillation. arXiv preprint arXiv:2509.18198 , 2025c. Liu, R., Yu, D., Ke, L., Liu, H., Zhou, Y., Liang, Z., Mi, H., Tokekar, P., and Yu, D. Stable and efficient single-rollout rl for multimodal reasoning. arXiv preprint arXiv:2512.18215 , 2025d. Liu, R., Yu, D., Zheng, T., Dai, R., Li, Z., Yu, W., Liang, Z., Song, L., Mi, H., Tokekar, P., et al. Vogue: Guiding exploration with visual uncertainty improves multimodal reasoning. arXiv preprint arXiv:2510.01444 , 2025e. Liu, Y.-C., Tian, J., Glaser, N., and Kira, Z. When2com: Multi-agent perception via communication graph group-ing. In Proceedings of the IEEE/CVF Conference on 
+
+9computer vision and pattern recognition , pp. 4106–4115, 2020a. Liu, Y.-C., Tian, J., Ma, C.-Y., Glaser, N., Kuo, C.-W., and Kira, Z. Who2com: Collaborative perception via learnable handshake communication. In 2020 IEEE Inter-national Conference on Robotics and Automation (ICRA) ,pp. 6876–6883. IEEE, 2020b. Loshchilov, I. and Hutter, F. Sgdr: Stochastic gra-dient descent with warm restarts. arXiv preprint arXiv:1608.03983 , 2016. Lu, J., Batra, D., Parikh, D., and Lee, S. Vilbert: Pre-training task-agnostic visiolinguistic representations for vision-and-language tasks. Advances in neural informa-tion processing systems , 32, 2019. Mandi, Z., Jain, S., and Song, S. Roco: Dialectic multi-robot collaboration with large language models. In 2024 IEEE International Conference on Robotics and Automation (ICRA) , pp. 286–299. IEEE, 2024. Matos, F., Bernardino, J., Dur ˜aes, J., and Cunha, J. A survey on sensor failures in autonomous vehicles: Challenges and solutions. Sensors , 24(16):5108, 2024. Milan ´es-Hermosilla, D., Trujillo Codorni ´u, R., L ´opez-Baracaldo, R., Sagar ´o-Zamora, R., Delisle-Rodriguez, D., Villarejo-Mayor, J. J., and Nunez-Alvarez, J. R. Monte carlo dropout for uncertainty estimation and motor im-agery classification. Sensors , 21(21):7241, 2021. Ngiam, J., Khosla, A., Kim, M., Nam, J., Lee, H., Ng, A. Y., et al. Multimodal deep learning. In ICML , volume 11, pp. 689–696, 2011. Nie, J., Zhang, J., Ding, W., Wan, X., Chen, X., and Ran, B. Decentralized cooperative lane-changing decision-making for connected autonomous vehicles. IEEE access ,4:9413–9420, 2016. Oliehoek, F. A., Amato, C., et al. A concise introduction to decentralized POMDPs , volume 1. Springer, 2016. Qiu, H., Huang, P., Asavisanu, N., Liu, X., Psounis, K., and Govindan, R. Autocast: Scalable infrastructure-less co-operative perception for distributed collaborative driving. 
+
+arXiv preprint arXiv:2112.14947 , 2021. Queralta, J. P., Taipalmaa, J., Pullinen, B. C., Sarker, V. K., Gia, T. N., Tenhunen, H., Gabbouj, M., Raitoharju, J., and Westerlund, T. Collaborative multi-robot search and rescue: Planning, coordination, perception, and active vision. Ieee Access , 8:191617–191643, 2020. Radford, A., Kim, J. W., Hallacy, C., Ramesh, A., Goh, G., Agarwal, S., Sastry, G., Askell, A., Mishkin, P., Clark, J., et al. Learning transferable visual models from natural language supervision. In International conference on machine learning , pp. 8748–8763. PmLR, 2021. Rahman, M. H., Abdel-Aty, M., and Wu, Y. A multi-vehicle communication system to assess the safety and mobility of connected and automated vehicles. Transportation re-search part C: emerging technologies , 124:102887, 2021. Shen, Y., Wang, X., Gao, P., and Lin, M. Auxiliary modality learning with generalized curriculum distillation. In In-ternational Conference on Machine Learning , pp. 31057– 31076. PMLR, 2023. Talebpour, A. and Mahmassani, H. S. Influence of connected and autonomous vehicles on traffic flow stability and throughput. Transportation research part C: emerging technologies , 71:143–163, 2016. Tan, H. and Bansal, M. Lxmert: Learning cross-modality encoder representations from transformers. arXiv preprint arXiv:1908.07490 , 2019. Wang, T.-H., Manivasagam, S., Liang, M., Yang, B., Zeng, W., and Urtasun, R. V2vnet: Vehicle-to-vehicle commu-nication for joint perception and prediction. In European conference on computer vision , pp. 605–621. Springer, 2020. Xu, R., Xiang, H., Tu, Z., Xia, X., Yang, M.-H., and Ma, J. V2x-vit: Vehicle-to-everything cooperative percep-tion with vision transformer. In European conference on computer vision , pp. 107–124. Springer, 2022. Ye, L. and Yamamoto, T. Evaluating the impact of connected and autonomous vehicles on traffic safety. Physica A: Statistical Mechanics and its Applications , 526:121009, 2019. Zhang, K., Yang, Z., and Ba s¸ ar, T. Multi-agent reinforce-ment learning: A selective overview of theories and algo-rithms. Handbook of reinforcement learning and control ,pp. 321–384, 2021. Zhou, Y., Xiao, J., Zhou, Y., and Loianno, G. Multi-robot collaborative perception with graph neural net-works. IEEE Robotics and Automation Letters , 7(2): 2289–2296, 2022. 10 A. Appendix 
+
+A.1. Collaborative Decision Making 
+
+A.1.1. D ATASET DETAILS 
+
+The dataset is generated using the AUTOCASTSIM (Qiu et al., 2021) benchmark, which features three complex and accident-prone traffic scenarios for connected autonomous driving, characterized by limited sensor coverage or obstructed views. These scenarios are realistic and include background traffic of 30 vehicles. They involve challenging interactions such as overtaking, lane changing, and red-light violations, which inherently increase the risk of accidents: (1) Overtaking :A sedan is blocked by a truck on a narrow, two-way road with a dashed centerline. The truck also obscures the sedan’s view of oncoming traffic. The ego vehicle must decide when and how to safely pass the truck. (2) Left Turn : The ego vehicle attempts a left turn at a yield sign. Its view is partially blocked by a truck waiting in the opposite left-turn lane, reducing visibility of vehicles coming from the opposite direction. (3) Red Light Violation : As the ego vehicle crosses an intersection, another vehicle runs a red light. Due to nearby vehicles waiting to turn left, the ego vehicle’s sensors are unable to detect the violator. Following prior work (Cui et al., 2022; Gao et al., 2024; Liu et al., 2025c;b), we employ an expert agent as configured in Cui et al. (2022), with full access to the traffic scene, to collect data. This expert agent is deployed in the environment to generate data trails. Each trail represents a unique instantiation of the traffic scenario, with differences arising from the randomized scenario configurations. These variations include different types of vehicles present in the scene, varying initial positions and trajectories of collaborative vehicles, difference in traffic flow and interactions, resulting in different visual, LiDAR inputs and control actions for each trail. Each trail contains RGB images and LiDAR point clouds from multiple vehicles, resulting in a substantially large dataset with a total size of approximately 400 GB. 11

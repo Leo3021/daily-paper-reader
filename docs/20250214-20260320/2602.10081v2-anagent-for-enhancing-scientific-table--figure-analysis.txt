@@ -1,0 +1,1810 @@
+Title: Anagent For Enhancing Scientific Table & Figure Analysis
+
+URL Source: https://arxiv.org/pdf/2602.10081v2
+
+Published Time: Fri, 13 Feb 2026 01:32:05 GMT
+
+Number of Pages: 66
+
+Markdown Content:
+# ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Xuehang Guo 1 Zhiyong Lu 2 Tom Hope 3 Qingyun Wang 1
+
+# Abstract 
+
+In scientific research, analysis requires accurately interpreting complex multimodal knowledge, in-tegrating evidence from different sources, and drawing inferences grounded in domain-specific knowledge. However, current artificial intel-ligence (AI) systems struggle to consistently demonstrate such capabilities. The complexity and variability of scientific tables and figures, combined with heterogeneous structures and long-context requirements, pose fundamental obstacles to scientific table & figure analysis. To quan-tify these challenges, we introduce ANA BENCH ,a large-scale benchmark featuring 63 , 178 in-stances from nine scientific domains, systemat-ically categorized along seven complexity dimen-sions. To tackle these challenges, we propose AN-
+
+> AGENT
+
+, a multi-agent framework for enhanced scientific table & figure analysis through four specialized agents: PLANNER decomposes tasks into actionable subtasks, EXPERT retrieves task-specific information through targeted tool execu-tion, SOLVER synthesizes information to generate coherent analysis, and CRITIC performs itera-tive refinement through five-dimensional quality assessment. We further develop modular train-ing strategies that leverage supervised finetuning and specialized reinforcement learning to opti-mize individual capabilities while maintaining effective collaboration. Comprehensive evalua-tion across 9 broad domains with 170 subdomains demonstrates that ANAGENT achieves substantial improvements, up to ↑ 13 .43% in training-free settings and ↑ 42 .12% with finetuning, while re-vealing that task-oriented reasoning and context-aware problem-solving are essential for high-quality scientific table & figure analysis. Our project page: https://xhguo7.github.io/Anagent/. 
+
+> 1
+
+College of William & Mary 2NIH - National Library of Medicine 3The Allen Institute for AI (AI2). Correspondence to: Xuehang Guo <xguo15@wm.edu >, Zhiyong Lu <zhiy-ong.lu@nih.gov >, Tom Hope <tomh@allenai.org >, Qingyun Wang <qwang16@wm.edu >.
+
+# 1. Introduction 
+
+Figure 1. Scientific Analysis Workflow. Motivated by how hu-man researchers perform scientific analysis, we decompose the scientific analysis workflow into dedicated stages, which leads to 
+
+ANAGENT (Fig. 4). 
+
+AI has made notable progress in assisting scientifists across diverse domains (Boiko et al., 2023; Gao et al., 2024) and stages of the research lifecycle, such as hypothesis discov-ery (Wang et al., 2024; Garikaparthi et al., 2025), literature review (Zhang et al., 2024b), citation recommendation (Choi et al., 2025; Press et al., 2024), etc. With the growing trend of human-AI co-discovery (Gottweis et al., 2025), these ad-vances reveal AI’s potential in serving as AI co-scientists to accelerate scientific discovery and improve research com-munication (Gridach et al., 2025; Zhang et al., 2024a). How-ever, to function effectively as AI co-scientists, AI sys-tems draw on capabilities in multimodal reasoning (Bai et al., 2025c; Zhao et al., 2025), long-context comprehen-sion (Reddy & Shojaee, 2024; Sundar et al., 2024), and 
+
+domain-specific understanding , which remain challenging for current AI systems (Zhou et al., 2025). A fundamental yet important task that reflects these capa-bilities is scientific table & figure analysis , as tables and figures provide critical information that is often difficult to express through text alone in scientific papers. Analyz-ing these artifacts requires AI systems to accurately: (1) interpret complex multimodal data across diverse layouts and formats ( e.g. , LaTeX tables, bar charts, architectural diagrams), (2) integrate evidence from multiple sources and lengthy contexts ( e.g. , captions, sections, citations), and 1
+
+> arXiv:2602.10081v2 [cs.CL] 12 Feb 2026
+
+ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+(3) generate task-oriented insights grounded in specialized terminology, related contexts, and domain-specific knowl-edge. Despite recent advances in multimodal large lan-guage models (MLLMs), scientific table & figure analysis remains challenging, particularly when handling the het-erogeneity of scientific literature across different authoring formats (e.g. , LaTeX , XML ), rendered formats (e.g. , PDF, HTML), and dissemination platforms (e.g. , arXiv (arXiv, 1991), PubMed (PubMed, 1996)). This is further compli-cated by error propagation (Gridach et al., 2025), as mis-takes in structural parsing, numerical extraction, or contex-tual interpretation can cascade into factual incorrectness. 
+
+Where existing benchmarks fall short? Several bench-marks have been proposed for scientific table & figure un-derstanding (Li et al., 2024; Singh et al., 2024; Lu et al., 2023; Zhang et al., 2025; Pramanick et al., 2024; Lou et al., 2023; Jin et al., 2019; Liu et al., 2026). However, those benchmarks primarily focus on narrowly defined tasks, such as question answering , claim verification , or caption gen-eration . As such, they fail to capture the full spectrum of challenges inherent in scientific analysis writing (Tab. 4), including varying levels of analytical depth, diverse reason-ing requirements across scientific domains, and synthesis of information across multiple modalities and long contexts (Fig. 2). Moreover, our preliminary exploration reveals that current MLLMs struggle significantly with scientific analy-sis (§2.2). These limitations are particularly pronounced for scientific analysis tasks requiring complex reasoning across different scopes, depths, and objectives (Fig. 8). 
+
+Our Approach. To tackle these challenges, we introduce 
+
+ANA BENCH , a scientific table & figure analysis benchmark encompassing tables and figures from 9 scientific domains across 170 fine-grained disciplines, systematically catego-rized along seven complexity dimensions that capture multi-faceted challenges of scientific analysis (Fig. 2). Building on insights from how human researchers approach scien-tific writing (Fig. 1), we propose ANAGENT (Fig. 4), a multi-agent framework that decomposes scientific analy-sis into specialized subtasks handled by four collaborative agents: PLANNER for task decomposition and planning ,
+
+EXPERT for knowledge searching and retrieval , SOLVER 
+
+for reasoning and generation , and CRITIC for reflection and refinement . To enhance agent-wise performance on their specialized tasks, we implement test-time optimization (§3.3) and modular finetuning (§3.4) to enhance individual agent capabilities while maintaining effective collaboration. To summarize, our main contributions are: • We introduce ANA BENCH (§2), a benchmark consisting of 63 , 178 instances for evaluating and advancing AI sys-tems in scientific tale & figure analysis, spanning seven data and analysis complexities (Fig. 2). • We propose ANAGENT (§3), a multi-agent framework for scientific table & figure analysis writing, comprising four specialized agents equipped with specialized tools, enabling complex reasoning, systematic knowledge inte-gration, and collaborative scientific analysis writing. • By presenting specialized evaluation metrics for assessing scientific analysis quality (§2.4), results in §5 demonstrate that ANAGENT significantly improves scientific table & figure analysis through test-time optimization ( ∆rel ≥↑ 13 .43% ) and modular training ( ∆rel ≥ ↑ 42 .12% ). Type 
+
+> Data
+> Analysis
+> Format
+> Source
+> Domain
+> Objective
+> Width
+> Depth
+> Table
+> Figure
+> CS
+> EE
+> Math
+> Physics
+> Economics
+> Biology
+> Finance
+> Statistics
+> BioMed
+> General
+> Review
+> LaTeX
+> XML
+> Shallow
+> In-Depth
+> Self-Contained
+> Internal
+> External
+> Mixed
+> Method
+> Experiment
+> Multi- Modal & Layout Perception
+> Long-Context Understanding
+> Source-Type
+> Writing Conventions
+> Domain-Specific Knowledge & Contexts
+> What are the goals of this analysis?
+> What should this analysis cover and refer to?
+> What to summarize ，
+> what to infer?
+
+Figure 2. Challenges In Scientific Table & Figure Analysis. The heterogeneity of scientific literature presents great challenges for high-quality analysis of scientific tables and figures (Fig. 8). 
+
+# 2. A NA BENCH : Evaluating Scientific Analysis 
+
+2.1. Problem Formulation: Scientific Analysis 
+
+We formulate the task of scientific table & figure analysis as a context-aware generation problem: Given an input x com-prising one or more tables {xt} and/or one or more figures 
+
+{xf }, together with their source information s and input query q that specifies the analysis requirements and objec-tives, the goal is to generate a well-written analysis y that accurately interprets the provided tabular and visual data, integrates evidence across all available contexts, situates findings within the broader research, and delivers domain-specific insights. Formally, the task can be expressed as: 
+
+y = f (x, s, q ) where x ∈ {{ xt}, {xf }, {xt, x f }} (1) As such, this scientific analysis writing problem encom-passes multimodal long-context reasoning for input tables and figures with different formats and layouts. 2ANAGENT For Enhancing Scientific Table & Figure Analysis     
+
+> Figure 3. ANA BENCH For Evaluating Autonomous Scientific Analysis. We implement four-stage benchmark construction method to build ANA BENCH , with multi-level filtering to enhance data quality.
+
+2.2. Preliminary: MLLM Agents In Scientific Analysis 
+
+To empirically assess the challenges faced by MLLM agents in scientific analysis, we conduct a preliminary study (§A) evaluating their performance across seven complexity di-mensions (Fig. 2). We randomly select 120 samples from 
+
+ANA BENCH with all seven challenges evenly distributed, and employ Qwen3-VL-8B as MLLM agent backbone to generate scientific analysis. Performance is evaluated using SciBERT (Eq. 23). With performance struggling to exceed 60% across all metrics, Fig. 8 reveals pronounced difficul-ties in multimodal, multi-layout understanding and in-depth analysis that demand inferential generation. These findings highlight that MLLM agents face substantial challenges in interpreting complex heterogeneous scientific artifacts .
+
+2.3. Benchmarking Scientific Analysis Benchmark Construction. Our benchmark construction method comprises four stages (Fig. 3): (1) Source collec-tion , which identifies and collects candidate source papers that satisfy predefined relevance and retrieval criteria. (2) 
+
+Data extraction , which extracts tables, figures, and their associated contexts. A context retrieval depth d controls the level of context referenced by each table or figure. Extracted data are augmented via two-level filtering: paper-level filter-ing removes papers that fail to meet validity requirements, and data-level filtering excludes tables and figures with formatting errors, missing information, or other quality is-sues. (3) Instance construction , which transforms each filtered data into a scientific analysis instance. Each in-stance consists of table and/or figure data, corresponding contexts, metadata, and gold analysis. Resulting instances are further refined through a specialized data cleaning step using configurable thresholds, including the maximum num-ber of samples and the minimum length of ground truths. (4) MLLM-assisted task classification , which combines rule-based heuristics with MLLM classification (§C.2.3) to categorize ANA BENCH along seven dimensions (§C.2). Through four-stage construction, ANA BENCH achieves large-scale coverage across seven complexity dimensions while faithfully reflecting real-world distributions of data characteristics and analytical challenges. 
+
+Data Complexity. We consider four data complexity dimen-sions (§C.2.1): (1) Type : the type of analysis data ( table ,
+
+figure , or both ); (2) Domain : domain disciplines that the source paper belongs to, with ANA BENCH spanning 9 broad domains across 170 disciplines; (3) Format : the format of analysis writing ( LaTeX or XML ); (4) Source : the type of source paper ( general research papers or reviews & surveys ). 
+
+Analysis Complexity. We characterize analysis complexity along three complementary dimensions (§C.2.2): (1) Width :the reference scope of the analysis ( self-contained , internal ,
+
+external , or mixed ); (2) Depth : the level of analytical rigor (shallow or in-depth ); (3) Objective : the primary goal and focus of the analysis ( methodology or experiment ). 
+
+2.4. Evaluating Scientific Analysis Rule-Based Evaluation. Rule-based evaluation metrics cover both lexical and semantic assessment of the generated analysis. Lexical evaluation include ROUGE-L (Eq. 19) (Lin, 2004), BLEU (Eq. 20) (Papineni et al., 2002), and word overlap (Eq. 21); while semantic assessment calcu-lates similarity between model generated analysis y and ground-truth analysis y∗ through cosine similarity (Eq. 22), SciBERT-Score (Eq. 23) (Beltagy et al., 2019), and ME-TEOR (Eq. 24) (Banerjee & Lavie, 2005) scores. 
+
+MLLM-As-Judge. For more reliable evaluation, we im-plement MLLM-as-judge by leveraging Gemini-2.5-Flash and GPT-4.1-mini to grade each generated analysis across five dimensions (Fig. 44, §A.2 & E), including analysis con-sistency , query-analysis alignment , knowledge utilization ,
+
+format correctness , and grounding accuracy .
+
+Human Expert Assessment. To consolidate our evaluation, we include human researchers in their expert domains to perform manual assessment on domain subsets (§A.2 & E). 3ANAGENT For Enhancing Scientific Table & Figure Analysis         
+
+> Figure 4. Multi-Agent Coordinative Scientific Analysis. Our multi-Agent scientific analysis framework, ANAGENT , is developed to cover various stages to analyze scientific tables and figures through four collaborative agents: PLANNER ,EXPERT ,SOLVER , and
+> CRITIC . Some example details are omitted as [...] for clarity.
+
+# 3. A NAGENT : Multi-Agent Scientific Analysis 
+
+3.1. A NAGENT For Scientific Table & Figure Analysis 
+
+Facing challenges in both data and analysis levels (Fig. 2), traditional approaches that directly map inputs to outputs struggle with varying task complexities due to their lack of systematic reasoning and knowledge retrieval capabilities. 
+
+How do human scientists analyze tables and figures? In-stead of simply describing what we observe, we engage in a deliberate process of understanding the research question, planning the problem-solving, gathering relevant domain knowledge, interpreting the data in context, and rigorously evaluating our findings and conclusions (Fig. 1). 
+
+Our Approach. Inspired by human analysis workflow (Fig. 1), we propose ANAGENT (Fig. 4), a multi-agent sys-tem for enhanced table & figure analysis. Given input x,source s, and query q, ANAGENT operates through four interactive stages (§D): 
+
+Stage 1: Task Decomposition. P LANNER analyzes the input and decomposes the complex task into actionable subtasks τi (i = 1 , . . . , M p): 
+
+PLANNER (x, s, q ) = {τ1, τ 2, . . . , τ Mp } (2) 
+
+Stage 2: Task-Oriented Knowledge Retrieval. E XPERT 
+
+performs iterative knowledge acquisition through multi-turn tool executions. At each turn e, the knowledge base Ke is expanded by incorporating new knowledge retrieved based on subtask τe and previously accumulated knowledge Ke−1:
+
+Ke = Ke−1 ∪ EXPERT (τe, Ke−1), e = 1 , . . . , M e
+
+(3) 
+
+Stage 3: Solution Generation. S OLVER synthesizes the accumulated knowledge Kn with the input to generate can-didate analysis. At iteration i, it incorporates feedback fi−1:
+
+yi = SOLVER (x, s, q, Kn, f i−1), i = 1 , . . . , M s (4) 
+
+Stage 4: Reflective Refinement. C RITIC assesses gener-ated analysis through five-dimensional evaluation protocol (§E.2) and provides feedback for iterative improvement: 
+
+fi = CRITIC (yi, x, s, q, Kn), i = 1 , . . . , M c (5) The interactive refinement between SOLVER (Eq. 4) and 
+
+CRITIC (Eq. 5) produces the final analysis y = yM .
+
+3.2. Scientific ToolKits 
+
+To facilitate complex scientific analysis spanning multiple stages from source searching to analysis writing (Fig. 4), we develop 5 scientific toolkits with 16 specialized tools (Tab. 13) to enable efficient scientific analysis with improved accuracy and comprehensiveness (§D.3). 
+
+3.3. Multi-Agent Optimization Few-Shot Optimization. To enhance the adaptability of individual agents, we include few-shot learning by providing each agent with k-shot exemplars. These examples guide agents to perform specialized tasks effectively, enabling test-time adaptation without extensive task-specific training. 
+
+Critic-Guided Reflective Optimization. To further im-prove collaborative performance, we incorporate a dedicated 
+
+CRITIC that assesses and optimizes SOLVER ’s analysis so-lutions. Through five-dimensional protocol (§E.2), CRITIC 
+
+provides targeted feedback to guide SOLVER optimizing analysis solution, reducing errors, improving logical consis-tency, and mitigating hallucinations. 
+
+Agent-Level Capability Augmentation. In multi-agent systems, overall performance is significantly influenced by individual agents’ capabilities. To this end, we introduce agent-level capability augmentation, a strategy in which individual agents can be independently enhanced by more capable models to improve system-level outcomes, enabling 4ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Table 1. Evaluation of Training-Free Agents. Performance of baselines and training-free ANAGENT (Me = 5 ) on ANA BENCH (§C.4). Compared with baselines, relative performance differences (Eq. 29) are shown as positive ↑ ∆rel % or negative ↓ ∆rel %.
+
+Model Size Semantic Accuracy (%) Lexical Accuracy (%) Overall Accuracy (%) COSINE BERT METEOR ROUGE -L BLEU WORD SSEM SLEX SAVG 
+
+Baselines GPT-4.1-mini - 56.34 59.74 19.47 16.74 3.39 11.49 45.18 10.54 27.86 Gemini-2.5-Flash - 52.41 55.99 19.01 14.90 2.76 9.95 42.47 9.20 25.84 
+
+InternVL-3.5 4B 54.38 58.19 18.76 15.67 2.66 9.80 43.78 9.37 26.58 
+
+8B 55.73 59.10 19.30 16.80 2.86 10.28 44.71 9.98 27.34 
+
+Qwen2.5-VL 3B 54.74 58.49 17.82 15.89 2.56 10.02 43.68 9.49 26.59 
+
+7B 55.65 59.66 18.90 16.40 2.98 10.38 44.74 9.98 27.31 
+
+Qwen3-VL 4B 55.41 58.15 18.41 15.77 2.77 10.06 43.99 9.53 26.76 
+
+8B 55.94 59.11 19.16 17.06 3.02 10.39 44.73 10.16 27.44 
+
+ANAGENT (Zero-Shot) GPT-4.1-mini - 59.94 61.63 22.75 18.19 4.81 12.26 48.11 ↑6.49% 11.75 ↑11.48% 29.93 ↑7.43% 
+
+Gemini-2.5-Flash - 55.60 59.37 19.40 16.04 3.15 11.10 44.79 ↑5.46% 10.09 ↑9.67% 27.44 ↑6.19% 
+
+InternVL-3.5 4B 58.26 59.86 21.21 16.10 3.29 11.11 46.44 ↑6.08% 10.17 ↑8.54% 28.31 ↑6.51% 
+
+8B 59.46 61.25 22.59 17.00 3.88 11.68 47.77 ↑6.84% 10.85 ↑8.72% 29.31 ↑7.21% 
+
+Qwen2.5-VL 3B 57.50 60.01 21.03 17.34 3.87 11.53 46.18 ↑5.72% 10.91 ↑14.96% 28.55 ↑7.37% 
+
+7B 58.91 60.41 21.59 17.47 4.11 11.85 46.97 ↑4.98% 11.14 ↑11.62% 29.06 ↑6.41% 
+
+Qwen3-VL 4B 59.41 60.21 21.23 16.27 3.90 11.33 46.95 ↑6.73% 10.50 ↑10.18% 28.73 ↑7.36% 
+
+8B 59.76 61.53 23.07 17.75 4.98 12.20 48.12 ↑7.58% 11.64 ↑14.57% 29.88 ↑8.89% 
+
+ANAGENT (One-Shot) GPT-4.1-mini - 60.87 63.28 24.26 20.65 5.73 12.55 49.47 ↑9.50% 12.98 ↑23.15% 31.22 ↑12.06% 
+
+Gemini-2.5-Flash - 61.06 61.34 20.52 17.40 4.06 11.47 47.64 ↑12.17% 10.98 ↑19.35% 29.31 ↑13.43% 
+
+InternVL-3.5 4B 59.11 60.52 22.60 18.04 3.82 11.50 47.41 ↑8.29% 11.12 ↑18.68% 29.27 ↑10.12% 
+
+8B 60.26 62.12 23.18 19.14 4.56 12.97 48.52 ↑8.52% 12.22 ↑22.44% 30.37 ↑11.08% 
+
+Qwen2.5-VL 3B 58.89 60.70 22.19 18.41 3.99 11.54 47.26 ↑8.20% 11.31 ↑19.18% 29.29 ↑10.15% 
+
+7B 60.24 61.00 23.41 19.41 4.98 12.47 48.22 ↑7.78% 12.29 ↑23.15% 30.25 ↑10.77% 
+
+Qwen3-VL 4B 59.64 60.61 22.42 18.05 4.03 11.51 47.55 ↑8.09% 11.20 ↑17.52% 29.38 ↑9.79% 
+
+8B 60.55 62.27 24.65 20.06 5.92 12.95 49.15 ↑9.88% 12.98 ↑27.76% 31.07 ↑13.23% 
+
+selective upgrades at test time. 
+
+3.4. Modular Training 
+
+How to train ANAGENT to enhance individual agent capa-bilities while maintaining effective global collaboration? 
+
+We develop a modular training paradigm that aligns with the functional decomposition of ANAGENT . Each agent is first initialized via supervised finetuning (SFT) to establish anal-ysis and reasoning foundations, followed by agent-specific reinforcement learning (RL) to optimize specialized behav-iors and capabilities. 
+
+Supervised Finetuning. All agents in ANAGENT are initial-ized through the SFT phase on the scientific analysis writing training set (Tab. 7) randomly sampled from ANA BENCH 
+
+(§2). Each training instance consists of the multimodal in-put x ∈ { xt, x f }, source information s, query q, and the corresponding ground-truth analysis y∗. Let θ denote the shared model parameters. The SFT objective (Eq. 6) is to minimize the token-level negative log-likelihood of the reference analysis conditioned on the input (§3.4): 
+
+LSFT (θ) = E(x,s,q,y ∗)
+
+−
+
+> |y∗|
+
+X
+
+> t=1
+
+log pθ (y∗ 
+
+> t
+
+| y∗
+
+> <t
+
+, x, s, q )
+
+
+
+(6) 
+
+RL Optimization. After SFT initialization, each agent is further optimized via RL with Group Relative Policy Optimization (GRPO) (Shao et al., 2024). For each agent 
+
+a ∈ { PLANNER , EXPERT , SOLVER , CRITIC }, we define an agent-specific policy πθa derived from SFT initialization and optimized on specialized RL datasets (§D.4). Given an input state ξa and a sampled action za ∼ πθa (· | ξa), GRPO maximizes the expected relative advantage within a sampled group Ga = {z(1)  
+
+> a
+
+, . . . , z (K) 
+
+> a
+
+}:
+
+L(a)GRPO (θa) = −Eξa
+
+"
+
+1
+
+K
+
+> K
+
+X
+
+> k=1
+
+ˆA(k) 
+
+> a
+
+log πθa
+
+
+
+z(k) 
+
+> a
+
+| ξa
+
+#
+
+,
+
+(7) where K represents the number of sampled candidate ac-tions in each GRPO group, ˆA(k) 
+
+> a
+
+denotes the normalized advantage computed from relative rewards within the group 5ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Ga, and Eξa [·] shows the expectation over the agent-specific input distribution Da.
+
+Specialized Rewards. Each agent a is optimized with a specialized reward tailored to its functional role (§D.4). Let 
+
+Ra denote the total reward for agent a, which decomposes into a weighted sum of multiple components: 
+
+Ra = X
+
+> m
+
+λa,m ra,m (8) where m is the index over reward components for agent 
+
+a, ra,m is an individual reward term, and λa,m is its corre-sponding weight with P 
+
+> m
+
+λa,m = 1 .
+
+# 4. Experiments 
+
+Model. Across baselines and ANAGENT (§D.1), we evaluate two close-source MLLMs, GPT-4.1-mini 
+
+(OpenAI, 2025) and Gemini-2.5-Flash (Google De-velopers Blog, 2025), and six open-source MLLMs, 
+
+InternVL-3.5 (Wang et al., 2025a), Qwen2.5-VL 
+
+(Bai et al., 2025b), and Qwen3-VL (Bai et al., 2025a) of different sizes. 
+
+Data. To maintain computationally efficiency while re-flect real-world complexity, we randomly sample from 
+
+ANA BENCH (§2) across 170 different scientific domains (Tab. 6), reducing the overall training size while maintaining the real-world data distribution. 
+
+Implementation Details. During SFT, agents are trained for one epoch on the SFT training set (Tab. 7) with ini-tial learning rate 1 × 10 −4 and cosine scheduler. During RL training, each agent is optimized on tailored datasets (Tab. 8) for one epoch with initial learning rate 1 × 10 −6 to develop specialized skills. See detailed configurations and computation overhead in Tabs. 11-10. 
+
+# 5. Results 
+
+5.1. Enhancing Scientific Table & Figure Analysis Effectiveness of Training-Free A NAGENT . Tab. 1 summa-rizes the performance of baselines and training-free ANA -
+
+> GENT
+
+. Across eight backbone MLLMs (§4), ANAGENT 
+
+consistently achieves notable gains, demonstrating the effec-tiveness and robustness of multi-agent collaboration. Under zero-shot setting, ANAGENT yields marked improvements over baselines, with ∆rel ≥ 4.98% on SSEM , ∆rel ≥ 8.54% 
+
+on SLEX , and ∆rel ≥ 6.19% on overall SAVG . When extend-ing to one-shot setting, the advantages of ANAGENT are fur-ther amplified, with relative improvements ∆rel ≥ 7.78% 
+
+on SSEM , ∆rel ≥ 17 .52% on SLEX , and ∆rel ≥ 9.79% on 
+
+SAVG . Results of training-free ANAGENT demonstrate its effectiveness in consistently enhancing scientific analysis across diverse backbone models, with few-shot prompting in synergizing with ANAGENT to further unlock its potential. 
+
+Effectiveness of Finetuned A NAGENT . A NAGENT con-sistently benefits from finetuning, with the combination of SFT+RL exhibiting the strongest optimization effects (e.g. , Qwen3-VL-4B : SAVG =38 .03% ) in comparison to their SFT ( e.g. , Qwen3-VL-4B : SAVG = 36 .02% ) and RL (e.g. , Qwen3-VL-4B : SAVG = 30 .03% ) counterparts, high-lighting the cumulative advantages of combining SFT with RL. On the other hand, jointly considering performance (Tab. 2) and computation overhead (Tab. 10) indicates SFT provides a more favorable trade-off than RL for long-context comprehension and long-output generation (§G.2). Also, similar to training-free variants (Tab. 1), finetuned ANA - 
+
+> GENT
+
+presents consistent improvements from zero-shot to one-shot scientific analysis ( ∆ ≥ 3.04% ). This reveals the effectiveness of one-shot learning in multi-agent systems, where agents with specialized objectives can better coordi-nate and reason with minimal task-specific demonstrations.  
+
+> Figure 5. Few-Shot Learning Optimization (§3.3)
+
+5.2. Test-Time Optimization Enhancing Scientific Analysis via Few-Shot Learning. To better accommodate heterogeneous inputs, we incorporate 
+
+k-shot learning to improve both individual adaptability and overall coordination (§3.3). Compared with zero-shot gener-ation, one-shot learning yields marked gains (Tabs. 1-2). In-creasing the number of shots further improves performance (k > 1), with k = 3 achieving the highest, though relative gains diminish as k grows. Considering computational effi-ciency, k = 1 provides the most favorable trade-off between performance and cost. As shown in Fig. 5, few-shot learn-ing enables ANAGENT to more effectively leverage prior knowledge and achieve improved coordination.  
+
+> Figure 6. Agent-Level Capability Augmentation (§3.3)
+
+Enhancing Scientific Analysis via Agent-Level Capabil-ity Augmentation. We conduct controlled experiments in which GPT-4.1-mini powers PLANNER , EXPERT , and 
+
+CRITIC , with four different MLLMs instantiating SOLVER ,6ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Table 2. Evaluation of Finetuned Agents. Performance of finetuned ANAGENT (Me = 5 ) on ANA BENCH (§C.4). Compared with baselines (Tab. 1), relative performance differences (Eq. 29) are shown as positive ↑ ∆rel % or negative ↓ ∆rel %.
+
+Model Size Semantic Accuracy (%) Lexical Accuracy (%) Overall Accuracy (%) COSINE BERT METEOR ROUGE -L BLEU WORD SSEM SLEX SAVG 
+
+ANAGENT — SFT (Zero-Shot) InternVL-3.5 4B 62.38 64.78 28.38 24.77 13.10 18.90 51.85 ↑18.43% 18.92 ↑101.92% 35.39 ↑33.15% 
+
+8B 64.16 65.82 29.62 25.26 14.27 20.56 53.20 ↑18.99% 20.03 ↑100.70% 36.61 ↑33.91% 
+
+Qwen2.5-VL 3B 60.84 65.77 25.09 24.27 11.19 17.58 50.57 ↑15.77% 17.68 ↑86.30% 34.12 ↑28.32% 
+
+7B 63.21 65.97 27.63 24.91 13.96 20.21 52.27 ↑16.83% 19.69 ↑97.29% 35.98 ↑31.75% 
+
+Qwen3-VL 4B 62.98 64.72 28.86 25.75 14.11 19.68 52.19 ↑18.64% 19.85 ↑108.29% 36.02 ↑34.60% 
+
+8B 64.70 66.98 31.33 27.93 16.47 22.09 54.34 ↑21.48% 22.16 ↑118.11% 38.25 ↑39.40% 
+
+ANAGENT — SFT (One-Shot) InternVL-3.5 4B 62.79 65.60 27.99 24.51 13.72 18.75 52.13 ↑19.07% 18.99 ↑102.67% 35.56 ↑33.78% 
+
+8B 64.97 66.63 29.39 25.01 14.63 20.79 53.66 ↑20.02% 20.14 ↑101.80% 36.90 ↑34.97% 
+
+Qwen2.5-VL 3B 61.25 66.54 25.27 24.27 11.26 17.53 51.02 ↑16.80% 17.69 ↑86.41% 34.35 ↑29.18% 
+
+7B 63.93 66.78 29.31 26.47 14.22 20.60 53.34 ↑19.22% 20.43 ↑104.71% 36.89 ↑35.08% 
+
+Qwen3-VL 4B 63.51 65.22 28.30 26.34 14.05 19.77 52.34 ↑18.98% 20.05 ↑110.39% 36.20 ↑35.28% 
+
+8B 65.07 67.13 31.45 28.08 16.01 22.59 54.55 ↑21.95% 22.22 ↑118.70% 38.39 ↑39.91% 
+
+ANAGENT — RL (Zero-Shot) Qwen2.5-VL 3B 56.54 60.49 21.37 18.87 5.67 12.72 46.13 ↑5.61% 12.42 ↑30.87% 29.28 ↑10.12% 
+
+Qwen3-VL 4B 58.97 60.99 22.33 19.09 5.91 12.76 47.43 ↑7.82% 12.58 ↑32.00% 30.03 ↑12.22% 
+
+ANAGENT — RL (One-Shot) Qwen2.5-VL 3B 58.19 61.10 22.01 19.40 6.20 13.63 47.10 ↑7.83% 13.07 ↑37.72% 30.09 ↑13.16% 
+
+Qwen3-VL 4B 60.42 62.24 22.70 19.51 6.21 12.95 48.45 ↑10.14% 12.89 ↑35.26% 30.67 ↑14.61% 
+
+ANAGENT — SFT+RL (Zero-Shot) Qwen2.5-VL 3B 62.61 65.90 27.22 25.22 12.59 18.78 51.91 ↑18.84% 18.86 ↑98.74% 35.39 ↑33.10% 
+
+Qwen3-VL 4B 63.13 66.66 29.46 26.87 14.84 20.73 53.08 ↑20.66% 20.81 ↑118.36% 36.95 ↑38.08% 
+
+ANAGENT — SFT+RL (One-Shot) Qwen2.5-VL 3B 62.92 66.63 27.64 26.82 14.41 19.63 52.40 ↑19.96% 20.29 ↑113.80% 36.34 ↑36.67% 
+
+Qwen3-VL 4B 63.75 67.89 30.79 27.91 15.80 22.03 54.14 ↑23.07% 21.92 ↑130.01% 38.03 ↑42.12% 
+
+respectively. Results in Fig. 6 show that agent-level capa-bility augmentation (§3.3) consistently improves the overall performance of ANAGENT across all four SOLVER back-bones ( ∆rel ≥ 10 .68% ). Notably, augmenting only selected agents with a more capable MLLM leads to marked gains over homogeneous ANAGENT , despite leaving SOLVER un-changed. These findings highlight the significance of agent-level capability differentiation in multi-agent systems and demonstrate that selectively augmenting critical roles, espe-cially those tasked with global guidance and complex rea-soning, can effectively enhance coordination performance. 
+
+5.3. Ablations On A NAGENT Variants Effectiveness of Multi-Agent Scientific Analysis. The performance of ANAGENT variants (Tab. 9) varies across training-free and finetuned settings (Fig. 17). Comparing training-free variants, Omnion consistently underperforms baselines ( ↓ 3.89% ≤ ∆abs ≤ ↓ 6.90% ), revealing that providing a standalone SOLVER with diverse tools can overwhelm reasoning and fails to enable effective scien-tific analysis. Symnion improves upon Omnion (∆abs ≥↑ 1.39% ) by including EXPERT to assist tool invocation and context comprehension, yielding performance that is generally above baselines but remains unstable and occasion-ally inferior. This unveils the key insight that the absence of global planning can lead to suboptimal coordination and misleading intermediate decisions. In contrast, by integrat-ing high-level planning, interactive executing, context-aware problem-solving, and reflective refinement (§3), ANAGENT 
+
+consistently achieves the highest performance. Among all variants, finetuning leads to marked gains over training-free counterparts ( ∆abs ≥ ↑ 3.12% ), even finetuned Omnion sur-passing baselines, highlighting the importance of targeted finetuning in optimizing multi-agent coordination. 
+
+Effectiveness of Critic-Guided Optimization. Comparing 
+
+ANAGENT with and without CRITIC reveals contrasting effects (Fig. 17). For training-free ANAGENT , incorpo-rating CRITIC can degrade collaborative performance for smalls-size MLLM agents as a result of their ineffective reflection. This effect is different for more capable agents, unveiling the limited reasoning and reflection abilities of smaller MLLM agents. In contrast, finetuned CRITIC is able to more accurately assess intermediate solutions and identify key deficiencies, guiding effective refinements to 7ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+improve overall performance. These findings underscore both the challenges and the significance of equipping agen-tic systems with robust reflection and refinement abilities in tackling complex problems. 
+
+5.4. In-Depth Analysis        
+
+> Figure 7. Ablations On Training Data. Performance visualization of ablation studies (§5.4), respectively on: (a) data size , (b) data domain , (c) data format , (d) data type (§C.2.1).
+
+Validation via MLLM-As-Judge & Case Studies. Tab. 12 showcases consistent performance gains across six back-bone MLLMs (§G.1), with overall SMLLM achieving up to 
+
+∆rel = 29 .24% . This validates our design of multi-metric evaluation (§2.4). Through dedicated case studies (§I) on seven error patterns (Fig. 8), Fig. 35 reveals substantial re-ductions across all error types, indicating the effectiveness of ANAGENT in advancing scientific reasoning & under-standing across seven complexity dimensions (§2). 
+
+Modular Training Is Better Than End-to-End Training For Multi-Agent Optimization. Comparing modular train-ing (§3.4) with end-to-end training, we evaluate their impact on multi-agent collaboration. As shown in Tab. 3, modu-lar training consistently outperforms end-to-end training across all metrics with notable gains ( ∆rel ≥ ↑ 33 .10% ). These results reveal that modular training more effectively supports coordinated behaviors and leads to stronger over-all performance. In contrast, end-to-end training markedly constrains agents from developing and preserving special-ized capabilities for designated roles. For example, in some cases, PLANNER directly generates final solutions during the planning stage (§I.8), significantly undermining role spe-cialization and leading to degraded performance ( ∆abs ≥↓ 2.68% ). This loss of specialization ultimately hampers collaborative effectiveness, highlighting the significance of modular optimization in multi-agent systems. 
+
+Unpacking the Training Data Recipe For Multi-Agent Finetuning. To understand how training data affects multi-agent finetuning, we conduct ablation studies along four                                        
+
+> Table 3. End-to-End Training vs. Modular Training. Compari-son between end-to-end training over modular training.
+> Model Size SSEM SLEX SAVG
+> ANAGENT (Training-Free) Qwen2.5-VL 3B 46.18 10.91 28.55 ↑7.37%
+> Qwen3-VL 4B 46.95 10.50 28.73 ↑7.36%
+> ANAGENT (End-to-End) Qwen2.5-VL 3B 48.32 14.56 31.44 ↑18.24%
+> Qwen3-VL 4B 49.17 14.87 32.02 ↑19.66%
+> ANAGENT (Modular) Qwen2.5-VL 3B 51.91 18.86 35.39 ↑33.10%
+> Qwen3-VL 4B 53.08 20.81 36.95 ↑38.08%
+
+dimensions of the training set (Fig. 7). As shown in Fig. 7(a), training 30K subset consistently underperforms training on the full set ( ∆rel ≥ ↓ 10 .27% ), unveiling the benefits of larger-scale training data. Fig. 7(b) compares domain-specific training with training on nine-domain full set. Domain-specific learning results in pronounced per-formance degradation ( ∆rel ≥ ↓ 26 .55% ), revealing that restricting training domains significantly limits agents’ gen-eralizability to out-of-domain tasks. Fig. 7(c) illustrates that single-format training impairs cross-format generalization, leading to consistent performance drops ( ∆rel ≥↓ 8.85% ). Fig. 7(d) further demonstrates that limiting training to a single data type markedly degrades performance ( ∆rel ≥↓ 
+
+9.53% ). We extend our discussion in §G.3. 
+
+Tools Are The Key To Open The Door of Good Scien-tific Analysis. Tools play a pivotal role in enabling high-quality scientific analysis by exposing ANAGENT to ex-tended knowledge and context. Figs. 32-33 demonstrate that performance gains arise not merely from the availabil-ity of tools, but from their strategic and objective-aligned utilization. When tool functionalities are accurately matched to task demands, ANAGENT is able to effectively retrieve relevant context and domain knowledge, ground reasoning in additional evidence, and adapt analysis to task-specific scientific scenarios. We extend our discussion in § G.9. 
+
+# 6. Conclusions 
+
+In this work, we address scientific table & figure analysis by proposing (1) ANA BENCH (§2), a benchmark with 63 , 178 
+
+instances along seven complexity dimensions (Fig. 2), and (2) ANAGENT (§3), a multi-agent system for enhanced scientific table & figure analysis. Through test-time opti-mization (§3.3) and modular training (§3.4), ANAGENT 
+
+achieves substantial improvements on ANA BENCH (§5), revealing the effectiveness of task-oriented decomposition, strategic knowledge retrieval, and context-aware problem-solving in tackling complex scientific problems. We hope 
+
+ANA BENCH and ANAGENT provide meaningful founda-tions to facilitate future research. 8ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+# Impact Statement 
+
+This paper aims to advance the field of Machine Learning by proposing a challenging benchmark and developing effec-tive multi-agent collaboration for scientific table and figure analysis. We acknowledge potential broader impacts of our work. ANA BENCH and ANAGENT contribute to the de-velopment of more capable multimodal scientific reasoning systems. By addressing challenges in interpreting complex scientific artifacts across diverse complexity dimensions, our work advances the reasoning capabilities of MLLM agents in handling heterogeneous knowledge and informa-tion, long-context comprehension, and domain-specific rea-soning. These capabilities extend beyond scientific con-texts and can potentially benefit other applications requiring multimodal reasoning and understanding. We believe our work represents a meaningful technical contribution to mul-timodal language models and multi-agent systems, with broader implications for AI systems that learn to reason over heterogeneous knowledge and information. 
+
+# Acknowledgments 
+
+We thank the Google Cloud Research Program for their computational support. 
+
+# References 
+
+arXiv. arxiv e-print archive. https://arxiv.org/ ,1991. Bai, S., Cai, Y., Chen, R., Chen, X., Cheng, Z., Deng, L., Ding, W., Gao, C., Ge, C., Ge, W., Guo, Z., Huang, Q., Huang, J., Hui, B., Jiang, S., Li, Z., Li, M., Li, M., Li, K., Lin, Z., Liu, J., Liu, C., Liu, Y., Liu, Y., Sun, J., Tang, J., Tu, J., Wan, J., Wang, P., Wang, P., Xu, Y., Xuancheng, R., Yang, H., Zhang, H., Zhang, F., Zheng, B., Zhong, H., Zhou, F., Zhou, J., Zhu, Y., and Zhu, K. Qwen3-vl techni-cal report. arXiv , abs/2511.21631, 2025a. URL https: //arxiv.org/abs/2511.21631 . Preprint. Bai, S., Chen, K., Liu, X., Wang, J., Ge, W., Song, S., Dang, K., Wang, P., Wang, S., Tang, J., Zhong, H., Zhu, Y., Yang, M., Li, Z., Wan, J., Wang, P., Ding, W., Fu, Z., Xu, Y., Ye, J., Zhang, X., Xie, T., Cheng, Z., Zhang, H., Yang, Z., Xu, H., and Lin, J. Qwen2.5-vl technical report. arXiv , abs/2502.13923, 2025b. URL https: //arxiv.org/abs/2502.13923 . Preprint. Bai, Y., Liu, B., Xue, S., Cai, F., Ye, N., and Zhang, G. Reasoning knowledge filter for logical table-to-text gen-eration. In Liu, K., Song, Y., Han, Z., Sifa, R., He, S., and Long, Y. (eds.), Proceedings of Bridging Neu-rons and Symbols for Natural Language Processing and Knowledge Graphs Reasoning @ COLING 2025 , pp. 18–30, Abu Dhabi, UAE, January 2025c. ELRA and ICCL. URL https://aclanthology.org/2025. neusymbridge-1.3/ .Banerjee, S. and Lavie, A. METEOR: An automatic metric for MT evaluation with improved correlation with hu-man judgments. In Proceedings of the ACL Workshop on Intrinsic and Extrinsic Evaluation Measures for Ma-chine Translation and/or Summarization , pp. 65–72, Ann Arbor, Michigan, 2005. Association for Computational Linguistics. URL https://aclanthology.org/ W05-0909/ .Beltagy, I., Lo, K., and Cohan, A. Scibert: Pretrained language model for scientific text. In EMNLP , 2019. Boiko, D. A., MacKnight, R., Kline, B., and Gomes, G. Autonomous chemical research with large language models. Nature , 624:570 – 578, 2023. URL https: //doi.org/10.1038/s41586-023-06792-0 .Choi, Y. M., Guo, X., Fung, Y. R., and Wang, Q. Citeguard: Faithful citation attribution for llms via retrieval-augmented validation. ArXiv , abs/2510.17853, 2025. URL https://api.semanticscholar. org/CorpusId:282246822 .Erickson, N., Purucker, L., Tschalzev, A., Holzm ¨uller, D., Desai, P. M., Salinas, D., and Hutter, F. Tabarena: A living benchmark for machine learning on tabular data. 
+
+arXiv preprint arXiv:2506.16791 , 2025. URL https: //arxiv.org/abs/2506.16791 .Gao, S., Fang, A., Huang, Y., Giunchiglia, V., Noori, A., Schwarz, J. R., Ektefaie, Y., Kondic, J., and Zitnik, M. Empowering biomedical dis-covery with ai agents. Cell , 187:6125–6151, 2024. URL https://api.semanticscholar. org/CorpusId:268875818 .Garikaparthi, A., Patwardhan, M., Vig, L., and Cohan, A. IRIS: Interactive research ideation system for ac-celerating scientific discovery. In Mishra, P., Mure-san, S., and Yu, T. (eds.), Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Volume 3: System Demonstrations) , pp. 592–603, Vienna, Austria, July 2025. Association for Computational Linguistics. ISBN 979-8-89176-253-4. doi: 10.18653/v1/2025.acl-demo.57. URL https: //aclanthology.org/2025.acl-demo.57/ .Google Developers Blog. Start building with gemini 2.5 flash, April 2025. URL https: //developers.googleblog.com/en/ start-building-with-gemini-25-flash/ .Gottweis, J., Weng, W.-H., Daryin, A., Tu, T., Palepu, A., Sirkovic, P., Myaskovsky, A., Weissenberger, F., Rong, 9ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+K., Tanno, R., Saab, K., Popovici, D., Blum, J., Zhang, F., Chou, K., Hassidim, A., Gokturk, B., Vahdat, A., Kohli, P., Matias, Y., Carroll, A., Kulkarni, K., Tomasev, N., Guan, Y., Dhillon, V., Vaishnav, E. D., Lee, B., Costa, T. R. D., Penad ´es, J. R., Peltz, G., Xu, Y., Pawlosky, A., Karthikesalingam, A., and Natarajan, V. Towards an ai co-scientist. CoRR , abs/2502.18864, 2025. doi: 10.48550/arXiv.2502.18864. URL https://arxiv. org/abs/2502.18864 .Gridach, M., Nanavati, J., Abidine, K. Z. E., Mendes, L., and Mack, C. Agentic ai for scientific discovery: A survey of progress, challenges, and future direc-tions. ArXiv , abs/2503.08979, 2025. URL https: //api.semanticscholar.org/CorpusId: 276937648 .Guo, X., Wang, X., Chen, Y., Li, S., Han, C., Li, M., and Ji, H. Syncmind: Measuring agent out-of-sync recovery in collaborative software engineering. arXiv preprint arXiv:2502.06994 , 2025. URL https:// arxiv.org/abs/2502.06994 .Jin, Q., Dhingra, B., Liu, Z., Cohen, W. W., and Lu, X. Pubmedqa: A dataset for biomedical research question answering. In Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Lan-guage Processing (EMNLP–IJCNLP) , pp. 2567–2577, Hong Kong, China, 2019. Association for Computa-tional Linguistics. doi: 10.18653/v1/D19-1259. URL 
+
+https://aclanthology.org/D19-1259/ .Li, C., Shangguan, Z., Zhao, Y., Li, D., Liu, Y., and Co-han, A. M3sciqa: A multi-modal multi-document sci-entific qa benchmark for evaluating foundation models. In Al-Onaizan, Y., Bansal, M., and Chen, Y.-N. (eds.), 
+
+Findings of the Association for Computational Linguis-tics: EMNLP 2024 , pp. 15419–15446, Miami, Florida, USA, November 2024. Association for Computational Linguistics. doi: 10.18653/v1/2024.findings-emnlp. 904. URL https://aclanthology.org/2024. findings-emnlp.904/ .Lin, C. ROUGE: A package for automatic evaluation of summaries. In Proceedings of the Workshop on Text Summarization Branches Out (WAS 2004) , Barcelona, Spain, 2004. Association for Computational Linguistics. URL https://aclanthology.org/W04-1013. pdf .Liu, T., Nathani, D., Li, Z., Yang, K., and Wang, W. Y. Wildsci: Advancing scientific reasoning from in-the-wild literature. arXiv preprint arXiv:2601.05567 , 2026. URL 
+
+https://arxiv.org/abs/2601.05567 .Lou, Y., Kuehl, B., Bransom, E., Feldman, S., Naik, A., and Downey, D. S2abel: A dataset for entity linking from scientific tables. In Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing (EMNLP) , pp. 3089–3101, Singapore, 2023. Association for Computational Linguistics. doi: 10.18653/v1/2023. emnlp-main.186. URL https://aclanthology. org/2023.emnlp-main.186/ .Lu, X., Pan, L., Liu, Q., Nakov, P., and Kan, M.-Y. SCITAB: A challenging benchmark for compositional reasoning and claim verification on scientific tables. In Bouamor, H., Pino, J., and Bali, K. (eds.), Pro-ceedings of the 2023 Conference on Empirical Meth-ods in Natural Language Processing , pp. 7787–7813, Singapore, December 2023. Association for Computa-tional Linguistics. doi: 10.18653/v1/2023.emnlp-main. 483. URL https://aclanthology.org/2023. emnlp-main.483/ .Newman, B., Lee, Y., Naik, A., Siangliulue, P., Fok, R., Kim, J., Weld, D. S., Chang, J. C., and Lo, K. ArxivDIGESTables: Synthesizing scientific literature into tables using language models. In Al-Onaizan, Y., Bansal, M., and Chen, Y.-N. (eds.), Proceedings of the 2024 Conference on Empirical Methods in Nat-ural Language Processing , pp. 9612–9631, Miami, Florida, USA, November 2024. Association for Compu-tational Linguistics. doi: 10.18653/v1/2024.emnlp-main. 538. URL https://aclanthology.org/2024. emnlp-main.538/ .OpenAI. Introducing gpt-4.1 in the api, April 2025. URL 
+
+https://openai.com/index/gpt-4-1/ .Papineni, K., Roukos, S., Ward, T., and Zhu, W. BLEU: a method for automatic evaluation of machine trans-lation. In Proceedings of the 40th Annual Meeting of the Association for Computational Linguistics , pp. 311–318, Philadelphia, Pennsylvania, USA, 2002. As-sociation for Computational Linguistics. doi: 10.3115/ 1073083.1073135. URL https://aclanthology. org/P02-1040/ .Pramanick, S., Chellappa, R., and Venugopalan, S. Spiqa: A dataset for multimodal question answering on scientific papers. In Advances in Neural Information Processing Systems , 2024. Press, O., Hochlehnert, A., Prabhu, A., Udandarao, V., Press, O., and Bethge, M. Citeme: Can language models accurately cite scientific claims? ArXiv ,abs/2407.12861, 2024. URL https://arxiv.org/ pdf/2407.12861.pdf .PubMed. Pubmed: Database of biomedical literature. 
+
+https://pubmed.ncbi.nlm.nih.gov/ , 1996. 10 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Reddy, C. K. and Shojaee, P. Towards scientific discov-ery with generative ai: Progress, opportunities, and chal-lenges. In AAAI Conference on Artificial Intelligence ,2024. URL https://api.semanticscholar. org/CorpusId:274776255 .Shao, Z., Wang, P., Zhu, Q., Xu, R., Song, J.-M., Zhang, M., Li, Y. K., Wu, Y., and Guo, D. Deepseek-math: Pushing the limits of mathematical reasoning in open language models. ArXiv , abs/2402.03300, 2024. URL https://api.semanticscholar. org/CorpusID:267412607 .Singh, S., Sarkar, N., and Cohan, A. SciDQA: A deep reading comprehension dataset over scientific papers. In Al-Onaizan, Y., Bansal, M., and Chen, Y.-N. (eds.), Pro-ceedings of the 2024 Conference on Empirical Methods in Natural Language Processing , pp. 20908–20923, Miami, Florida, USA, November 2024. Association for Compu-tational Linguistics. doi: 10.18653/v1/2024.emnlp-main. 1163. URL https://aclanthology.org/2024. emnlp-main.1163/ .Sundar, A. S., Xu, J., Gay, W., Richardson, C., and Heck, L. cpapers: A dataset of situated and multimodal interactive conversations in scientific papers. ArXiv , abs/2406.08398, 2024. URL https://api.semanticscholar. org/CorpusId:270391245 .Wang, Q., Downey, D., Ji, H., and Hope, T. SciMON: Sci-entific inspiration machines optimized for novelty. In Ku, L.-W., Martins, A., and Srikumar, V. (eds.), Proceed-ings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , pp. 279–299, Bangkok, Thailand, August 2024. Association for Computational Linguistics. doi: 10.18653/v1/2024. acl-long.18. URL https://aclanthology.org/ 2024.acl-long.18/ .Wang, W., Gao, Z., Gu, L., Pu, H., Cui, L., Wei, X., Liu, Z., Jing, L., Ye, S., Shao, J., Wang, Z., Chen, Z., Zhang, H., Yang, G., Wang, H., Wei, Q., Yin, J., Li, W., Cui, E., Chen, G., Ding, Z., Tian, C., Wu, Z., Xie, J., Li, Z., Yang, B., Duan, Y., Wang, X., Li, S., Zhao, X., Duan, H., Deng, N., Fu, B., He, Y., He, C., Shi, B., He, J., Xiong, Y., Lv, H., Wu, L., Shao, W., Zhang, K., Deng, H., Qi, B., Ge, J., Guo, Q., Zhang, W., Ouyang, W., Limin, W., Dou, M., Zhu, X., Lu, T., Lin, D., Dai, J., Zhou, B., Su, W., Chen, K., Qiao, Y., Wang, W., and Luo, G. Internvl3.5: Advancing open-source multimodal models in versatility, reasoning, and efficiency. arXiv ,abs/2508.18265, 2025a. URL https://arxiv.org/ abs/2508.18265 . Preprint. Wang, Z., Guo, X., Stoica, S., Xu, H., Wang, H., Ha, H., Chen, X., Chen, Y., Yan, M., Huang, F., et al. Perception-aware policy optimization for multimodal rea-soning. arXiv preprint arXiv:2507.06448 , 2025b. Zhang, X., Wang, D., Wang, B., Dou, L., Lu, X., Xu, K., Wu, D., and Zhu, Q. Scitat: A question answer-ing benchmark for scientific tables and text covering di-verse reasoning types. In Findings of the Association for Computational Linguistics: ACL 2025 , pp. 3859– 3881, Vienna, Austria, 2025. Association for Compu-tational Linguistics. doi: 10.18653/v1/2025.findings-acl. 199. URL https://aclanthology.org/2025. findings-acl.199/ .Zhang, Y., Chen, X., Jin, B., Wang, S., Ji, S., Wang, W., and Han, J. A comprehensive survey of scientific large lan-guage models and their applications in scientific discov-ery. In Al-Onaizan, Y., Bansal, M., and Chen, Y.-N. (eds.), 
+
+Proceedings of the 2024 Conference on Empirical Meth-ods in Natural Language Processing , pp. 8783–8817, Miami, Florida, USA, November 2024a. Association for Computational Linguistics. doi: 10.18653/v1/2024. emnlp-main.498. URL https://aclanthology. org/2024.emnlp-main.498/ .Zhang, Z., Liu, Y., hua Zhong, S., Chen, G., Yang, Y., and Cao, J. From references to insights: Collaborative knowl-edge minigraph agents for automating scholarly literature review. In AAAI Conference on Artificial Intelligence ,2024b. URL https://api.semanticscholar. org/CorpusId:273963834 .Zhao, X., Luo, X., Shi, Q., Chen, C., Wang, S., Liu, Z., and Sun, M. ChartCoder: Advancing multimodal large language model for chart-to-code generation. In Che, W., Nabende, J., Shutova, E., and Pilehvar, M. T. (eds.), Pro-ceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) ,pp. 7333–7348, Vienna, Austria, July 2025. Association for Computational Linguistics. ISBN 979-8-89176-251-0. doi: 10.18653/v1/2025.acl-long.363. URL https: //aclanthology.org/2025.acl-long.363/ .Zheng, T., Deng, Z., Tsang, H. T., Wang, W., Bai, J., Wang, Z., and Song, Y. From automation to autonomy: Asurvey on large language models in scientific discovery. In Christodoulopoulos, C., Chakraborty, T., Rose, C., and Peng, V. (eds.), Proceedings of the 2025 Confer-ence on Empirical Methods in Natural Language Pro-cessing , pp. 17733–17750, Suzhou, China, November 2025. Association for Computational Linguistics. ISBN 979-8-89176-332-6. doi: 10.18653/v1/2025.emnlp-main. 895. URL https://aclanthology.org/2025. emnlp-main.895/ .Zhou, Z., Feng, X., Huang, L., Feng, X., Song, Z., Chen, R., Zhao, L., Ma, W., Gu, Y., Wang, B., Wu, 11 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+D., Hu, G., Liu, T., and Qin, B. From hypoth-esis to publication: A comprehensive survey of ai-driven research support systems. ArXiv , abs/2503.01424, 2025. URL https://api.semanticscholar. org/CorpusId:276775839 .12 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+# A. Preliminary Exploration 
+
+A.1. What Challenges Exist In Scientific Table & Figure Analysis? 
+
+The heterogeneity of table & figure scientific analysis poses critical challenges for MLLM agents in accurately understanding various modalities, structures, formats, contexts, domains, and writing demands. To investigate how MLLM agents can perform in tackling these challenges, we employ Qwen3-VL-8B as the base model, generating analysis on 60 scientific tables and figures, respectively. These 120 data are randomly sampled from ANA BENCH with evenly distributed features across both data complexity (including data type , data format , data source , and data domain ) and analysis complexity 
+
+(including analysis objective , analysis depth , and analysis width ) (§2.3). As shown in Fig. 2, the agent presents varying performance on these dimensions, showcasing strengths on table structures over visual figures, XML formats over LaTeX, arXiv (arXiv, 1991) papers over PubMed (PubMed, 1996), computer science related domains over biomedicine, experimental analysis over methodology, superficial summarization over in-depth analysis, and fully-grounded analysis over inferential writing. Analyzing case-by-case, we observe seven distinct patterns (Fig. 8) in agent’s analysis failures, which are in close accordance with the main challenges we conclude in Fig. 2. Employing Qwen3-VL-8B as the analysis agent baseline, the agent performs scientific analysis on different data types, formats, sources, and domains (Figs. 8-10). As shown in Fig. 9, the agent analyzes two distinct data types, table and figure ,respectively. While the table is a text-only single modality input, it presents different structures than writing or drawing. On the other hand, the figure gives vision-language input, complicating the multimodal understanding that serves as the basis of accurate analysis. Compared with ground-truth analysis, the agent’s outputs reveal their significant visual perception errors, together with their lack of scientific writing abilities with proper analysis depth and width. Fig. 10 shows two examples with different data types, sources, formats, and domains. As domain-specific knowledge further complicates the tasks, the agent analyzes both table and figure with notable hallucinated contents. Meanwhile, the agent’s analysis contains significant misinterpretation on domain-specific terminologies and expressions, and lacks wider analysis coverage and deeper discussions. 
+
+A.2. How To Enhance Scientific Table & Figure Analysis?   
+
+> Figure 8. Key Error Patterns. Through our case study on 120 samples, we identify seven key error patterns that correspond to the analysis challenges shown in Fig. 2.
+
+Benchmarking Scientific Analysis Under Realistic Challenges. Our preliminary exploration (§A.1) reveals that failures in scientific table & figure analysis are not stemming from isolated weaknesses, but rather from the compound difficulty introduced by heterogeneous data representations and diverse analytical demands (Fig. 2). To this end, we propose ANA BENCH (§2), a benchmark that systematically instantiates these challenges based on real-world scientific publications. By covering diverse data modalities and structures, types and formats, sources and domains, ANA BENCH develops scientific analysis tasks with varying analysis widths, depths, and objectives, enabling controlled evaluation of MLLM agents’ scien-tific analysis capabilities across various data and analysis complexities. Aligning benchmark construction (§2.3) di-rectly with the observed challenges (Fig. 2), ANA BENCH 
+
+establishes a principled foundation for evaluating and advancing scientific table & figure analysis. 
+
+Enhancing Scientific Analysis Through Multi-Agent Collaboration. The identified error patterns present across different stages of scientific writing, from input interpretation and contextual understanding to analysis writing and reflective correction. As such, a high-quality scientific analysis demands deliberate planning, accurate and domain-aware information acquisition, coherent syn-13 ANAGENT For Enhancing Scientific Table & Figure Analysis      
+
+> Figure 9. Preliminary Analysis On Failure Patterns. Analyzing on two different data types, table &figure , the agent shows its lack of accurate visual perception and its incapability of writing with proper analysis depth and width.
+
+thesis, and careful verification, which require capabilities that are difficult to reliably achieve within a monolithic agent (§5.3). 
+
+How to enhance these specialized capabilities in one agentic framework? By decomposing the scientific analysis writing process into multiple stages, we introduce ANAGENT , a multi-agent framework capable of collaborative scientific analysis with specialized completion and optimization. Specifically, ANAGENT consists of four specialized agents: PLANNER for high-level task planning, alleviating potential errors in analysis width, depth, and objectives; EXPERT for task-oriented exploration and retrieval, avoiding domain-specific and contextual understanding errors across varied modalities, structures, and formats; SOLVER for scientific analysis writing, reasoning through all the available knowledge and information as guided and supported by PLANNER and EXPERT ; and CRITIC for self- reflection and correction to rectify inaccurate analyses and hallucinated contents. Collectively, ANAGENT targets the key failure patterns observed in Fig. 8 to enhance agent’s scientific analysis capabilities for improved overall performance. 
+
+Evaluating Scientific Analysis With Multi-Dimensional Assessment. Given the diversity of challenges (Fig. 2) and error patterns (Fig. 8) involved in scientific analysis, single-scalar judgment is insufficient to reflect analysis quality. Accurate scientific analysis requires faithful interpretation of presented data, comprehensive coverage of key findings, adherence to task-specific requirements, clear and coherent scientific writing, and strict grounding in available evidence. Accordingly, our assessment considers these aspects jointly, capturing both analytical correctness and writing quality through the five-dimensional evaluation protocol (Fig. 44): content accuracy , analytical completeness , format correctness , clarity & coherence , and reliability & faithfulness . To complement our rule-based assessment, we apply five-dimensional protocol to both MLLM-As-Judge and human expert assessment (§2.4), enabling fine-grained comparisons across models and settings. 14 ANAGENT For Enhancing Scientific Table & Figure Analysis   
+
+> Figure 10. Preliminary Analysis On Failure Patterns. Analyzing on two data types with different data sources, formats, and domains, the agent generates analysis with significant hallucinated contents, meanwhile incapable of writing with proper analysis depth and width.
+
+# B. Related Work 
+
+AI For Scientific Table Understanding. Recent advances in AI greatly inspire research on table understanding (Erickson et al., 2025), particularly scientific tables that exhibit diverse formats, layouts, domains, and analytical objectives. As tables constitute a compact yet information-dense medium for conveying methodological details and empirical findings, benchmarks are proposed to evaluate distinct aspects of scientific table understanding: SCITAB (Lu et al., 2023) assesses table-based claim verification, S2abEL (Lou et al., 2023) targets entity linking, and other benchmarks address question answering (QA) (Pramanick et al., 2024; Zhang et al., 2025), table-to-text generation (Bai et al., 2025c), literature-to-table (Newman et al., 2024), etc. However, existing benchmarks emphasize isolated tasks while lack principled curriculum to capture diverse data heterogeneity and reasoning complexity in long-horizon contexts, motivating our work to benchmark scientific table understanding across multiple complexity dimensions. 
+
+AI For Scientific Multimodal Understanding. Scientific papers are inherently multimodal, combining text with figures, tables, algorithms, etc., to communicate complex scientific evidence (Zheng et al., 2025; Zhang et al., 2024a). Accordingly, multimodal reasoning and long-context comprehension are essential for scientific research. However, existing benchmarks have significant limitations: SPIQA (Pramanick et al., 2024) for table & figure QA shows limited coverage of cross-domain generalization and reasoning complexity. WildSci (Liu et al., 2026) targets QA across domains, yet fails to incorporate multimodal long-context reasoning that is fundamental to scientific inquiry. These limitations motivate ANA BENCH with structured reasoning curriculum to provide more comprehensive testbed for enhancing multimodal scientific understanding. 15 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+# C. A NA BENCH : Benchmark Analysis 
+
+We construct ANA BENCH that covers seven key challenges (Fig. 2), with our construction method scalable to different sizes for custom use (Fig. 3). By developing an automated multi-stage benchmark construction method (§3), ANA BENCH 
+
+captures a wide range of data complexity (§C.2.1) and analysis complexity (§C.2.2), enabling more comprehensive evaluation of scientific analysis. Our multi-level filtering and quality-control procedures further ensure high data reliability. The comparison between ANA BENCH and recent scientific benchmarks is summarized in Tab. 4. 
+
+C.1. Benchmark Construction 
+
+As illustrated in Fig. 3, our dataset construction method comprises four progressive automated stages: (1) source collection ,(2) data extraction , (3) instance construction , and (4) task classification . To ensure data quality, we implement multi-level filtering across stages, from source collection to instance construction . Here, we elaborate on our benchmark construction in further detail to complement ANA BENCH :
+
+Source Collection. During the initial stage of source collection , we gather source papers from multiple dissemination platforms and apply a combination of paper-level filters, including domain-category filtering, publication-year filtering, keyword-based filtering, full-text access filtering, and maximum-source thresholding. In particular, to mitigate the risk of data contamination during model pretraining, we restrict sources to papers published after 2023. Moreover, to ensure data quality and better coverage of recent work, we set the maximum source threshold for papers published in or after 2025 to be twice that of papers published before 2025. 
+
+Data Extraction. In the second stage of data extraction , we perform both paper-level and data-level filtering based on automated data parsing. Specifically, we filter out papers and data instances that exhibit access failures or parsing errors. For each retained figure or table data, we extract the parsed data content along with the associated source files when available ( e.g. , PNG images). In addition, we extract contextual information for each targeted data through d-depth hierarchical intra-document and inter-document reference retrieval. Our d-depth hierarchical context retrieval method (Alg. 1) is implemented in a recursive manner: the first-level context consists of elements that the target instance refers to or is referred to by; the second-level context includes elements that the first-level contexts refer to or are referred to by; and this process continues iteratively up to depth d. This hierarchical context retrieval enables the extraction of both internal and external relational information surrounding each data sample. 
+
+Instance Construction. Supported by the prior two stages, the instance construction stage integrates the targeted data, 
+
+d-depth contexts, ground-truth analysis, and source metadata to create each scientific analysis instance. This stage performs multi-level data cleaning , including data filtering that excludes embedded elements, threshold-based filtering that removes instances with over-short or over-long inputs and outputs according to the predefined thresholds, and data validation that discards data with missing targeted samples or ground-truth analyses. The resulting cleaned instances are then stored in 
+
+ANA BENCH for subsequent task classification.  
+
+> Figure 11. Year Distribution of A NA BENCH .
+> Visualization of year distribution, with 2025 comprising the largest proportion to mitigate data contamination (§C).
+
+Task Classification. We combine rule-based task classification with 
+
+MLLM-assisted curriculum categorization to classify scientific analysis instances into fine-grained curriculum categories across seven complexity dimensions (§C.2.3). We summarize the complexity curriculum categories in Tab. 5, with 23 task complexity categories across four data complexity dimensions (§C.2.1) and three analysis complexity dimensions (§C.2.2). 
+
+Quality Control. To ensure data quality, we implement multi-level fil-tering and data cleaning across different benchmark construction stages (§C). Furthermore, to mitigate the risk of data contamination during model pretraining, we restrict paper sources to those published after 2023 at the initial source-collection stage of our benchmark construction (Fig. 3), with 2025 accounting for the majority of instances to mitigate data contamination (Fig. 11). Accordingly, our evaluation set (§C.4) is obtained by filtering 
+
+ANA BENCH to instances derived from papers published in 2025 and then downsampling this subset. 16 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Algorithm 1 k-Depth Hierarchical Context Retrieval  
+
+> 1:
+
+Input: Target data instance d, maximum context depth k, reference graph G 
+
+> 2:
+
+Output: Hierarchical context set C = {C 1, . . . , Ck} 
+
+> 3:
+
+Initialize C ← ∅  
+
+> 4:
+
+Initialize visited set V ← { d} 
+
+> 5:
+
+Initialize frontier F0 ← { d} 
+
+> 6:
+
+for i = 1 to k do  
+
+> 7:
+
+Initialize Fi ← ∅  
+
+> 8:
+
+for all e ∈ F i−1 do  
+
+> 9:
+
+Retrieve referring elements Rin (e) and referred elements Rout (e) from G 
+
+> 10:
+
+for all e′ ∈ R in (e) ∪ R out (e) do  
+
+> 11:
+
+if e′ /∈ V then  
+
+> 12:
+
+Add e′ to Fi 
+
+> 13:
+
+Add e′ to V 
+
+> 14:
+
+end if  
+
+> 15:
+
+end for  
+
+> 16:
+
+end for  
+
+> 17:
+
+Set Ci ← F i 
+
+> 18:
+
+end for  
+
+> 19:
+
+Return C
+
+C.2. Benchmark Curriculum 
+
+According to the difficulty and diversity of the data, ANA BENCH is organized into a curriculum along two overarching dimensions (§2.3), data complexity (§C.2.1) and analysis complexity (§C.2.2), to capture and reflect real-world variations in both scientific inputs and analytical demands, enabling systematic evaluation across heterogeneous scenarios. To determine benchmark curriculum, we perform fine-grained task classification across data and analysis complexities (§C.2.3). C.2.1. D ATA COMPLEXITY 
+
+Data Type. ANA BENCH covers different data modalities and structures commonly encountered in scientific literature. Specifically, the input data include structured tables that present single-modality data with explicit tabular organization, and figures that are inherently multimodal and consist of both visual and textual elements. The table category includes diverse tabular organizations with varying layouts, levels of sparsity, and semantic density, requiring structured parsing and relational reasoning. On the other hand, the figure category spans a wide range of visual structures, such as charts, plots, frameworks, diagrams, etc ., introducing additional challenges in visual interpretation and cross-modal alignment between textual and visual elements. 
+
+Data Format. To reflect the real-world diversity of scientific document representations, the input data are supplied in both 
+
+LaTeX and XML formats. These formats differ substantially in syntactic structure and parsing complexity, requiring models to handle distinct markup conventions while preserving the underlying semantic content. 
+
+Data Source. The benchmark incorporates data collected from publications across not only dissimilar literature categories, including general papers and review or survey papers, but also different dissemination platforms, such as arXiv (arXiv, 1991) and PubMed (PubMed, 1996). These sources vary in writing structures, submission formats, and disciplinary emphasis, contributing to increased heterogeneity in data and domain distributions. 
+
+Data Domain. ANA BENCH spans 9 broad scientific domains, covering 170 fine-grained disciplines (Tab. 6 & Figs. 12-14). This domain diversity supports ANA BENCH to systematically evaluate the analytical capabilities of MLLM agents across varied domain-specific knowledge, terminologies, methodological conventions, and writing norms. 17 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+C.2.2. A NALYSIS COMPLEXITY 
+
+Analysis Objective. Data in ANA BENCH are classified according to their analytical objectives. Specifically, each analysis is labeled as either (1) methodology-oriented analysis that describes methodological designs, theoretical formulations, algorithmic principles, and implementation of methods, models, or experiments; or (2) experimental analysis that interprets empirical results, identifies patterns or trends, and draws evidence-based conclusions. This distinction reflects the diverse objectives of scientific reasoning involved in research analysis. 
+
+Analysis Width. Analysis width characterizes the scope of information referenced in the ground-truth analysis. We define four fine-grained classes: (1) analyses with no references , which rely solely on the immediate inputs; (2) internal references ,which draw upon other components within the same document; (3) external references , which incorporate information beyond the current document; and (4) mixed references , which combine both internal and external sources. This analysis width reflects the increasing breadth of contextual integration required for comprehensive analysis. 
+
+Analysis Depth. Analysis depth distinguishes between surface-level summarization and inference-driven analysis. Shallow 
+
+analyses involve direct restatement or aggregation of explicitly stated information, whereas in-depth analyses require implicit reasoning, interpretation, or synthesis that is not directly observable from the input. This analysis depth captures the degree of cognitive and analytical complexity demanded by each task. 
+
+Table 4. Benchmark Comparison. We compare ANA BENCH with existing scientific benchmarks across multiple dimensions of data complexity (M-modal: multimodal, M-Layout: multi-layout, M-Doc.: multi-document, M-Source: multi-source, M-Format: multi-format, M-Domain: multi-domain) and reasoning complexity (Long-Context: long-context reasoning, M-Width: multi-width, M-Depth: multi-depth, M-Obj.: multi-objective), highlighting the comprehensiveness of our approach to evaluating autonomous scientific analysis capabilities of MLLM-powered scientific agents. Note: 9/26 denotes 9 domains and 26 subdomains; 9/170 denotes 9 domains and 170 subdomains. Compared benchmarks are listed in alphabetical order. 
+
+Benchmark Task Source Data Complexity Reasoning Complexity M-modal M-Layout M-Doc. M-Source M-Format M-Domain Long-Context M-Width M-Depth M-Obj. M3SciQA 
+
+(Li et al., 2024) 
+
+QA Partial ✓ ✓ ✓ × × × × × × ×
+
+SCIDQA 
+
+(Singh et al., 2024) 
+
+QA Full × × ✓ × × × ✓ × × ×
+
+SCITAB 
+
+(Lu et al., 2023) 
+
+Claim Verifica-tion Partial × × × × × × × × × ×
+
+SCITAT 
+
+(Zhang et al., 2025) 
+
+QA Partial × × × × × × × × × ×
+
+SPIQA 
+
+(Pramanick et al., 2024) 
+
+QA Full ✓ ✓ × ✓ × × ✓ × × ×
+
+S2abEL 
+
+(Lou et al., 2023) 
+
+Entity Link Partial × × × × × × × × × ×
+
+PubMedQA 
+
+(Jin et al., 2019) 
+
+QA Partial × × × × × × × × × ×
+
+WildSci 
+
+(Liu et al., 2026) 
+
+QA Partial × × × × × ✓(9/26) × × × ×
+
+ANA BENCH Scientific Analysis Full ✓ ✓ ✓ ✓ ✓ ✓(9/170) ✓ ✓ ✓ ✓
+
+18 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Table 5. ANA BENCH Complexity Curriculum. This table summarizes the task classification stage of our benchmark construction method for the complexity curriculum of ANA BENCH , which defines 23 task complexity categories across seven data complexity and analysis complexity dimensions. 
+
+Curriculum Broad Fine-Grained Category Definition Table 
+
+Tabular-structured data that organize information into rows and columns to sys-tematically present structured contents, such as method characteristics, parameter configurations, benchmark comparisons, categorical classifications, experimental results, quantitative or qualitative summaries, and analytical breakdowns, en-abling precise lookup, comparison, and reference. 
+
+Type Figure 
+
+Visual representations of scientific information that employ graphical, dia-grammatic, or illustrative elements, such as plots, charts, schematics, diagrams, images, framework architectures, etc., to show relationships, patterns, processes, structures, conceptual approaches, and other critical information that may be complex or inefficient to express in textual form 
+
+LaTeX 
+
+Scientific data obtained from documents in LaTeX, which is a structured format widely used in scholarly publishing to encode mathematical expressions, tables, figures, algorithms, and document structures 
+
+Data Complexity Format XML 
+
+Scientific data obtained from documents encoded in XML, which is a struc-tured, machine-readable format that represents document content, metadata, and hierarchical relationships through tagged elements, commonly used for standard-ized archival and data exchange in scholarly publishing 
+
+General 
+
+Scientific literature that primarily focuses on the development, analysis, or evaluation of a specific method, model, framework, or benchmark, typically proposing novel techniques or reporting empirical results within a defined re-search problem. 
+
+Source Review 
+
+Scientific literature that systematically examines, summarizes, and synthesizes existing research within a specific domain or research direction, aiming to provide an overview of prior work, identify trends, compare approaches, and highlight open challenges for future research. 
+
+Domain 9/170 Scientific data can span multiple research domains, among which ANA BENCH 
+
+covers 9 broad domains encompassing 170 fine-grained disciplinary categories 
+
+Methodology Scientific analysis that explains and rationalize the proposed method, such as model designs, training algorithms, framework architectures, etc. 
+
+Objective Experiment 
+
+Scientific analysis that focuses on empirically evaluating and analyzing diverse aspects like performance, robustness, trustworthiness, comparative effectiveness, etc., across different datasets, settings, or baselines using quantitative and qualita-tive results 
+
+Self-Contained Scientific analysis that relies solely on the given input, without referring to additional sources 
+
+Internal Scientific analysis that integrates the given input with references drawn from within the same source paper 
+
+External Scientific analysis that integrates the given input with references drawn from sources outside the source paper 
+
+Width Mixed Scientific analysis that combines the given input with references drawn from both within and outside the source paper 
+
+Shallow 
+
+Scientific analysis that focuses on surface-level observations, straightforward patterns, or direct summarization of the input, without extended reasoning, inter-pretation, or inference 
+
+Analysis Complexity Depth In-Depth 
+
+Scientific analysis that involves extended reasoning, deeper interpretation, and evidence-grounded inference beyond surface-level summarization to derive deeper insights, explanations, findings, or conclusions 
+
+19 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Figure 12. ANA BENCH Domain Distribution. Domain distribution of ANA BENCH across 9 broad domain categories (Fig. 13.a) and 170 fine-grained subdomain categories (Fig. 12). 
+
+Figure 13. Broad Domain Distribution. Broad domain distribution of (a) A NA BENCH and (b) the evaluation set of A NA BENCH across nine broad domain categories. 
+
+Figure 14. ANA BENCH Evaluation Domain Distribution. Besides the domain distribution of ANA BENCH (Fig. 12 & Fig. 13.a), we additionally visualize that of the downsampled evaluation set across 9 broad domains (Fig. 13.b) and 170 subdomains (Fig. 14). 
+
+20 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Figure 15. ANA BENCH : Benchmark Statistics. We quantitatively analyze our benchmark in the dimensions of seven challenges (Fig. 2) across varying data and analysis complexities. 
+
+21 ANAGENT For Enhancing Scientific Table & Figure Analysis      
+
+> Table 6. ANA BENCH Domains. This table summarizes the 9 broad domains and 170 subdomains that ANA BENCH covers and collects data from. Directly summing subdomain categories is inaccurate due to subdomain overlapping.
+
+Broad Domain Fine-Grained Subdomain Computer Science 
+
+(40 Subdomains) 
+
+Artificial Intelligence; Hardware Architecture; Computational Complexity; Computational Engineering, Finance, and Science; Computational Geometry; Computation and Language; Cryptography and Security; Computer Vision and Pattern Recognition; Computers and Society; Databases; Distributed, Parallel, and Cluster Computing; Digital Libraries; Discrete Mathematics; Data Structures and Algorithms; Emerging Technologies; Formal Languages and Automata Theory; General Literature; Graphics; Computer Science and Game Theory; Human-Computer Interaction; Information Retrieval; Information Theory; Machine Learning; Logic in Computer Science; Multiagent Systems; Multimedia; Mathematical Software; Numerical Analysis; Neural and Evolutionary Computing; Networking and Internet Architecture; Other Computer Science; Operating Systems; Performance; Programming Languages; Robotics; Symbolic Computation; Sound; Software Engineering; Social and Information Networks; Systems and Control 
+
+Economics 
+
+(3 Subdomains) Econometrics; General Economics; Theoretical Economics 
+
+Electrical Engineering 
+
+(4 Subdomains) 
+
+Audio and Speech Processing; Image and Video Processing; Signal Processing; Systems and Control 
+
+Mathematics 
+
+(32 Subdomains) 
+
+Commutative Algebra; Algebraic Geometry; Analysis of PDEs; Algebraic Topology; Classical Analysis and ODEs; Combinatorics; Category Theory; Complex Variables; Differential Geometry; Dynamical Systems; Functional Analysis; General Mathematics; General Topology; Group Theory; Geometric Topology; History and Overview; Information Theory; K-Theory and Homology; Logic; Metric Geometry; Mathematical Physics; Numerical Analysis; Number Theory; Operator Algebras; Optimization and Control; Probability; Quantum Algebra; Rings and Algebras; Representation Theory; Symplectic Geometry; Spectral Theory; Statistics Theory 
+
+Physics 
+
+(51 Subdomains) 
+
+Astrophysics (Cosmology and Nongalactic Astrophysics; Earth and Planetary Astrophysics; Astrophysics of Galaxies; High Energy Astrophysical Phenomena; Instrumentation and Methods for Astrophysics; Solar and Stellar Astrophysics); Condensed Matter (Disordered Systems and Neural Networks; Mesoscale and Nanoscale Physics; Materials Science; Other Condensed Matter; Quantum Gases; Soft Condensed Matter; Statistical Mechanics; Strongly Correlated Electrons; Superconductivity); General Relativity and Quantum Cosmology (General Relativity and Quantum Cosmology); High Energy Physics - Experiment; High Energy Physics -Lattice; High Energy Physics - Phenomenology; High Energy Physics - Theory; Mathematical Physics; Nonlinear Sciences; Nuclear Experiment; Nuclear Theory; Physics (Accelerator Physics; Atmospheric and Oceanic Physics; Applied Physics; Biological Physics; Chemical Physics; Classical Physics; Computational Physics; Data Analysis, Statistics and Probability; Physics Education; Fluid Dynamics; General Physics; Geophysics; History and Philosophy of Physics; Instrumentation and Detectors; Medical Physics; Optics; Plasma Physics; Popular Physics; Physics and Society; Space Physics); Quantum Physics 
+
+Quantitative Biology 
+
+(10 Subdomains) 
+
+Biomolecules; Cell Behavior; Genomics; Molecular Networks; Neurons and Cognition; Other Quantitative Biology; Populations and Evolution; Quantitative Methods; Subcellular Processes; Tissues and Organs 
+
+22 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Broad Domain Fine-Grained Subdomain Quantitative Finance 
+
+(9 Subdomains) 
+
+Computational Finance; Economics; General Finance; Mathematical Finance; Portfolio Management; Pricing of Securities; Risk Management; Statistical Finance; Trading and Market Microstructure 
+
+Statistics 
+
+(6 Subdomains) 
+
+Applications; Computation; Methodology; Machine Learning; Other Statistics; Statistics Theory 
+
+Biomedicine 
+
+(15 Subdomains) 
+
+General Pathology; Infectious Disease; Neurological Disease; Endocrine & Metabolic Disease; Psychiatry; Oncology; Cardiovascular System; Cell Biology; Genetics; Endocrinology; Immunology; Biochemistry; Metabolism; Histology; Virology   
+
+> Table 7. SFT Data Distribution. This table summarizes the data size, data type, data format, and domain categories of different downsampled datasets for SFT.
+
+Data Size Data Type Data Format Data Source Domain 
+
+Figure Table LaTeX XML General Review & Survey 
+
+Single-Format 
+
+20,000 16,743 3,258 20,000 0 10,000 10,000 824,210 11,778 12,432 0 24,210 22,860 1,350 142,804 33,485 9,319 42,804 0 20,000 11,350 8
+
+Multi-Format 
+
+31,350 26,245 5,105 20,000 11,350 21,901 20,903 967,014 45,263 21,751 42,804 11,350 44,761 22,253 9  
+
+> Table 8. RL Data Distribution. This table summarizes the data size, data type, data format, and domain categories of the downsampled datasests for agent-wise RL training.
+
+Agent Data Type Data Format Data Source Domain 
+
+Figure Table LaTeX XML General Review & Survey 
+
+Train Planner 7,870 2,584 7,632 2,822 5,829 4,625 9
+
+Expert 10,628 2,894 8,058 5,464 7,883 5,639 9
+
+Solver 18,737 6,444 16,331 8,850 16,868 8,313 9
+
+Critic 8,761 4,065 7,655 5,171 7,650 5,176 9
+
+Test Planner 1,168 416 1,000 584 1,000 584 9
+
+Expert 1,594 499 1,342 751 1,312 781 9
+
+Solver 1,992 749 1,773 968 1,838 903 9
+
+Critic 1,242 431 1,089 584 1,034 639 923 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+C.2.3. T ASK CURRICULUM 
+
+Employing Gemini-2.5-Flash (Google Developers Blog, 2025) for MLLM-assisted classification and conceptual criteria for 
+
+rule-based classification , we perform fine-grained task curriculum classification (Tab. 5) on ANA BENCH according to the data complexity and analysis complexity of each instance: • Data Type: Rule-based classification, based on the data type of the input data (§C.2.1). • Data Format: Rule-based classification, based on the data format of the input data(§C.2.1). • Data Source: Rule-based classification, based on the data source of the input data (§C.2.1). • Data Domain: Rule-based classification, based on the domain of the task (§C.2.1). • Analysis Objective: MLLM classification, according to the analysis objective of the task (§C.2.2). • Analysis Width: Rule-based classification, according to the references and citations included in the task (§C.2.2). • Analysis Depth: MLLM classification, according to the analysis level of the task (§C.2.2). 
+
+C.3. Benchmark Statistics  
+
+> Figure 16. Evaluation Set Data Distribution.
+
+Following the major challenges (Fig. 2) and failure errors (Fig. 8) identified through preliminary exploration (§A), we construct ANA BENCH across different data types, data for-mats, data sources, and data domains, thereby contributing to different data and analysis complexities (§C.2). Starting from 9 broad scientific domains, we systematically delve into each domain to compile scientific analysis sam-ples across 170 fine-grained subdomains (Tab. 6). Addition-ally, we define the task curriculum of ANA BENCH accord-ing to the seven complexity levels of each task (§C.2.3). Through quantitative analysis, we summarize the statistics of our benchmark in Fig.15. Our dataset construction fol-lows real-world distributions of data types, formats, and domains, preserving both natural data distribution imbal-ance and inherent complexity curriculum (Fig. 3 & §2). 
+
+C.4. Data Preprocessing   
+
+> Figure 17. Ablation Studies On A NAGENT Variants.
+
+For training and evaluation, we implement additional fil-tering and downsampling to ensure both data quality and computation efficiency. 
+
+Data Filtering. We add the first length filtering step to exclude samples with overly short ground-truth analysis to ensure the effectiveness of model learning, and then apply the second filtering step to filter out samples with overlong contexts or overlong analysis to preserve efficient training with affordable computational resources. 
+
+Data Downsampling. The large computation resources required by RL are intensified by the long-context inputs and long-analysis output. To this end, we further downsample a subset of the filtered dataset through random sampling with more narrowed thresholds. 
+
+Training Data. During the SFT stage, we leverage the filtered dataset with 31,350 samples. To explore the effects of data size, we extend our ablation studies to cover several variations of data sizes (Tab. 7). During RL optimization, 24 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+we further downsample a smaller subset tailored for each agent’s sub-goals (§3.4 & D.4). 
+
+Evaluation Data. Aiming for comprehensive evaluation, we randomly downsample the test set from ANA BENCH in a dimension-wise manner to cover all challenge dimensions (Fig. 2). As such, our test set (Fig. 16) consists of 7,319 test samples across different data types, formats, modalities, sources, and domains, with tasks in varying analysis depths, widths, and writing categories. To mitigate data contamination (§C), our evaluation set consists of instances derived exclusively from source papers published in 2025 (Fig. 11). We visualize the domain distribution of the evaluation dataset in Fig. 14. 
+
+# D. A NAGENT : Multi-Agent Collaborative Scientific Analysis 
+
+D.1. A NAGENT Variants 
+
+We summarize five variants of ANAGENT in Tab. 9, which differ in their agent components and tool availability. To investigate the contribution of these design choices to scientific analysis generation, we conduct additional ablation studies using the same evaluation dataset and metrics (§E). As shown in Fig. 17, agents’ performance exhibits a clear ordering: 
+
+ANAGENT consistently outperforms Symnion variants, which in turn outperform Omnion variants. In the training-free setting, 
+
+Omnion underperforms all baselines, indicating that equipping a standalone SOLVER with diverse tools is insufficient and can even overwhelm the agent, preventing effective interaction with task contexts and environments. Symnion alleviates this issue to some extent by introducing EXPERT to assist with tool invocation and contextual interaction. While this generally improves performance over baselines, results remain unstable and occasionally fall below baseline levels, suggesting that tool orchestration alone is not enough for robust scientific reasoning. In contrast, ANAGENT integrates PLANNER for high-level task decomposition, EXPERT for contextual and domain-specific information retrieval, SOLVER for context-aware problem solving, and CRITIC for reflection and refinement. This structured multi-agent design leads to consistently superior performance across all MLLM backbones, demonstrating the significance of explicit planning, contextual grounding, and context-aware problem-solving in complex scientific analysis. Comparing training-free and finetuned variants, all finetuned models achieve substantial gains over their training-free counterparts. Notably, even finetuned Omnion surpasses baseline methods, highlighting the critical role of targeted finetuning in enabling agents to effectively leverage tools and interact with scientific environments. Overall, these results underscore the complementary benefits of principled multi-agent architecture design and task-specific finetuning for reliable and high-performing scientific reasoning systems.              
+
+> Table 9. ANAGENT Variants. Overview of ANAGENT variants.
+> ANAGENT Variants Tools Agent Component PLANNER EXPERT SOLVER CRITIC
+> Baselines –
+
+# × × × × ×  
+
+> Omnion –
+
+# ✓ × × ✓ ×  
+
+> Symnion –
+
+# ✓ × ✓ ✓ ×  
+
+> ANAGENT –
+
+# ✓ ✓ ✓ ✓ × 
+
+> w/ C RITIC
+
+# ✓ ✓ ✓ ✓ ✓
+
+D.2. Multi-Agent Collaboration 
+
+Implementing collaborative scientific analysis, ANAGENT decomposes the end-to-end reasoning and writing process into four specialized agents with complementary roles (§3). As inspired by our preliminary exploration (§A.2), rather than relying on a single monolithic agent to simultaneously plan, retrieve, reason, and reflect, our design explicitly separates these responsibilities to reduce error propagation and encourage iterative refinement (§1). Accordingly, each agent is guided by a tailored prompt that defines its task, objective, and interaction protocol, enabling structured collaboration across different stages of scientific analysis (§3.1). Fig. 4 illustrates our proposed multi-agent scientific analysis workflow (with example data from (Guo et al., 2025)), as motivated by Fig. 1 (with example data from (Wang et al., 2025b)). 
+
+PLANNER is responsible for high-level task decomposition and strategic guidance. Given a scientific analysis task, 
+
+PLANNER identifies the core objectives, determines the required analytical depth and breadth, and outlines a step-by-step plan to guide downstream agents. By explicitly structuring the reasoning process before content generation, PLANNER 
+
+25 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+mitigates common failures such as incomplete coverage, misaligned objectives, and shallow analysis. The task prompt for 
+
+PLANNER is shown in Fig. 45. 
+
+EXPERT focuses on task-oriented exploration, retrieval, and domain-specific clarification. Under the guidance of 
+
+PLANNER , EXPERT gathers relevant contextual knowledge, resolves ambiguities in terminology or context, and provides structured evidence or references across diverse modalities, formats, and domains. This separation allows ANAGENT to better handle domain-specific nuances and reduces errors arising from insufficient or incorrect contextual understanding. The detailed task prompt for EXPERT is presented in Fig. 46. 
+
+SOLVER performs the core scientific analysis writing. Guided by the problem-solving plan generated by PLANNER and the supporting information provided by EXPERT , SOLVER synthesizes semantically coherent, logically structured, and scientifically grounded analysis. SOLVER ’s prompt (Fig. 47) emphasizes systematic integration of provided information and rigorous scientific reasoning, maintaining close alignment between retrieved knowledge and analysis objectives. 
+
+CRITIC conducts self-reflection and post-hoc verification of the generated analysis. By systematically reviewing the 
+
+SOLVER ’s solution, it identifies overlooked observations and findings, logical inconsistencies and reasoning flaws, groundless claims and hallucinated contents, as well as formatting errors and analysis inaccuracies, proposing targeted revisions for enhanced scientific analysis. By explicitly modeling critique and reflection as an explicit step, ANAGENT improves analytical reliability and scientific rigor. By applying the five-dimensional evaluation protocol (§A.2 & E.2), CRITIC ’s prompt defines both evaluation criteria and critique objectives for high-quality scientific analysis (Fig. 48). 
+
+D.3. Scientific Toolkits 
+
+In scientific research, human researchers rely on a diverse set of skills to observe, analyze, and reason over complex scientific materials. These skills include reading and comprehending scientific documents , retrieving targeted knowledge , searching for related literature and information , analyzing multimodal data with dissimilar structures and formats , and performing interactive or computational explorations . To develop AI agents into AI scientists, we take inspiration from human scientific research, equipping AI agents with five specialized toolkits (Tab. 13) to support scientific reasoning and analysis. 
+
+D.4. Modular Optimization 
+
+To enhance the scientific analysis performance of ANAGENT , we implement modular optimization, training each agent on its specialized task using GRPO (Shao et al., 2024). Concretely, by constructing four RL training datasets respectively designed for four agents’ specialized tasks, each agent 
+
+a ∈ { PLANNER , EXPERT , SOLVER , CRITIC } is optimized through a specialized reward function tailored to its own task objectives. As shown in Eq. 8, the reward for agent a is decomposed into weighted components with P 
+
+> m
+
+λa,m = 1 (§3.4). D.4.1. PLANNER OPTIMIZATION 
+
+PLANNER is optimized through selecting optimal problem-solving strategies from multiple candidate plans for each scientific analysis task We formulate this as a multi-choice preference selection task, where the agent is asked to identify the most effective decomposition strategy for the given analysis task. 
+
+Data. We construct the PLANNER ’s RL preference dataset by generating different versions of planning strategies for each scientific analysis instance using two models, where Qwen3-VL-8B acts as the baseline PLANNER and 
+
+Gemini-2.5-Flash as the reference PLANNER . For each input (x, s, q ), we collect multiple candidate plans from both models. We then filter the generated problem-solving plans by executing the complete ANAGENT workflow with each reference plan and retaining only those Gemini-2.5-Flash plans that can improve end-to-end performance over the 
+
+Qwen3-VL-8B baseline: 
+
+∀∆S ∈ { ∆SLEX (y∗, y ), ∆SSEM (y∗, y ), ∆SAVG (y∗, y )} (∆ S > 0) (9) As shown in Eq. 9, SLEX (y∗, y ) (Eq. 25), SSEM (y∗, y ) (Eq. 26), and SAVG (y∗, y )} are the final accuracy scores in our rule-based evaluation (§E.1). With Qwen3-VL-8B plans serving as baseline options, the performance-validated 26 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Gemini-2.5-Flash plans are designated as ground-truth preferred choices. This approach ensures PLANNER to learn to select problem-solving strategies that lead to measurably better scientific analysis quality. 
+
+Reward. Optimized to make strategic decisions from predefined option sets, PLANNER ’s reward function combines format compliance and answer accuracy: 
+
+RPLANNER = λPf · rPf (za) + λPacc · rPacc (za, z ∗
+
+> a
+
+) (10) where rPf (za) validates structural correctness, and rPacc (za, z ∗
+
+> a
+
+) measures answer accuracy. For multi-choice selections, accuracy is computed as: 
+
+rPacc (za, z ∗
+
+> a
+
+) = 
+
+(
+
+1 if O(za) = O(z∗
+
+> a
+
+)   
+
+> 2PORO
+> PO+RO
+
+otherwise (11) where O(·) extracts the set of selected options, PO = |O (za)∩O (z∗  
+
+> a)||O (za)|
+
+is precision, and RO = |O (za)∩O (z∗   
+
+> a)||O (z∗
+> a)|
+
+is recall. D.4.2. EXPERT OPTIMIZATION 
+
+As we observe notable inaccurate and hallucinated tool calls in domain-specific knowledge retrieval failures, EXPERT is optimized for task-oriented tool calling and execution through GRPO. Unlike general-purpose tool-use benchmarks, our optimization focuses on domain-specific information retrieval tools tailored to scientific analysis tasks (Tab. 13), with the specialized RL dataset built on downsampled scientific analysis instances (Tab. 8). 
+
+Data. We construct EXPERT ’s RL dataset by pairing each candidate tool with tool-specific queries and formats. Each training instance consists of tool prefix, current knowledge state Ki−1, and the ground-truth tool invocation z∗
+
+> expert
+
+. The dataset emphasizes correct tool selection, proper parameter formatting, and contextually appropriate query aligned with the specific analysis objectives. 
+
+Reward. EXPERT performs tool-based information retrieval. Its reward evaluates both format validity and tool execution correctness: 
+
+REXPERT = λEf · rEf (za) + λEacc · rEacc (za, z ∗
+
+> a
+
+) (12) where rEf (za) validates that the action za conforms to the expected tool specification query and format. The accuracy component rEacc verifies tool selection and parameter correctness through: 
+
+rEacc (za, z ∗
+
+> a
+
+) = I[T (za) = T (z∗
+
+> a
+
+)] · ρ(za, z ∗
+
+> a
+
+) (13) where T (·) extracts the tool type, I(·) is the indicator function, and ρ(za, z ∗
+
+> a
+
+) measures parameter correctness using tool-specific validation rules. D.4.3. S OLVER 
+
+SOLVER is optimized to generate high-quality scientific analysis. Its RL optimization objective, therefore, focuses on synthesizing retrieved knowledge with input data to produce coherent, accurate, and contextually appropriate analysis writing. 
+
+Data. SOLVER ’s RL dataset consists of instances (x, s, q, Kn, y ∗), where y∗ represents the ground-truth analysis. We use SciBERT (Beltagy et al., 2019) as the reward model to evaluate semantic quality, guiding SOLVER ’s scientific analysis generation with improved scientific accuracy, terminology usage, and writing style. SOLVER ’s reward function incorporates format compliance, length appropriateness (§G.5), and semantic similarity to guide SOLVER toward generating well-structured and high-quality analysis. 27 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Reward. As discussed above, SOLVER ’s reward combines format compliance, length appropriateness, and semantic quality (Eq. 14): 
+
+RSOLVER = λSf · rSf (za) + λSlen · rSlen (za, z ∗
+
+> a
+
+) + λSacc · rSacc (za, z ∗
+
+> a
+
+) (14) where rSlen (za, z ∗
+
+> a
+
+) penalizes outputs with overlong or overshort length relative to the ground truth (Eq. 15): 
+
+rSlen (za, z ∗
+
+> a
+
+) = I[0 .5|z∗
+
+> a
+
+| ≤ | za| ≤ 1.5|z∗
+
+> a
+
+|] (15) and rSacc (za, z ∗
+
+> a
+
+) computes semantic similarity using SciBERT token-level embeddings (Eq. 16): 
+
+rSacc (za, z ∗
+
+> a
+
+) = 2Pemb Remb 
+
+Pemb + Remb 
+
+(16) where Pemb and Remb are computed from the maximum token-level cosine similarities between SciBERT embeddings of za
+
+and z∗
+
+> a
+
+.D.4.4. CRITIC OPTIMIZATION 
+
+Similar to PLANNER , CRITIC is optimized through multi-choice solution preference selection, but focuses on assessing analysis quality and providing constructive feedback for analysis refinement. 
+
+Data. We follow the same data construction methodology as PLANNER (§D.4.1). Concretely, for each scientific analysis 
+
+yi generated by SOLVER , we collect critique feedback from both Qwen2-VL-8B (serving as baseline CRITIC ) and Gemini-2.5-Flash (serving as reference CRITIC ). Following PLANNER data filtering, we filter the feedback by evaluating whether applying the suggested revisions leads to improved analysis quality (Eq. 9). As such, only those Gemini-2.5-Flash critiques that can enhance SOLVER ’s analysis writing are retained as ground-truth preferred feedback options, while Qwen2-VL-8B critiques serve as baseline options. This helps CRITIC to learn to identify key quality deficiencies and provide actionable improvement suggestions across multiple evaluation dimensions (Fig. 48). 
+
+Reward. Similar to PLANNER , CRITIC ’s reward also consists of format compliance and answer accuracy (Eq. 17): 
+
+RCRITIC = λCf · rCf (za) + λCacc · rCacc (za, z ∗
+
+> a
+
+) (17) where rCf (za) validates evaluation formatting correctness, and rCacc (za, z ∗
+
+> a
+
+) measures answer accuracy. Same to PLANNER ,answer accuracy is computed as (Eq. 18): 
+
+rCacc (za, z ∗
+
+> a
+
+) = 
+
+(
+
+1 if O(za) = O(z∗
+
+> a
+
+)   
+
+> 2PORO
+> PO+RO
+
+otherwise (18) 
+
+# E. Scientific Analysis Evaluation 
+
+E.1. Rule-Based Evaluation 
+
+We design rule-based evaluation in both lexical and semantic dimensions. Lexical evaluation consists of R OUGE -L (Eq. 19) (Lin, 2004), B LEU (Eq. 20) (Papineni et al., 2002), and word overlap (Eq. 21) metrics. For semantic evaluation, we employ cosine similarity (Eq. 22), SciBERT (Eq. 23) (Beltagy et al., 2019), and M ETEOR (Eq. 24) (Banerjee & Lavie, 2005) metrics to calculate the semantic assessment scores. In addition to the lexical score SLEX (Eq. 25) and semantic score SSEM (Eq. 26) that are calculated as the mean of their three metrics, respectively. The overall score SAVG (Eq. 27) is averaged across all six metrics. Concretely, given the model-generated analysis y and ground-truth analysis y∗, the lexical and semantic evaluation scores are calculated as follows: 28 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+ROUGE -L measures the longest common subsequence (LCS) between y and y∗:ROUGE -L (y∗, y ) = LCS (y∗, y )max( |y∗|, |y|) (19) where LCS (y∗, y ) computes the length of the longest common subsequence, and | · | denotes sequence length. 
+
+BLEU calculates n-gram precision with a brevity penalty (BP): BLEU (y∗, y ) = BP · exp 
+
+> N
+
+X
+
+> n=1
+
+wn log pn
+
+!
+
+(20) where pn is the n-gram precision, wn is the weight for each n-gram (typically wn = 1 /N ), and BP is the brevity penalty to penalize short predictions. 
+
+Word Overlap measures the Jaccard similarity between word sets: WORD (y∗, y ) = |W (y∗) ∩ W (y)||W (y∗) ∪ W (y)| (21) where W (·) extracts the set of unique words from a text. 
+
+Cosine Similarity measures the angle between sentence embeddings: COSINE (y∗, y ) = e(y∗) · e(y)
+
+∥e(y∗)∥∥ e(y)∥ (22) where e(·) is a sentence embedding function that maps text to a dense vector representation. 
+
+SciBERT Score computes token-level semantic similarity using SciBERT embeddings: SciBERT (y∗, y ) = 2 · PSciBERT · RSciBERT 
+
+PSciBERT + RSciBERT 
+
+(23) where PSciBERT and RSciBERT are precision and recall computed from token-level cosine similarities between SciBERT embeddings of y∗ and y.
+
+METEOR evaluates based on unigram matching with synonym and paraphrase support: METEOR (y∗, y ) = Fmean · (1 − PEN ) (24) where Fmean is the harmonic mean of unigram precision and recall, and PEN is a fragmentation penalty based on chunk count. 
+
+Final Scores include the lexical score SLEX (Eq. 25) and semantic score SSEM (Eq. 26) that are computed as: 
+
+SLEX (y∗, y ) = ROUGE -L + BLEU + WORD 
+
+3 (25) 
+
+SSEM (y∗, y ) = COSINE + SciBERT + METEOR 
+
+3 (26) The overall evaluation score SAVG (Eq. 27) is the average across all six metrics: 
+
+SAVG (y∗, y ) = 16
+
+> 6
+
+X
+
+> i=1
+
+mi(y∗, y ) (27) where mi denotes each of the six individual metrics. 29 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+E.2. Five-Dimensional Evaluation Protocol 
+
+We apply our five-dimensional evaluation protocol to both MLLM-As-Judge and human expert assessment (§2.4 & A.2). Fig. 44 shows the evaluation prompt for assessing scientific analysis quality. Accordingly, we prompt and finetune CRITIC 
+
+for self- reflection and correction with the same five criteria (Fig. 48). 
+
+E.3. Performance Difference 
+
+To quantify the performance differences between two methods, we calculate absolute performance difference ( ∆abs %) and 
+
+relative performance difference ( ∆rel %) across metrics. 
+
+Absolute Performance Difference. The absolute performance difference ∆abs (Eq. 28) measures the direct performance gap between our method and the baseline: 
+
+∆abs = ( Sours − Sbaseline )% (28) where S denotes a metric score ( e.g. , SciBERT, BLEU, etc.), and the ∆abs result is expressed in percentage points. 
+
+Relative Performance Difference. The relative performance difference ∆rel (Eq. 29) measures the proportional improve-ment or degradation with respect to the baseline: 
+
+∆rel = Sours − Sbaseline 
+
+Sbaseline 
+
+× 100% (29) where S denotes a metric score, and the result represents the percentage change relative to the baseline performance. 
+
+# F. Implementation Details 
+
+To complement the implementation details presented in §4, we further summarize our experiment configurations and computation overhead in Tabs. 11-10. As can be seen in Tab. 10, RL demands significantly more computation resources for smaller MLLMs with model sizes of 3B–4B parameters. Therefore, we finetuned only Qwen2.5-VL-3B and Qwen3-VL-4B models for computation efficiency. Their performance (Tab. 2) further substantiates the effectiveness of combining supervised finetuning and reinforcement learning, delivering remarkable cumulative optimization benefits even for small-size MLLMs.                                
+
+> Table 10. Computation Overhead. This table summarizes the computation overhead during training and evaluation. nM LLM denotes the number of different backbone MLLMs.
+> nM LLM
+> 1234
+> Evaluation A100 80 GB ×1A100 80 GB ×2A100 80 GB ×4A100 80 GB ×4
+> SFT A100 80 GB ×1–––
+> RL A100 80 GB ×8–––
+
+30 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Table 11. Implementation Details. This table summarizes the key configuration settings during training and evaluation. Mp, Me, Ms,and Mc denote the maximum number of turns allowed for Planner, Expert, Solver, and Critic, respectively. The maximum depth of context searching tools is set to d = 1 across all settings. The maximum and minimum pixel values are denoted by max pixel and min pixel .The learning rate is represented by lr . nrollout denotes the number of rollouts during RL, and nepoch denotes the number of training epochs. 
+
+Agent Configuration PLANNER EXPERT SOLVER CRITIC (All Agents) 
+
+Mp Me Ms Mc d max pixel min pixel lr nrollout nepoch 
+
+Evaluation 1 5 2 1 1 1024 × 1024 128 × 128 – – –
+
+SFT 1 1 1 1 1 512 × 512 128 × 128 1 × 10 −4 – 1
+
+RL 1 1 1 1 1 512 × 512 128 × 128 1 × 10 −6 4 1
+
+Table 12. MLLM-As-Judge Evaluation. Evaluation of scientific table & figure analysis across baselines, training-free ANAGENT , and finetuned ANAGENT , through five-dimensional evaluation protocol (§E.2). Compared with baselines, relative performance differences 
+
+(Eq. 29) are shown as positive ↑ ∆rel % or negative ↓ ∆rel %.
+
+Model Size Five-Dimensional Evaluation (%) Overall Accuracy (%) 
+
+SACC SCOMPLETE SFORMAT SCLARITY SFAITH SMLLM 
+
+Baselines InternVL-3.5 4B 42.00 27.17 69.67 64.33 55.33 51.70 
+
+8B 52.67 30.50 71.67 68.50 60.83 56.83 
+
+Qwen2.5-VL 3B 43.17 24.88 64.50 64.83 56.00 50.68 
+
+7B 50.83 32.17 73.50 67.50 60.33 56.87 
+
+Qwen3-VL 4B 46.50 28.50 68.33 67.17 57.00 53.50 
+
+8B 52.83 31.17 74.17 69.50 61.17 57.77 ANAGENT (Training-Free) InternVL-3.5 4B 44.17 30.83 70.33 66.00 59.50 54.17 ↑4.78% 
+
+8B 55.67 35.17 71.83 71.67 65.50 59.97 ↑5.53% 
+
+Qwen2.5-VL 3B 47.67 25.13 67.83 66.17 56.50 52.66 ↑3.91% 
+
+7B 52.17 37.50 74.17 69.83 63.00 59.33 ↑4.33% 
+
+Qwen3-VL 4B 51.67 31.83 68.50 67.50 60.83 56.07 ↑4.80% 
+
+8B 54.17 39.50 77.50 72.83 64.50 61.70 ↑6.80% 
+
+ANAGENT (SFT) InternVL-3.5 4B 50.83 47.50 77.83 69.33 64.67 62.03 ↑19.98% 
+
+8B 56.33 52.33 79.00 75.17 72.17 67.00 ↑17.90% 
+
+Qwen2.5-VL 3B 50.33 48.33 76.50 71.17 65.67 62.40 ↑23.13% 
+
+7B 54.33 53.67 80.83 73.00 74.50 67.27 ↑18.29% 
+
+Qwen3-VL 4B 53.50 50.17 76.17 72.17 65.33 63.47 ↑18.64% 
+
+8B 57.17 54.83 83.83 74.67 73.83 68.87 ↑19.21% 
+
+ANAGENT (SFT + RL) Qwen2.5-VL 3B 54.00 55.17 78.83 72.17 67.33 65.50 ↑29.24% 
+
+Qwen3-VL 4B 56.50 57.17 79.33 73.33 68.50 66.97 ↑25.18% 
+
+31 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Figure 18. Length Distribution. Visualization of Data Length in ANA BENCH . (1) Left: Input data length. (2) Center: Core context length. (3) Right: Ground-truth analysis length. 
+
+Figure 19. Length Distribution of GPT-4.1-mini. Using GPT-4.1-mini as the base model, this figure visualizes the length distribution of 150 randomly sampled agent-generated analysis versus ground-truth analysis length. 
+
+32 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Figure 20. Length Distribution of Qwen3-VL-8B. Leveraging Qwen3-VL-8B, this figure visualizes the length distribution of 150 randomly sampled agent-generated analysis versus ground-truth analysis length. 
+
+33 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Table 13. Five Specialized Toolkits of A NAGENT . To enhance specialized scientific research capabilities, ANAGENT is equipped with five complementary toolkits that respectively support document comprehension, knowledge retrieval, targeted searching, multimodal understanding, and autonomous coding exploration. 
+
+Specialized Tools Supported Inputs & Formats Functions Document Toolkit Online Fetcher 
+
+URL (arXiv, Semantic Scholar, PubMed, general web), Source Type & Preferred Format (HTML, LaTeX, XML, PDF), DOI, Paper ID, Search Query Fetch and parse documents from online sources, including arXiv papers (LaTeX/PDF), Semantic Scholar (search/metadata), PubMed Central (XML), and general URLs (HTML/PDF/XML) 
+
+PDF Parser URL, Local Path, Bytes Parse PDF documents to extract text, metadata, hierarchical contents with optional image saving 
+
+XML Parser URL, Local Path, XML Strings, Bytes Parse XML documents and extract metadata, hierarchical contents with configurable detail levels 
+
+Knowledge Toolkit Abstract Collector Title, Author, Year, URL, DOI, arXiv ID, PMID, Local Path Search and extract paper abstracts from multiple academic sources (e.g., arXiv, PubMed, Semantic Scholar, CrossRef) 
+
+Information Localizer 
+
+Search String (e.g., keyword, phrase, caption, title, equation), URL, Local Path Localize and extract the complete section (broad meaning, e.g., section, subsection, figure, table, etc.) according to the input query 
+
+Context Finder Search String (e.g., keyword, phrase, caption, title, equation), URL, Local Path Localize a search string in a document and extract all bidirectional citation contexts with multi-level traversal support 
+
+Section Extractor Section Identifier (e.g., keywords, numbers), URL Extract the complete sections (broad meaning, e.g., section, subsection, figure, table, etc.) according to the input query 
+
+Search Toolkit arXiv Searcher 
+
+URL, Title, Keywords, Author, Category, Sort, Max Results, and Other arXiv Search Queries and Filters Search and retrieve arXiv preprint scientific literature across diverse domains 
+
+PebMed Searcher 
+
+URL, Title, Keywords, Author, Time Range, PMID, Sort, Time Range, Max Results, and Other PubMed Search Queries and Filters Search and retrieve biomedical scientific literature in PubMed 
+
+Semantic Scholar Searcher 
+
+URL, Title, Year, Field, Venue, Citations, Max Results, and Other Semantic Scholar Search Queries and Filters Search and retrieve scientific literature via Semantic Scholar API 
+
+Web Searcher 
+
+Search String, Keywords, Temporal Filters, Max Results, Date, Language, Search Level, and Other Web Search Queries and Filters Search and retrieve web information via Google Search API 
+
+Wikipedia Searcher 
+
+Search String, Title, Keywords, Search Mode, and Other Wikipedia Search Queries and Filters Search and retrieve Wikipedia concepts, terminologies, and articles with intelligent routing across five MediaWiki APIs 
+
+Vision Toolkit OCR Extractor Image Source, Language, Bounding Boxes, Threshold Enhance visual perception through OCR 
+
+Figure Parser Image Source, Query, Contexts Parse and extract visual information from scientific figures 
+
+Image Analyzer Image Source, Query, Focus, Detail Level, Contexts Analyze images with interactive query-driven exploration 
+
+Sandbox Toolkit Sandbox Explorer Python Code, Environment Dependencies Execute Python code in isolated Docker/Apptainer sandbox with package installation and task data access for autonomous tool development and task exploration 
+
+34 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+# G. A Deeper Dive Beneath the Results 
+
+G.1. MLLM-As-Judge Evaluation On Scientific Analysis 
+
+Leveraging GPT-4.1-mini (OpenAI, 2025) as the MLLM judger, we conduct MLLM-as-judge evaluation following the five-dimensional evaluation protocol (§E.2). Due to cost constraints (approximately ˜$45/100 instances), for each agent, we evaluate performance on a randomly sampled subset of 300 instances drawn from the complete evaluation set (§C.4). Results are summarized in Tab. 12. Across five evaluated dimensions and the averaged SMLLM , results demonstrate a monotonic improvement from baselines to training-free ANAGENT , with the finetuned version achieving the highest performance. Comparing between ANAGENT finetuned through SFT and the combination of SFT+RL, the latter ANAGENT consistently outperforms SFT-only counterparts, revealing the significance of specialized ability development in multi-agent systems. Moreover, while the absolute evaluation scores differ, our MLLM-as-judge assessment yields performance trends that are consistent with those observed under rule-based evaluation (Tabs. 1-2). ANAGENT that perform well on rule-based metrics also achieve higher rankings under MLLM-based judgment, supporting the use of rule-based evaluation and MLLM-as-judge for scientific analysis assessment. 
+
+G.2. Specialized RL as a Double-Edged Sword for Enhancing Scientific Table & Figure Analysis 
+
+Trained on tailored datasets (§3.4), agents benefit substantially from specialized RL optimization, achieving notable performance improvements (Tab. 2). In particular, RL finetuning yields consistent gains ( ∆AVG ≥ 10 .12% ), while combining SFT with RL further amplifies performance, achieving even larger gains ( ∆AVG ≥ 33 .10 ). Nevertheless, these gains come at a high computational cost. As shown in Tab. 10, specialized RL introduces substantially higher computation overhead as compared to SFT alone. When jointly considering performance optimization and computation efficiency, SFT demonstrates a more favorable trade-off for scientific table & figure analysis tasks that demand long-context understanding and long-output generation (§5.1). Overall, while RL is highly effective at optimizing specialized agents for specialized tasks, it functions as a double-edged sword: delivering stronger task-specific optimization at the expense of markedly increased computational cost, which may limit its practicality when finetuning larger models in resource-intensive scientific settings. 
+
+G.3. How Training Data Recipe Shapes Finetuning Outcomes? Benefits of Increased Data Size. Fig. 7 shows the performance of ANAGENT finetuned on different subsets of the training set (§C.4), revealing the benefits of finetuning with increased data sizes. While Fig. 7(a) isolates the effects of data size by comparing finetuning on a 30K-instance subset against the full dataset, Fig. 7(b)-(d) evaluate subsets constructed along different data types, domains, and formats, respectively. As shown in Fig. 7(a), finetuning on 30K instances leads to consistent performance degradation across all four MLLM agents as compared to training on the full set ( ∆rel ≥ ↓ 10 .27% ), demonstrating the clear benefits of increased data size. Results in Fig. 7(b)-(d) lend further evidence to this advantage on subsets with varying data sizes and compositions ( ∆rel ≥ ↓ 9.29% ). 
+
+Domain-Specific Learning Leads To Decreased Generalizability. Fig. 7(b) examines the impact of domain-specific finetuning on agent performance by comparing models trained exclusively on computer science (CS), biology, and a mixture of all nine domains. Across all four MLLM agents, training on the full set of nine domains consistently yields the strongest performance, while domain-specific training leads to notable degradation ( ∆rel ≥ ↓ 26 .55% ). In particular, agents finetuned solely on biology exhibit the lowest performance ( SAVG ≤ 29 .79% ), followed by those trained only on CS ( SAVG ≤ 31 .92% ). This trend reveals that restricting training data to a single domain substantially limits agents’ ability to generalize beyond domain-specific patterns. Moreover, the larger performance gap observed for biology-only ( 25 subdomains ) training compared to CS ( 40 subdomains ) indicates that narrower or more specialized domains impose stronger constraints on cross-domain transfer, further emphasizing the significance of domain diversity for robust general-purpose scientific reasoning. 
+
+Single-Format Learning Limits Cross-Format Adaptability. Fig. 7(c) assesses the effects of data format on agent performance by comparing models finetuned exclusively on LaTeX, exclusively on XML, and on both. Across all four MLLM agents, training on LaTeX ( SAVG ≥ 31 .98% ) consistently outperforms training on XML ( SAVG ≥ 26 .13% ), indicating that LaTeX-based supervision provides more effective signals for scientific reasoning. However, agents trained on either single format exhibit degraded performance compared to those trained on both ( ∆rel ≥ ↓ 8.85% ). These results suggest that restricting training to a single data format limits agents’ adaptability to heterogeneous input representations, while exposure 35 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+to multiple formats enhances robustness and cross-format generalization. 
+
+Single-Type Learning Limits Multi-Type Adaptability. Fig. 7(d) further analyzes the impact of data type by comparing agents finetuned exclusively on tables, exclusively on figures, and on both. Across all four MLLM agents, models trained only on tables ( SAVG ≥ 28 .29% ) consistently underperform those trained only on figures & tables ( SAVG ≥ 30 .57% ), revealing limited generalization from structured tabular inputs to multimodal reasoning. More importantly, agents trained on either single type exhibit substantial performance degradation relative to those trained on both tables and figures ( ∆rel ≥↓ 9.53% ), indicating a pronounced loss of adaptability when exposure is restricted to a single data type. These trends highlight that learning from a single data type constrains agents’ ability to handle heterogeneous layouts and modalities, while maintaining data heterogeneity in training is critical for enhanced scientific analysis performance. 
+
+G.4. Significance of Contextual Information & Domain Knowledge In Scientific Analysis 
+
+Contextual information and domain-specific knowledge play a critical role in scientific analysis, supporting both accurate observations and well-grounded inference. To examine the role of contextual information and domain knowledge in scientific analysis, we conduct a comparative evaluation across baselines and ANAGENT . Specifically, we consider baselines and training-free ANAGENT under two settings: (1) with gold contextual information and domain-specific knowledge included in the input, and (2) with them excluded from the input. All models are evaluated on the same evaluation split of ANA BENCH 
+
+(§C.4), ensuring evaluation consistency across experimental conditions. The provided contexts in setting (1) are gold contexts extracted from highly-relevant components of the source scientific papers of each instance, such as table and figure captions , sections , citations , etc ., that both refer to and are referred by the task input ( d = 1 ). These contexts represent the most relevant and effectively optimal information for the task, as simulating what human researchers naturally attend to during scientific analysis. They provide a highly informative signal that agents would otherwise search for and extract themselves, often at greater computational cost and with lower accuracy. Fig. 21 visualizes the quantitative results of this comparison and highlights consistent performance improvements when additional contextual information is provided. Across both baseline methods and ANAGENT , enriching the input with supplementary contexts and domain-specific knowledge yields marked gains, with relative improvements ∆rel ≥ 4.42% on scientific analysis tasks. These improvements are observed consistently across evaluation settings, indicating that the benefit is not model-specific but instead reflects a general reliance on contextual grounding for complex scientific reasoning. In particular, domain-specific context enables more accurate interpretation of technical concepts, experimental setups, and implicit assumptions, which are often under-specified in isolated inputs. The results empirically validate the significance of contextual and domain knowledge in complex scientific analysis.    
+
+> Figure 21. Ablation Studies On Additional Contexts & Domain Knowledge. Comparison between with (”w/” in the figure) and without gold contextual information and domain-specific knowledge .
+
+G.5. Can AI Agents Deliver What Is Asked? 
+
+In human–AI co-discovery , AI agents are expected to follow human-specified requirements, especially in terms of the depth ,
+
+breadth , and length of writing in our scientific analysis tasks. This raises a central question: Can AI agents reliably meet 
+
+36 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+stated expectations? 
+
+Motivated by this question, we conduct an ablation study examining the effects of requirement prompting using three types of explicit statements: analysis length , analysis width , and analysis depth . Particularly, each prompt specifies the expected 
+
+writing length , contextual breadth , or analytical depth of the scientific analysis writing. Relative to the baseline setting in which no requirements are specified, we evaluate agent performance under five conditions: (1) no requirement, (2) length requirement, (3) width requirement, (4) depth requirement, and (5) all three requirements combined. To maintain valid comparisons, we leverage samples with medium analysis width and in-depth analysis depth as the test set (Fig. 15 & §C.3), while remaining the heterogeneity of the dataset with varying data and analysis complexties (§C.2.1 & §C.2.2).   
+
+> Figure 22. When AI Scientists Meet Stated Analysis Expectations. Our experiments investigate AI agents’ capabilities in properly comprehending and implementing scientific analysis with explicit expectations.
+
+Comparing between baselines and ANAGENT (Fig. 9), results in Fig. 22 demonstrate consistent effects of explicit analysis requirements on MLLM agents’ performance. As indicated by the red bars, imposing writing constraints on analysis length leads to a noticeable performance degradation, suggesting current AI agents’ lack of sufficient awareness of how to effectively organize and prioritize their reasoning under stated space limitations. In contrast, explicitly specifying requirements on analysis width or depth significantly improves performance, as such guidance helps agents better understand the expected analytical scope and level of detail for each task. Notably, combining analysis length, width, and depth together yields the largest performance gains. This indicates a strong complementary effect among these dimensions, highlighting the importance of holistic analysis constraints in enhancing AI agents’ reasoning capabilities and informing the design of future AI research assistants and human-AI co-discovery systems. To further investigate AI agents’ awareness of generation length and the implications of explicitly stated length expectations, 37 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+we extend our study to compare the lengths of agent-generated analyses with those of ground-truth analyses. Fig. 19 presents the distribution of analysis lengths for three settings using agents powered by GPT-4.1-mini: (1) Baseline agent 
+
+without explicit analysis length requirement, (2) Baseline agent with explicit analysis length requirement, and (3) ANAGENT 
+
+with explicit analysis length requirement. As shown in Fig. 19, the baseline agent without analysis length expectations consistently generates short analyses, in stark contrast to the substantial variability observed in ground-truth analyses colored in gray. On the other hand, explicitly instructing the agent to generate analyses around the specified length not only increases the overall length of the generated outputs but also substantially enriches the variance in analysis length. ANAGENT 
+
+with length expectations exhibit variation more consistent with the ground-truth analyses. Building upon the observations from GPT-4.1-mini (Fig. 19), we employ Qwen3-VL-8B to power agents under four settings: (1) Baseline agent without 
+
+explicit analysis length requirement; (2) Baseline agent with explicit analysis length requirement; (3) ANAGENT with 
+
+explicit analysis length requirement; and (4) ANAGENT , powered by finetuned Qwen3-VL-8B, with explicit analysis length requirement. The upper three groups in Fig. 20 exhibit patterns similar to those observed with GPT-4.1-mini: The baseline agent without explicit length constraints consistently produces short analyses, whereas introducing length requirements increases both the average length and the variance of the generated analyses. On the contrary, ANAGENT finetuned through the combination of SFT+RL shows markedly higher variance in analysis length, accompanied by notably improved performance (Tab. 2). Collectively, Figs. 19-20 unveil that current AI agents fail to reliably interpret explicitly stated analysis lengths, which function not only as generation constraints but also as implicit signals of the expected analytical coverage scope.   
+
+> Figure 23. Ablation Study on Data Type. Evaluation of agent performance across different data types (§C.2.1).
+
+G.6. Scientific Analysis Across Data Complexities 
+
+The complexity of each scientific analysis task is fundamentally shaped by the nature of the input data itself. Across real-world scientific writing, analyses are conducted over heterogeneous data that vary in type , source , format , and domain 
+
+(§C.2.1 & Fig. 15), each of which introduces distinct interpretive and integration challenges. For example, tables and figures 38 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+differ substantially in how information is structured and accessed, while variations in data domains shape what contextual information and domain-specific knowledge are needed for accurate reasoning and analysis. These variations give rise to different levels of data complexity that directly affect MLLM agents’ abilities to search, perceive, extract, and comprehend the related evidence. To systematically examine these challenges across varying data complexities, we evaluate scientific analysis with different data types , sources , formats , and domains . Beyond contrasting individual data types, we further extend our investigation to how models handle varying input scales , where evidence is distributed across multiple tables, multiple figures, or multimodal combinations of different data types. Results reveal how multiple facets of data complexity influence scientific table & figure analysis, suggesting potential directions for future improvement.   
+
+> Figure 24. Ablation Study on Data Format. Evaluation of agent performance across different data formats (§C.2.1).
+
+Tabular Structures Are More Challenging Than Multimodal Figure Reasoning. Although figures require multimodal reasoning, tables pose distinct and often greater challenges due to the need to accurately parse and reason over complex tabular structures. As shown in Fig. 23, both the baselines and ANAGENT consistently achieve higher performance on scientific figures than on tables, with absolute improvements of ∆abs ≥ 2.40% for baselines, ∆abs ≥ 1.47% for ANAGENT ,
+
+∆abs ≥ 4.83% for finetuned ANAGENT . Augmented with task-oriented EXPERT , ANAGENT narrows the performance gap to 1.47% . Nonetheless, the heterogeneous layouts and diverse semantic intents of scientific tables ( e.g. , reporting empirical results versus comparing methods) continue to present substantial challenges for reliable scientific analysis. 
+
+LaTeX Is Easier to Understand Than XML. We observe a clear and consistent performance advantage when scientific contents are represented in LaTeX rather than XML . As shown in Fig. 24, all baselines as well as ANAGENT achieve higher accuracy on LaTeX data ( SAVG ≥ 27 .15 ) as compared to XML ( SAVG ≥ 23 .44 ), indicating that XML introduces additional challenges for MLLM-powered agents. Across both data formats, performance improves monotonically from baselines to ANAGENT and further to the finetuned ANAGENT , demonstrating the robustness of our approach regardless of representation. Nevertheless, the overall performance gap between LaTeX and XML persists ( ∆abs ≥ 1.07 ), suggesting that 
+
+XML ’s verbose and nested structure hinders effective reasoning. A possible reason is that LaTeX is the dominant format 39 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+for scientific writing and is therefore more prevalent in model pretraining corpora, leading to stronger prior familiarity. In contrast, XML often emphasizes structural markup over semantic clarity, requiring agents to interpret scientific meaning from less explicit cues and references, which further exacerbates the difficulty. 
+
+Review and Survey Papers Are More Challenging Than General Scientific Literature. We observe that both baselines and ANAGENT consistently achieve higher performance on general scientific paper analysis tasks than on review and survey papers. As illustrated in Fig. 25, the absolute performance gap between these two data sources remains substantial across all models ( ∆abs ≥ 3.51% ), reaching up to 8.07% on the InternVL3.5-8B baseline. Despite this difficulty, performance improves monotonically from baselines to ANAGENT and further to the finetuned ANAGENT on both paper sources, indicating the effectiveness of our method across varying document sources and types. Notably, in most cases, ANAGENT 
+
+and finetuned ANAGENT can narrow the gap between general papers and review/survey papers, indicating the effectiveness of specialized tools for information searching and retrieval. Through manual checking, we also observe that scientific analysis sections in review and survey papers are significantly less likely to be self-contained as compared with general papers. This supports our potential thinking that attributes the increased difficulty of review and survey papers to their heavy reliance on extensive internal and external references, cross-paper comparisons, and high-level synthesis, which makes their scientific analysis less self-contained than that of general research articles.   
+
+> Figure 25. Ablation Study on Data Source. Evaluation of agent performance across different data sources (§C.2.1).
+
+Enhancing Scientific Analysis Across Domains. We observe inconsistent variability in scientific analysis performance across domains. As shown in Fig. 26, baselines exhibit pronounced domain variability in scientific analysis performance. In particular, the lowest baseline performance is observed on Statistics domain ( SAVG = 17 .08% ), followed by Economics 
+
+(SAVG = 20 .28% ) and Quantitative Finance (SAVG = 21 .87% ). In contrast, the highest baseline performance is achieved on 
+
+Quantitative Biology (SAVG = 33 .96% ). This disparity reveals that baseline agents struggle to generalize scientific reasoning capabilities across domains with varying levels of mathematical abstraction, formalism, and domain-specific assumptions. In contrast, both ANAGENT and finetuned ANAGENT consistently improve performance across all domains ( ∆rel ≥ 4.06% ), effectively elevating even the most challenging Statistics domain from the lowest baseline performance to SAVG = 36 .84% 
+
+under finetuned ANAGENT . Moreover, when comparing the performance distribution across domains, baseline agents show pronounced inter-domain performance gaps, while ANAGENT significantly reduces such variation, and finetuned ANAGENT 
+
+further presents an even more uniform performance distribution across domains. This trend reveals the effectiveness of 40 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+ANAGENT in mitigating domain-specific reasoning bottlenecks, leading to more robust and consistent scientific analysis across diverse research areas.   
+
+> Figure 26. Ablation Study on Data Domain. Evaluation of agent performance across nine broad domains (§C.2.1).
+
+Scaling Inputs Furnishes Additional Contexts While Simplifying Data Complexity. In addition to the width, depth, and objectives of an analysis task, the nature of the input data plays a fundamental role in determining the complexity of scientific analysis. Input data may take the form of a single table or figure, multiple tables or figures, or a combination of both. To this end, we conduct an additional study examining input coverage across inputs that vary in layout, modality, and quantity. As shown in Fig. 27, expanding input coverage generally leads to more reliable and higher-quality analyses, with our method consistently outperforming baseline counterparts across all settings. This trend suggests that broader data coverage provides complementary contextual cues and domain knowledge that help agents better interpret experimental evidence and articulate scientific insights. Notably, agents tend to benefit from multi-input settings over single-input ones (i.e., darker bars higher than lighter bars in most cases), indicating that aggregating information across multiple sources often facilitates reasoning by grounding analysis in richer contextual support. The benefits of increased coverage are particularly pronounced for multimodal inputs. MLLM-powered agents exhibit stronger reasoning abilities when figures are present, either alone or in combination with tables, as compared to tabular-only layouts. In some cases ( e.g. , Qwen2.5-VL baselines), single-figure inputs can yield performance comparable to, or even exceeding, that of other input coverage settings, underscoring the advantages of visual representations for improved scientific reasoning. While scaling inputs typically enhances performance, these gains are not unbounded. Agents with limited capacity may struggle to effectively integrate excessive information, resulting in diminished returns ( e.g. , Qwen3-VL-4B gains higher performance on S-T&S-F over 
+
+M-T&M-F ). Overall, evaluation results across six input coverage settings highlight a nuanced trade-off in input scaling, where richer coverage can reduce effective data complexity and improve analysis, as long as it aligns with the agent’s reasoning capacity. 41 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Figure 27. Ablation Study on Input Coverage. Evaluation of agent performance across six different input coverage settings. S-T 
+
+represents single-table input, S-F represents single-figure input, M-T represents multi-table input, and M-F represents multi-figure input. 
+
+42 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+G.7. Scientific Analysis Across Analysis Complexities   
+
+> Figure 28. Ablation Study on Analysis Width. Evaluation of agent performance across four analysis width curriculum (§C.2.2).
+
+Variations in analysis depths , widths , and objectives contribute to tiered curriculum complexities (§C.2.2 & Fig. 15) that reflect the level of detail, breadth of coverage, and overall focus in real-world scientific analysis. With varying writing widths, scientific analysis may either focus narrowly on the individual table or figure , such as summarizing and interpreting it in isolation to draw specific findings; or adopt a broader perspective , comparing across multiple tables and figures to identify patterns and synthesize insights. The combination of analysis width and depth further accounts for how much of an analysis section is devoted to the targeted input. Some analyses may dedicate only a small portion to a specific table or figure, while others may use it as the central basis for extensive discussion and conclusions. Moreover, targeting methodology interpretation or experimental demonstration, analysis objectives fundamentally shape how an analysis is formulated. By evaluating the challenges introduced by varying analysis widths, depths, and objectives, results reveal their impact on scientific table & figure analysis across different agents. 
+
+The Core Challenge Of Analysis Width Comes From External References. As suggested by the challenges (Fig. 2) and the curriculum of (d) Analysis Width (Fig. 15), we implement the four-level complexity curriculum for analysis width, including: easy tasks for self-contained analysis writing, moderate tasks with internal references within the source paper, 
+
+hard tasks with external references aside from the source paper, and challenging tasks that contain both internal and external references. Results in Fig. 28 reveal how increasing analysis width affects scientific table and figure analysis writing. Specifically, across all complexity levels, ANAGENT variants consistently outperform baselines, with further improvements observed after finetuning, unveiling the effectiveness of our multi-agent collaboration design. The reduced variations among four analysis width curricula further demonstrate the robustness of collaborative analysis writing under varying context widths. Notably, task difficulty does not monotonically increase with the curriculum level. For baselines, the highest performance is consistently achieved on self-contained tasks and degrades substantially when external references are involved, reflecting agents’ limited capabilities to adaptively comprehend and incorporate additional contextual knowledge. In contrast, for both ANAGENT and its finetuned variant, moderate tasks achieve the strongest performance, suggesting that internal references, such as paper-specific definitions, methodologies, experiments, domain concepts, etc., provide the most effective contextual grounding for scientific analysis writing. Performance declines markedly on hard and challenging 
+
+tasks that involve external references, underscoring external knowledge integration as the primary bottleneck in scientific analysis. Interestingly, in some cases, agents exhibit lower performance on hard tasks than on challenging ones, despite the latter containing the broader combination of both internal and external references. This observation reveals that current MLLM-powered agents struggle to selectively identify, interpret, and adapt externally referenced knowledge that is closely 43 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+connected to the internal context, whereas the presence of internal references in challenging tasks may partially anchor the use of external information. Overall, these results highlight the critical role of highly relevant internal context in supporting scientific analysis, as it supplies essential concepts, core methodologies, and domain-specific cues that facilitate coherent reasoning. Conversely, self-contained tasks place greater emphasis on precise interpretation of the input tables and figures themselves, while external-reference-heavy tasks pose the greatest challenge due to the need for adaptive comprehension and task-specific integration of externally sourced knowledge.       
+
+> Figure 29. Ablation Study on Analysis Depth. Evaluation of agent performance across two analysis depth: shallow analysis and in-depth analysis (§C.2.2).
+
+Increased Analysis Depth Leads to More Challenging Tasks. Following the curriculum design of (c) Analysis Depth 
+
+in Fig. 15, we instantiate two levels of analysis depth as illustrated in Fig. 2: (1) shallow analysis tasks, which primarily involve surface-level description and direct interpretation of tables and figures, and (2) in-depth analysis tasks that require reasoning beyond evidence, causal and logical interpretation, as well as synthesis of underlying conclusions or experimental implications. Ablation results are presented in Fig. 29. Across all evaluated methods, performance on in-depth analysis tasks is consistently lower than that on shallow tasks, confirming that increased analysis depth introduces substantially greater difficulty. This performance gap suggests that deep scientific reasoning, such as drawing non-trivial inferences, explaining observed trends, or connecting empirical results to broader methodological or theoretical considerations, remains challenging for current MLLM agents. Despite this increased difficulty, our approach demonstrates consistent improvements over baselines at both depth levels, with additional gains obtained through finetuning. Importantly, the performance gap between shallow and in-depth analysis is noticeably reduced for ANAGENT (∆abs ≤ 4.25% ) and its finetuned variant (∆abs ≤ 0.86% ) as compared to baselines ( ∆abs ≤ 5.41% ). This reduction indicates that collaborative analysis writing is effective at supporting not only shallow but also deeper reasoning, enabling agents to better decompose complex analytical requirements and progressively refine interpretations. Overall, these results suggest that, while increased analysis depth substantially raises task difficulty, structured multi-agent collaboration provides a meaningful means of handling deeper scientific reasoning and analysis. 44 ANAGENT For Enhancing Scientific Table & Figure Analysis      
+
+> Figure 30. Ablation Study on Analysis Objective. Evaluation of agent performance across two analysis objectives: methodology-oriented
+> analysis and experiment-oriented analysis (§C.2.2).
+
+Methodology-Oriented Analysis Is More Challenging Than Experiment-Oriented Analysis. Scientific analysis tasks are typically driven by different analytical objectives. Accordingly, we categorize scientific analysis into two categories according to the analysis objective of the task: (1) methodology-oriented analysis, which aims to explain, interpret, and reason about methodological designs, theoretical formulations, algorithmic principles, and so on; and (2) experiment-oriented analysis, which focuses on analyzing empirical results, experimental settings, and observed trends presented in tables or figures. As shown in Fig. 30, the experimental results demonstrate a clear and consistent performance gap between these two analysis objectives across all evaluated agents. The phenomenon where agents in general perform worse on methodology-oriented analysis than on experiment-oriented analysis ( ∆ABS ≥↓ 1.95% ) indicates that accurately understanding and explaining methodological concepts and theoretical objectives is essentially more challenging than analyzing empirical evidence. This gap is observed consistently across different agent variants, suggesting a general limitation of current MLLM agents in methodology-level reasoning. Despite this challenge, our approach improves performance on both methodology-oriented and experiment-oriented analysis tasks, with further gains achieved through finetuning. More importantly, comparing to baselines ( ∆ABS ≥ 4.91% ), the performance gap between the two analysis objectives is notably reduced for ANAGENT (∆ABS ≤ 3.60% ) and finetuned ANAGENT (∆ABS ≤ 3.29% ). This observation suggests that the extended task-specific context and domain-specific knowledge collectively enable agents to better understand fundamental methods, clarify analytical objectives, and perform more coherent and objective-driven scientific analysis. Overall, these results indicate that, while methodology-oriented analysis remains inherently more difficult than experiment-oriented analysis, providing richer contextual grounding and structured collaborative reasoning can enhance agents’ abilities in reasoning about both methodological contents and experimental evidence. The narrowed performance gap further underscores the significance of objective-aware contextual support for advancing scientific analysis capabilities beyond empirical result interpretation. 
+
+G.8. Human Expert Evaluation of Domain Analysis 
+
+To more comprehensively assess the quality of scientific analysis writing, we incorporate an additional evaluation conducted by domain experts. Specifically, human evaluators with expertise in computer science manually assess 100 agent-generated 45 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Figure 31. Domain Evaluation. Assessing 100 samples manually for each model on each domain, we compare the evaluation results between baseline and ANAGENT using the same base model (Qwen3-VL-8B). 
+
+analyses in their respective domains. Each analysis is generated based on explicit human requirements (§22) and evaluated through the same five-dimensional evaluation protocol (§E.2). Results in Fig. 31 show human assessment on two models in 
+
+computer science domain (Tab. 6). The notable increase of ”Good” analysis demonstrates significant performance gain achieved by ANAGENT . Meanwhile, the decrease of five-dimensional errors further reveal the effective improvements on scientific analysis writing through systematic planning, reasoning, problem-solving, and reflective refinement (§3). 
+
+Figure 32. ANAGENT Tool Utilization. Investigation on tool utilization of training-free ANAGENT and finetuned ANAGENT .
+
+46 ANAGENT For Enhancing Scientific Table & Figure Analysis    
+
+> Figure 33. ANAGENT Tool Utilization Strategy Optimization Through Finetuning. Optimization of tool utilization strategy through finetuning.
+
+G.9. Tool Utilization 
+
+Equipped with five toolkits comprising sixteen tools in total (Tab. 13), ANAGENT extends its contextual awareness and domain expertise through autonomous tool invocation. However, effective tool utilization requires accurate alignment between tool functionalities and task-specific execution objectives. Without such ability, agents exhibit substantially degraded performance due to non-strategic or failed tool calls (Fig. 32). Fig. 32 presents a comparative analysis between finetuned ANAGENT (lighter colors) and training-free ANAGENT (darker colors) across four backbone MLLMs. Overall, finetuned ANAGENT demonstrates a pronounced increase in the usage frequency of critical information-retrieval tools from the search toolkit , such as abstract collector (∆rel ≥ ↑ 12 .31% ), 
+
+information localizer (∆rel ≥ ↑ 61 .27% ), etc. This trend suggests that finetuning enables the model to more reliably identify when additional knowledge acquisition is necessary and to select appropriate tools accordingly. Beyond increased tool engagement, finetuned ANAGENT consistently achieves a markedly higher tool invocation success rate, accompanied by a substantial reduction in failed or invalid tool calls. These observations reveal that finetuning not only improves ANAGENT ’s awareness of which tools to use, but also enhances ANAGENT ’s ability to correctly format and execute tool calls, thereby reducing execution-level errors and facilitating analysis generation. More importantly, finetuned ANAGENT exhibits clearly more strategic and task-aware tool utilization. As illustrated by Fig. 33, in figure-centric scientific analysis tasks, finetuned 
+
+ANAGENT invokes tools from the vision toolkit ∆rel ≥ ↑ 16 .39% more frequently than its training-free counterpart. This behavior reflects a stronger alignment between task objectives and tool selection, highlighting the effectiveness of finetuning in fostering objective-oriented reasoning and adaptive tool-use policies. Taken together, these findings demonstrate that finetuning effectively enhances both the reliability and strategic capacity of tool utilization. The improved tool-call success rate and task-aware tool selection jointly contribute to the superior scientific analysis performance of ANAGENT , meanwhile underscoring the critical role of objective-driven tool orchestration in multimodal agent systems. 47 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+# H. Example: A NAGENT For Scientific Table & Figure Scientific Analysis 
+
+Here is an end-to-end scientific analysis writing example of ANAGENT :
+
+48 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+49 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Figure 34. Example of A NAGENT Scientific Analysis Writing. This example ( SAVG = 72 .41% ) shows a complete end-to-end scientific analysis process of ANAGENT , illustrating the full scientific analysis writing workflow from task planning, searching and executing, context-aware problem-solving, to iterative reflection and refinement. Input query and agent prompts are provided in §D.2 and omitted here for clarity. 
+
+50 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+# I. Failure Analysis    
+
+> Figure 35. Examination On Error Distribution. Comparison of the seven key error patterns (Fig. 8) between baseline and ANAGENT
+> on the same set. Similar to Fig. 8, the Y axis represents “Error Rate (%)” from low to high.
+
+Following our preliminary exploration that reveals seven key error patterns in scientific table and figure analysis (Fig. 8), we extend the evaluation to ANAGENT , powered by the same backbone model Qwen3-VL-8B and tested on the identical 120-sample subset. Figure 35 compares and visualizes the distributions of the seven error patterns between baseline and 
+
+ANAGENT . As can be seen from Fig. 35, ANAGENT consistently reduces error rates across all seven categories ( ∆rel ≥↓ 3.28% ), demonstrating the effectiveness of integrating high-level planning with low-level knowledge acquisition and problem-solving through multi-agent collaboration for enhancing scientific table and figure analysis. Building on these seven error patterns (Figs. 8-35), we conduct a systematic failure analysis and identify seven representative failure types corresponding to each error category, aiming to provide meaningful insights to inform future research. 
+
+I.1. Multi- Modality & Layout Perception Error 
+
+Perception errors are a major obstacle to accurate multimodal reasoning in MLLMs (Wang et al., 2025b). Although perception errors are notably decreased ( ∆rel =↓ 11 .94% ) by ANAGENT , there are still cases where ANAGENT ’s scientific analysis receives low evaluation scores as a result of perception errors. Fig. 36 shows an example of a scientific analysis failure case ( SAVG = 25 .64% ) with multi- modality & layout error .
+
+I.2. Hallucination Error 
+
+Hallucination remains a known challenge in MLLMs and poses a significant source of errors for scientific table & figure analysis that requires faithful and reliable scientific generation. Although hallucination errors are remarkably reduced (∆rel =↓ 32 .65% ) by ANAGENT , there are still cases where ANAGENT ’s scientific analysis writing receives low evaluation scores due to hallucination errors. Fig. 37 shows an example of a scientific analysis failure case ( SAVG = 21 .85% ) with 
+
+hallucination error .
+
+I.3. Domain-Specific Error 
+
+Considering the domain-specific nature of scientific literature, acquiring accurate understanding of domain-specific tables and figures remains a significant challenge for MLLMs. While ANAGENT markedly reduces domain-specific errors (∆rel =↓ 27 .03% ), there are still cases where ANAGENT ’s scientific analysis writing receives low evaluation scores due to limited domain knowledge or misunderstandings of domain-specific contents. Fig. 38 shows an example of a scientific analysis failure case ( SAVG = 11 .28% ) with domain-specific error .51 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+I.4. Long-Context Understanding Error 
+
+Scientific literature usually involves long-horizon contexts and cross-document references, posing significant challenges for MLLMs to effectively process, reason, and comprehend. While ANAGENT is able to reduce errors stemming from long-context understanding ( ∆rel =↓ 3.28% ), it remains a high error rate (Fig. 35) for ANAGENT . For example, Fig. 39 shows a scientific analysis failure case ( SAVG = 24 .43% ) as a result of long-context understanding error .
+
+I.5. Analysis Width Error 
+
+Scientific literature contains heterogeneous elements, such as tables, figures, sections, citations, etc., that introduce varying scopes of information coverage. Although ANAGENT reduces errors stemming from analysis width ( ∆rel =↓ 13 .79% ), it still exhibits a relatively high error rate (Fig. 35). One representative failure case is shown in Fig. 40, where ANAGENT 
+
+achieves a low scientific analysis score ( SAVG = 25 .96% ) due to analysis width errors .
+
+I.6. Analysis Depth Error 
+
+The roles and implications of tables and figures in scientific literature impose varying demands on the depth of analysis. Some only require shallow summarization directly derived from tabular or visual content, while others demand deeper reasoning, such as interpreting trends, drawing comparisons, or inferring conclusions supported by the presented evidence. Although ANAGENT reduces errors stemming from analysis depth ( ∆rel =↓ 9.78% ), it still exhibits a relatively high error rate (Fig. 35). One representative failure case is shown in Fig. 41, where ANAGENT attains a low scientific analysis score (SAVG = 31 .24% ) due to analysis depth errors .
+
+I.7. Analysis Objective Error 
+
+Tables and figures in scientific literature serve diverse analytical objectives. Some are designed to illustrate methodological designs, some to highlight benchmark innovations, and some to present empirical evidence in support of hypothetical claims, among a variety of scientific analysis objectives. Although ANAGENT reduces errors related to analysis objectives (∆rel =↓ 9.78% ), correctly identifying and fulfilling these objectives remains challenging for MLLM agents (Fig. 35). A representative failure case is shown in Fig. 42, where ANAGENT achieves a low scientific analysis score ( SAVG = 31 .45% )due to analysis objective errors .
+
+I.8. Other Errors Due To MLLM Backbone’s Ability Constraints 
+
+The heterogeneity of multimodal content and the requirement for long-context understanding pose significant challenges for MLL agents. These challenges give rise to fundamental errors that profoundly impair scientific analysis, while stemming from the inherent ability constraints of the backbone MLLMs. Fig. I.8 illustrates two representative types of failures observed across different MLLMs: (a) repetitive content in ANAGENT ’s output, and (b) incorrectly generated intermediate solutions by upstream agents prior to the scientific analysis writing performed by SOLVER . These phenomena reveal the significance of backbone MLLM’s capacity in multi-agent systems for effective global context modeling, logical consistency, and accurate information consolidation. 
+
+# J. Limitations 
+
+By proposing ANA BENCH , we introduce the task of scientific table & figure analysis, which is one of the core stages for scientific research. While ANAGENT demonstrates promising capabilities in scientific table & figure analysis, we acknowledge several limitations that we aim to address in our future work: 
+
+Computational Overhead. The multi-agent architecture with iterative execution and refinement introduces additional computational overhead as compared to single-pass generation. In practice, increasing the maximum number of iterations allowed for ANAGENT may consume more computational resources. To mitigate this, we implement engine pre-checking during the initialization of ANAGENT to avoid redundant MLLM engine initialization, and we plan to further optimize GPU utilization efficiency in future work. 
+
+Domain Coverage. Although ANAGENT spans nine scientific domains across 170 fine-grained disciplines, it primarily focuses on arXiv and PubMed publications. The generalization of ANAGENT to emerging scientific domains, non-English literature, and alternative dissertation platforms remains to be validated. 52 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Tool Dependency. The effectiveness of ANAGENT is closely tied to the quality and reliability of provided scientific toolkits. Unsuccessful tool calls, as restrained by backbone MLLM reasoning capabilities or truncated tool execution outputs due to MLLM context window limits, can directly impact analysis quality. These challenges motivates us to explore tool utilization and optimization in our future work. 
+
+Evaluation Challenges. While we employ multi-faceted evaluation including rule-based metrics, MLLM-as-Judge, and human expert assessment, the cost of MLLM-as-Judge and human expert assessment can be very large that substantially limits evaluation efficiency. We aim to investigate systematic evaluation with low costs in future research. Despite these limitations, we believe ANA BENCH and ANAGENT represents a meaningful step toward more capable and reliable AI systems for scientific research, and we hope our work will inspire future investigations into scientific reasoning and analysis.      
+
+> Figure 36. Example of Multi- Modality & Layout Perception Error. This example ( SAVG = 25 .64% ) illustrates a scientific analysis failure case with multi- modality & layout perception errors (§I.1). Input query and agent prompts are provided in §D.2 and omitted here for clarity. Other intermediate outputs and contexts are also omitted for clear presentation.
+
+53 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Figure 37. Example of Hallucination Error. This example ( SAVG = 21 .85% ) illustrates a scientific analysis failure case with 
+
+hallucination errors (§I.2). Input query and agent prompts are provided in §D.2 and omitted here for clarity. Other intermediate outputs and contexts are also omitted for clearer presentation. 
+
+54 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Figure 38. Example of Domain-Specific Error. This example ( SAVG = 11 .28% ) illustrates a scientific analysis failure case with multi-modality & layout perception errors (§I.3). Input query and agent prompts are provided in §D.2 and omitted here for clarity. Other intermediate outputs and contexts are also omitted for clear presentation. 
+
+55 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Figure 39. Example of Long-Context Understanding Error. This example ( SAVG = 24 .43% ) illustrates a scientific analysis failure case due to long-context understanding errors (§I.4). Input query and agent prompts are provided in §D.2 and omitted here for clarity. Other intermediate outputs and contexts are also omitted for clear presentation. 
+
+56 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Figure 40. Example of Analysis Width Error. This example ( SAVG = 25 .96% ) illustrates a scientific analysis failure case due to 
+
+analysis width errors (§I.5). Input query and agent prompts are provided in §D.2 and omitted here for clarity. Other intermediate outputs and contexts are also omitted for clear presentation. 
+
+57 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Figure 41. Example of Analysis Depth Error. This example ( SAVG = 31 .24% ) illustrates a scientific analysis failure case due to analysis depth errors (§I.6). Input query and agent prompts are provided in §D.2 and omitted here for clarity. Other intermediate outputs and contexts are also omitted for clear presentation. 
+
+58 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Figure 42. Example of Analysis Objective Error. This example ( SAVG = 31 .45% ) illustrates a scientific analysis failure case due to 
+
+analysis objective errors (§I.7). Input query and agent prompts are provided in §D.2 and omitted here for clarity. Other intermediate outputs and contexts are also omitted for clear presentation. 
+
+59 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+60 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Figure 43. Example of Other Errors Due To MLLM Backbone Ability Constraints. This figure shows two scientific analysis failure cases due to MLLM backbone ability constraints (§I.8): (a) Repetitive Content, (b) Intermediate Solution. Input query and agent prompts are provided in §D.2 and omitted here for clarity. Some contents denoted as [...] are omitted for presentation brevity. 
+
+61 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Prompt for Five-Dimensional Evaluation Protocol 
+
+You are an expert evaluator for scientific {data type } analysis writing tasks. Given a {data type } and its ground-truth analysis, evaluate whether a model-generated analysis is of high quality. 
+
+Ground-truth Analysis 
+
+{gt analysis }
+
+Model Analysis 
+
+{model analysis }
+
+Evaluation Criteria 
+
+1. Content Accuracy : Does the model analysis accurately and correctly reflect the explicitly presented information in the {data type }, such as reported values, trends, stated findings, and observed patterns, without distortion or omission? 2. Analytical Completeness : Does the model analysis sufficiently develop the derived analyses, interpretations, and conclusions implied by the {data type }, capturing key insights without missing important analytical findings? 3. Format Correctness : Are there any format errors in model analysis that violate the task requirements, such as incorrect structure, typographical errors, or improper formatting? 4. Clarity & Coherence : Is the model analysis clearly articulated, properly structured, and logically coherent, with sound scientific writing throughout? 5. Reliability & Faithfulness : Are there any hallucinated information in model analysis that is never covered, analyzed, and inferred in the ground-truth analysis? NOTE that both referred contents (e.g., referring to other tables/figures/section-s/equations/etc., within the paper or referring to other papers) or reasonably inferred contents are considered as grounded (CAREFUL: analysis writing SHOULD have inferred contents, as long as they are reasonable and inferrable from the given information in such as way that are covered by ground-truth analysis) 
+
+Instructions 
+
+• Compare the Model Analysis against the Ground-truth Analysis 
+
+• Focus on the quality of model analysis writing in the five dimensions of Evaluation Criteria 
+
+• Consider semantic similarity and information coverage, NOT exact word matching • Rate the overall quality on a scale from 0-2 (where 2 is excellent) 
+
+Response Format                                                                                           
+
+> <think>your evaluation reasoning</think> <accuracy>grade 0-2 for **Content Accuracy**: 0=mostly inaccurate; 1=partially accurate; 2=fully accurate</accuracy> <completeness>grade 0-2 for **Analytical Completeness**: 0=most key analyses missing; 1=some key analyses missing; 2=all key analyses present</completeness> <format>grade 0-2 for **Format Correctness**: 0=many format errors; 1=some format errors; 2=no format error</format> <writing>grade 0-2 for **Clarity &Coherence**: 0=poorly written; 1=moderately clear; 2=clear and coherent</writing> <faithfulness>grade 0-2 for **Reliability &Faithfulness**: 0=mostly hallucinated; 1 =partially hallucinated; 2=fully reasonable</faithfulness>
+> Figure 44. Prompt For Five-Dimensional Evaluation Protocol. During LLM-as-judge and human expert evaluation (§2.4), the evaluator is prompted to assess the quality of each model-generated scientific analysis in five dimensions, including content accuracy ,analytical completeness ,format correctness ,clarity & coherence , and reliability & faithfulness .
+
+62 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Prompt for Planner Agent 
+
+You are a Task Planning agent specialized in analyzing and task problems, decomposing tasks into concrete subtasks, and generating high-level plans that can guide resolving the given tasks. 
+
+Task Problem 
+
+{task problem }
+
+Additional Contexts 
+
+{task context }
+
+What You Need To Do 
+
+1. Understand the Task Problem and its requirements, and analyze the analysis width, depth, and objective of this task 2. Analyze what contextual information and domain-specific knowledge are needed to resolve this task 3. Decompose complex tasks into clear, actionable subtasks 4. Create a concise and instructive Problem-Solving Plan that can effectively guide resolving the Task Problem Requirements 
+
+• Be systematic, thorough, and strategic in your planning • As contextual information and domain-specific knowledge are highly important, please ALWAYS highlight ” Find, retrieve, distill, and summarize all the related contexts ” at the very beginning of your plan • Please specify finding and adding necessary citations and references to support the analysis completeness and format accuracy of the final answer • Your Problem-Solving Plan should be around {plan limit } characters, consisting several subtasks in bullet-point format using ”*” WITHOUT indents • Provide both your reasoning and planning in the following format with proper enclosure: 
+
+<think>your reasoning and analysis</think> <plan>your **Problem-Solving Plan**</plan>    
+
+> Figure 45. Prompt For P LANNER Agent. P LANNER directs task-oriented planning, providing systematic guidance for improved analysis accuracy and completeness.
+
+Prompt for Expert Agent (PART I) 
+
+You are an Expert Scientist equipped with various tools for information retrieval and knowledge collection. Your job is to iteratively gather task-specific information by: 1. Analyze the given Task Problem and the corresponding Problem-Solving Plan 
+
+2. Decide which ONE tool to use in each turn 3. Receive and summarize tool execution results 4. Repeat until you have gathered sufficient information to solve the given task You can ONLY use ONE tool per turn. Think carefully about which tool can provide the most useful information based on what you already know. After gathering all the relevant contexts and domain knowledge by calling different tools, in the end, you should generate a concise task-specific Knowledge Summary with all the important information needed to answer the Task Problem .
+
+Task Problem 
+
+{task problem }
+
+63 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Prompt for Expert Agent (PART II) Additional Contexts 
+
+{task context }
+
+Problem-Solving Plan 
+
+{planner plan }
+
+Available Tools 
+
+{tool info }
+
+What You Need To Do 
+
+You have {max turns } turns to gather information. This is TURN 1. In each turn, you have two choices: 1. Use A Tool to gather more information: • Analyze the task and current state to decide which tool to use. You can ONLY use ONE tool in each turn. • To call a tool, please follow these steps: (a) First, provide your analysis and reasoning, en-closed in: <think>your analysis of what information is needed, which specific tool you choose for current turn, and why</think> ; (b) Second, specify your selected tool for this turn, enclosed in: <tool>tool name</tool> ; (c) Third, provide your tool-specific query and options with proper enclosure as required in Available Tools .2. Stop and Summarize if you believe your collected information is sufficient to resolve the Task Problem Instructions 
+
+• Carefully review and analyze the Task Problem and its requirements, the Problem-Solving Plan , and all your collected information via tool calling • DO NOT ANSWER THE Task Problem : You ONLY need to analyze and summarize all your collected information based on your reasoning, analysis, observations, key findings, and any other highly important information that you believe can support solving the Task Problem 
+
+• BE MINDFUL about the required depth of the Task Problem : Analyze carefully the analysis width, depth, and objective of this task, e.g., whether it asks about shallow description or in-depth analysis, academic writing or technical report, scientific discovery or creative generation, etc. • Your Knowledge Summary should: (1) Be both concise and informative, consisting of around {summary len }
+
+characters; (2) Use Markdown format but in free style that you believe best suits current task, e.g., plain text, bullet points, or a mix of both, etc.; (3) Ensure The Accuracy and Quality of Your Summary: Ensure the faithfulness of you Knowledge Summary , incorporating ONLY factual information of significance directly from the collected contexts and domain knowledge, avoiding self-generated, self-interpreted, self-inferred, or rephrased details; (4) Always use the correct format in line with the input table/figure. For example, if the input uses La-TeX, you SHOULD use Latex Bib and \cite for reference citations, and specify Latex \ref when referring to other tables/figures/sections/equations/etc.; (5) Organize a well-structured summary that includes both high-level insights and detailed information, analysis, observations, and key findings, etc. For example: <think>your reasoning</think><summary> {summary structure }</summary> 
+
+Please generate your reasoning and Knowledge Summary enclosed in: 
+
+<think>your reasoning</think> <summary>your knowledge summary</summary>    
+
+> Figure 46. Prompt For E XPERT Agent. E XPERT leads information searching and retrieval to supply task-specific contextual and domain knowledge.
+
+64 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Prompt for Solver Agent (Initial Generation) 
+
+You are a Expert Scientist that writes high-quality scientific analysis according to the given Task Problem .
+
+Task Problem 
+
+{task problem }
+
+Additional Contexts 
+
+{task context } # Expert knowledge summary included 
+
+Problem-Solving Plan 
+
+{planner plan }
+
+What You Need To Do 
+
+1. Analyze the Task Problem and its requirements, and conclude the analysis width, depth, and objective of this task 2. Review the Problem-Solving Plan and Additional Contexts 
+
+3. Reason and analyze all the available information and knowledge systematically and thoroughly 4. Generate your solution enclosed in: <answer>your solution</answer> 
+
+Requirements 
+
+• Please ensure the accuracy, precision, completeness, profession, and quality of your scientific analysis • Please carefully review all the given information and contexts, and generate semantically coherent, logically structured, and scientifically grounded analysis • Always use the correct format in line with the input table/figure. For example, if the input uses LaTeX, you SHOULD use Latex Bib and \cite for reference citations, and specify Latex \ref when referring to other tables/figures/sections/equations/etc. • Provide your reasoning and solution in the following format with proper enclosure: 
+
+<think>your reasoning</think> <answer>your scientific analysis</answer>             
+
+> Figure 47. Prompt for the S OLVER Agent. As supported by PLANNER and EXPERT ,SOLVER integrates important contextual information and domain knowledge into task inputs to generate initial scientific analysis, and collaborates with the CRITIC to iteratively reflect on, correct, and refine the analysis. CRITIC feedback is omitted here for prompt presentation clarity, and is added to the prompt during iterative reflection and refinement.
+
+65 ANAGENT For Enhancing Scientific Table & Figure Analysis 
+
+Prompt for Critic Agent 
+
+You are a CRITIC ADVISOR responsible for evaluating and improving STUDENT’s STUDENT Answer to the given 
+
+Task Problem based on available Additional Contexts .
+
+Task Problem 
+
+{task problem }
+
+Additional Contexts 
+
+{task context }
+
+STUDENT Problem-Solving Plan 
+
+{planner plan }
+
+STUDENT Answer 
+
+{solver solution }
+
+Evaluation Criteria 
+
+1. Content Accuracy : Does the model analysis accurately and correctly reflect the explicitly presented information in the {data type }, such as reported values, trends, stated findings, and observed patterns, without distortion or omission? 2. Analytical Completeness : Does the model analysis sufficiently develop the derived analyses, interpretations, and conclusions implied by the {data type }, capturing key insights without missing important analytical findings? 3. Format Correctness : Are there any format errors in model analysis that violate the task requirements, such as incorrect structure, typographical errors, or improper formatting? 4. Clarity & Coherence : Is the model analysis clearly articulated, properly structured, and logically coherent, with sound scientific writing throughout? 5. Reliability & Faithfulness : Are there any hallucinated information in model analysis that is never covered, analyzed, and inferred in the ground-truth analysis? NOTE that both referred contents (e.g., referring to other tables/figures/section-s/equations/etc., within the paper or referring to other papers) or reasonably inferred contents are considered as grounded (CAREFUL: analysis writing SHOULD have inferred contents, as long as they are reasonable and inferrable from the given information in such as way that are covered by ground-truth analysis) 
+
+What You Need To Do 
+
+1. Analyze the Task Problem and its requirements, and conclude the analysis width, depth, and objective of this task 2. Review the Additional Contexts , reasoning and analyzing all the available information and knowledge systematically and thoroughly 3. Evaluate STUDENT’s STUDENT Answer according to the five Evaluation Criteria 
+
+4. Generate your detailed improvement guidance feedback to STUDENT, which should at least cover the five evaluation dimensions above, and less than {feedback limit } characters 
+
+Response Format                                                                                           
+
+> <think>your evaluation reasoning</think> <accuracy>grade 0-2 for **Content Accuracy**: 0=mostly inaccurate; 1=partially accurate; 2=fully accurate</accuracy> <completeness>grade 0-2 for **Analytical Completeness**: 0=most key analyses missing; 1=some key analyses missing; 2=all key analyses present</completeness> <format>grade 0-2 for **Format Correctness**: 0=many format errors; 1=some format errors; 2=no format error</format> <writing>grade 0-2 for **Clarity &Coherence**: 0=poorly written; 1=moderately clear; 2=clear and coherent</writing> <faithfulness>grade 0-2 for **Reliability &Faithfulness**: 0=mostly hallucinated; 1 =partially hallucinated; 2=fully reasonable</faithfulness> <feedback>your feedback</feedback>
+> Figure 48. Prompt For C RITIC Agent. Cooperating with SOLVER ,CRITIC also employs the five-dimensional evaluation protocol (Fig. 44 & §A.2) for reflective correction and refinement.
+
+66

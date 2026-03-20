@@ -1,0 +1,898 @@
+Title: Socratic-Geo: Synthetic Data Generation and Geometric Reasoning via Multi-Agent Interaction
+
+URL Source: https://arxiv.org/pdf/2602.03414v1
+
+Published Time: Wed, 04 Feb 2026 02:04:13 GMT
+
+Number of Pages: 18
+
+Markdown Content:
+# Socratic-Geo: Synthetic Data Generation and Geometric Reasoning via Multi-Agent Interaction 
+
+Zhengbo Jiao 1,2,3,∗, Shaobo Wang 2,∗, Zifan Zhang 1,4,∗, Wei Wang 1, Bing Zhao 1,▲ , Hu Wei 1,†,
+
+Linfeng Zhang 2,†
+
+> 1
+
+AI DATA, Alibaba Group Holding Limited 
+
+> 2
+
+EPIC Lab, Shanghai Jiao Tong University 
+
+> 3
+
+Shanghai University of Finance and Economics 
+
+> 4
+
+Wuhan University 
+
+> ∗
+
+Equal contribution , ▲ Project leader , †Corresponding authors 
+
+Abstract 
+
+Multimodal Large Language Models (MLLMs) have significantly advanced vision-language under-standing. However, even state-of-the-art models struggle with geometric reasoning, revealing a critical bottleneck: the extreme scarcity of high-quality image-text pairs. Human annotation is prohibitively expensive, while automated methods fail to ensure fidelity and training effectiveness. Existing approaches either passively adapt to available images or employ inefficient random ex-ploration with filtering, decoupling generation from learning needs. We propose Socratic-Geo, a fully autonomous framework that dynamically couples data synthesis with model learning through multi-agent interaction. The Teacher agent generates parameterized Python scripts with reflective feedback (Reflect for solvability, RePI for visual validity), ensuring image-text pair purity. The Solver agent optimizes reasoning through preference learning, with failure paths guiding Teacher’s targeted augmentation. Independently, the Generator learns image generation capabilities on accumulated "image-code-instruction" triplets, distilling programmatic drawing intelligence into visual generation. Starting from only 108 seed problems, Socratic-Solver achieves 49.11 on six benchmarks using one-quarter of baseline data, surpassing strong baselines by 2.43 points. Socratic-Generator achieves 42.4% on GenExam, establishing new state-of-the-art for open-source models, surpassing Seedream-4.0 (39.8%) and approaching Gemini-2.5-Flash-Image (43.1%).  
+
+> Date:
+
+February 4, 2026  
+
+> Correspondence:
+
+zhanglinfeng1997@outlook.com , kongwang@alibaba-inc.com  
+
+> Project Page:
+
+https://github.com/Frostlinx/Socratic-geo 
+
+1 Introduction 
+
+The burgeoning development of Multimodal Large Models (MLLMs) has significantly advanced the intersection of vision and language. As foundational capabilities mature, multimodal mathematical reasoning has garnered significant research attention [ 1 –3], especially in geometry—a domain that demands both visual perception and logical deduction. However, progress is severely bottlenecked by the extreme scarcity of high-quality geometric training data. Manual annotation is prohibitively expensive and time-consuming, while automated 1        
+
+> arXiv:2602.03414v1 [cs.CV] 3 Feb 2026 Overall MathVerse GeoQA_test
+> MathVision MathVista WeMath
+> Socratic-solver +R-COT +PGPS +Geo +Zero-Shot +GeoReasoning
+> (a) Generator performance (%) (b) Solver performance (%)
+> GenExam-Math (Relaxed Score)
+
+Figure 1 Overall performance comparison demonstrating the dual effectiveness of the Socratic-Geo framework in both reasoning and generation. (a) Our Socratic-Generator-Image achieves an impressive 42.4 Relaxed score on the 
+
+GenExam-Math benchmark, establishing a new state-of-the-art for open-source models and matches strong closed-source systems like Gemini-2.5-Flash-Image. (b) Our Socratic-Solver achieves an impressive 49.11% average accuracy across the reasoning benchmarks, marking a substantial +4.13 point improvement over the zero-shot baseline and consistently outperforming all other fine-tuning methods. 
+
+synthesis struggles to simultaneously balance correctness, diversity, and training effectiveness. This raises a critical question: How can we design an efficient geometric data synthesis engine? 
+
+Existing automated methods fall into three categories. First, image-based textual augmentation [ 4, 5] enhances linguistic quality but remains passive —refining descriptions for pre-existing images without constructing new structures. Second, symbolic-driven random generation [ 6, 7] ensures correctness through formal languages but adopts blind exploration , generating vast candidates then filtering heuristically. Third, LLM-driven augmentation [ 8 ] produces diverse content but acts as black-box amplifiers , inheriting model biases and lacking fine-grained control. Most critically, all paradigms produce static, one-way datasets that decouple synthesis from learning—data generation occurs independently of model training, missing opportunities for iterative improvement. To address these challenges, we propose Socratic-Geo: a dynamic data synthesis engine that couples generation with learning (Figure 2). Inspired by the Socratic method, our framework implements goal-driven synthesis through multi-agent interaction. The Teacher agent generates parametric Python scripts using a "conceive-and-verify" loop where Reflect (solvability checker) ensures mathematical validity while RePI (visual validator) verifies rendering correctness, enabling proactive structural modification rather than passive adaptation. For targeted enhancement, Solver’s failed reasoning paths diagnose weaknesses and guide Teacher’s generation goals, replacing blind exploration with learner-driven synthesis . Finally, we fine-tune the Generator on accumulated "image-code-instruction" triplets, distilling programmatic drawing intelligence into generative capabilities and establishing a synthesis-learning closed loop . Our main contributions are threefold: 2• Goal-Driven Programmatic Synthesis. We introduce a paradigm that establishes generation goals by diagnosing learner weaknesses and enhances image structures through code modification, supported by our Reflect-RePI mechanism for proactive self-correction. 
+
+• Multi-Agent Interaction Framework. We propose Socratic-Geo that tightly couples synthesis with learning. Teacher-Solver interaction drives reasoning evolution, extending to Generator for controllable geometric image generation from programmatic data. 
+
+• Strong Empirical Results. Starting from only 108 seed problems, Socratic-Solver achieves substantial improvements across benchmarks, with an overall +4.13 point gain over baselines using merely a quarter of training samples (Figure 1b). Independently, Socratic-Generator achieves 42.4% on GenExam (Figure 1a), establishing new state-of-the-art for open-source models by surpassing commercial model Seedream-4.0 (39.8%) and approaching Gemini-2.5-Flash-Image (43.1%). 
+
+2 Related Work 
+
+2.1 Geometry Generation 
+
+To address data scarcity, several methods have been proposed for synthetic geometric problem generation. Inter-GPS [ 7] parses diagrams into formal logic to enable symbolic reasoning but relies on manually drawn images. G-LLaVA [ 9] constructs Geo170K, a large-scale dataset of geometry problems paired with images. R-CoT [ 4] introduces reverse chain-of-thought to generate logically consistent question–answer pairs from diagrams. TrustGeoGen [ 6] employs formal verification to ensure generated problems are mathematically valid. Generalizable Geometric Image Caption Synthesis [ 5] focuses on improving caption diversity and generalization. While these approaches improve data scale and logical consistency, they typically rely on templates, offering limited control over geometric structure. 
+
+2.2 Multi-agent Interaction 
+
+Multi-agent frameworks have emerged as a means to generate training data autonomously. LLM2LLM [ 10 ]uses iterative refinement between teacher and student models. R-Zero [ 11 ] and Absolute Zero [ 12 ] achieve self-evolution without human data through reinforcement learning and self-play. Socratic-Zero [ 13 ] implements co-evolution among Teacher, Solver, and Generator agents to produce reasoning data. Vision-Zero [ 14 ] extends this idea to vision–language models via gamified self-play. SPICE [ 15 ] improves reasoning through self-play within corpus environments. These methods demonstrate strong capabilities in text-based reasoning tasks, but similar collaborative mechanisms have not yet been applied to visual reasoning tasks involving structured diagram generation. 
+
+3 Preliminaries 
+
+3.1 Group Relative Policy Optimization 
+
+Group Relative Policy Optimization (GRPO) [ 16 ] is a policy-gradient algorithm designed for reinforcement learning tasks where model outputs can be scored via deterministic verification rules. Given an input problem 
+
+q, the reference policy πref generates G candidate outputs {o1, . . . , o G}, each assigned a scalar reward Ri by a verifiable evaluation function. The sequence-level advantage is computed via group normalisation: 
+
+A(i) = Ri − mean ({Rj }Gj=1 )
+
+std ({Rj }Gj=1 ) , (1) where mean and std denote the sample mean and standard deviation of the group’s rewards. The optimisation objective applies PPO’s clipped surrogate at the token level, with KL regularisation to constrain policy deviation: 
+
+LGRPO (θ) = 1
+
+G
+
+> G
+
+X
+
+> i=1
+
+1
+
+|oi|
+
+> |oi|
+
+X
+
+> t=1
+
+min  rt(θ)A(i), clip( rt(θ),
+
+1 − ϵ, 1 + ϵ)A(i) − β D KL (πθ ∥ πref )
+
+(2) 3where rt(θ) = πθ (oi,t |q) 
+
+> πref (oi,t |q)
+
+, ϵ is the clipping range, and β controls the KL regularisation strength. By leveraging group-relative advantages from verifiable rewards, GRPO streamlines training by removing the value network, reducing computational overhead, and stabilising learning in sparse-reward environments. 
+
+3.2 Socratic-Zero Framework and Limitations 
+
+Socratic-Zero is a multi-agent learning framework for text-based mathematical reasoning, comprising a Solver ,
+
+Teacher , and Generator . The Teacher refines the Solver ’s reasoning by generating improved text problems, and the Generator learns this text-to-text transformation to expand the dataset. This approach is incompatible with geometry, where diagrams are integral to problem definitions and must align precisely with textual statements. In geometry, correctness depends on axiomatic consistency between text and figure. The Teacher , limited to language, cannot use tools to programmatically modify diagrams (e.g., add auxiliary lines) or verify geometric integrity, leading to unreliable (image, text, solution) triplets. Without such structured, tool-based outputs, the Generator learns only from vague textual prompts to unstructured pixel data, lacking precise supervision. Thus, the original framework cannot synthesize valid reasoning data or high-fidelity geometric images, motivating a paradigm grounded in programmatic control. 
+
+• Verify : Formally compare the Solver ’s responses with the reference solution to detect incorrect reasoning cases requiring intervention. 
+
+• Analyze : Perform dual-modality error diagnosis. For the geometric code (and its rendered diagram), inspect structural properties and detect missing or violated axioms; for the text (problem statement), identify semantic inconsistencies, underspecified constraints, or misleading descriptions. This step pinpoints the minimal modifications needed to repair or strengthen the problem. 
+
+• Invent (via RePI): Programmatically modify the underlying Python geometry code to construct a new problem that explicitly incorporates the critical constraints found in the analysis. Ensure the modified code executes successfully and that the generated diagram is perfectly aligned with the updated textual description. 
+
+• Qualify (via Reflect): As a self-verifying step, the Teacher solves the invented problem using its reasoning pipeline. Only if the solution matches the reference and the geometry passes all checks is the example admitted to the reasoning curriculum and used to generate paired (text, image) data for the Generator .
+
+4 Method 
+
+4.1 Framework Overview 
+
+We propose Socratic-Geo , a fully autonomous framework designed for goal-driven data synthesis in the geometric domain. Operating from a minimal seed set without reliance on external data, the framework functions as a closed-loop synthesis engine. Its primary objective is to continuously generate challenging (image , text , solution ) triplets for reasoning model training. As a synergistic secondary objective , the framework leverages valuable assets created during this process to train a high-fidelity image Generator . This entire synthesis process is driven by the interaction of three specialized agents: As illustrated in Figure 2, these agents form an interaction loop centered on reasoning. The Solver ’s struggles trigger the Teacher ’s invention process. The Teacher ’s programmatic invention, in turn, provides gold-standard data for the Solver ’s next learning stage. This core Solver-Teacher interaction ensures that the synthesized curriculum continuously adapts to the Solver ’s evolving capabilities. The curriculum, C, evolves iteratively as: 
+
+Ct+1 = Ct ∪ { (I′, q ′, a ′) | ∃ (I, q, a ∗) ∈ C t, {a(i) 
+
+> S
+
+}ki=1 ∼ π(t) 
+
+> S
+
+(I, q ),
+
+> k
+
+X
+
+> i=1
+
+V(q, a (i) 
+
+> S
+
+, a ∗) = 0 } (3) where problems from the current curriculum Ct that the Solver fails to solve across k attempts trigger the 
+
+Teacher ’s invention pipeline, producing a new validated triplet that is appended to form Ct+1 .4Original Problem Solver I need to carefully recognize the image, then think step by step, give my final answer …Enhanced Question I need to analyze   
+
+> student answers, thus invent new problems…how to draw images?
+
+(a) Solver’s Online Optimization 
+
+For Each Step     
+
+> Evolve with GRPO
+> Data Pool
+> I realize what error I have made and fix them …
+> (b) Generator’s Offline Optimization
+> I learn from all images with instructions from all the data pool … I need to transfer problems into drawing instructions for teaching ..
+> ++
+> Generator
+
+Evolve with SFT        
+
+> Original Image Enhanced Image
+> Generated Image
+> Original Image Enhanced Image
+> Original Question Enhanced Question Instructions for images Emm, I should use tools
+> for drawing new images .. Iverify the student answer by matching
+> standard answer …
+> Before new curriculum, I must qualify
+> the problems with images ..
+> Verified Results Teacher
+> Generated by tools
+
+Figure 2 Overview of the Socratic-Geo framework. (a) A closed-loop reasoning process where the Solver’s failures trigger the Teacher to invent and validate new problems, enriching the curriculum. (b) The Generator distills the Teacher’s programmatic drawing instructions into a standalone image synthesis model. 
+
+4.2 Teacher Engine: Core of Data Synthesis 
+
+The Teacher acts as a proactive constructor of geometric reasoning data through a pipeline (Fig. 2): Through this process, each synthesized (image, text, solution) triplet is executable, geometrically sound, textually precise, and targeted to address weaknesses in the Solver .
+
+4.3 Reinforcement Learning based Solver optimization 
+
+The Solver ( S) evolves through Group Relative Policy Optimization (GRPO), learning from the high-quality, targeted data supplied by the Teacher. Crucially, this is a pure reinforcement learning paradigm rather than knowledge distillation : the Solver never observes the Teacher’s chain-of-thought reasoning or reference solutions during training. Instead, it learns exclusively through trial-and-error, receiving only binary reward signals that indicate correctness without revealing the solution path. This design ensures that performance gains stem from the RL mechanism itself, not from imitating teacher outputs. The Solver and Teacher form the framework’s core reasoning loop. For each problem, the Solver with policy 
+
+πS generates k solution attempts {a(i) 
+
+> S
+
+}ki=1 . The Teacher provides a binary reward Ri = V(q, a (i) 
+
+> S
+
+, a ref ) ∈ { 0, 1}
+
+for each attempt. Its most critical contribution occurs when all attempts fail ( P Ri = 0 ). In this scenario, the Teacher ’s own verified reference solution, aref , is injected as the sole positive example. This ensures the Solver receives a gold-standard signal even in complete failure. The positive and negative sets for optimization are thus defined 5Algorithm 1: Teacher Modules 
+
+Input: P0, πS , πT , Gϕ, T
+
+Output: C, π∗     
+
+> S,G∗
+> ϕ
+> 1C ← P 0,D ← ∅
+> 2
+
+for t = 1 to T do       
+
+> // Solver Phase
+> 3(I, q, a ∗, c )∼ C
+> aS←πS(I, q )
+> 4
+
+if aS̸ = a∗ then         
+
+> // RePI: Invent
+> 5C←Diagnose (πS, a ∗)
+> 6ok ←False
+> 7
+
+while not ok do      
+
+> 8
+> c′←πT.Modify (c, C )(I′, q ′, a ′)←Exec (c′)
+
+if success then   
+
+> ok ←True
+
+end  
+
+> 9
+
+end          
+
+> // Reflect: Verify
+> 10 aT←πT(I′, q ′)
+> v←Check (aT, a ′)
+> 11
+
+if v then        
+
+> 12 C ← C ∪ { (I′, q ′, a ′, c ′)}
+> // Generator: Learn
+> 13 d←πT.Trans (q′)
+> D ← D ∪ { (d, I ′)}
+> 14
+
+end  
+
+> 15
+
+end           
+
+> 16 πS←Train (πS,C)
+> 17 Gϕ←Diff (Gϕ,D)
+> 18
+
+end  
+
+> 19
+
+return C, π∗  
+
+> S,G∗
+> ϕ
+
+as: 
+
+(Z+, Z−) = 
+
+(
+
+({a(i) 
+
+> S
+
+| Ri = 1 }, {a(i) 
+
+> S
+
+| Ri = 0 }) if Pki=1 Ri > 0({aref }, {a(1)  
+
+> S
+
+, . . . , a (k) 
+
+> S
+
+}) if Pki=1 Ri = 0 (4) The Solver parameters θS are then updated to maximize the GRPO objective: 
+
+LGRPO (θS ) = −E(I,q )∼C t
+
+ 1
+
+|Z| 
+
+X
+
+> a∈Z
+
+1
+
+|a|
+
+> |a|
+
+X
+
+> t=1
+
+( ˆAt(a) + β(rt − 1)) log πθS (at|I, q, a <t )
+
+ (5) 
+
+4.4 Generator Training: A Synergistic Byproduct 
+
+Crucially, the Generator (G) operates independently of the core reasoning loop. It does not interact with the 
+
+Solver or influence the Teacher ’s decisions. Instead, it is a synergistic byproduct whose training relies entirely on the valuable assets created by the Teacher during its primary mission of improving the Solver .To enable this, the Teacher performs an additional, dedicated step for the Generator ’s benefit. After inventing a new problem and its programmatic representation, the Teacher translates this information into a descriptive, natural-language drawing instruction, pdiagram . This creates high-quality ( instruction , image ) pairs. The Generator , a diffusion-based model, is then trained on these (pdiagram , I new ) pairs. This process is a form of knowledge distillation : the symbolic, rule-based, and precise drawing intelligence of the Teacher is distilled into the neural weights of the Generator . By learning from these programmatic blueprints instead of 62√13 
+
+Image: Question:  
+
+> Given a triangle ABC with
+> ∠BAC=60 °, AB=6, and AC=8.
+> Point D lies on BC such
+> that AD ⊥BC. Let O be the
+> circumcenter of △ABC. Find
+> the circumradius R.
+
+Code: 
+
+Answer:       
+
+> 2√39/3
+> # Calculate point D (AD ⟂BC)
+> BC_vec = C – B
+> BC_unit = BC_vec /
+> np.linalg.norm(BC_vec)
+> ………………
+> D = B + BD_length *BC_unit
+> # Draw triangle
+> triangle = plt.Polygon([A, B, C],
+> fill=False, edgecolor='black',
+> linewidth=2)
+> ax.add_patch(triangle)
+> ………………
+> Since AD ⊥BC, this means that D is the foot of the
+> altitude from A to BC. Step 1: Finding BC Since AD ⊥BC ,
+> I assume that triangle ABC might be aright triangle .
+> AB² + AC² = 6² + 8² = 36 + 64 = 100,So BC = 10.…………
+> R = BC/2 = 10/2 = 5
+
+Response: 
+
+Verify 
+
+Error Analysis: 
+
+Enhance Suggestion:    
+
+> By introducing point P, students must understand the
+> intersection properties of line AD with the
+> circumcircle, not just memorize formulas.
+> Using only the area formula to find the circumradius
+> ignores the key condition ∠BAC=60 °.
+
+Solver Teacher 
+
+Image: 
+
+Answer: 
+
+> √13
+
+Question: Code:                      
+
+> Given triangle ABC
+> with ∠BAC=60 °,AB= , and AC=8 .
+> Point Dlies on BC such that AD ⊥BC .
+> The circumcircle Oof △ABC meets
+> line AD again at point P (P≠A). Find
+> the length of AP.
+> # Draw triangle ABC
+> triangle = plt.Polygon([A, B, C],
+> fill=False, edgecolor='black',
+> linewidth=2)
+> ax.add_patch(triangle)
+> ………………
+> # Select the intersection point
+> that is not point A
+> P1 = A + t1 *AD_unit
+> P2 = A + t2 *AD_unit
+> ………………
+
+2√39/3 ≠5        
+
+> I receive response from solver and
+> verify it, then analysis key
+> errors ,correspondingly, give
+> enhance suggestions , finally create
+> enhanced code for image and
+> question for next round…
+> Every round, I c arefully examine
+> the given image and understand
+> it in detail. Think step-by-step
+> to answer the question…
+
+Figure 3 A concrete instantiation of the Socratic-Geo interaction pipeline, where the Teacher transforms flawed reasoning into diagnostic problems. Red highlighted regions mark critical intervention points including error diagnosis and geometric augmentation. 
+
+Left: The Solver incorrectly assumes a right triangle structure, overlooking the given constraint ∠BAC = 60 ◦, leading to an invalid solution path. Right: The Teacher introduces point P , forcing the Solver to apply the inscribed angle theorem combined with the 60 ◦ angle property to establish the relationship between ∠AP D and ∠ACD , directly targeting the reasoning deficiency. 
+
+vague prompts, the Generator learns to map structured instructions to geometrically precise diagrams. The supervised fine-tuning (SFT) loss is: 
+
+LSFT (θG ) = Epdiagram ,z 0,ϵ,t 
+
+∥ϵ − ϵθG (zt, t, p diagram )∥2 , zt = √¯αtz0 + √1 − ¯αtϵ (6) Here, E is the VAE encoder, and ϵθG is the noise prediction network. This allows us to create a powerful generative model as a valuable byproduct of the main reasoning-focused loop. 
+
+5 Experiments 
+
+5.1 Experiment Setup 
+
+Models We employed Qwen3-VL-235B-A22B-Instruct as the Teacher to produce high-quality question genera-tion and image-code refinement strategies. The Generator component adopted Qwen-Image [ 17 ], distilled from the Teacher’s image-generation policy. On the mathematics track of the GenExam text-to-image benchmark, we evaluated Socratic-Geo alongside representative models (see Appendix K for complete list). In addition, we trained the Solver on Qwen2.5-VL-7B-Instruct [ 18 ] using GRPO [ 16 ] reinforcement learning on both the Socratic-Geo-generated geometry dataset and mainstream geometry datasets. 
+
+Benchmarks We evaluated geometric reasoning in mathematics across six benchmarks: MathVerse [ 1], MathVista [ 2], MathVision [ 19 ], GeoQA [ 3], GeomVerse [ 20 ], and WeMath [ 21 ]. Furthermore, we assessed generator performance on the math track of the GenExam[22]. benchmark. 
+
+Solver Evaluation For each test item, we adopted zero-shot prompting with the temperature set to 0.1 to generate solutions. Correctness was determined by combining rule-based answer extraction with a semantic verification module. Full details of the evaluation protocol—including the sampling strategy, extraction procedures, and the LLM-based adjudication configuration—are provided in Appendix J. 
+
+Baseline Methods To enable fair comparison, we selected two prevailing paradigms for geometric data synthesis: 
+
+• LLM-driven generation : R-CoT [ 4 ] (reverse chain-of-thought to produce high-quality geometric images and factual descriptions), G-LlaVA [ 9] (LLM-driven scaling and augmentation of existing datasets), GeoReasoning-10K [ 5 ] (reinforcement learning framework to automatically generate high-quality multi-modal image–text pairs). 
+
+• Human collection and annotation : PGPSNet [ 23 ] (manually built large-scale geometric dataset with meticulous labeling). 7Table 1 Evaluation of geometric data synthesis methods on six multimodal reasoning benchmarks: MathVerse, GeomVerse, GeoQA, MathVision, MathVista, and WeMath. Performance is reported in Mean@1 (%). Data Scale” denotes the size of synthetic training data in thousands (k), progressively growing across three curriculum stages. All results use LLM-as-judge (3-vote) evaluation. Arrow values represent absolute point changes relative to Zero-shot baseline, where green arrows indicate performance improvements and red arrows indicate performance declines. The Overall” column represents the average performance across five benchmarks (excluding GeomVerse). Best results per category are highlighted in bold . Detailed configurations of the curriculum stages can be found in Appendix I. 
+
+Geometric Benchmarks (Mean@1) Model Data Scale MathVerse GeomVerse GeoQA MathVision MathVista WeMath Overall 
+
+Qwen2.5-VL-7B-Instruct Zero-shot 39.59 3.33 43.92 22.70 61.10 57.59 44.98 
+
+LLM-driven Synthesis 
+
++ R-CoT 7.2k 40.86 ↑ 1.27 3.33 ↑ 0.00 46.49 ↑ 2.57 22.72 ↑ 0.02 62.60 ↑ 1.50 57.59 ↑ 0.00 46.05 ↑ 1.07 
+
++ Geo170k (G-LLaVA) 10k 40.36 ↑ 0.77 3.33 ↑ 0.00 47.16 ↑ 3.24 24.34 ↑ 1.64 62.00 ↑ 0.90 57.44 ↓ 0.15 46.26 ↑ 1.28 
+
++ GeoReasoning 10k 40.99 ↑ 1.40 5.56 ↑ 2.23 46.76 ↑ 2.84 24.34 ↑ 1.64 63.40 ↑ 2.30 57.90 ↑ 0.31 46.68 ↑ 1.70 
+
+Symbolic-based Synthesis 
+
++ PGPS9K 10k 40.81 ↑ 1.22 4.44 ↑ 1.11 46.08 ↑ 2.16 22.74 ↑ 0.04 61.30 ↑ 0.20 58.53 ↑ 0.94 45.89 ↑ 0.91 
+
++ TrustGeoGen 10k 41.02 ↑ 1.43 4.44 ↑ 1.11 46.35 ↑ 2.43 22.89 ↑ 0.19 61.80 ↑ 0.70 58.61 ↑ 1.02 46.13 ↑ 1.15 
+
+Knowledge Distillation (SFT) 
+
++ KD (Geo3K) 3k 40.52 ↑ 0.93 3.33 ↑ 0.00 46.21 ↑ 2.29 22.68 ↓ 0.02 62.10 ↑ 1.00 58.02 ↑ 0.43 46.89 ↑ 1.91 
+
++ KD (Our Synthesis) 2.5k 40.89 ↑ 1.30 3.89 ↑ 0.56 46.58 ↑ 2.66 23.01 ↑ 0.31 62.40 ↑ 1.30 58.15 ↑ 0.56 47.37 ↑ 2.39 
+
+Socratic-Solver-Geo (Ours) 
+
++ Stage1 0.4k 40.33 ↑ 0.74 3.33 ↑ 0.00 45.14 ↑ 1.22 22.45 ↓ 0.25 61.20 ↑ 0.10 57.54 ↓ 0.05 45.33 ↑ 0.35 
+
++ Stage2 1k 41.78 ↑ 2.19 3.33 ↑ 0.00 44.86 ↑ 0.94 23.54 ↑ 0.84 62.30 ↑ 1.20 58.21 ↑ 0.62 46.14 ↑ 1.16 
+
++ Stage3 2.5k 45.05 ↑ 5.46 6.67 ↑ 3.34 49.20 ↑ 5.28 26.19 ↑ 3.49 63.55 ↑ 2.45 61.58 ↑ 3.99 49.11 ↑ 4.13 
+
+We applied the same GRPO training protocol across all datasets for controlled evaluation of these strategies. Detailed training configurations are provided in Appendix A. 
+
+Generator Evaluation We trained the Generator based on Qwen-Image as the foundation model. On the GenExam mathematics track, we evaluated the generator’s geometry-specific text-to-image performance against representative baselines: GPT-Image-1, Gemini-2.5-Flash-Image, Imagen-4-Ultra, Seedream 4.0, Qwen-Image (base model), HiDream-I1-Full, FLUX.1 dev, FLUX.1 Krea, and Stable Diffusion 3.5 Large. 
+
+Infrastructure We trained the Qwen2.5-VL-7B-Instruct Solver model and the Generator using 32 ×A100 GPUs. 
+
+5.2 Solver Results 
+
+Baseline Comparison . As shown in Table 1, our Socratic-Solver-Geo achieves an overall Mean@1 accuracy of 42.07%, consistently outperforming all baseline methods trained on existing geometric datasets. Notably, our final model (+Stage3) surpasses the strongest baseline (GeoReasoning at 39.82%) by 2.25 percentage points despite using fewer training samples. This performance gap widens on specific benchmarks such as MathVerse (45.05% vs 40.99%) and WeMath (61.58% vs 57.90%), demonstrating the effectiveness of our co-evolutionary approach. 
+
+Data Efficiency . Our approach demonstrates remarkable data efficiency compared to existing methods. While baseline approaches require 7.2k–10k training examples to achieve competitive performance, our method reaches state-of-the-art results with only 2.5k synthetically generated problems. This 3–4 × reduction in required data highlights how our framework maximizes the informational value of each training example through precise error diagnosis and targeted problem generation. Rather than accumulating redundant examples, Socratic-Geo creates a minimal yet maximally informative curriculum that directly addresses the solver’s current weaknesses. 8Table 2 Generalization of Socratic-Geo to Chart Reasoning and Multimodal Coding. Our method consistently improves over the base model across all benchmarks.                        
+
+> Domain Benchmark Base Ours Gain
+> Chart Reasoning ChartQA 87.3 91.2 ↑+3 .9
+> CharXiv 66.6 74.2 ↑+7 .6
+> ChartQAPro 41.3 46.3 ↑+5 .0
+> ChartMinic 40.2 45.3 ↑+5 .1
+> Multimodal Coding Design2Code 29.1 34.3 ↑+5 .2
+> UIFlow2Code 75.9 81.5 ↑+5 .6
+
+5.2.1 Evaluation Protocol 
+
+The GenExam-Math benchmark evaluates generated diagrams using a fully automated protocol. For each prompt, binary questions verify geometric and symbolic constraints, with weights summing to 1.0 for correctness score C. 
+
+> Visual Quality Dimensions
+
+(each scored 0–2): 
+
+• Vsp : Spelling accuracy of labels and notation 
+
+• Vlc : Logical consistency of element placement 
+
+• Vrd : Readability of the diagram 
+
+> Final Metrics:
+
+• Strict Score (Str) : Percentage of images where C = 1 and Vsp = Vlc = Vrd = 2 
+
+• Relaxed Score (Rel) : Rel = 0 .7C + 0 .1Vsp + 0 .1Vlc + 0 .1Vrd 
+
+All scores are computed automatically using GPT-5 as judge with ground-truth images as reference. 
+
+5.2.2 Result Analysis 
+
+> Baseline Comparison
+
+. Socratic-Generator-Image achieved a Strict Score of 6.0 and a Relaxed Score of 42.4 ,outperforming all open-source models on GenExam-Math . It surpassed its base model Qwen-Image (Str: 0.0, Rel: 18.9) by 6.0 and 23.5 points, respectively. Although closed-source models such as GPT-Image-1 achieved a higher Str (8.0), they were not trained on geometry-specific data. 
+
+> Training Data Source
+
+. The performance gain was attributed to the use of programmatically generated training data. All images were synthesized by a deterministic Python interpreter, ensuring 100% geometric validity and eliminating noise or ambiguity present in human-drawn or web-scraped datasets. 
+
+> Instruction Quality
+
+. The Teacher agent produced fine-grained drawing instructions that explicitly encoded geometric constraints as executable specifications. These instructions were derived from the same symbolic code used to generate reference solutions, ensuring perfect alignment between problem logic and visual output. 
+
+5.2.3 Extension to Other Domains 
+
+To demonstrate the generalizability of our framework beyond geometry, we apply Socratic-Geo to two additional multimodal reasoning domains: Chart Reasoning and Multimodal Coding . As shown in Table 2, our approach achieves consistent improvements across all benchmarks, confirming that the Socratic interaction paradigm is task-agnostic. Unlike Socratic-Zero’s static text rephrasing, our framework evolves visual logic via code-driven synthesis, enabling effective transfer to diverse visual reasoning tasks. 9Table 3 Performance on the GenExam-Math benchmark: strict (Str) and relaxed (Rel) scores for geometric diagram generation. Red indicates our method, which is trained based on Qwen-Image. 
+
+GenExam-Math Model Str Rel 
+
+Closed-source Models 
+
+GPT-Image-1 8.0 52.0 Seedream 4.0 2.6 39.8 Imagen-4-Ultra 2.6 35.9 Gemini-2.5-Flash-Image 0.7 43.1 Seedream 3.0 0.7 18.6 FLUX.1 Kontext max 0.0 23.5 
+
+Open-source T2I Models 
+
+Qwen-Image 0.0 18.9 HiDream-I1-Full 0.0 16.7 FLUX.1 dev 0.0 12.2 FLUX.1 Krea 0.0 7.0 Stable Diffusion 3.5 Large 0.0 12.2 
+
+Open-source Unified MLLMs 
+
+BAGEL (thinking) 0.0 11.7 BAGEL 0.0 14.7 Show-o2-7B 0.0 10.8 Show-o2-1.5B-HQ 0.0 7.3 BLIP3o-NEXT-GRPO-Text-3B 0.0 15.5 BLIP3o-8B 0.0 6.4 Janus-Pro 0.0 13.7 Emu3 0.0 11.3 
+
+Socratic-Generator-Image 6.0 42.4 Table 4 Ablation study on the Qualify Module. The Qualify Module improves data efficiency, enabling better performance with fewer but higher-quality training samples. 
+
+Method Training Data MathVerse     
+
+> Qwen2.5-VL-7B-Instruct Zero-shot 39.59 Socratic-Solver-Geo (w/ Qualify) 0.4k
+
+40.33 ↑+0 .74   
+
+> Socratic-Solver-Geo (w/o Qualify) 1.3k 37.09
+
+Table 5 Ablation study on Instruction Rewriting (IR) for geometric diagram generation on GenExam-Math. IR converts natural language questions into structured drawing commands. 
+
+Method Strict (%) Relaxed (%)     
+
+> Qwen-Image (baseline) 0.0 18.9 Socratic-Generator-Image (w/o IR) 0.0 20.1 Socratic-Generator-Image (
+
+w/ IR ) 6.0 ↑+6 .0 42.4 ↑+22 .3
+
+5.3 Ablation Study and Analysis 
+
+Necessity of the Qualify Module . We test an ablated Teacher where invented problems are added without verification. Using only Stage1 training, the data grows from 0.4k (filtered) to 1.0k (all retained). However, MathVerse accuracy falls to 39.09%, even below the zero-shot baseline (39.59%), showing that without geometric consistency checks, invalid or inconsistent problems enter the set and hurt reasoning performance. The Qualify module is therefore critical for preserving synthetic data quality. 10 Table 6 Ablation studies on training paradigm and Teacher capacity. Left : RL vs. SFT comparison shows RL training yields superior performance on identical data. Right : Teacher scaling reveals that even weak Teachers (3B) outperform baselines due to “information privilege”—access to Solver failure logs and code.                              
+
+> Training Mode Data Source Acc (%)
+> SFT (KD) Geo3K (Public) 46.89 SFT (KD) Our Synthesis (2.5k) 47.37
+> RL (Ours) Our Synthesis (2.5k) 49.11 Teacher Model Scale Role Acc (%)
+> Qwen2.5-VL-3B 3B Weaker 48.47 Qwen2.5-VL-7B 7B Self-play 48.63 Qwen3-VL-30B 30B Moderate 48.99
+> Qwen3-235B 235B Standard 49.11
+> Gemini 2.5 Pro API Top-tier 49.54
+> GeoReasoning API 10k Data 46.68
+> Impact of the Qualify Module
+
+. Removing the Qualify stage enlarged the training set (1.0k vs. 0.4k) but reduced quality. The ablated model scored 39.09% on MathVerse, below the zero-shot baseline (39.59%), showing that unverified problems often contain logical or geometric errors that degrade performance. Qualify enforces geometric validity and non-degeneracy, ensuring each example contributes a meaningful learning signal for curriculum evolution. 
+
+> Effectiveness of Instruction Rewriting
+
+. We evaluate converting geometric questions into explicit drawing commands before image generation. Table 5 compares: (1) w/ IR — structured commands; (2) w/o IR —raw questions as prompts. On GenExam-Math, removing IR drops strict accuracy to 0.0% and relaxed to 20.1%, versus 6.0% and 42.4% for the system. Structured, instructions are thus essential for diagrams that match mathematical constraints. 
+
+> RL Engine vs. Supervised Fine-tuning
+
+. A critical question is whether performance gains stem from the RL mechanism or merely from high-quality synthesized data. Table 6 (left) provides a controlled comparison: using identical 2.5k training data, our RL-based approach significantly outperforms supervised fine-tuning (knowledge distillation). Even when SFT uses our high-quality synthesized data, it achieves only 47.37% compared to 49.11% with RL training. This 1.74% gap demonstrates that the trial-and-error learning paradigm—where the Solver never observes teacher solutions—is fundamentally more effective than imitation learning. 
+
+> Impact of Teacher Capacity
+
+. We investigate how Teacher model capacity affects Solver performance. Table 6 (right) reveals a key insight: performance gains primarily stem from information privilege —the Teacher’s access to Solver failure logs and underlying code—rather than raw model capability. Even a 3B parameter model, when granted this diagnostic access, achieves 48.47% accuracy, surpassing all baselines trained on 10k samples. This demonstrates the framework’s robustness: weaker models can effectively serve as Teachers when equipped with structured feedback mechanisms. 
+
+6 Conclusion 
+
+In this work, we introduced Socratic-Geo , a fully autonomous and dynamic geometric data synthesis framework that unifies solver improvement and controllable image generation through a tightly coupled multi-agent interaction loop. Drawing inspiration from the Socratic method, the system continuously identifies reasoning weaknesses in the Solver , and proactively generates targeted problems via the Reflect-RePI pipeline, which enforces both mathematical correctness and visual fidelity through programmatic verification. This synthesis-learning closed loop is able to expand a highly informative curriculum from only a small set of seed problems, achieving significant data efficiency compared to existing one-way or static synthesis strategies. Comprehensive evaluation across six multimodal reasoning benchmarks confirms the effectiveness of our approach: the  
+
+> Socratic-Solver
+
+yields an average improvement of +4.13 points over the zero-shot baseline while using merely a quarter of the typical training size, and the Socratic-Generator , distilled from programmatic drawing intelligence into instruction–image pairs, attains a 42.4% relaxed score on GenExam-Math , setting a new state-of-the-art among open-source models and rivaling strong closed-source systems. Beyond advancing the state-of-the-art in multimodal mathematical reasoning and geometry-specific text-to-image generation, our work establishes a scalable, self-improving data engine that can be extended to other STEM domains. 11 References 
+
+[1] Renrui Zhang, Dongzhi Jiang, Yichi Zhang, Haokun Lin, Ziyu Guo, Pengshuo Qiu, Aojun Zhou, Pan Lu, Kai-Wei Chang, Peng Gao, and Hongsheng Li. Mathverse: Does your multi-modal llm truly see the diagrams in visual math problems?, 2024. [2] Pan Lu, Hritik Bansal, Tony Xia, Jiacheng Liu, Chunyuan Li, Hannaneh Hajishirzi, Hao Cheng, Kai-Wei Chang, Michel Galley, and Jianfeng Gao. Mathvista: Evaluating mathematical reasoning of foundation models in visual contexts, 2024. [3] Jiaqi Chen, Jianheng Tang, Jinghui Qin, Xiaodan Liang, Lingbo Liu, Eric P. Xing, and Liang Lin. Geoqa: A geometric question answering benchmark towards multimodal numerical reasoning, 2022. [4] Linger Deng, Yuliang Liu, Bohan Li, Dongliang Luo, Liang Wu, Chengquan Zhang, Pengyuan Lyu, Ziyang Zhang, Gang Zhang, Errui Ding, et al. R-cot: Reverse chain-of-thought problem generation for geometric reasoning in large multimodal models. arXiv preprint arXiv:2410.17885, 2024. [5] Yue Xin, Wenyuan Wang, Rui Pan, Ruida Wang, Howard Meng, Renjie Pi, Shizhe Diao, and Tong Zhang. Generalizable geometric image caption synthesis, 2025. [6] Daocheng Fu, Jianlong Chen, Renqiu Xia, Zijun Chen, Qi Liu, Yuan Feng, Hongbin Zhou, Renrui Zhang, Shiyang Feng, Peng Gao, Hongyuan Zha, Junchi Yan, Botian Shi, Yu Qiao, and Bo Zhang. Trustgeogen: Formal-verified data engine for trustworthy multi-modal geometric problem solving, 2025. [7] Pan Lu, Ran Gong, Shibiao Jiang, Liang Qiu, Siyuan Huang, Xiaodan Liang, and Song-Chun Zhu. Inter-gps: Interpretable geometry problem solving with formal language and symbolic reasoning, 2021. [8] Renrui Zhang, Xinyu Wei, Dongzhi Jiang, Ziyu Guo, Shicheng Li, Yichi Zhang, Chengzhuo Tong, Jiaming Liu, Aojun Zhou, Bin Wei, Shanghang Zhang, Peng Gao, Chunyuan Li, and Hongsheng Li. Mavis: Mathematical visual instruction tuning with an automatic data engine, 2024. [9] Jiahui Gao, Renjie Pi, Jipeng Zhang, Jiacheng Ye, Wanjun Zhong, Yufei Wang, Lanqing Hong, Jianhua Han, Hang Xu, Zhenguo Li, and Lingpeng Kong. G-llava: Solving geometric problem with multi-modal large language model, 2025. [10] Nicholas Lee, Thanakul Wattanawong, Sehoon Kim, Karttikeya Mangalam, Sheng Shen, Gopala Anumanchipalli, Michael W. Mahoney, Kurt Keutzer, and Amir Gholami. Llm2llm: Boosting llms with novel iterative data enhancement, 2024. [11] Chengsong Huang, Wenhao Yu, Xiaoyang Wang, Hongming Zhang, Zongxia Li, Ruosen Li, Jiaxin Huang, Haitao Mi, and Dong Yu. R-zero: Self-evolving reasoning llm from zero data, 2025. [12] Andrew Zhao, Yiran Wu, Yang Yue, Tong Wu, Quentin Xu, Yang Yue, Matthieu Lin, Shenzhi Wang, Qingyun Wu, Zilong Zheng, and Gao Huang. Absolute zero: Reinforced self-play reasoning with zero data, 2025. [13] Shaobo Wang, Zhengbo Jiao, Zifan Zhang, Yilang Peng, Xu Ze, Boyu Yang, Wei Wang, Hu Wei, and Linfeng Zhang. Socratic-zero : Bootstrapping reasoning via data-free agent co-evolution, 2025. [14] Qinsi Wang, Bo Liu, Tianyi Zhou, Jing Shi, Yueqian Lin, Yiran Chen, Hai Helen Li, Kun Wan, and Wentian Zhao. Vision-zero: Scalable vlm self-improvement via strategic gamified self-play, 2025. [15] Bo Liu, Chuanyang Jin, Seungone Kim, Weizhe Yuan, Wenting Zhao, Ilia Kulikov, Xian Li, Sainbayar Sukhbaatar, Jack Lanchantin, and Jason Weston. Spice: Self-play in corpus environments improves reasoning, 2025. [16] Zhihong Shao, Peiyi Wang, Qihao Zhu, Runxin Xu, Junxiao Song, Xiao Bi, Haowei Zhang, Mingchuan Zhang, Y. K. Li, Y. Wu, and Daya Guo. Deepseekmath: Pushing the limits of mathematical reasoning in open language models, 2024. [17] Chenfei Wu, Jiahao Li, Jingren Zhou, Junyang Lin, Kaiyuan Gao, Kun Yan, Sheng ming Yin, Shuai Bai, Xiao Xu, Yilei Chen, et al. Qwen-image technical report. arXiv preprint arXiv:2508.02324, 2025. [18] Shuai Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, Sibo Song, Kai Dang, Peng Wang, Shijie Wang, Jun Tang, et al. Qwen2.5-vl technical report. arXiv preprint arXiv:2502.13923, 2025. [19] Ke Wang, Junting Pan, Weikang Shi, Zimu Lu, Mingjie Zhan, and Hongsheng Li. Measuring multimodal mathematical reasoning with math-vision dataset, 2024. 
+
+12 [20] Mehran Kazemi, Hamidreza Alvari, Ankit Anand, Jialin Wu, Xi Chen, and Radu Soricut. Geomverse: A systematic evaluation of large models for geometric reasoning, 2023. [21] Runqi Qiao, Qiuna Tan, Guanting Dong, Minhui Wu, Chong Sun, Xiaoshuai Song, Zhuoma GongQue, Shanglin Lei, Zhe Wei, Miaoxuan Zhang, Runfeng Qiao, Yifan Zhang, Xiao Zong, Yida Xu, Muxi Diao, Zhimin Bao, Chen Li, and Honggang Zhang. We-math: Does your large multimodal model achieve human-like mathematical reasoning?, 2024. [22] Zhaokai Wang, Penghao Yin, Xiangyu Zhao, Changyao Tian, Yu Qiao, Wenhai Wang, Jifeng Dai, and Gen Luo. Genexam: A multidisciplinary text-to-image exam, 2025. [23] Ming-Liang Zhang, Fei Yin, and Cheng-Lin Liu. A multi-modal neural geometric solver with textual clauses parsed from diagram, 2023. [24] OpenAI. Gpt-image-1. https://openai.com/index/image-generation-api/ , 2025. [25] Google. Introducing Gemini 2.5 flash image, our state-of-the-art image model. https://developers.googleblog. com/en/introducing-gemini-2-5-flash-image/ , 2025. [26] Google Deepmind. Imagen. https://deepmind.google/models/imagen/ , 2025. [27] ByteDance Seed. Seedream 4.0. https://seed.bytedance.com/en/seedream4_0 , 2025. [28] Yu Gao, Lixue Gong, Qiushan Guo, Xiaoxia Hou, Zhichao Lai, Fanshi Li, Liang Li, Xiaochen Lian, Chao Liao, Liyang Liu, et al. Seedream 3.0 technical report. arXiv preprint arXiv:2504.11346, 2025. [29] Stephen Batifol, Andreas Blattmann, Frederic Boesel, Saksham Consul, Cyril Diagne, Tim Dockhorn, Jack English, Zion English, Patrick Esser, Sumith Kulal, Kyle Lacey, Yam Levi, Cheng Li, Dominik Lorenz, Jonas Muller, Dustin Podell, Robin Rombach, Harry Saini, Axel Sauer, and Luke Smith. Flux.1 kontext: Flow matching for in-context image generation and editing in latent space, 2025. [30] Qi Cai, Jingwen Chen, Yang Chen, Yehao Li, Fuchen Long, Yingwei Pan, Zhaofan Qiu, Yiheng Zhang, Fengbin Gao, Peihan Xu, et al. Hidream-i1: A high-efficient image generative foundation model with sparse diffusion transformer. arXiv preprint arXiv:2505.22705, 2025. [31] Dustin Podell, Zion English, Kyle Lacey, Andreas Blattmann, Tim Dockhorn, Frederic Boesel, Yam Levi, and Axel Sauer. Scaling rectified flow transformers for high-resolution image synthesis. arXiv preprint arXiv:2403.03206, 2024. [32] Jinheng Xie, Zhenheng Yang, and Mike Zheng Shou. Show-o2: Improved native unified multimodal models. arXiv preprint arXiv:2506.15564, 2025. [33] Anyi Li, Ji-Ze Han, Zike Ge, Yixin Wang, Jiaming Li, Yixuan Shi, Ziyang Zhao, Haoyu Hu, Zeren Hu, Renrui Zhang, Hongsheng Li, Yu Qiao, and Peng Gao. Bagel: A benchmark for gem-level vision-language evaluation. arXiv preprint arXiv:2406.13943, 2024. [34] Xiaokang Chen, Zhiyu Wu, Xingchao Liu, Zizheng Pan, Wen Liu, Zhenda Xie, Xingkai Yu, and Chong Ruan. Janus-pro: Unified multimodal understanding and generation with data and model scaling. arXiv preprint arXiv:2501.17811, 2025. [35] Xinlong Wang, Xiaosong Zhang, Zhengxiong Luo, Quan Sun, Yufeng Cui, Jinsheng Wang, Fan Zhang, Yueze Wang, Zhen Li, Qiying Yu, et al. Emu3: Next-token prediction is all you need. arXiv preprint arXiv:2409.18869, 2024. [36] Jiuhai Chen, Zhiyang Xu, Xichen Pan, Yushi Hu, Can Qin, Tom Goldstein, Lifu Huang, Tianyi Zhou, Saining Xie, Silvio Savarese, Le Xue, Caiming Xiong, and Ran Xu. Blip3-o: A family of fully open unified multimodal models-architecture, training and dataset, 2025. [37] Jiuhai Chen, Zhiyang Xu, Xichen Pan, Shusheng Yang, Can Qin, An Yan, Honglu Zhou, Zeyuan Chen, Tianyi Zhou, Silvio Savarese, Le Xue, Caiming Xiong, and Ran Xu. Blip3o-next: A next-generation multimodal foundation model. https://jiuhaichen.github.io/BLIP3o-NEXT.github.io/ , Aug 2025. 
+
+13 Appendix 
+
+A Training Curriculum Configuration 
+
+> Stage 1
+
+: Approximately 0.4k problems, consisting of: (1) 108 manually curated and validated seed problems, and (2) augmented problems generated by the Teacher based on Solver errors during 8-attempt solving of the seed problems. All augmented problems are validated by the Teacher for geometric correctness and paired with ground-truth solutions. 
+
+> Stage 2
+
+: Approximately 1.0k problems, consisting of: (1) all 0.4k problems from Stage 1, and (2) augmented problems generated by the Teacher based on Solver errors during 8-attempt solving of Stage 1 problems. All augmented problems are validated by the Teacher for geometric correctness and paired with ground-truth solutions. 
+
+> Stage 3
+
+: Approximately 2.5k problems, consisting of: (1) all 1.0k problems from Stage 2, and (2) augmented problems generated by the Teacher based on Solver errors during 8-attempt solving of Stage 2 problems. All augmented problems are validated by the Teacher for geometric correctness and paired with ground-truth solutions. 
+
+B Data Synthesis Cost Analysis 
+
+Table 7 presents a comprehensive cost comparison between Socratic-Geo and existing geometric data synthesis methods. Our approach achieves 60 × lower cost than R-CoT while producing higher-quality training data. This efficiency stems from our fault-diagnosis-driven synthesis: by analyzing Solver failures before invoking the Teacher, we minimize redundant API calls and maximize the informational value of each synthesized problem.                            
+
+> Table 7 Cost and efficiency comparison of geometric data synthesis methods. Socratic-Geo achieves state-of-the-art performance at 60 ×lower cost by minimizing Teacher calls through targeted fault diagnosis.
+> Method Scale Teacher Total Calls Cost (USD) Acc (%)
+> G-LLaVA 10k GPT-3.5 100,000 $650.0 46.26 R-CoT 7.2k ERNIE 4.0 36,000 $3,000.0 46.05 GeoReasoning 10k Gemini-Flash 80,000 $824.0 46.68
+> Ours 2.5k Qwen3-235B 8,334 $21.67 49.11
+
+Key factors contributing to our cost efficiency: 
+
+• Targeted Synthesis : Problems are generated only when the Solver fails, avoiding redundant data creation. 
+
+• High Yield Rate : Our Qualify module ensures ∼30% yield rate (valid problems per Teacher call), compared to ∼10–20% for baselines. 
+
+• Minimal Data Requirement : The RL-based training paradigm extracts maximum learning signal from each problem, requiring only 2.5k samples vs. 7–10k for baselines. 
+
+C Infrastructure Requirements 
+
+We trained the Solver and Generator using 32 ×A100 GPUs for experimental speed. However, this configuration is not a minimum requirement . The framework can operate with significantly reduced resources: 
+
+• Solver Training : Minimum 4 × A100 GPUs (or equivalent VRAM ≥160GB total) 
+
+• Generator Training : Minimum 8 × A100 GPUs (or equivalent VRAM ≥320GB total) 
+
+• Inference : Single A100 GPU sufficient for both Solver and Generator The 32 ×A100 configuration was chosen to accelerate experimentation and enable rapid iteration during development. 14 D Hyperparameter Ablation 
+
+D.1 Branching Factor k
+
+We use k = 8 as the standard branching factor (number of solution attempts per problem), following GRPO conventions. Table 8 shows that k = 8 provides optimal balance between exploration and stability. Increasing to k = 16 triggers data explosion and training instability.                      
+
+> Table 8 Ablation on branching factor kand seed scale.
+> Ablation Setting Observation Acc (%)
+> Seed Scale Large (400) Robust to scale 45.41
+> Ours (108) Stable 45.33 Data-free Diversity-driven 45.28 Branching kk= 8 (Std) Optimal 49.11
+> k= 16 Data explosion Unstable
+
+D.2 Seed Scale 
+
+Performance is robust to seed scale variation. Using 108 seeds achieves comparable results to 400 seeds (45.33% vs. 45.41%), demonstrating that diversity of the evolutionary process—not initial seed quantity—drives performance gains. 
+
+E Visual Logic Evolution: Comparison with Socratic-Zero 
+
+A key distinction between Socratic-Geo and Socratic-Zero lies in our Visual Logic Evolution capability. While Socratic-Zero performs static text rephrasing on fixed images, Socratic-Geo dynamically modifies the underlying geometric structure through code-driven synthesis. 
+
+E.1 Synergetic Enhancement 
+
+Socratic-Zero only rephrases text on static images. In contrast, Socratic-Geo synergetically augments visual grounding by: 
+
+• Adding auxiliary constructions : e.g., drawing diagonal BD to create new triangles 
+
+• Introducing new geometric elements : e.g., inscribing square PQRS within a circle 
+
+• Modifying constraint relationships : e.g., changing angle values to create new problem variants This aligns with findings from the Qwen3-VL technical report that perception and alignment drive multimodal gains. 
+
+E.2 Agentic Paradigm 
+
+Socratic-Zero relies on static prompts; our agentic framework uses tool-use and reflection for complex logic and generalization: 
+
+• RePI (Reflective Problem Invention) : Programmatically modifies Python geometry code to construct targeted problems 
+
+• Reflect : Self-verification step where Teacher solves invented problems to ensure validity 
+
+E.3 Rule-to-Pixel Synthesis 
+
+Our Generator uses a Python engine for diffusion synthesis, ensuring precision via symbolic-to-pixel mapping. Each geometric constraint is encoded as executable code, guaranteeing 100% geometric validity. 15 F Algorithm Pseudocode 
+
+F.1 RePI: Reflective Problem Invention 
+
+Algorithm 2: RePI: Reflective Problem Invention 
+
+Input: Failed problem (I, q, a ∗), Solver policy πS , Teacher policy πT
+
+Output: New validated problem (I′, q ′, a ′)
+
+// Step 1: Diagnose Solver Failure  
+
+> 1
+
+{a(i) 
+
+> S
+
+}ki=1 ← πS (I, q ) // Generate k solution attempts  
+
+> 2
+
+C ← AnalyzeErrors ({a(i) 
+
+> S
+
+}, a ∗) // Identify reasoning gaps // Step 2: Invent New Problem  
+
+> 3
+
+c ← GetGeometryCode (I, q ) // Extract underlying code  
+
+> 4
+
+c′ ← πT .Modify (c, C ) // Modify code to address gaps  
+
+> 5
+
+(I′, q ′, a ′) ← Execute (c′) // Render new problem // Step 3: Validate  
+
+> 6
+
+if GeometricValidation (I′, q ′) = True then  
+
+> 7
+
+return (I′, q ′, a ′) 
+
+> 8
+
+end  
+
+> 9
+
+else  
+
+> 10
+
+return RePI (I, q, a ∗) // Retry with different modification  
+
+> 11
+
+end 
+
+F.2 Reflect: Self-Verification 
+
+Algorithm 3: Reflect: Self-Verification Module 
+
+Input: Candidate problem (I′, q ′, a ′), Teacher policy πT
+
+Output: Boolean validity flag 
+
+// Step 1: Teacher Solves Problem  
+
+> 1
+
+aT ← πT (I′, q ′) // Teacher generates solution // Step 2: Compare with Reference  
+
+> 2
+
+match ← Compare (aT , a ′)
+
+// Step 3: Geometric Consistency Check  
+
+> 3
+
+valid ← CheckConstraints (I′, q ′) 
+
+> 4
+
+return match ∧ valid 
+
+G Prompt Templates 
+
+G.1 Teacher Error Analysis Prompt 
+
+Error Analysis Prompt 
+
+You are analyzing a geometry problem where the Solver failed. Given: 
+
+• Problem : [Image + Question] 
+
+• Reference Answer : [Ground truth] 
+
+• Solver Attempts : [List of failed solutions] Identify the specific reasoning gaps: 1. What geometric properties did the Solver miss? 2. What auxiliary constructions could help? 3. What constraints were violated? Output a structured diagnosis for problem modification. 
+
+16 G.2 Teacher Problem Invention Prompt    
+
+> Problem Invention Prompt
+> Based on the error diagnosis, modify the geometry code to create a new problem that:
+> •Directly addresses the identified reasoning gap
+> •Maintains geometric validity and non-degeneracy
+> •Produces a solvable problem with a unique answer Modification strategies: 1. Add auxiliary lines/points to expose hidden relationships 2. Modify angle/length values to create new constraint patterns 3. Introduce additional geometric elements (circles, tangents, etc.) Output executable Python geometry code.
+
+G.3 Drawing Instruction Generation Prompt  
+
+> Drawing Instruction Prompt
+> Convert the following geometry problem into explicit drawing instructions for an image generator:
+> Problem : [Question text] Geometry Code : [Python code] Generate step-by-step drawing commands: 1. Specify exact coordinates and dimensions 2. Label all points, angles, and segments 3. Include visual styling (line thickness, colors) 4. Ensure mathematical precision Output structured drawing instructions.
+
+H Supplementary Material Details I Training Curriculum Configuration 
+
+> Data Seed Construction
+
+: The initial 108 seed problems comprise geometry word problems with accompanying figures and their corresponding Python code for geometric construction. These problems were manually selected from middle school exercise collections and exam papers by human experts, with complete annotations including problem statements, figures, and solution code. 
+
+> Geo170k Sampling Strategy
+
+: From the Geo170k dataset, we selected 10k problems for training. Since each geometric figure in Geo170k corresponds to 11 problems with high homogeneity, we selected one representative problem per figure to ensure data quality and diversity while also maintaining a comparable quantity to other datasets. 
+
+> Stage 1
+
+: Approximately 0.4k problems, consisting of: (1) 108 manually curated seed problems, and (2) augmented problems generated by the Teacher based on Solver errors during 8-attempt solving. All augmented problems are validated for geometric correctness with ground-truth solutions. 
+
+> Stage 2
+
+: Approximately 1.0k problems, consisting of: (1) all 0.4k problems from Stage 1, and (2) augmented problems generated from Solver errors during 8-attempt solving of Stage 1. All augmented problems are validated with ground-truth solutions. 
+
+> Stage 3
+
+: Approximately 2.5k problems, consisting of: (1) all 1.0k problems from Stage 2, and (2) augmented problems generated from Solver errors during 8-attempt solving of Stage 2. All augmented problems are validated with ground-truth solutions. 
+
+J Evaluation Protocol 
+
+> Answer Extraction Strategy
+
+: We employ a two-tier extraction approach to identify student model responses: 
+
+• Primary Method : Extract answers enclosed in \boxed{} format using regex pattern \boxed\{([^}]+)\} 
+
+• Fallback Method : If no boxed format detected, perform full-text search for option letters (A/B/C/D) or numerical values matching the ground truth 
+
+> Semantic Verification Module
+
+: An LLM-based judge (Qwen3-VL-235B) evaluates answer correctness through structured comparison: 17 • Matching Rules : Case-insensitive for multiple-choice options; unit-agnostic for numerical answers (e.g., “90” matches “90 degrees”) 
+
+• Temperature : 0.1 for deterministic judgments 
+
+• Max Tokens : 10 
+
+• Output Format : Binary classification (“Correct” or “Incorrect”) 
+
+> Sampling Configuration
+
+:
+
+• Prompting Strategy : Zero-shot with three randomized prompt templates to reduce variance 
+
+• Student Model Temperature : 0.1 
+
+• Max Tokens : 1024 
+
+• Repetition : Each problem solved N times independently (e.g., N = 8 for Mean@8 metric) 
+
+• Timeout : 300s for student model, 120s for teacher model 
+
+> Mean@N Metric
+
+: A problem is considered passed if at least one attempt out of N repetitions is judged correct by the teacher model. The final score is computed as: Mean@N = Number of Passed Problems Total Problems 
+
+> Implementation Details
+
+: Evaluations run with configurable parallelism (default: 16 concurrent workers) using ThreadPoolExecutor. Trajectory files containing all intermediate results are saved incrementally every 10 problems to ensure fault tolerance and enable result inspection. 
+
+K Baseline Models 
+
+We compared against the following representative models from GenExam’s main results: 
+
+> Closed-source models
+
+: GPT-Image-1 [ 24 ], Gemini-2.5-Flash-Image [ 25 ], Imagen-4-Ultra [ 26 ], Seedream 4.0 [ 27 ], Seedream 3.0 [28], FLUX.1 Kontext max [29]. 
+
+> Open-source T2I models
+
+: Qwen-Image [ 17 ], HiDream-I1-Full [ 30 ], FLUX.1 dev [ 29 ], FLUX.1 Krea [ 29 ], Stable Diffusion 3.5 Large [31]. 
+
+> Open-source unified MLLMs
+
+: Show-o2 [ 32 ], BAGEL and BAGEL (thinking) [ 33 ], Janus-Pro [ 34 ], Emu3 [ 35 ], BLIP3o [36], BLIP3o-NEXT [37]. 18

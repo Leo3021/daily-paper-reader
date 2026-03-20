@@ -1,0 +1,280 @@
+Title: ProactiveMobile: A Comprehensive Benchmark for Boosting Proactive Intelligence on Mobile Devices
+
+URL Source: https://arxiv.org/pdf/2602.21858v3
+
+Published Time: Tue, 03 Mar 2026 01:45:22 GMT
+
+Number of Pages: 11
+
+Markdown Content:
+# ProactiveMobile: A Comprehensive Benchmark for Boosting Proactive Intelligence on Mobile Devices 
+
+## Dezhi Kong 1* Zhengzhao Feng 1,2* Qiliang Liang 1,3* Hao Wang 1 Haofei Sun 1 Changpeng Yang 1
+
+## Yang Li 1 Peng Zhou 1 Shuai Nie 1 Hongzhen Wang 1 Linfeng Zhou 1,4
+
+## Hao Jia 1 Jiaming Xu 1 Runyu Shi 1† Ying Huang 1
+
+> 1
+
+HyperAI Team, Xiaomi Corporation 2Zhejiang University 3Peking University 4Northeastern University 
+
+## Abstract 
+
+Multimodal large language models (MLLMs) have made significant progress in mobile agent development, yet their capabilities are predominantly confined to a reactive paradigm, where they merely execute explicit user com-mands. The emerging paradigm of proactive intelligence ,where agents autonomously anticipate needs and initiate actions, represents the next frontier for mobile agents. However, its development is critically bottlenecked by the lack of benchmarks that can address real-world complex-ity and enable objective, executable evaluation. To over-come these challenges, we introduce ProactiveMobile , a comprehensive benchmark designed to systematically ad-vance research in this domain. ProactiveMobile formal-izes the proactive task as inferring latent user intent across four dimensions of on-device contextual signals and gener-ating an executable function sequence from a comprehen-sive function pool of 63 APIs. The benchmark features over 3,660 instances of 14 scenarios that embrace real-world complexity through multi-answer annotations. To ensure quality, a team of 30 experts conducts a final audit of the benchmark, verifying factual accuracy, logical consistency, and action feasibility, and correcting any non-compliant entries. Extensive experiments demonstrate that our fine-tuned Qwen2.5-VL-7B-Instruct achieves a success rate of 19.15%, outperforming o1 (15.71%) and GPT-5 (7.39%). This result indicates that proactivity is a critical compe-tency widely lacking in current MLLMs, yet it is learnable, emphasizing the importance of the proposed benchmark for proactivity evaluation. 
+
+## 1. Introduction 
+
+Fueled by rapid advancements in MLLMs [3, 47, 49], mo-bile agents have achieved substantial breakthroughs[14, 46] 
+
+> *These authors contributed equally.
+> †Corresponding authors.
+
+such as interface comprehension [12, 55], conversational in-teraction [21, 36], and task planning [8, 38]. However, these agents share a fundamental constraint: they are confined to a reactive paradigm, functioning as passive executors of direct user commands [10, 34]. These models place the entire cognitive burden on the user, from need identification to goal articulation [30], thereby relegat-ing the agent to the role of a high-level tool and fundamen-tally limiting its potential for seamless integration into daily life [24]. The limitations of the reactive paradigm are becoming a critical bottleneck, propelling a fundamental shift towards 
+
+proactive intelligence —the undisputed next frontier for mobile agents. This vision represents not merely an in-cremental improvement, but a complete re-imagining of the agent’s role: rather than being a passive tool, it evolves into a genuinely helpful assistant by autonomously anticipating user needs and initiating actions [26, 43, 44]. The profound implication is a future of human-agent collaboration where cognitive burden is minimized, and interaction feels seam-lessly intuitive [4, 30, 43]. Recognizing this transformative potential, pioneering studies have indeed validated the core premise of proactivity[9, 26, 43, 44]. Despite these promising initial steps, the current re-search landscape for proactive agents remains fragmented and lacks a unified foundation. A core deficiency is that ex-isting benchmarks [26, 44] oversimplify the task: they rely on abstracted contexts and crucially assume a single “cor-rect” action per scenario. This ignores the inherent subjec-tivity and diversity of user preferences, forcing the com-plex one-to-many mapping of proactive suggestions into an unrealistic one-to-one paradigm. This flawed premise is exacerbated by the metrics used for evaluation. For in-stance, ProactiveAgent ’s [26] binary reward model is too coarse to differentiate partial from complete failures, while 
+
+FingerTip-20K [44] relies on cosine similarity, which cap-tures semantic relevance but ignores functional correctness and executability. Beyond definition and evaluation, a third major shortcoming lies in the output format. Both bench-1                     
+
+> arXiv:2602.21858v3 [cs.AI] 28 Feb 2026 Can you help me turn on the air
+> conditioner, set the temperature to 23
+> ℃, and adjust the fan speed to level 2 ?
+> I will help you turn on the air
+> conditioner, set the temperature to
+> 23 ℃, and adjust the fan speed to
+> level 2 .
+> Do you need to turn on your home
+> air conditioner in advance?
+> User Profiles: Prefer to turn on the air conditioner in high -temperature environments, typically setting the
+> temperature to 23 ℃and the fan speed to level 2.
+> Device Status: The navigation system indicates that the user is about to arrive home.
+> World Information: The local weather on that day is hot, with temperatures exceeding 35 ℃.
+> Behavioral Trajectories: The user complained about the hot weather on a social platform.
+> The agent p roactively perceives the following four types of information from the mobile device.
+> Trigger
+> The proactive agent completes the task without
+> requiring user instructions.
+> The reactive agent requires precise
+> user instructions to complete the task.
+> User
+> Reactive
+> Agent
+> Proactive
+> Agent
+> User
+> Yes, I do.
+> The air conditioner at home has
+> been turned on, with the
+> temperature set to 23 ℃and the
+> fan speed adjusted to level 2. Proactive
+> Agent
+
+Figure 1. A comparison of proactive and reactive paradigms in mobile agents. 
+
+marks rely on generating natural language recommenda-tions, a format that is inherently ambiguous and lacks a direct path to on-device execution, creating a critical gap between suggesting a task and actually performing it. This confluence of issues (an ill-defined task rooted in oversim-plification, superficial evaluation, and a non-executable out-put format) critically bottlenecks the systematic advance-ment of the field. To address these critical gaps, we introduce Proactive-Mobile , a comprehensive benchmark designed to system-atically advance research on proactive mobile agents. To mitigate oversimplification, ProactiveMobile formalizes the proactive task by requiring agents to predict actions based on four dimensions of on-device contextual signals: user profile, device status, world information, and behavioral tra-jectories. Figure 1 clearly illustrates this process and con-trasts it with the reactive agent paradigm. To tackle the ig-norance of user preferences, ProactiveMobile embraces the one-to-many nature of proactivity: each instance is anno-tated and manually verified with one to three target actions. The resulting benchmark is substantial, comprising 3,660 instances of 14 distinct scenes spanning a diverse range of real-world scenarios. Furthermore, to overcome the in-herent ambiguity and subjectivity of evaluating natural lan-guage suggestions, we introduce a crucial constraint: mod-els must translate their intents into executable actions. We achieve this by constructing a comprehensive function pool of 63 APIs, requiring models to output specific function se-quences. This approach transforms the evaluation from a subjective text-matching problem into an objective, struc-tured task. To establish baselines on our benchmark, we fine-tuned Qwen2.5-VL-7B-Instruct [3] and MiMo-VL-7B-SFT-2508 [35] on the training set. We then evaluated their per-formance on ProactiveMobile alongside a suite of lead-ing closed-source models, including o1 [17], GPT-5 [29], and Gemini-2.5-Pro [7]. Our fine-tuned Qwen2.5-VL-7B-Instruct achieves a success rate of 19.15% on the ex-act function sequence matching, significantly outperform-ing closed-source models, including o1 (15.71%), GPT-5 (7.39%), and Gemini-2.5-Pro (8.91%). These results offer two critical insights. First, this su-perior performance supports our hypothesis: proactivity is a specialized capability that requires targeted, domain-specific training, as provided by ProactiveMobile. Even the most powerful general-purpose models fail to master it out-of-the-box. Second, although proactivity is learnable, the performance of trained models still fails to meet the require-ments for on-device deployment. This indicates that proac-tive intelligence is a highly challenging research problem, which in turn underscores the significance of our work and the necessity of the proposed benchmark. Our contributions are as follows: 1. We propose a novel and comprehensive task formaliza-tion for proactive mobile agents, grounding the problem in rich, multi-dimensional real-world context. 2. We construct and open-source ProactiveMobile, com-prising 3,660 multi-intent instances across 14 scenarios. To facilitate deployment and fine-grained evaluation, all intents are mapped to corresponding function sequences via a predefined function pool of 63 APIs. 3. We provide an in-depth empirical analysis, establish-ing strong baselines and revealing that proactivity is a specialized capability lacking in current general mod-els, thereby highlighting critical challenges and future research directions. Notably, we will release our model weights to foster progress within the research commu-nity. 22. Related Work 
+
+2.1. LLM-Based Mobile Interaction 
+
+The advent of MLLMs has ushered in a new era of mo-bile agents capable of understanding natural language in-structions and visual UI elements to perform actions au-tonomously. These LLM-based mobile agents represent a paradigm shift, enabling users to accomplish intricate, multi-step tasks on web, mobile, or desktop applications via simple conversational commands [34, 48]. A core capability of these agents is GUI understanding ,or GUI grounding, where MLLMs interpret screen layouts by combining visual perception with textual information. To enhance this, specialized models [37, 41, 45] and meth-ods [6, 12, 33, 55] have been developed to better process GUI-specific modalities. The rapid progress in this area is also fueled by the development of specialized datasets, in-cluding large-scale annotated datasets [15, 19, 20, 23, 41] and data pipelines [19, 23, 45]. Another critical area is task planning and execution .LLMs excel at decomposing high-level natural language commands into a series of executable actions. However, methods based on static prompting often struggle with long-horizon tasks and dynamic environments [34, 40, 42, 51]. Some research explores fine-tuning or reinforcement learn-ing to enhance the reasoning and prediction capabilities of MLLMs in related tasks [13, 27, 28, 39, 53]. The maturation of the field is also marked by comprehensive benchmarks [25, 50, 53, 54], which provide standardized environments for evaluating agent performance on realistic tasks. 
+
+2.2. Proactive Agents 
+
+The paradigm of intelligent agents is undergoing a signif-icant shift, moving from reactive systems that await ex-plicit user commands to proactive agents that anticipate user needs [9]. By inferring likely intentions and preemptively offering or executing useful actions, these agents can en-hance user engagement and task efficiency [32]. Research in proactivity has evolved through several distinct stages. Initial explorations in this domain have largely focused on proactive conversational agents. Instead of passively re-sponding, these systems actively guide the dialogue by ask-ing clarifying questions, suggesting relevant topics, or steer-ing the conversation towards a productive goal [9, 10, 22]. While foundational, their proactivity is primarily confined to the conversational level. Building on this, subsequent research has delved deeper into proactive intent inference, where the agent’s goal is to predict a user’s next action or ultimate goal from their be-havior. These approaches can be broadly categorized into two types: those that explicitly prompt the user for clari-fication to confirm intent [31, 52], and those that implic-itly infer intent from contextual cues and behavioral history [18, 44]. This line of work is crucial for understanding user needs before they are articulated. The most advanced form of proactivity involves agents that not only anticipate needs but also autonomously exe-cute or propose complete tasks. This represents the ulti-mate goal of delivering value to the user with minimal fric-tion. However, existing work in this advanced stage often faces significant limitations. Some studies are confined to narrow, specific domains like smart home control, limiting their generalizability [5]. Others predict overly simplistic, single-step tasks, often within simulated or artificial scenar-ios that do not capture the nuances of genuine user inter-actions [26, 44]. Our work addresses these gaps by intro-ducing a benchmark where the data is deeply grounded in diverse, realistic scenarios, designed to evaluate an agent’s ability to recommend complex, multi-step tasks. 
+
+## 3. Benchmark 
+
+In this section, we define the task and detail the benchmark construction process. Due to space limitations, we provide comprehensive implementation details in the Appendix, in-cluding the prompt templates used for data generation, the design of the annotation platform, annotator training mate-rials, annotation guidelines, quality control procedures, and other technical specifications. 
+
+3.1. Task Definition 
+
+We define proactive intelligence as the task of predicting users’ latent intentions based on their user profile, device status, world information, and behavioral trajectories. The details of these four categories are as follows: • User Profile. The user’s static attributes and dynamic behavioral characteristics encompass basic information, long-term behavioral habits, and personal preferences. • Device Status. Real-time device and immediate environ-mental states include hardware, battery level, network sta-tus, location, and notifications. • World Information. External circumstances, including weather, time of day, and public holidays. • Behavioral Trajectories. A temporal sequence of user-device interactions that reveals evolving intent. In terms of representation, user profile, device status, and world information are expressed in natural language, while behavioral trajectories are represented either as textual de-scriptions or sequences of GUI screenshots. To facilitate command execution, all intents are mapped into a unified sequence of executable functions. Consequently, the com-plete proactive intelligence task can be formalized as: 
+
+T = {(IIIk, F FF k)}ak=1 = Predict (U, D, W, B). (1) Here, U, D, W, and B represent the user profile, device status, world information, and behavioral trajectories at the 3Device Status User Profile  
+
+> World Information
+> Task Pool
+> (1) Generate four information
+> GUI Trace Text Trace
+> (3) Add interfering information
+> Agent
+> Agent
+> (5) Three-stage review (2) Generate potential intentions
+
+Claude Sonnet 4 
+
+Gemini 2.5 Pro 
+
+o1 
+
+GPT 4o 
+
+Claude Sonnet 3.7 
+
+Gemini 2.0 Flash   
+
+> Rec 1
+> Rec 2
+> Top-3 intentions
+> Rec 30
+> (4) Map to function
+> Agent
+> Function Pool
+> Functions
+> Mapping
+> Behavioral trajectories
+> Annotator Agent
+
+Figure 2. The overview of data generation. 
+
+decision moment. For each decision point, there may exist multiple valid intent–function pairs, denoted as the ground-truth set T . The model generates a single predicted pair: 
+
+(ˆIII, ˆFFF ) = MMM θ (U, D, W, B),
+
+ˆFFF =
+
+(
+
+(f1, . . . , f n), ˆIII̸ = ∅ ∧ ˆIII ⇒ ˆFFF , 
+
+∅, ˆIII = ∅ ∨ ˆIII ⇏ ˆFFF , 
+
+(2) where ˆFFF is non-empty only if ˆIII is actionable and can be mapped to at least one function from the predefined function pool F, i.e., ˆFFF ⊆ F; otherwise, ˆFFF = ∅.The prediction is considered correct if the model output matches any ground-truth pair: 
+
+(ˆIII, ˆFFF ) ∈ T . (3) 
+
+3.2. Dataset Construction 
+
+This section is organized into three main sections. First, we elaborate on the acquisition methods for behavioral trajec-tories. Second, we outline the end-to-end data generation process. Finally, we provide a detailed account of the data auditing mechanism. 
+
+3.2.1. Acquisition of Behavioral Trajectories 
+
+User behavioral trajectories serve as the foundation for in-tent prediction. In cases where direct access to user actions is unavailable, screenshots are used as substitutes. We de-fine these two modalities as: • Multimodal trajectories: Sequences of mobile screen-shots captured during user interactions, combined with corresponding text commands from both public and self-built datasets, summarized in Table 1. • Text trajectories: Textual logs of user actions are de-rived from GUI traces. We first categorize and dedu-plicate text commands, then employ Claude-Sonnet-4 to generate text-based action trajectories via prompt-based expansion.           
+
+> Dataset Description Usage GUI-Odyssey [25] A dataset for cross-app mobile GUI navigation 21,669 AITZ [50] Largest dataset in the Android GUI navigation field 9,413 CAGUI [53] A real-world Chinese Android GUI benchmark 3,196 MobileAgentBench Self-collected GUI data from mobile devices 12,481
+
+Table 1. Summary of GUI datasets. 
+
+3.2.2. Generation Pipeline 
+
+The data generation process involves five key steps, as illus-trated in Figure 2. 1. Generate contextual information. Based on user be-havioral trajectories and relevant commands, we ran-domly employ Claude-Sonnet-4[2], Gemini-2.5-Pro [7], and GPT-5 [29] to generate three complementary in-formation components—user profile, device status, and world information—thereby constructing a comprehen-sive contextual information stream. The generated infor-mation then undergoes a plausibility check using the o1 [17]. If the content is deemed implausible, it is discarded and subsequently regenerated. 2. Generate potential intentions. Leveraging the con-textual information, multiple MLLM models simulate users’ potential next-step intentions. These intentions represent tasks that agents can recommend proactively, triggered by specific conditions and personalized ac-cording to the user profile. To ensure both diversity and quality of generated intentions, we select six state-of-the-art closed-source MLLMs (Claude-Sonnet-4 [2], Claude-Sonnet-3.7 [1], Gemini-2.5-Pro [7], Gemini-2.0-Flash [11], o1 [17], and GPT-4o [16]) with strong mul-timodal understanding and reasoning capabilities. To unify their outputs, Gemini-2.5-Flash [7] is prompted to semantically cluster the 30 generated candidates and extract the top-3 representative intentions (cluster cen-troids) ranked by overall support across models. 3. Add interfering information. To enhance model ro-bustness, we intentionally inject irrelevant textual noise into the user profile, device states, and environmental in-formation. The injected noise consists of task-irrelevant 4yet semantically coherent text generated by Gemini-2.5-Pro [7] through carefully designed prompts. This pro-cess preserves overall logical consistency while training the model to focus on salient and task-relevant signals. On average, the amount of injected noise is approxi-mately 5–20 times the volume of task-relevant informa-tion. 4. Map to function. Convert intentions into function calls. We uniformly convert textual instructions gener-ated by multiple MLLMs into executable function-call sequences. This conversion is performed by Claude-Sonnet-4 [2], which is prompted to select appropriate functions from a predefined function pool to fulfill each recommended task. The resulting sequence may include one or more functions, while a zero-function sequence indicates that no action is required and triggers the no-recommendation logic. 5. Three-stage review. A three-stage review mecha-nism—comprising rule-based checks, agent evaluations, and expert reviews—is adopted to filter and validate gen-erated data, ensuring reliability and accuracy. 
+
+3.2.3. Three-Stage Review 
+
+To ensure data quality, we implement a comprehensive quality control process spanning three stages: rule-based filtering, agent evaluation, and expert review. 1. Rule-based filtering. Automatically removes entries that fail to meet format and consistency requirements. 2. Agent evaluation. We employ Gemini-2.5-Pro [7] to as-sess the internal consistency among textual information, action trajectories, and recommended actions. Using a prompt-based evaluation framework, the model exam-ines textual information for authenticity and naturalness, trajectories for realism and temporal coherence, and rec-ommendations for contextual appropriateness and exe-cutability. 3. Expert review. Experts verify the remaining entries for factual accuracy, internal logic feasibility, and ac-tion feasibility. A team of 30 trained annotators, each with prior experience in human–computer interaction and data annotation, conducts the verification process. All annotators undergo standardized training and trial la-beling sessions to align annotation criteria and resolve ambiguities. To ensure data quality, each data point is independently annotated by three annotators. An item is considered valid and accepted for the final dataset only if at least two annotators are in agreement on its label. This extensive cleaning and correction process represents a four-month effort with a total investment of $210,000. Throughout this period, experts collabo-ratively refine and validate the dataset to ensure its relia-bility and consistency. 
+
+3.3. Function Pool Construction 
+
+To facilitate on-device execution and standardized evalu-ation, we transformed textual instructions into a unified function call format by creating a predefined function pool. Our construction process involved a multi-stage pipeline. First, we manually categorized instructions into 14 distinct scenes. Then, we employed LLMs to initially generate function sequences and subsequently refine them by merg-ing similar functions and parameters while pruning infre-quent ones. Following this automated phase, we defined a formal schema for each function, annotating parameter data types and specifying required arguments. Finally, the en-tire function pool underwent a rigorous manual verification by five experienced doctoral researchers specializing in AI agents and system design, who cross-checked all definitions to ensure semantic consistency, correctness, and overall co-herence. 
+
+3.4. Difficulty Definition 
+
+To systematically evaluate model performance across dif-ferent levels of challenge, we establish a three-tier difficulty system. We classify each data item based on the number of correct predictions from a panel of five powerful models: Claude-Sonnet-4 [2], Claude-Sonnet-3.7 [1], GPT-4o [16], Gemini-2.5-Pro [7], and Gemini-2.5-Flash [7]. The diffi-culty level is defined as follows: • Level 1 (Easy) : Correctly solved by 4–5 out of 5 refer-ence models. • Level 2 (Medium) : Correctly solved by 2–3 out of 5 ref-erence models. • Level 3 (Hard) : Correctly solved by 0–1 out of 5 refer-ence models. To validate this automatic classification, a group of five ex-perienced doctoral researchers independently assessed a stratified sample of data items. The resulting difficulty an-notations showed an inter-rater agreement of over 95% with our model-based difficulty levels, confirming the reliability and consistency of the proposed three-tier system. Finally, in Figure 3 and Table 2, we illustrate the dataset information for our benchmark. 
+
+## 4. Experiments 
+
+This section highlights the value and contributions of our work by benchmarking against state-of-the-art closed-source MLLMs. 
+
+4.1. Setting 
+
+Fine-tuned Model. To create a specialized proactive agent, we perform full-parameter supervised fine-tuning (SFT) on Qwen2.5-VL-7B-Instruct [3] and MiMo-VL-7B-SFT-2508 [35]. A core aspect of our methodology is the defined out-put format: the model was trained to co-generate both a 5Split Data Type Scenes Items Intents Images Ave. Image Functions Ave. Functions L1 L2 L3 Train Multimodal 12 4,438 8,977 32,418 7.30 9,964 1.11 308 1,376 2,754 Text 12 4,438 4,438 - - 8,259 1.86 372 1,208 2,858 Test Multimodal 14 1,832 3,711 14,341 7.83 4,173 1.24 118 613 1,101 Text 14 1,828 2,676 - - 2,266 0.85 259 711 858 
+
+Table 2. Statistics of the ProactiveMobile dataset, broken down by Train and Test splits and data modality. The table details the composition of our benchmark, including the number of scenes, items, intents, functions, and distribution of different difficulties. Notably, the test set includes two additional scenes (14 vs. 12) not present in the training set, which form our dedicated out-of-distribution (OOD) evaluation split. Model 
+
+L1 L2 
+
+Multimodal Text All Multimodal Text All SR ↑ FTR ↓ SR ↑ FTR ↓ SR ↑ FTR ↓ SR ↑ FTR ↓ SR ↑ FTR ↓ SR ↑ FTR ↓
+
+GPT-5 5.08 69.23 20.46 15.07 15.65 20.82 6.20 61.47 16.34 27.29 11.64 33.74 GPT-4o 11.02 95.24 18.53 42.33 16.18 47.03 5.87 92.31 9.14 54.49 7.63 60.77 o1 18.64 46.88 27.41 2.71 24.67 8.30 11.58 32.58 21.94 4.64 17.14 10.32 
+
+Gemini-2.5-Pro 6.78 66.67 10.81 62.87 9.55 63.32 11.91 67.44 7.03 80.91 9.29 78.38 Qwen2.5-VL-7B 0.85 80.00 2.32 50.00 1.86 54.84 1.14 71.05 2.39 65.81 1.81 67.10 MiMo-VL-7B-SFT 5.08 42.10 7.34 53.49 6.63 51.43 4.08 62.12 5.63 53.88 4.91 55.79 Qwen2.5-VL-7B +Proactive 19.49 38.23 37.07 6.85 31.56 11.07 14.52 24.31 29.39 10.08 22.51 13.18 MiMo-VL-7B-SFT +Proactive 15.25 27.27 20.08 51.02 18.57 47.60 11.42 24.03 16.60 50.12 14.20 44.00 Model 
+
+L3 Avg 
+
+Multimodal Text All Multimodal Text All SR ↑ FTR ↓ SR ↑ FTR ↓ SR ↑ FTR ↓ SR ↑ FTR ↓ SR ↑ FTR ↓ SR ↑ FTR ↓
+
+GPT-5 5.09 44.80 8.28 37.55 6.48 41.04 5.46 51.17 8.67 27.38 7.39 34.20 GPT-4o 4.27 90.45 4.66 52.19 4.44 70.06 5.24 91.27 8.37 51.03 6.80 61.67 o1 11.90 19.75 14.45 10.06 13.02 14.76 12.23 25.05 19.20 5.95 15.71 11.87 
+
+Gemini-2.5-Pro 9.26 66.82 7.58 82.54 8.53 74.03 9.99 66.96 7.82 76.54 8.91 73.61 Qwen2.5-VL-7B 0.73 71.05 1.28 58.06 0.97 65.22 0.87 71.77 1.86 60.17 1.37 64.22 MiMo-VL-7B-SFT 2.73 58.02 2.80 42.48 2.76 50.82 3.33 57.87 4.54 50.72 3.93 53.10 Qwen2.5-VL-7B +Proactive 13.17 24.14 16.20 11.85 14.50 17.74 14.03 25.15 24.29 9.99 19.15 14.77 MiMo-VL-7B-SFT +Proactive 11.99 27.12 12.24 35.37 12.10 30.87 12.01 26.26 15.04 46.12 13.53 39.24 Table 3. Overall performance comparison of our fine-tuned model ( +Proactive ) against baselines on the ProactiveMobile test set. We report two key metrics: Success Rate (SR ↑), where higher is better, and False Trigger Rate (FTR ↓), where lower is better. The comparison is broken down by task difficulty (L1-L3) and data modality. For each metric, the best result is in bold and the second-best is underlined. All scores are in percentage (%). 
+
+natural language recommendation instruction and the cor-responding executable function sequence. We utilize the 8,876 instances from the training split of ProactiveMobile. Further details regarding data pre-processing, specific hy-perparameters, and the hardware environment are provided in Appendix. 
+
+Baseline Models. To benchmark against the current state-of-the-art, we evaluate several leading proprietary MLLMs, including GPT-5 [29], GPT-4o [16], Gemini-2.5-Pro [7], o1 [17], unfinetuned Qwen2.5-VL-7B-Instruct [3], and unfine-tuned MiMo-VL-7B-SFT-2508 [35]. All baseline models were evaluated in a zero-shot setting. To ensure a fair com-parison, the standardized prompt instructed these models to adopt the same output format. We design a standard-ized prompt that provided each model with the same multi-dimensional context (user profile, device status, etc.) and the list of available functions from our API pool, instruct-ing them to output the appropriate function call sequence. 
+
+4.2. Metrics 
+
+Evaluating proactive intelligence presents unique chal-lenges, especially given the one-to-many nature of valid ac-tions in ProactiveMobile, where a single context can map to multiple ground-truth sequences. A naive evaluation metric would either be too brittle (penalizing functionally correct but formally different predictions) or too lenient. To ad-dress this, we define two core metrics, Success Rate and False Trigger Rate, whose final values are determined by a sophisticated evaluation protocol designed specifically for this one-to-many context, as detailed below. 6Figure 3. Distribution of the 14 primary user intent categories, demonstrating the benchmark’s broad scenario coverage (e.g., Per-sonal Management, Office Work, Food & Dining). Training Strategy Multimodal Text All SR ↑ FTR ↓ SR ↑ FTR ↓ SR ↑ FTR ↓                        
+
+> Func. 11.57 100.00 5.31 100.00 8.44 100.00
+> Rec.+Func.(ours) 14.03 25.15 24.29 9.99 19.15 14.77 Think+Func. 7.92 100.00 3.77 99.83 5.85 99.89 Think+Rec.+Func. 4.97 3.02 9.79 1.80 7.38 2.21
+
+Table 4. Ablation study on the impact of different output for-mats. We compare our primary Text Recommendation + Func-tion strategy against variants that only output the Function , or include an additional reasoning ( Think ) step. Model SR ↑ FTR ↓
+
+GPT-5 10.29 46.15 GPT-4o 3.13 52.63 o1 18.75 3.57 
+
+Gemini-2.5-Pro 12.50 54.17 Qwen2.5-VL-7B-Instruct 1.56 66.67 MiMo-VL-7B-SFT-2508 4.69 45.45 Qwen2.5-VL-7B-Instruct + Proactive 15.63 27.59 MiMo-VL-7B-SFT-2508 + Proactive 7.81 40.91 Table 5. Performance on the Out-of-Distribution (OOD) test set. This set comprises 64 instances from two scenarios (Logistics De-livery and Smart Home) that were entirely absent from the training data. 
+
+4.2.1. Core Metrics 1. Success Rate (SR). This is our primary, binary success metric, designed to measure perfect functional equivalence. A prediction is considered accurate not based on simple string comparison, but on whether it is semantically and functionally identical to a valid ground truth. To make this judgment, we employ a powerful LLM judge (Gemini-2.5-Pro [7]) 1. An instance receives a final SR score of 1 only if the model’s prediction is deemed functionally equivalent 
+
+> 1To ensure the validity of judgment, we verified the consistency be-tween the model and human experts, and achieved a consistency of 98%.
+
+to one of the valid ground-truth answers; otherwise, it is 0. Given ProactiveMobile’s one-to-many nature, the precise procedure for selecting the “best” ground truth to compare against is critical, and is elaborated in our Best-Match Se-lection Protocol (Section 4.2.2). 
+
+2. False Trigger Rate (FTR). This metric measures the model’s reliability in non-trigger scenarios. It quantifies the rate at which the model incorrectly generates an ac-tion when the ground truth specifies that no action should be taken. Let Nno −action be the total number of instances where the ground-truth set is empty ( G = ∅), and Nf t 
+
+be the number of those instances where the model falsely triggers a non-empty Spred . The FTR is calculated as: FTR = Nf t 
+
+> Nno −action
+
+4.2.2. Best-Match Selection Protocol 
+
+The aforementioned protocol dictates how a model’s predic-tion ( Spred ) is scored against the set of ground-truth candi-dates ( G = Slabel, 1, ... ) to yield the final SR score. It is a two-stage process designed to be both rigorous and fair: 
+
+Stage 1: Prioritize Perfect Functional Equivalence. We first check if the model’s prediction is functionally equiva-lent (as judged by our LLM referee) to any of the ground-truth sequences. If one or more such ”perfect matches” are found, the SR for this instance is immediately set to 1, and the protocol terminates for this instance. One of these per-fect matches is randomly selected as the best match ( S∗
+
+> label
+
+)for any further analysis. 
+
+Stage 2: F1-Score Fallback for Imperfect Predictions. If no perfect match is found in Stage 1, the SR for this in-stance is definitively 0. However, for consistent and fair analysis, we still need to select a single “closest” ground truth. In this scenario, we identify the ground-truth candi-date that maximizes the F1-score (calculated on the sets of function names) when compared with Spred . To compute this score, we treat both the prediction and the ground truth as unordered sets of function names, thus ignoring parame-ters and sequence order. This allows us to calculate the har-monic mean of precision (the fraction of predicted functions that are correct) and recall (the fraction of correct functions that were predicted). This F1-maximizing sequence is then designated as the best match ( S∗
+
+> label
+
+). 
+
+Why this protocol? This two-stage design serves a crucial purpose. It establishes perfect functional correctness as the unambiguous gold standard for success, which is directly reflected in our primary SR metric. The F1-fallback mech-anism, meanwhile, ensures a robust and consistent process for handling failures, providing a fair basis for comparison and deeper analysis even when the primary success condi-tion is not met. 74.3. Overall Performance 
+
+Table 3 presents a comprehensive performance analysis, re-vealing several critical insights into the current landscape of proactive intelligence. 
+
+Fine-tuning on ProactiveMobile consistently unlocks SOTA capabilities. The most striking result is the sig-nificant impact of fine-tuning on our benchmark. This ef-fect is consistent across different base models: fine-tuning boosts the Qwen2.5-VL-7B-Instruct from a mere 1.37% to a state-of-the-art 19.15% Success Rate, and similarly ele-vates the MiMo-VL-7B-SFT-2508 from 3.93% to 13.53%. Our fine-tuned Qwen model establishes a new benchmark, significantly outperforming the top-performing proprietary model, o1 (15.71% SR). This substantial gap unequivocally demonstrates that proactivity is a specialized, learnable skill requiring domain-specific adaptation, validating Proactive-Mobile as an essential training resource. 
+
+Multimodal reasoning remains a key bottleneck. The performance disparity across data types reveals a core chal-lenge. For our top-performing model (Qwen2.5-VL-7B + Proactive), the SR on Text tasks (24.29%) is substantially higher than on Multimodal tasks (14.03%). This perfor-mance delta suggests that grounding abstract intents within noisy, real-world GUI screenshots introduces significant complexity, highlighting robust visual comprehension as a critical area for future advancement in on-device proactive intelligence. 
+
+The low absolute scores validate the task’s inherent dif-ficulty. Despite the strong relative performance of our fine-tuned model, the absolute SR scores remain modest across the board. The fact that the state-of-the-art sits just under 20% confirms that reliable, functionally correct proactive intelligence is a profoundly difficult and unsolved problem. This finding validates ProactiveMobile not as a benchmark for a saturated task, but as a challenging and indispensable testbed designed to catalyze genuine breakthroughs in the field. 
+
+4.4. Generalization to Out-of-Distribution Scenar-ios 
+
+To assess generalization, we evaluated all models on an out-of-distribution (OOD) test set comprising 64 instances from two scenarios—Logistics Delivery and Smart Home—that were entirely absent from the training data. The results in Table 5 reveal a telling dichotomy. On one hand, o1 emerges as the top performer with an 18.75% SR, likely leveraging its vast pre-training to handle novel concepts. On the other hand, our fine-tuned Qwen2.5-VL-7B-Instruct + Proactive model secures a strong second place at 15.63% SR, significantly outperforming other powerful generalists like Gemini-2.5-Pro (12.50%), GPT-5 (10.29%), and GPT-4o (3.13%). This demonstrates that while immense scale of-fers one path to generalization, our fine-tuning approach ef-fectively imparts a more robust and transferable understand-ing of proactive logic. It validates that the skills learned on ProactiveMobile are not mere pattern matching, but repre-sent a promising step toward truly generalizable proactive intelligence. 
+
+4.5. Ablation Study 
+
+To validate our training and output format (Recommenda-tion + Function), we conducted an ablation study comparing it with variants that either omitted the recommendation or added an explicit Think step. The results in Table 4 are deci-sive. Our chosen strategy achieves the highest SR (19.15%), indicating that compelling the model to articulate a user-facing intent acts as an effective reasoning scaffold. Criti-cally, formats trained without this textual recommendation (Function only and Think + Function) exhibit a catastrophic failure in safety, with False Trigger Rate (FTR) rates near 100%. This demonstrates that generating the intent is in-dispensable for teaching the model the crucial skill of when not to act. The study also reveals a crucial trade-off between SR and safety. While adding a Think step (Think + Recommenda-tion + Function) slightly lowered SR, it drastically enhanced safety, slashing the FTR rate to a 2.21%. This highlights the Think step as a promising direction for building maximally safe agents. Nevertheless, our primary Recommendation + Function approach offers the best-performing balance be-tween SR and reliability, thus validating our core design choice. Further ablation studies, including an analysis of the impact of different contextual dimensions, are detailed in Appendix. 
+
+## 5. Conclusion 
+
+In this work, we address the critical bottleneck hinder-ing the transition of mobile agents from a reactive to a proactive paradigm: the lack of an executable, objective, and realistic benchmark. We introduce ProactiveMobile, a comprehensive benchmark that formalizes the proactive task around a four-dimensional context model, incorporates multi-answer annotations, and uniquely mandates an exe-cutable function-call sequence output. Our extensive exper-iments validate that proactivity is a specialized, learnable capability. This is consistently demonstrated as fine-tuning on our benchmark boosts different models’ performance, with our top-performing model achieving a 19.15% success rate—establishing a new state-of-the-art that surpasses even leading proprietary models like o1 (15.71%). This demon-strates the efficacy of ProactiveMobile as an essential tool for targeted training and highlights the significant gap in current models’ out-of-the-box abilities. While our work establishes a new SOTA, the modest absolute success rates underscore that proactive intelligence is a profoundly challenging research problem, opening up 8several promising future directions. Key priorities include enhancing models’ multimodal reasoning to close the significant performance gap between text and multimodal tasks, and exploring advanced training methodologies like reinforcement learning for more robust decision-making. Furthermore, our ablation study on output formats reveals a rich trade-off between success rate and safety, warranting deeper investigation into creating agents that are not only effective but also trustworthy. By providing a foundational and challenging testbed, ProactiveMobile aims to catalyze these future innovations, steering the community toward the development of truly intelligent, anticipatory agents. 
+
+## References 
+
+[1] Anthropic. Claude 3.7 Sonnet and Claude Code. https: / / www . anthropic . com / news / claude - 3 - 7 -sonnet , 2025. Accessed: 2025-11-13. 4, 5 [2] Anthropic. Introducing Claude 4. https : / / www . anthropic.com/news/claude-4 , 2025. Accessed: 2025-11-13. 4, 5 [3] Shuai Bai, Keqin Chen, Xuejing Liu, Jialin Wang, Wenbin Ge, Sibo Song, Kai Dang, Peng Wang, Shijie Wang, Jun Tang, et al. Qwen2. 5-vl technical report. arXiv preprint arXiv:2502.13923 , 2025. 1, 2, 5, 6 [4] Florian Brachten, Felix Br¨ unker, Nicholas RJ Frick, Bj¨ orn Ross, and Stefan Stieglitz. On the ability of virtual agents to decrease cognitive load: an experimental study. Information Systems and e-Business Management , 18(2):187–207, 2020. 1[5] Zhihao Cao, Zidong Wang, Siwen Xie, Anji Liu, and Lifeng Fan. Smart help: Strategic opponent modeling for proactive and adaptive robot assistance in households. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pat-tern Recognition , pages 18091–18101, 2024. 3 [6] Jikai Chen, Long Chen, Dong Wang, Leilei Gan, Chenyi Zhuang, and Jinjie Gu. V2p: From background suppression to center peaking for robust gui grounding task, 2025. 3 [7] Gheorghe Comanici, Eric Bieber, Mike Schaekermann, Ice Pasupat, Noveen Sachdeva, Inderjit Dhillon, Marcel Blis-tein, Ori Ram, Dan Zhang, Evan Rosen, et al. Gemini 2.5: Pushing the frontier with advanced reasoning, multimodality, long context, and next generation agentic capabilities. arXiv preprint arXiv:2507.06261 , 2025. 2, 4, 5, 6, 7 [8] Shihan Deng, Weikai Xu, Hongda Sun, Wei Liu, Tao Tan, Liujianfeng Liujianfeng, Ang Li, Jian Luan, Bin Wang, Rui Yan, and Shuo Shang. Mobile-bench: An evaluation bench-mark for LLM-based mobile agents. In Proceedings of the 62nd Annual Meeting of the Association for Computa-tional Linguistics (Volume 1: Long Papers) , pages 8813– 8831, Bangkok, Thailand, 2024. Association for Computa-tional Linguistics. 1 [9] Yang Deng, Wenqiang Lei, Wai Lam, and Tat-Seng Chua. A survey on proactive dialogue systems: Problems, methods, and prospects, 2023. 1, 3 [10] Yang Deng, Lizi Liao, Wenqiang Lei, Grace Hui Yang, Wai Lam, and Tat-Seng Chua. Proactive conversational ai: A comprehensive survey of advancements and opportuni-ties. ACM Transactions on Information Systems , 43(3):1–45, 2025. 1, 3 [11] Google. Gemini 2.0: Flash, Flash-Lite and Pro. https: //developers.googleblog.com/en/gemini-2-family-expands/ , 2025. Accessed: 2025-11-13. 4 [12] Boyu Gou, Ruohan Wang, Boyuan Zheng, Yanan Xie, Cheng Chang, Yiheng Shu, Huan Sun, and Yu Su. Navigating the digital world as humans do: Universal visual grounding for gui agents, 2025. 1, 3 [13] Zhangxuan Gu, Zhengwen Zeng, Zhenyu Xu, Xingran Zhou, Shuheng Shen, Yunfei Liu, Beitong Zhou, Changhua Meng, Tianyu Xia, Weizhi Chen, Yue Wen, Jingya Dou, Fei Tang, Jinzhen Lin, Yulin Liu, Zhenlin Guo, Yichen Gong, Heng Jia, Changlong Gao, Yuan Guo, Yong Deng, Zhenyu Guo, Liang Chen, and Weiqiang Wang. Ui-venus technical report: Building high-performance ui agents with rft, 2025. 3 [14] Xueyu Hu, Tao Xiong, Biao Yi, Zishu Wei, Ruixuan Xiao, Yurun Chen, Jiasheng Ye, Meiling Tao, Xiangxin Zhou, Ziyu Zhao, et al. Os agents: A survey on mllm-based agents for computer, phone and browser use. In Proceedings of the 63rd Annual Meeting of the Association for Computational Lin-guistics (Volume 1: Long Papers) , pages 7436–7465, 2025. 1[15] Zheng Hui, Yinheng Li, Dan Zhao, Colby Banbury, Tianyi Chen, and Kazuhito Koishida. Winspot: Gui grounding benchmark with multimodal large language models. In Pro-ceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Volume 2: Short Papers) , pages 1086–1096, 2025. 3 [16] Aaron Hurst, Adam Lerer, Adam P Goucher, Adam Perel-man, Aditya Ramesh, Aidan Clark, AJ Ostrow, Akila Weli-hinda, Alan Hayes, Alec Radford, et al. Gpt-4o system card. 
+
+arXiv preprint arXiv:2410.21276 , 2024. 4, 5, 6 [17] Aaron Jaech, Adam Kalai, Adam Lerer, Adam Richard-son, Ahmed El-Kishky, Aiden Low, Alec Helyar, Aleksander Madry, Alex Beutel, Alex Carney, et al. Openai o1 system card. arXiv preprint arXiv:2412.16720 , 2024. 2, 4, 6 [18] Jaekyeom Kim, Dong-Ki Kim, Lajanugen Logeswaran, Sun-gryull Sohn, and Honglak Lee. Auto-intent: Automated in-tent discovery and self-exploration for large language model web agents. In Findings of the Association for Computa-tional Linguistics: EMNLP 2024 , pages 16531–16541, 2024. 3[19] Hongxin Li, Jingfan Chen, Jingran Su, Yuntao Chen, Qing Li, and Zhaoxiang Zhang. Autogui: Scaling gui grounding with automatic functionality annotations from llms. arXiv preprint arXiv:2502.01977 , 2025. 3 [20] Kaixin Li, Ziyang Meng, Hongzhan Lin, Ziyang Luo, Yuchen Tian, Jing Ma, Zhiyong Huang, and Tat-Seng Chua. Screenspot-pro: Gui grounding for professional high-resolution computer use. arXiv preprint arXiv:2504.07981 ,2025. 3 [21] Yanda Li, Chi Zhang, Wenjia Jiang, Wanqi Yang, Bin Fu, Pei Cheng, Xin Chen, Ling Chen, and Yunchao Wei. Appagent v2: Advanced agent for flexible mobile interactions. arXiv preprint arXiv:2408.11824 , 2024. 1 
+
+9[22] Lizi Liao, Grace Hui Yang, and Chirag Shah. Proactive con-versational agents in the post-chatgpt world. In Proceedings of the 46th international ACM SIGIR conference on research and development in information retrieval , pages 3452–3455, 2023. 3 [23] Xinyi Liu, Xiaoyi Zhang, Ziyun Zhang, and Yan Lu. Ui-e2i-synth: Advancing gui grounding with large-scale instruction synthesis, 2025. 3 [24] Xingyu Bruce Liu, Shitao Fang, Weiyan Shi, Chien-Sheng Wu, Takeo Igarashi, and Xiang’Anthony’ Chen. Proactive conversational agents with inner thoughts. In Proceedings of the 2025 CHI Conference on Human Factors in Computing Systems , pages 1–19, 2025. 1 [25] Quanfeng Lu, Wenqi Shao, Zitao Liu, Fanqing Meng, Box-uan Li, Botong Chen, Siyuan Huang, Kaipeng Zhang, Yu Qiao, and Ping Luo. Gui odyssey: A comprehensive dataset for cross-app gui navigation on mobile devices. arXiv preprint arXiv:2406.08451 , 2024. 3, 4 [26] Yaxi Lu, Shenzhi Yang, Cheng Qian, Guirong Chen, Qinyu Luo, Yesai Wu, Huadong Wang, Xin Cong, Zhong Zhang, Yankai Lin, et al. Proactive agent: Shifting llm agents from reactive responses to active assistance. arXiv preprint arXiv:2410.12361 , 2024. 1, 3 [27] Zhengxi Lu, Yuxiang Chai, Yaxuan Guo, Xi Yin, Liang Liu, Hao Wang, Han Xiao, Shuai Ren, Guanjing Xiong, and Hongsheng Li. Ui-r1: Enhancing efficient action predic-tion of gui agents by reinforcement learning. arXiv preprint arXiv:2503.21620 , 2025. 3 [28] Run Luo, Lu Wang, Wanwei He, Longze Chen, Jiaming Li, and Xiaobo Xia. Gui-r1 : A generalist r1-style vision-language action model for gui agents, 2025. 3 [29] OpenAI. GPT-5 System Card. Technical report, OpenAI, 2025. Accessed: 2025-08-10. 2, 4, 6 [30] Yingzhe Peng, Xiaoting Qin, Zhiyang Zhang, Jue Zhang, Qingwei Lin, Xu Yang, Dongmei Zhang, Saravan Rajmo-han, and Qi Zhang. Navigating the unknown: A chat-based collaborative interface for personalized exploratory tasks. In 
+
+Proceedings of the 30th International Conference on Intelli-gent User Interfaces , pages 1048–1063, 2025. 1 [31] Cheng Qian, Bingxiang He, Zhong Zhuang, Jia Deng, Yujia Qin, Xin Cong, Zhong Zhang, Jie Zhou, Yankai Lin, Zhiyuan Liu, et al. Tell me more! towards implicit user intention un-derstanding of language model driven agents. In Proceedings of the 62nd Annual Meeting of the Association for Compu-tational Linguistics (Volume 1: Long Papers) , pages 1088– 1113, 2024. 3 [32] Roderick Tabalba, Christopher J. Lee, Giorgio Tran, Nurit Kirshenbaum, and Jason Leigh. Articulatepro: A compar-ative study on a proactive and non-proactive assistant in a climate data exploration task, 2024. 3 [33] Fei Tang, Zhangxuan Gu, Zhengxi Lu, Xuyang Liu, Shuheng Shen, Changhua Meng, Wen Wang, Wenqi Zhang, Yongliang Shen, Weiming Lu, Jun Xiao, and Yueting Zhuang. Gui-g 2: Gaussian reward modeling for gui ground-ing, 2025. 3 [34] Fei Tang, Haolei Xu, Hang Zhang, Siqi Chen, Xingyu Wu, Yongliang Shen, Wenqi Zhang, Guiyang Hou, Zeqi Tan, Yuchen Yan, Kaitao Song, Jian Shao, Weiming Lu, Jun Xiao, and Yueting Zhuang. A survey on (m)llm-based gui agents, 2025. 1, 3 [35] Core Team, Zihao Yue, Zhenru Lin, Yifan Song, Weikun Wang, Shuhuai Ren, Shuhao Gu, Shicheng Li, Peidian Li, Liang Zhao, Lei Li, Kainan Bao, Hao Tian, Hailin Zhang, Gang Wang, Dawei Zhu, Cici, Chenhong He, Bowen Ye, Bowen Shen, Zihan Zhang, Zihan Jiang, Zhix-ian Zheng, Zhichao Song, Zhenbo Luo, Yue Yu, Yudong Wang, Yuanyuan Tian, Yu Tu, Yihan Yan, Yi Huang, Xu Wang, Xinzhe Xu, Xingchen Song, Xing Zhang, Xing Yong, Xin Zhang, Xiangwei Deng, Wenyu Yang, Wenhan Ma, Wei-wei Lv, Weiji Zhuang, Wei Liu, Sirui Deng, Shuo Liu, Shi-mao Chen, Shihua Yu, Shaohui Liu, Shande Wang, Rui Ma, Qiantong Wang, Peng Wang, Nuo Chen, Menghang Zhu, Kangyang Zhou, Kang Zhou, Kai Fang, Jun Shi, Jinhao Dong, Jiebao Xiao, Jiaming Xu, Huaqiu Liu, Hongshen Xu, Heng Qu, Haochen Zhao, Hanglong Lv, Guoan Wang, Duo Zhang, Dong Zhang, Di Zhang, Chong Ma, Chang Liu, Can Cai, and Bingquan Xia. Mimo-vl technical report, 2025. 2, 5, 6 [36] Junyang Wang, Haiyang Xu, Haitao Jia, Xi Zhang, Ming Yan, Weizhou Shen, Ji Zhang, Fei Huang, and Jitao Sang. Mobile-agent-v2: Mobile device operation assistant with ef-fective navigation via multi-agent collaboration. Advances in Neural Information Processing Systems , 37:2686–2710, 2024. 1 [37] Ziwei Wang, Weizhi Chen, Leyang Yang, Sheng Zhou, Shengchu Zhao, Hanbei Zhan, Jiongchao Jin, Liangcheng Li, Zirui Shao, and Jiajun Bu. Mp-gui: Modality percep-tion with mllms for gui understanding. In Proceedings of the Computer Vision and Pattern Recognition Conference , pages 29711–29721, 2025. 3 [38] Zhenhailong Wang, Haiyang Xu, Junyang Wang, Xi Zhang, Ming Yan, Ji Zhang, Fei Huang, and Heng Ji. Mobile-agent-e: Self-evolving mobile assistant for complex tasks. arXiv preprint arXiv:2501.11733 , 2025. 1 [39] Jinyang Wu, Mingkuan Feng, Shuai Zhang, Feihu Che, Zengqi Wen, Chonghua Liao, and Jianhua Tao. Beyond examples: High-level automated reasoning paradigm in in-context learning via mcts. arXiv preprint arXiv:2411.18478 ,2024. 3 [40] Jinyang Wu, Guocheng Zhai, Ruihan Jin, Jiahao Yuan, Yuhao Shen, Shuai Zhang, Zhengqi Wen, and Jianhua Tao. Atlas: Orchestrating heterogeneous models and tools for multi-domain complex reasoning. arXiv preprint arXiv:2601.03872 , 2026. 3 [41] Zhiyong Wu, Zhenyu Wu, Fangzhi Xu, Yian Wang, Qiushi Sun, Chengyou Jia, Kanzhi Cheng, Zichen Ding, Liheng Chen, Paul Pu Liang, and Yu Qiao. Os-atlas: A foundation action model for generalist gui agents, 2024. 3 [42] Yuquan Xie, Zaijing Li, Rui Shao, Gongwei Chen, Kai-wen Zhou, Yinchuan Li, Dongmei Jiang, and Liqiang Nie. Mirage-1: Augmenting and updating gui agent with hierar-chical multimodal skills, 2025. 3 [43] Bufang Yang, Lilin Xu, Liekang Zeng, Kaiwei Liu, Siyang Jiang, Wenrui Lu, Hongkai Chen, Xiaofan Jiang, Guoliang 
+
+10 Xing, and Zhenyu Yan. Contextagent: Context-aware proac-tive llm agents with open-world sensory perceptions, 2025. 1[44] Qinglong Yang, Haoming Li, Haotian Zhao, Xiaokai Yan, Jingtao Ding, Fengli Xu, and Yong Li. Fingertip 20k: A benchmark for proactive and personalized mobile llm agents. 
+
+arXiv preprint arXiv:2507.21071 , 2025. 1, 3 [45] Yuhao Yang, Yue Wang, Dongxu Li, Ziyang Luo, Bei Chen, Chao Huang, and Junnan Li. Aria-ui: Visual grounding for gui instructions. arXiv preprint arXiv:2412.16256 , 2024. 3 [46] Huanjin Yao, Ruifei Zhang, Jiaxing Huang, Jingyi Zhang, Yibo Wang, Bo Fang, Ruolin Zhu, Yongcheng Jing, Shunyu Liu, Guanbin Li, and Dacheng Tao. A survey on agentic multimodal large language models, 2025. 1 [47] Shukang Yin, Chaoyou Fu, Sirui Zhao, Ke Li, Xing Sun, Tong Xu, and Enhong Chen. A survey on multimodal large language models. National Science Review , 11(12): nwae403, 2024. 1 [48] Chaoyun Zhang, Shilin He, Jiaxu Qian, Bowen Li, Liqun Li, Si Qin, Yu Kang, Minghua Ma, Guyue Liu, Qingwei Lin, Saravan Rajmohan, Dongmei Zhang, and Qi Zhang. Large language model-brained gui agents: A survey, 2025. 3 [49] Duzhen Zhang, Yahan Yu, Jiahua Dong, Chenxing Li, Dan Su, Chenhui Chu, and Dong Yu. Mm-llms: Recent ad-vances in multimodal large language models. arXiv preprint arXiv:2401.13601 , 2024. 1 [50] Jiwen Zhang, Jihao Wu, Teng Yihua, Minghui Liao, Nuo Xu, Xiao Xiao, Zhongyu Wei, and Duyu Tang. Android in the zoo: Chain-of-action-thought for gui agents. In Findings of the Association for Computational Linguistics: EMNLP 2024 , pages 12016–12031, 2024. 3, 4 [51] Shaoqing Zhang, Zhuosheng Zhang, Kehai Chen, Xinbei Ma, Muyun Yang, Tiejun Zhao, and Min Zhang. Dynamic planning for llm-based graphical user interface automation. In Findings of the Association for Computational Linguis-tics: EMNLP 2024 , pages 1304–1320, 2024. 3 [52] Xuan Zhang, Yang Deng, Zifeng Ren, See Kiong Ng, and Tat-Seng Chua. Ask-before-plan: Proactive language agents for real-world planning. In Findings of the Association for Computational Linguistics: EMNLP 2024 , pages 10836– 10863, 2024. 3 [53] Zhong Zhang, Yaxi Lu, Yikun Fu, Yupeng Huo, Shenzhi Yang, Yesai Wu, Han Si, Xin Cong, Haotian Chen, Yankai Lin, Jie Xie, Wei Zhou, Wang Xu, Yuanheng Zhang, Zhou Su, Zhongwu Zhai, Xiaoming Liu, Yudong Mei, Jianming Xu, Hongyan Tian, Chongyi Wang, Chi Chen, Yuan Yao, Zhiyuan Liu, and Maosong Sun. AgentCPM-GUI: Build-ing mobile-use agents with reinforcement fine-tuning. arXiv preprint arXiv:2506.01391 , 2025. 3, 4 [54] Henry Hengyuan Zhao, Kaiming Yang, Wendi Yu, Difei Gao, and Mike Zheng Shou. Worldgui: An interactive benchmark for desktop gui automation from any starting point. arXiv preprint arXiv:2502.08047 , 2025. 3 [55] Yuqi Zhou, Sunhao Dai, Shuai Wang, Kaiwen Zhou, Qinglin Jia, and Jun Xu. Gui-g1: Understanding r1-zero-like train-ing for visual grounding in gui agents. arXiv preprint arXiv:2505.15810 , 2025. 1, 3 
+
+11

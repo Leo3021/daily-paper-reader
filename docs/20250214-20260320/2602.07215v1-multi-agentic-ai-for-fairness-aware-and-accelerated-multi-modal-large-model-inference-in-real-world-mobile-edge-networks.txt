@@ -1,0 +1,744 @@
+Title: Multi-Agentic AI for Fairness-Aware and Accelerated Multi-modal Large Model Inference in Real-world Mobile Edge Networks
+
+URL Source: https://arxiv.org/pdf/2602.07215v1
+
+Published Time: Tue, 10 Feb 2026 01:28:08 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> LATEX CLASS FILES, VOL. X, NO. Y, MONTH 202X
+
+# Multi-Agentic AI for Fairness-Aware and Accelerated Multi-modal Large Model Inference in Real-world Mobile Edge Networks 
+
+Haiyuan Li, Hari Madhukumar, Shuangyi Yan, Yulei Wu, Dimitra Simeonidou 
+
+Abstract —Generative AI (GenAI) has transformed applications in natural language processing and content creation, yet central-ized inference remains hindered by high latency, limited customiz-ability, and privacy concerns. Deploying large models (LMs) in mobile edge networks emerges as a promising solution. However, it also poses new challenges, including heterogeneous multi-modal LMs with diverse resource demands and inference speeds, varied prompt/output modalities that complicate orchestration, and resource-limited infrastructure ill-suited for concurrent LM execution. In response, we propose a Multi-Agentic AI framework for latency- and fairness-aware multi-modal LM inference in mobile edge networks. Our solution includes a long-term plan-ning agent, a short-term prompt scheduling agent, and multiple on-node LM deployment agents, all powered by foundation language models. These agents cooperatively optimize prompt routing and LM deployment through natural language reasoning over runtime telemetry and historical experience. To evaluate its performance, we further develop a city-wide testbed that supports network monitoring, containerized LM deployment, intra-server resource management, and inter-server communications. Exper-iments demonstrate that our solution reduces average latency by over 80% and improves fairness (Normalized Jain index) to 0.90 compared to other baselines. Moreover, our solution adapts quickly without fine-tuning, offering a generalizable solution for optimizing GenAI services in edge environments. 
+
+Index Terms —Mobile edge network, Agentic AI, Multi-modal large models, resource management, real-world deployment 
+
+I. I NTRODUCTION 
+
+Generative artificial intelligence (GenAI) is reshaping mod-ern technology, powered by multi-modal large models (LMs) built on the Transformer framework. Utilizing embeddings, self-attention, and multi-layer perceptrons [1], [2], these mod-els capture complex patterns in text, images, and videos, enabling tasks such as human-like conversations, document summarization, realistic image generation, and video analysis. Generative AI-as-a-Service is evolving into a pivotal role in next-generation networks [3], [4]. However, current GenAI service delivery heavily depends on centralized data centers, facing significant challenges such as uplink bandwidth costs, transmission latency, privacy risks, and limited model cus-tomization. In response, mobile edge computing (MEC) offers 
+
+This work was supported in part of the UK-funded project REASON under the Future Open Networks Research Challenge sponsored by the Department of Science, Innovation and Technology (DSIT), and in part by the NVIDIA Academic Grant Program and the UK Engineering and Physical Sciences Research Council (EPSRC) grant EP/Y037243/1 and EP/X04047X/2 for TITAN Telecoms Hub. H. Li, H. Madhukumar, S Yan, Y. Wu, D. Simeonidou are with the Smart Internet Lab, Department of Electrical and Electronic Engineering, University of Bristol, BS8 1QU, U.K. (e-mail: ocean.h.li@bristol.ac.uk). Manuscript received XXXX YY, ZZZZ; revised XXXX YY, ZZZZ. 
+
+a promising alternative infrastructure by shifting inference tasks from data centers to edge servers [5], [6], allowing LMs to be distributed across MEC servers, balancing computational efficiency, reducing transmission latency, and eliminating pri-vacy concerns. To fully exploit the potential of edge LM inference, effective task scheduling and resource management are essential for improving system performance and service quality. Numerous studies have explored optimization in edge computing, with computational tasks in these works generally falling into two categories. The first involves general-purpose services [7]– [13], where tasks are defined in domains such as autonomous driving, IoT, or semantic extraction, typically by simulating network resource requirements, such as bandwidth and central processing unit (CPU) usage. As the increasing AI inference demands, a second category has emerged, focusing on edge AI applications [14]–[20], where computing tasks are typi-cally defined as execution of specific neural network models on associated datasets. While these studies offer significant benefits, LM inference introduces several unique and com-plex characteristics that distinguish it from conventional tasks. These characteristics lead to a range of challenges, including the following key examples:  
+
+> •
+
+Excessive resource demands & simulation fidelity gap: Un-like traditional computing tasks, the substantial size of LMs necessitates extensive storage and memory, often leading to out-of-memory errors and limiting model parallelization. Moreover, system-level support (e.g., specialized software packages, operating systems, and plugins) and hardware heterogeneity across mobile edge networks further compli-cate the task deployments. These constraints lie beyond the scope of simulations, as they often involve complex, dynamic factors and dependencies that are difficult to model in synthetic environments.  
+
+> •
+
+LM heterogeneity and concurrency: Multi-modal LMs ex-hibit inherent performance and demand heterogeneity. For instance, the inference speed of image-based models is often slower compared to text-based models. Additionally, their resource demands vary substantially; some LMs necessitate extensive video random access memory (vRAM) and RAM, while others prioritize graphics processing unit (GPU) usage with less (v)RAM requirements. This heterogeneity presents a unique challenge in balancing the concurrent operation of diverse LMs within a shared resource-constrained environ-ment.  
+
+> •
+
+Traffic diversity: Unlike traditional tasks, the LM input/out-
+
+> arXiv:2602.07215v1 [eess.SY] 6 Feb 2026 LATEX CLASS FILES, VOL. X, NO. Y, MONTH 202X
+
+put (i.e., prompts/inference results) exhibit high diversity. These prompts may include text generation, image genera-tion, image interpretation, and more. During collaborative edge operations, such diverse prompts can introduce vary-ing levels of transmission overhead during both upstream prompt submission and downstream inference result deliv-ery. Taken together, these challenges reveal a structural ten-sion in balancing diverse and latency-sensitive user intents with highly heterogeneous model demands, all under con-strained and fragmented resource conditions. While some efforts have been made to optimize the computation offloading of LMs [21]–[30], these studies have not fully addressed these challenges, and their limitations can be summarized as follows:  
+
+> •
+
+Current strategies predominantly focus on server selection for large language model (LLM) execution, while overlook-ing the dynamic and fine-grained allocation of resources across multi-modal LMs. This limitation ignores model het-erogeneity and fairness in scheduling and resource allocation for concurrent tasks with diverse requirements.  
+
+> •
+
+Although prompt allocation across edge servers has been explored in prior work, the transmission latency associated with transferring prompts and inference results has been largely overlooked. This oversight impacts total inference time and degrades the effectiveness of scheduling and re-source allocation strategies.  
+
+> •
+
+In practice, foundation models and task-specific LMs are frequently introduced, updated, or deprecated. Classic AI-driven resource management schemes, which rely on exten-sive training data and lack generalization capability, often struggle to adapt to the non-stationary and evolving nature of edge LM deployments.  
+
+> •
+
+Most existing approaches rely on overly simplified simu-lations, undermining the feasibility of their strategies. Key factors such as the LM initialization duration, the disruption of timely feedback in decision-making processes caused by LM runtime delays, the nonlinear relationship between resource usage and computation speed, the overhead of control signaling, and the resumable execution of interrupted LM service are often overlooked. To bridge these critical gaps, the main contributions of this paper are summarized as follows:  
+
+> •
+
+Multi-objective optimization for multi-modal LM inference: 
+
+We formulate a multi-objective optimization problem for managing multi-modal LM inference in mobile edge net-works, where diverse service types, such as text-to-text, text-to-image, and image-to-text, compete for limited compu-tational resources. The proposed formulation jointly opti-mizes two performance criteria, namely inter-LM fairness and end-to-end latency, while respecting network resource constraints.  
+
+> •
+
+GenAI for networks & networks for GenAI: We propose a two-tiered Agentic AI framework that integrates LLM-based agents across both long-term planning and short-term decision-making layers for optimizing edge LM inference. The Tier-1 Global Planning Agent operates at a slower temporal resolution, processing compact summaries of long-term telemetry and request distribution. It retrieves historical cases from episodic memory and synthesizes a macro-level policy that specifies probabilistic prompt-to-server routing and node-level LM deployment intents. At a finer tempo-ral granularity, a Prompt Scheduling Agent translates this strategy into concrete routing decisions by monitoring real-time cluster conditions, while distributed LM Deployment Control Agents dynamically adjust local LM activations and resource allocations.  
+
+> •
+
+Practical deployment: The proposed framework models the full lifecycle of prompt execution, including reception, scheduling, queuing, inference, and result delivery, capturing the end-to-end operational flow for realistic optimization. To enable practical validation, we develop a city-wide edge testbed based on OpenStack and Kubernetes, equipped with real-time monitoring, inter-server communication, and intra-server resource adjustment capabilities for LM deployment.  
+
+> •
+
+Extensive experiment: The proposed solution significantly reduces end-to-end latency while improving service success ratios, achieving a well-balanced trade-off between respon-siveness and fairness. Compared to baseline strategies, our system achieves over 80% latency reduction and increases the normalized Jain fairness index from 0.51 to 0.90, deliver-ing fast, fair, and resource-efficient decisions across both text and image generation services. Moreover, our framework demonstrates strong generalization ability through episodic memory and few-shot learning. By leveraging the reasoning capability of LLM, the system rapidly adapts to changing workload patterns without requiring task-specific fine-tuning. Together, these findings highlight the practicality and scal-ability of LLM-driven agentic AI for autonomous GenAI service management in mobile edge networks. The remainder of this paper is constructed as follows. Section II presents related work. Section III describes the Edge LM operation scenario and formulates the optimization problem. Section IV discusses the technical details of the proposed solution. Then, Section V presents the setup of the testbed, deployment of various LMs, and implementation of the solution. The experimental results are provided in Section VI. Finally, the paper concludes with a summary of our key findings in Section VII. II. L ITERATURE REVIEW 
+
+This paper focuses on optimizing LM inference at the edge. To enable efficient edge deployment of LMs, existing research primarily falls into two categories: (i) model-centric approaches , which reduce the model size through techniques such as quantization and weight pruning [31]–[33]; and (ii) 
+
+resource-centric approaches , which optimize the resources allocation to improve the LM execution efficiency [21]–[30]. 
+
+1) Model-centric approaches: To reduce LM size in fitting edge devices, recent state-of-the-art (SOTA) approaches have converged on hybrid pipelines, systematically combining prun-ing, low-bit quantization, and low-rank factorization methods. For instance, Yu et al. [31] introduced a layer-wise unified compression approach. This method dynamically adjusts quan-tization and pruning based on the sensitivity of each layer LATEX CLASS FILES, VOL. X, NO. Y, MONTH 202X                                                        
+
+> TABLE I SUMMARY OF RELATED WORKS ON NETWORK OPTIMIZATION FOR GENERATIVE AI SERVICES
+> Ref. Optimization Objective Resource category Solution Variable Development
+> [21] Inference latency & throughput MEC Dynamic programming algorithm LLM splitting options & allocation of the splits among MECs Experiment
+> [22] Throughput MEC Heuristic Prompt batching & Prompt allocation between MECs Simulation
+> [23] Prediction accuracy & UE load UE + MEC DRL Splitting point selection between an UE & a MEC Simulation
+> [24] Inference latency & task completion rate UE + MEC DRL Offloading decision and destination Simulation
+> [25] Inference latency & prediction accuracy MEC + Cloud DRL Offloading destination & resource allocation to tasks Simulation
+> [26] Human-Aware Utility Function Service provider DRL Service provider selection Simulation
+> [27] transmission, inference & accuracy costs MEC + Cloud AoC-based heuristic Offloading decision and destination Simulation
+> [28] Transmission & inference energy MEC Multi-Armed Bandit Upper confidence bound Task allocation among two MECs and LLM selection for task Simulation
+> [29] Transmission & idle & inference energy MEC + Cloud Multi-Armed Bandit Upper confidence bound Request allocation among MECs and a Cloud center Experiment
+> Ours Transmission & queuing & inference latency MEC Multi-agent Agentic AI Prompt allocation between MECs & resource allocation between LMs Experiment
+
+to compression, thereby reducing the computational load. In addition, the authors proposed an adaptive layer-tuning mecha-nism and a voting strategy to further minimize memory usage. This is achieved by selectively updating specific layers during inference and by implementing a voting mechanism to select the optimal output. Similarly, based on the same principle that "not all model weights are equally important for perfor-mance, Lin et al. [32] proposed an activation-aware weight quantization technology. This approach mitigates quantization errors without the need for retraining by selectively preserving the most critical 1% of weights, identified through activation magnitudes, and applying per-channel scaling. These com-pression techniques have significantly improved the feasibility of deploying LLMs on resource-constrained edge devices. However, efficient runtime execution remains challenging due to the limited and heterogeneous nature of edge computing environments. 
+
+2) Resource-centric approaches: With the model optimized for edge deployment, this paper focuses on efficient LLM inference through network resource coordination. Within the existing solutions, the LMs may be deployed either in their entirety or as split components, with the allocated resources potentially residing on edge devices, MEC servers, or the cloud. In specific, Du et al. [26] designed an actor-critic-based deep reinforcement learning (DRL) solution where the actor is replaced with a diffusion model capable of generating discrete decisions. This model selects the most appropriate AI content service providers, considering the available resources of each service provider. However, this approach fails to consider the internal resource management within each service provider, as it focuses on the execution destination of the LMs while neglecting the available resources allocated for running the model. In contrast, with the objective of minimizing inference latency and maximizing prediction accuracy, Yang et al. [25] propose a rewardless DRL-based algorithm to address the generalization limitations observed in reward-dependent models in dynamic environments. Specifically, the algorithm selects the optimal offloading destination between an edge server and a data center (instead of AI service providers), dynamically allocating computational and network resources based on the remaining available resources. However, this solution overlooks intro edge server collaborations, which may lead to suboptimal resource utilization, restricted service coverage, and imbalanced system performance. In response, Yang et al. [29] optimized the resource allocation between servers by formulating the problem as a multi-armed bandit (MAB) and addressing it using an upper confidence bound-based algorithm. This approach enables the selection of the most suitable server to execute the LLM for each service. However, their solution assumes the availability of a single language model, whereas in practice, a variety of multi-modal LMs often coexist within the network. Yuan et al. [28] applied a similar solution by also formulating the problem as an MAB with the objective of minimizing transmission and inference energy. In contrast, they took it a step further by not only selecting the most appropriate MEC server for the requests but also choosing the most suitable model from five available LLMs based on service needs. Nevertheless, despite offering multiple LLM options, their approach overlooks the competi-tion for memory and computing resources when running mul-tiple LLMs simultaneously. Additionally, it fails to account for request queuing delays, as not every request can be processed immediately after the allocation decision. A summary of SOTA solutions, including their objectives, managed resource types, methodologies, execution strategies, and experimental settings, is provided in Table I. LATEX CLASS FILES, VOL. X, NO. Y, MONTH 202X  
+
+> UE
+> MEC
+> RU
+> Multi-modal LMs
+> Prompt Prompt scheduling
+> Inference results
+> Response
+> Requests Responses
+> Fig. 1. A mobile edge network example where MEC servers host LMs of different modalities and collaboratively handle diverse inference requests.
+
+III. S YSTEM MODEL AND PROBLEM FORMULATION 
+
+We consider a multi-server mobile edge network, as illus-trated in Figure 1. The network consists of user equipment (UEs), radio units (RUs), and a set of heterogeneous MEC servers with different resource capacities. In this network, UEs generate service requests for various LM-based tasks, such as text-to-text processing, text-to-image generation, and image-to-text summarization. These requests are transmitted to the corresponding RUs over wireless channels. Each RU aggregates the received prompts within its coverage area and forwards them to its associated MEC server [34]. Let N = {1, 2, . . . , N } denote the set of MEC servers, and 
+
+T = {1, 2, . . . , T } represent the discrete time slots over an arbitrarily large time duration. At each time slot t ∈ T , each MEC server n ∈ N receives a set of LM service requests, denoted by Qnt = {qi}i∈I nt , where Int ⊆ I is the subset of LM types that received prompts at server n during slot 
+
+t. Each request qi corresponds to a batch of Kq prompts of type i. The prompts may be text or images, depending on the modality and functionality of the associated LM. As illustrated in Figure 1, prompts of request q ∈ Q nt can be transferred among MEC servers to locate one hosting the required LM of type i(q) for inference. Each LM i ∈ I requires a minimum amount of RAM and GPU memory, denoted by M min  
+
+> i
+
+and 
+
+V min  
+
+> i
+
+, respectively. Notably, there are no hard requirements on the number of CPU or GPU cores for LM deployment. However, the amounts of GPU and CPU resources allocated to an active model, denoted by Gni and Cni , directly influence its inference speed once deployed. Based on the received request, each server n ∈ N can select a subset of LMs Iact  
+
+> n
+
+⊆ I to activate, depending on its available resources. The following constraints ensure that the total consumption of resources by all active LMs does not exceed the physical limits of each server: ∑
+
+> i∈I act
+> n
+
+Gni ≤ Gn, ∑
+
+> i∈I act
+> n
+
+Cni ≤ Cn,
+
+∑
+
+> i∈I act
+> n
+
+M min  
+
+> i
+
+≤ Mn, ∑
+
+> i∈I act
+> n
+
+V min  
+
+> i
+
+≤ Vn, (1) where Gn, Cn, Mn, and Vn denote the total GPU accounts, CPU cores, RAM, and vRAM of server n, respectively. Due to limited computational resources in practical edge networks, not all incoming prompts can be effectively served. A request may fail if the required LM is not currently deployed on any available node, or if resource contention leads to excessive queuing delays that exceed the service deadline. Therefore, the objective of this paper is to ensure fair and balanced service across multiple LM service types while reducing the end-to-end latency experienced by successfully processed requests. To achieve these objectives, we propose a joint optimization framework that integrates two performance criteria: (i) fairness across LM service types, to prevent persistent under-service of any type, and (ii) minimization of overall end-to-end latency for successfully processed requests. Let ρi denote the long-term service rate of service type 
+
+i ∈ I, defined as the fraction of type-i requests that are successfully processed by the system. Specifically, the total number of arriving requests for service type i over the entire horizon is 
+
+Ai = ∑
+
+> t∈T
+
+∑
+
+> n∈N
+> 1
+
+[qi ∈ Q nt ] (2) To reflect the service-level behavior in real-world systems, we introduce an end-to-end deadline threshold τ . A request is considered failed if it is not fully processed within this time limit, as delayed responses may violate quality-of-service (QoS) requirements. Accordingly, we define a binary indicator variable δq ∈ { 0, 1} to indicate whether request q is success-fully processed: 
+
+δq =
+
+{1, if i(q) ∈ I act  
+
+> Dq
+
+and Tq ≤ τ, 
+
+0, otherwise , (3) where Dq is the server to which request q is dispatched, G
+
+denotes the resource allocation policy, and Tq represents the end-to-end delay experienced by q.The number of successfully served type-i requests is thus given by 
+
+Si = ∑
+
+> t∈T
+
+∑
+
+> n∈N
+
+δq, (4) and the corresponding service rate is 
+
+ρi = Si
+
+Ai
+
+, ∀i ∈ I . (5) To quantify fairness across LM service types, we apply Jain’s fairness index [35] over the vector ρ = ( ρ1, . . . , ρ I ):
+
+F (ρ) = 
+
+(∑  
+
+> i∈I
+
+ρi
+
+)2
+
+I ∑ 
+
+> i∈I
+
+ρ2
+
+> i
+
+, (6) which lies in the interval [1 /I, 1] , where a higher value indicates greater inter-type fairness. For each successfully processed request q (i.e., δq = 1 ), the total end-to-end latency is composed of three components: 
+
+Tq = Lq
+
+(Gnq ,i (q), C nq ,i (q)
+
+) + Xq (nq ) + Yq (nq , a nq ), (7) where the first term Lq(·) captures the inference latency, which depends on the allocated GPU and CPU resources for LM type 
+
+i(q) on server nq , as determined by the deployment policy G.The second term Xq (nq) denotes the network transmission delay, including uplink and downlink delays between the origin node and target server nq . The third term Yq (nq, a nq )
+
+represents the queuing delay, which depends on the current backlog and the LM deployment configuration at node nq. anqLATEX CLASS FILES, VOL. X, NO. Y, MONTH 202X 
+
+denotes the realized LM deployment and resource allocation configuration at server nq when request q enters service, as induced by the deployment policy G.To jointly optimize both service fairness and end-to-end latency, we normalize the two objectives onto a common scale. Fairness is normalized using a scaled variant of Jain’s index: 
+
+Fnorm (ρ) = F (ρ) − 1
+
+> I
+
+1 − 1
+
+> I
+
+∈ [0 , 1] , (8) so that Fnorm = 1 corresponds to perfect fairness (i.e., all service types are equally served), and Fnorm = 0 corresponds to the worst-case imbalance. Latency is normalized based on the end-to-end deadline threshold τ .
+
+¯Tnorm = 1
+
+∑
+
+> t∈T
+
+∑
+
+> n∈N
+
+∑ 
+
+> q∈Q nt
+
+δq
+
+∑
+
+> t∈T
+
+∑
+
+> n∈N
+
+∑
+
+> q∈Q nt
+
+δq · Tq
+
+τ , (9) This metric captures the average latency among completed requests. It isolates latency efficiency from the impact of failures, which are accounted for by the fairness objective. Overall, the joint optimization problem is formulated as: 
+
+P : min  
+
+> D,G
+
+λ · ¯Tnorm + (1 − λ) · (1 − Fnorm (ρ)) , (10) subject to server-level resource budgets Eq. (1), model de-ployment feasibility, and system-wide processing constraints. 
+
+λ ∈ [0 , 1] balances the trade-off between latency and fairness. IV. M ETHODOLOGY : H IERARCHICAL DECISION 
+
+FRAMEWORK FOR JOINT PROMPT SCHEDULING AND 
+
+RESOURCE ALLOCATION 
+
+To resolve this problem and enable efficient LM inference in edge networks, we propose a two-tiered Agentic AI-based optimization framework, as shown in Figure 2. The upper tier features a long-horizon Global Planning Agent that determines traffic distribution and LM activation policies. The lower tier includes two components operating at each time slot: i) a Prompt Scheduling Agent for request dispatching, and ii) multiple Resource Control Agents deployed at each server to manage model activation and resource allocation. 
+
+A. Tier-1: Long-term Global Planning Agent 
+
+In real-world networks, the end-to-end latency Tq and the outcome of a request δq are only observable after the entire in-ference process completes. As this process may span multiple time slots, it introduces substantial feedback delays, rendering traditional real-time control algorithms ineffective. To address this challenge, the first tier of our solution introduces an LLM-based Global Planning Agent that operates over a long-term horizon (an epoch consisting of multiple time slots Te). Instead of relying on real-time feedback, it records the per-formance of completed requests over a retrospective window and stores this information in memory. By reasoning over both historical execution experience, the planner generates a macro-policy Πe aimed at minimizing the composite objective 
+
+λ · ¯Tnorm + (1 − λ) · (1 − Fnorm ).At the beginning of each epoch e, the Planning Agent is informed by a comprehensive set of inputs, which are translated into a natural language prompt for the LLM. These inputs include:  
+
+> •
+
+Objective description: The agent’s objective is to generate a high-level policy that jointly governs prompt scheduling and LM deployment in an edge network, aiming to accelerate overall LM inference while ensuring fairness across service types, thereby avoiding the starvation of specific LMs.  
+
+> •
+
+Static network context (C): The heterogeneous resource capacities of all MEC servers, given by 
+
+{Gn, C n, M n, V n}n∈N , and the minimum memory requirements of all LM types, given by {M min  
+
+> i
+
+, V min  
+
+> i
+
+}i∈I ,as defined in the problem formulation.  
+
+> •
+
+Random policy baseline: A reference performance metric obtained from a uniformly randomized macro-policy. In cases where the current fairness score and mean end-to-end latency are lower than the established baseline, significant corrective actions are expected from the planner.  
+
+> •
+
+LM-specific characteristics: A description of deployment constraints and capabilities specific to each LM type. For instance, certain models (e.g., for image generation) may be infeasible to run on CPU-based backends.  
+
+> •
+
+Historical case memory ( H): A curated set of past experi-ences that form the in-context learning foundation for the LLM planner. Each case h ∈ H is structured as: 
+
+h = ( Me, Πe, F norm (ρe), ¯Tnorm ,e ), (11) associating a past macro-policy Πe with its corresponding telemetry and performance. Here, the long-term telemetry Me captures aggregated statis-tics over Te for each service type i ∈ I , including i) the success-only mean latency ¯Ti,e , computed over requests that were successfully processed within the queuing deadline and ii) the success ratio ρi,e , defined as the fraction of requests of type i that were successfully completed. From these per-type metrics, we also derive the normalized global latency ¯Tnorm ,e , representing the average latency across all successfully processed requests, scaled by the system dead-line τ and the normalized Jain’s fairness index Fnorm (ρe),where ρe = ( ρ1,e , . . . , ρ |I| ,e ) denotes the vector of per-type success ratios during Te.The output of the planning agent, the macro-policy Πe, is a structured object comprising two key components:  
+
+> •
+
+Routing probabilities ( Pe): A set of probabilities 
+
+Pe =
+
+{
+
+pin ∈ [0 , 1] 
+
+∣∣∣∣∣∑
+
+> n∈N
+
+pin = 1 , ∀i ∈ I 
+
+}
+
+, (12) which specifies the target traffic distribution for each service type i across the MEC servers.  
+
+> •
+
+Node role intent ( Re): A set of role assignments 
+
+Re = {Rn ⊆ I | n ∈ N } , (13) where each Rn defines the subset of LM services that server 
+
+n should specialize in. Overall, drawing on principles from reinforcement learning, the approach avoids suboptimal macro-policy configurations by learning from negative precedents, while making targeted adjustments within optimal cases. This enables the Planning LATEX CLASS FILES, VOL. X, NO. Y, MONTH 202X          
+
+> Received prompts on Server 1 Rescheduled Prompt queues for LM service
+> Received prompts on Server n
+> Received prompts on Server N
+> Rescheduled Prompt queues for LM service
+> Rescheduled Prompt queues for LM service
+> LM Deployment
+> LM-1 LM-2 LM-I
+> Prompt queues for
+> Long-term Planning Agent
+> LM-1 LM-2 LM-I
+> Prompt queues for LM-1 LM-2 LM-I
+> Prompt queues for LM-1 LM-2 LM-I
+> Inference results
+> Inference results
+> Inference results
+> I
+> P
+> P
+> P
+> I
+> I
+> LM-1 LM-2 LM-I
+> LM-1 LM-2 LM-I
+> Process on Server n Process on Server N Responses
+> Edge network Prompts Long-term prompt
+> Global prompt
+> Long-term network operations & LM performance
+> scheduling distribution status scheduling policy decision
+> Prompt Scheduling Agent Control Agent - 1
+> Resource allocation among LMs
+> Short-term
+> LM Deployment Control Agent - n
+> Resource allocation among LMs
+> LM Deployment Control Agent - N
+> Resource allocation among LMs Process on Server 1
+> Requests Inference results
+> Requests Inference results
+> Requests Inference results
+> Responses Prompts/ Responses Prompts/
+
+Fig. 2. The architecture of the proposed Multi-Agentic AI solution for resource management of Edge LM inference. 
+
+Agent to refine its decisions incrementally and achieve im-proved performance with respect to the composite objective. In addition, empowered by in-context reasoning, it can generalize across varying traffic patterns and cluster conditions to produce robust global policies. 
+
+B. Tier-2: Short-term Prompt Scheduling Agent and LM De-ployment Control Agent 
+
+While the Global Planning Agent provides long-term strate-gic guidance by specifying target routing distributions and node roles, it operates at an epoch-level timescale and thus cannot fully capture the bursty and highly dynamic nature of real-world edge workloads. In practice, queue lengths, instanta-neous load, and resource availability can fluctuate significantly from one time slot to the next. To bridge this gap between slow-timescale planning and fast-timescale dynamics, Tier-2 introduces two complementary agents: a Prompt Schedul-ing Agent that performs per-request dispatching under the planner’s guidance, and multiple distributed LM Deployment Control Agents that continuously adapt local LM activation and resource allocation on each MEC server. 
+
+1) Prompt Scheduling Agent: To handle the burstiness and unpredictability of network traffic, we design an LLM-based 
+
+Prompt Scheduling Agent that operates at every time slot 
+
+t, translating the high-level strategy of the Global Planning Agent into concrete routing decisions based on current network and edge-server conditions. Specifically, the scheduler ob-serves: (i) the macro-level strategy Πe, which specifies per-LM routing probabilities and node-role assignments (i.e., which LM types are allowed to run on which nodes); and (ii) a short-term system snapshot St that captures dynamic conditions such as per-node prompt backlogs {Bni (t)}i∈I , n ∈N , where Bni (t)
+
+denotes the total number of prompts of type i currently waiting at server n. For each incoming request q ∈ Q nt , the scheduler determines a dispatch decision Dq ∈ N , thereby filling a routing matrix that maps each (n, i (q)) pair, i.e., origin node 
+
+n and request type i(q), to a target MEC server for inference execution. While the scheduler primarily follows the probabilistic guid-ance specified in Pe, maintaining each LM’s long-term traffic split close to the macro-level distribution, it also dynamically adjusts routing decisions based on the instantaneous cluster state St. For example, if the preferred target node n∗ for ser-vice i(q) is currently overloaded (e.g., exhibiting deep queues or low available GPU headroom), the agent may temporarily reroute the request to an alternative feasible node, as long as the decision remains consistent with the node-role intent defined in Re. This mechanism enables timely load balancing and congestion avoidance while respecting the global policy structure. 
+
+2) LM Deployment Control Agent: To further optimize the system-wide objective, reducing end-to-end latency and improving fairness across LM service types, we introduce distributed LM Deployment Control Agents , invoked locally on each server n ∈ N . Their objective is to reduce inference and queuing delay, while satisfying server-level resource budgets and deployment feasibility conditions defined in the problem formulation. To support adaptive resource orchestration under the dy-namically shifting prompt distribution policies of the Planning Agent, the LM Deployment Control Agents are also powered by LLMs, which are capable of generalizing across diverse and non-stationary request patterns induced by evolving global macro-policies Πe. Unlike traditional AI-based solutions that may overfit to specific traffic scenarios, LLM can holistically interpret high-level deployment intent and local runtime states to make informed and flexible decisions. Each on-node agent observes local MEC information, in-cluding per-LM queue backlogs, current LM deployment sta-tus Bni (t), and resource headroom in terms of CPU, memory, and available GPU replicas. Guided by the macro-level node-role intent (Eq. (13)), these agents operate on the same short-term timescale as the Prompt Scheduling Agent and make fine-grained resource management decisions, including selecting the active LM instances Iact  
+
+> n
+
+and determining the corresponding CPU and GPU allocations an(t), according to instantaneous workload fluctuations and queue dynamics. LATEX CLASS FILES, VOL. X, NO. Y, MONTH 202X 
+
+The Tier-2 agents continuously execute per-request routing and per-node deployment actions, which collectively deter-mine end-to-end latency and service success outcomes for each LM type. Over fixed evaluation windows, these outcomes are aggregated into per-type and global performance metrics, such as success-only mean latency and service rates, which are fed back to the Tier-1 Planning Agent as structured telemetry. This closed-loop design enables Tier-1 to periodically update the macro-policy Πe based on empirical evidence from Tier-2 behaviors, while Tier-2 adapts its decisions immediately in response to the latest strategy. Overall, our solution pro-vides a modular, adaptive, and fully deployable framework for optimizing LM inference in mobile edge networks. By leveraging agentic AI modules for both long-term planning and short-term control, the system achieves scalable coordination across servers and responsive adaptation within individual MEC nodes under dynamic traffic loads and heterogeneous service demands. Moreover, all agents in our solution are dedicated solely to infrastructure orchestration and operate exclusively on system-level telemetry. In contrast to the user-facing LMs that process multimodal and private input content, these agents do not access or process end-user data. This separation preserves privacy and enables practical deployment via cloud-hosted LLM APIs, without violating data governance requirements. In this way, our framework exemplifies the synergy of GenAI for Networks , using generative agents to manage distributed infrastructure, and Networks for GenAI ,adapting edge systems to better serve edge GenAI workloads. V. E XPERIMENT SETUP AND IMPLEMENTATION 
+
+To evaluate the effectiveness of the proposed solution, we deploy a network with multiple servers distributed across Bristol. The setup of the network and the deployment of the two-tiered solution are detailed in this section. 
+
+A. Network architecture 
+
+Figure 3 illustrates the network architecture, with three server sets distributed across the University of Bristol, the We the Curious Museum, and the Mshed Museum. In this network, servers within a rack are connected to the Top-of-Rack (ToR) switch via 100 Gigabit Ethernet links, which are then linked to a fiber patch panel using 100Gbps Small Form-factor Pluggable (SFP) transceivers. At the intra-location level, the fiber patch panel connects to an aggregation switch, aggregating and managing traffic from all racks within the same location. For inter-location connectivity, the aggregation switch links to a spine fiber patch panel, enabling communica-tion between aggregation switches across different locations. A router is implemented at the University of Bristol site to enable connectivity between the internal network and the external internet. Seven Virtual Machines (VMs) are deployed based on OpenStack [36] across these locations, each serving as a MEC node. These VMs are interconnected in a mesh network at the network layer, where every VM can establish Secure Shell (SSH) connectivity with the rest nodes. A Kubernetes cluster is implemented within this infrastructure to facilitate efficient 
+
+> Operational-related Node-exporter DGCM-exporter Prompt queues Progress monitor LMs in Pods Global Inference results agent Controller VM (in UoB)
+> VIM controller managed VM
+> Local storage
+> Control agent Worker VM n
+> Prompt exchange
+> Data retrieval
+> Send inference
+> VIM controller managed VM
+> Prompt scheduling LM service-related
+> Resource allocation among LMs in network results to origins Scheduling storage Planning agent
+> We the Curious Museum Mshed Museum
+> Server set
+> Server set
+> ToR Switch Fiber Panel Spine Fiber Panel Server set
+> University of Bristol
+
+Fig. 3. Architecture of testbed and the allocation of network elements among servers. TABLE II CONFIGURATIONS OF VM S IN THE EXPERIMENT NETWORK                                
+
+> CPU (model-cores) RAM GPU vRAM
+> VM 1 Intel Xeon Icelake - 8 16GB N/A N/A VM 2 AMD EPYC 7453 - 24 32GB N/A N/A VM 3 AMD EPYC 7453 - 16 24GB NVIDIA A5000 * 1 24GB VM 4 AMD EPYC 7453 - 16 24GB NVIDIA A5000 * 1 24GB VM 5 AMD EPYC 7453 - 16 24GB NVIDIA A5000 * 1 24GB VM 6 AMD EPYC 7453 - 16 24GB NVIDIA A5000 * 1 24GB VM 7 AMD EPYC 7453 - 16 24GB NVIDIA A5000 * 2 48GB
+
+management of the distributed system and the execution of LM services. Table II summarizes the configurations of these VMs. Among them, VM1 is designated as the control node, used exclusively for the centralized Planning Agent and Prompt Scheduling Agent. The remaining worker nodes (VM2-VM7) handle LM Deployment Agent execution and LM inference workloads. 
+
+B. Containerized LM deployment 
+
+Within each VM, LMs can be deployed in dedicated Ku-bernetes pods, with one LM per pod. To minimize the initial-ization latency of LMs and avoid redundant LM parameter downloads when a pod restarts, we utilize Dockerfiles to en-capsulate each LM into an image. This image includes the base execution environment (e.g., operating system), application code for each LM, LM execution dependencies (e.g., libraries), and pre-cached files (e.g., LM parameters). The resulting images are pushed to a local Docker registry for reuse during future pod creations. Consequently, when a new pod is created, the underlying container can be directly deployed from the pre-built image. While this approach significantly reduces the deployment time of LM from scratch, the initialization of pods and the transfer of LM parameters from storage to memory or vRAM cannot be achieved in real time. These initialization times are incorporated into the optimization by considering them in the queuing delay Yq.Four multi-modal LMs (i.e. I = 4 ) are selected to assess the performance of the proposed solution, covering four types of common requirements, including i) LM1: simple text-to-text using GPT2 with 137M parameters [37], ii) LM2: complex text-to-text using GPT2-large with 812M parameters [37], iii) LM3: image-to-text using BLIP with 470M parameters [38] and iv) LM4: text-to-image using Stable Diffusion with 890M LATEX CLASS FILES, VOL. X, NO. Y, MONTH 202X 
+
+parameters [39]. low_cpu_mem_usage from accelerate devel-oped by Huggingface is applied to minimize memory usage. Based on empirical testing, the minimum memory/storage requirements for the containers hosting these four LMs are 1.2Gb/7.5Gb, 6.5Gb/13Gb, 0.5Gb/10Gb, and 1.6Gb/17.5Gb, respectively. To accommodate LM caching and to prevent memory exhaustion in pods, the deployment memory for these LMs has been configured at 3GB, 9GB, 2.5GB, and 3.5GB. At each time slot t, each MEC server receives up to four LM service requests, i.e., |Q nt | ≤ 4. The number of prompts per request is set as Kq ∈ { 0, 1, . . . , 8}.
+
+C. Model parallelism on GPU 
+
+The NVIDIA Container Toolkit is set up on all VMs, which allows users to build and run GPU-accelerated containers by providing a container runtime library and utilities that automatically configure containers to leverage NVIDIA GPUs. Subsequently, the NVIDIA device plugin is deployed as a 
+
+DaemonSet on all VMs, allowing Kubernetes to discover and manage GPU resources. To enable parallel computation of multiple LM across various containers, Nvidia provides two options: MIG (Multi-Instance GPU) and time-slicing. MIG enables static partitioning of GPUs into multiple isolated instances, each with its own dedicated portion of resources, such as vRAM and streaming multiprocessors (SMs). In contrast, time slicing divides the GPU’s time into intervals and assigns these time slots to various workloads or VMs based on predefined policies. During each time slice, a spe-cific workload has exclusive access to GPU resources, while vRAM remains isolated among processes. Since MIG is only applicable to certain GPU models, the time-slicing strategy is adopted to ensure algorithm generality. It is implemented by using ConfigMap and each physical GPU is split into 2 vGPUs. When the LM is executed on multiple vGPUs, we employ an automatic device_map mechanism based on transformer 
+
+developed by Huggingface, which automatically distributes the model’s weights across the allocated vGPUs, enabling parallel computation and maximizing resource efficiency. 
+
+D. Network monitoring & management 
+
+The interaction between the two-tiered solution and the network involves two main components: i) network monitor-ing, which encompasses the observation of network status and processing delays; and ii) network management, which pertains to the realization of Agentic AI and the management actions within the network. 
+
+1) Network monitoring: A Prometheus Node Exporter and a nvidia-dcgm-exporter instance are deployed on each VM within the cluster using a Daemonset to monitor CPU, RAM, GPU and vRAM metrics of each node.  
+
+> •
+
+To obtain real-time network information from Prometheus Node Exporter and nvidia-dcgm-exporter , the controller VM dispatches concurrent HTTP requests to the /metrics REST-ful API endpoints of all servers, utilizing ports 9100 and 9400 as the defaults for CPU and GPU-related metrics, re-spectively. This approach enables the retrieval of monitored network information across the cluster. The collected data is subsequently stored in a global MongoDB database for the inference purposes of the Global Planning Agent and the Prompt Scheduling Agent. On each worker node, a similar strategy is employed, where each server saves its own resource information in a local MongoDB database. This local storage facilitates quick access to node-specific metrics for local Controllers without overloading the network with unnecessary data transfers during the inference process. As a prerequisite, Role-Based Access Control (RBAC) configura-tions are required to ensure that the pods have the necessary permissions to query and collect metrics and access the MongoDB endpoint.  
+
+> •
+
+To calculate the delayed feedback Tq and δq, the uplink time, queuing time, inference time, and downlink time of each prompt set are recorded in the global MongoDB database. Each entry is annotated with the corresponding step and additional relevant metadata to enable efficient retrieval by the agents. 
+
+2) Network management: The proposed Multi-Agentic AI framework comprises a total of 8 agents, all built upon the OpenAI API. Specifically, a Global Planning Agent and a Prompt Scheduling Agent are invoked from VM1, while six LM Deployment Control Agents are each called via API from their respective MEC nodes during execution. Time is slotted with a 30-second interval, balancing control granularity and system responsiveness. Given the high compute and memory demands of modern multi-modal LMs in edge environments, sub-second control is unnecessary and may trigger redundant API calls or unstable behavior. LM initialization alone of-ten takes over 1 second, making frequent reconfigurations inefficient. Moreover, as end-to-end inference typically spans hundreds of seconds, fine-grained control offers negligible performance gains. At Tier-1, the Long-term Global Planning Agent runs once per epoch (50 slots). τ is set to 900s as the ser-vice tolerance latency. The weighting parameter is set to 
+
+λ = 0 .5, so that both end-to-end latency and fairness across LM service types are treated with equal importance in the optimization objective. The numerical statistics in Eq. (11) are rendered into natural-language sentences, for example: 
+
+“In the last epoch, LM1/LM2/LM3/LM4 have success-only mean latencies 210 .5, 245 .3, 120 .7, 680 .2,s with success ratios 
+
+0.93 , 0.88 , 0.97 , 0.72 , respectively. The resulting global mean latency is 314 .2,s and the normalized Jain fairness over suc-cess ratios is 0.81 . The corresponding macro policy allocated LM1/LM2 mostly to worker1–2, LM3/LM4 to worker3–5, and the micro router had an off-role ratio of 9.5% .” This textual summary is concatenated with a role description that states the objective ( “reduce global average latency while improving fairness across LMs’ success service ratios” ) and the static cluster description. The Planning Agent is instructed to output a strict JSON object containing: (i) a routing probabilities section that, for each LM, specifies a soft distribution of traffic across MEC nodes and (ii) a node role intent section describing, for each node, which LM types it is allowed or expected to host. The JSON is validated to ensure non-negative weights that sum to one over the feasible node set for each LATEX CLASS FILES, VOL. X, NO. Y, MONTH 202X 
+
+LM, that GPU-only models are only assigned to GPU-capable nodes, and that per-node LM sets respect concurrent capacity limits; if parsing fails or constraints are violated, we fall back to a random baseline policy. The validated macro policy is persisted in a shared store for consumption by the two lower-layer agents. Given that the Planning Agent learns from historical execution traces to generate refined decisions and operates without strict latency requirements, we employ a GPT-5-based API to leverage its advanced reasoning capacity. At Tier-2, the Prompt Scheduling Agent is implemented as an asynchronous Python service that runs one control step per slot. At the beginning of each slot t, immediately after slot t − 1 has finished, it loads the latest macro policy JSON flie, queries the monitoring layer for a short-window snapshot of cluster state (per-node queue backlogs, CPU/memory/GPU headroom, and current LM activations) aggregated up to the end of slot t − 1, and summarizes this information into a compact natural-language prompt. This prompt describes both the Planning Agent’s intended long-term traffic splits and the current short-term load imbalances and is sent to an OpenAI API. It returns a JSON-formed routing plan mapping each origin node and LM id to a preferred destination node, which is then applied unchanged for all requests arriving during slot t and broadcast to worker nodes via a FastAPI-based control plane. On each node, the prompt-scheduling service is encapsulated within a DaemonSet pod. A port-forward 
+
+Kubernetes service is configured between the host VM and the internal Kubernetes network to deliver the JSON messages into the appropriate DaemonSet pods, where they are translated into per-request forwarding actions. In addition, the LM Deployment Control Agent on each server is implemented with a short system prompt specialized to that node’s hardware profile (CPU-only, single-GPU, or dual-GPU). Rather than inputting the full macro policy, these agents receive a compact node-role description derived from the Planning Agent’s node role intent, indicating which LM types are primarily expected to run on that node. At the beginning of each local control step, synchronized with the global slot boundary and using measurements accumulated up to the end of the previous slot, each agent inspects a structured summary of its own state, including per-LM queue backlogs on that node, current pod/VM deployment status, and approximate CPU/memory/GPU headroom, and then selects a discrete activation pattern over LM types (e.g., for each LM: on GPU , on CPU , or off ), subject to local feasibility constraints. The resulting activation pattern is encoded into concrete start/stop operations for LM replicas on that node (e.g., creating or terminating Kubernetes pods with appropriate CPU/GPU bindings). As the LM Deployment Control agents and the edge LM inference application are on the same node, the control decision is done locally without transmission. In the creation and updating operations, CPU resources for each pod are managed by specifying CPU requests and CPU limits 
+
+in the Kubernetes deployment configuration, both set to the same value as determined by the Control Agent. CPU requests 
+
+represent the minimum guaranteed CPU resources for a pod and determine its CPU shares when resources are contested, while CPU limits set the maximum CPU resources a pod can use. These Kubernetes settings are directly translated into Control Groups (cgroups) configurations on the node where the pod runs. The CPU requests is converted into the 
+
+cpu.shares parameter within cgroups, influencing the pod’s relative share of CPU time under resource contention. The 
+
+CPU limits are enforced through the cpu.cfs_quota_us and 
+
+cpu.cfs_period_us parameters in cgroups, defining the maxi-mum CPU time a pod can consume within a specific period. The Linux scheduler allocates CPU time to processes based on these cgroup settings. By adhering to the defined shares (cpu.shares ) and quotas ( cpu.cfs_quota_us ), the Linux sched-uler ensures a deterministic distribution of CPU resources according to the specified controller actions. As for GPU resources, they are managed by Kubernetes Device Plugin 
+
+by specifying nvidia.com/gpu indicator in resource requests and limits configurations. Different from CPUs, which can be fractionally allocated, GPUs are indivisible. They can only be virtualized into a discrete number of vGPUs. The controller determines the allocation of the amount of vGPUs to each LM. In Tier-2, since all agents only need to follow the high-level policy provided by the Planning Agent and apply light-touch adjustments based on the current network state, their tasks are relatively simple. Moreover, as these decisions operate at a short-term timescale, we adopt a GPT-4-based API for their implementation. The latency of each API call remains negligible compared to both the 30-second slot duration and the time required for LM activation and inference. It is important to note that deactivating an LM pod may inter-rupt in-progress requests in the local queue, resulting in partial or failed processing. Moreover, due to the substantial size of LMs, the termination process is not instantaneous. During this shutdown period, the occupied resources (e.g., CPU, memory, or GPU) are not yet released, potentially causing resource contention and delaying subsequent deployments by placing them into a Pending state. To mitigate these disruptions, we implement two strategies:  
+
+> •
+
+To enable breakpoint recovery following Pod reactivation and to prevent redundant processing of prompts within the same execution group, we employ a hostPath volume to store a CSV file on the VM. This file maintains a flag indicating the real-time processing state, enabling the internal Pod to resume execution from its last recorded position and ensuring computational continuity.  
+
+> •
+
+To prevent conflicts and resource exhaustion, we enforce a strict rule: if a new Pod is created but remains pending, any subsequent action requiring additional resource allocation is automatically voided. 
+
+E. Runtime operation 
+
+Building upon the aforementioned network setup, this sec-tion explores the runtime operation of the two-tiered solution. A detailed sequence diagram is presented in Figure 4. In Tier-1 (Long-term Planning), the central VM first collects global network state and executes the Planning Agent per Te.Once the macro-policy (Pe, Re) is generated, the system proceeds with short-term operations in each time slot t. At the beginning of the slot, the Prompt Scheduling Agent is LATEX CLASS FILES, VOL. X, NO. Y, MONTH 202X                                     
+
+> T2.2. reshedule prompts
+> T2.3. record uplink latency
+> T2.4. send ‘prompt receiving success’ notice
+> T2.8. collect local prompt and resource information & check recorded latency & execute LM Deployment Control Agent (per t)
+> T2.10. record the inference latency
+> T2.11. send the inference results back
+> T2.12. record the downlink latency
+> T2.8. collect… & check… & execute…
+> VM 1(Central) VM 2(Worker) VM 3(Worker) VM N(worker)
+> T2.6. record the queuing latency
+> T2.8. collect… & check… & execute…
+> T2.12. record the downlink latency
+> T2.12. record the downlink latency
+> T2.10. record the inference latency
+> T2.10. record the inference latency
+> Tier2.7. trigger local LM management (per t)
+> T2.5. receive ‘prompt distribution success’ notice
+> T2.9. update pods & execute LM inference
+> T2.9. update … & execute …
+> T2.9. update … & execute …
+> Tier1 . collect global prompt and resource information & check recorded latency & Planning Agent update long-term policy (per Te)
+> T2.3. record uplink latency
+> T2.3. record uplink latency
+> T2.6. record the queuing latency
+> T2.6. record the queuing latency
+> Tier2.1 execute Prompt Scheduling Agent (per t) & send prompt distribution decision
+
+Fig. 4. Sequence diagram of the runtime operation. Communications between MEC servers are achieved by Fast API. 
+
+executed based on the latest system state observed at the end of the previous slot and generates routing decisions {D q} for all incoming prompts (T2.1). The resulting routing decisions are then disseminated to all MEC servers (T2.1). Each server then schedules its assigned prompts accordingly (T2.2). During the prompt scheduling process, uplink transmission latencies are recorded (T2.3). Upon receiving the dispatched prompt sets, the corresponding pods notify both the sending servers and the controller (T2.4, T2.5), and begin tracking the queuing time for each request (T2.6). The execution of the LM Deployment Control Agent is triggered (T2.7) once all prompt routing decisions have been completed. This activates the LM Deployment Control Agent (T2.8), which reorganizes the resource allocation among LM instances based on the current queued workload and avail-able resources. The new configuration is applied (T2.9), and prompts are processed by the scheduled LMs. Inference la-tency is recorded during this process (T2.10). After processing, the inference results are sent back to the originating servers (T2.11), and the downlink latency is recorded (T2.12). Within these processes, each node concurrently handles both Input/Output (I/O)-bound tasks, such as sending and receiving files or commands, deploying Agentic AI actions, and saving monitoring data to the MongoDB database. While executing these activities, all I/O-bound activities are implemented as asynchronous operations using async and httpx . This approach prevents blocking calls that could lead to event loop deadlocks and allows the system to yield execution when awaiting network responses or file I/O, rather than stalling entirely. VI. E XPERIMENT RESULTS 
+
+To evaluate the effectiveness of our proposed Agentic AI framework in optimizing the composite objective of low latency and fair service distribution , we first compare the achieved normalized fairness Fnorm (ρ) and success-only mean latency ¯Tnorm with six other baselines, including: 
+
+1) Random scheduling & random deployment (RR): Prompts are assigned randomly across servers, and each MEC node ran-domly activates LMs within local resource budgets, regardless of queue backlogs or prompt composition. 
+
+2) Random scheduling & Lyapunov-based LM deployment (RL): Requests are routed randomly across nodes, while each server independently solves 
+
+min  
+
+> G
+
+E[λ ¯Tnorm + (1 − λ)(1 − Fnorm (ρ)) | D ] , (14) using a Lyapunov drift-plus-penalty (DPP) problem [40] to determine which LMs to activate on CPU/GPU. Specifically, each server maintains a finite set of candidate deployment configurations, where each action specifies, for each LM type, whether it is inactive, deployed on CPU, or deployed on GPU. Actions that violate resource budgets or conflict with transient pod states are filtered out, yielding a feasible action set. At every slot t, the controller selects an action that maximizes the following score [40]: 
+
+∑
+
+> i∈I
+
+Qni (t) · ˆμni (a) − V · Cn(a, t ), (15) where Qni (t) denotes the queue backlog of LM type i at server 
+
+n, ˆμni (a) is a proxy for the service rate under configuration 
+
+a, and Cn(a, t ) represents the per-slot deployment cost. The parameter V controls the trade-off between backlog reduction and operational overhead. The service-rate proxy ˆμni (a) depends on the compute mode assigned to LM type i and the residual resource head-room. We adopt a smoothed multiplicative model: 
+
+ˆμni (a) = 
+
+
+
+αcpu  
+
+> i
+
+f (ηcpu  
+
+> n
+
+(t)) f (ηmem  
+
+> n
+
+(t)), i ∈ I act 
+
+> n, cpu
+
+(a),αgpu  
+
+> i
+
+f (ηgpu  
+
+> n
+
+(t)), i ∈ I act 
+
+> n, gpu
+
+(a),
+
+0, otherwise ,
+
+(16) where η·
+
+> n
+
+(t) denotes normalized residual CPU, memory, and GPU capacities, f (·) is a linear smoothing function, and 
+
+αcpu  
+
+> i
+
+, αgpu  
+
+> i
+
+are type-specific weights calibrated offline. In all experiments, we set αcpu  
+
+> i
+
+= 1 .0 for all LM types, while GPU weights are set to αgpu 1 = 1 .0 and αgpu 2 = 1 .2 for the small and large text LMs, and αgpu 3 = αgpu 4 = 1 .5 for the two image LMs, reflecting their higher sensitivity to GPU acceleration. The per-slot cost Cn(a, t ) consists of two components. The GPU usage cost is defined as 
+
+Cgpu  
+
+> n
+
+(a, t ) = πgpu (t) · NGPU (a), (17) where NGPU (a) denotes the number of GPU-backed LM instances under action a. The GPU shadow price πgpu (t)
+
+increases with GPU saturation and the fraction of image-type requests: 
+
+πgpu (t) = p0 + p1
+
+(1 − ηgpu  
+
+> n
+
+(t)) + p2 φimg  
+
+> n
+
+(t), (18) LATEX CLASS FILES, VOL. X, NO. Y, MONTH 202X 
+
+where φimg  
+
+> n
+
+(t) denotes the local image workload ratio. To discourage frequent activation and deactivation of large models, we introduce a churn penalty: 
+
+Cchurn  
+
+> n
+
+(t)= λchurn 
+
+∑
+
+> i∈I
+
+∣∣1
+
+[i ∈ I act  
+
+> n
+
+(t)] − 1
+
+[i ∈ I act  
+
+> n
+
+(t − 1) ]∣ ∣
+
+· (1 + κ Q ni (t)),
+
+(19) The total cost is given by Cn(a, t ) = Cgpu  
+
+> n
+
+(a, t )+ Cchurn  
+
+> n
+
+(a, t ).All coefficients in the DPP controller are obtained via an offline calibration phase. During this phase, Tier-2 runs under randomized routing while monitoring windowed statistics of end-to-end latency, GPU utilization, and deployment flip fre-quency. The GPU pricing coefficients (p1, p 2) are adjusted to reflect latency–headroom imbalance, while the churn parame-ters (λchurn , κ ) are tuned to suppress excessive reconfiguration. After several iterations, the parameters are frozen and shared across all servers. In all experiments, the finalized parameters are λchurn = 0 .08 , κ = 0 .76 , p1 = 0 .25 , and p2 = 0 .37 .Although this DPP-based controller does not directly op-timize the composite latency–fairness objective in Eq. (10), stabilizing per-type backlogs provides an effective proxy for latency reduction under standard queueing arguments (e.g., Little’s law), while the per-slot feasibility constraints implicitly promote balanced service across LM types [41]. As such, it serves as an interpretable baseline for Tier-2 resource management [34]. 
+
+3) Agentic scheduling & Lyapunov-based deployment (MAL): 
+
+This setting uses our proposed Agentic AI-based Planning Agent and Prompt Scheduling Agent for routing decisions, while still relying on the Lyapunov-based controller for local LM deployment. 
+
+4) Average scheduling & Lyapunov-based deployment (AL): 
+
+Requests are uniformly distributed across all feasible nodes (i.e., those capable of supporting the LM type), and each server uses the Lyapunov-based controller to decide resource allocation. 
+
+5) Random scheduling & full activation (RF): Prompts are randomly routed across nodes, and each server attempts to activate as many LMs as possible within its CPU/GPU con-straints, without dynamic reconfiguration. 
+
+6) Local processing & Lyapunov-based deployment (LL): All prompts are processed on their arrival node without inter-node dispatching, and each server runs the Lyapunov-based controller to manage local LMs. Importantly, for all Non-local Processing, requests for LM3 and LM4 are never routed to VM2 as it doesn’t have GPU resources. As shown in Figure 5, different scheduling and deployment strategies yield distinct trade-offs between latency and fairness. The Random scheduling & Full LM activation (RF) baseline (purple) performs the worst, with a high global mean latency exceeding 406 s and a low Jain’s index around 0.62 . This is attributed to its lack of coordination in prompt routing and aggressive local activation: LM1 and LM2 often run inefficiently on CPU, while LM3 and LM4 compete blindly for GPU resources without regard to queue lengths or system congestion. 
+
+> 0(a) (b)
+> Fig. 5. Comparison of different scheduling and deployment strategies in terms of end-to-end latency (x-axis) and normalized Jain’s fairness index (y-axis).
+
+Comparing the random scheduling & LM deployment (RR) (dark blue) with the random scheduling & Lyapunov-based deployment (RL) (light blue) highlights the effectiveness of the Lyapunov-based local controller. By adapting LM deployment to real-time queue backlogs and node-level headroom, RL improves fairness to near-perfect (Jain’s index ≈ 1.0) and reduces latency by over 50 s, despite both using random prompt routing. The Agentic scheduling & Lyapunov-based deployment (MAL) strategy (red) underperforms in fairness compared to RL and even some non-agentic methods. While the top-down Agentic scheduler aims to enforce structured routing and node-role specialization, the bottom-up Lyapunov controller, operating independently, may select deployments inconsistent with these intents. This misalignment undermines the benefit of high-level planning, underscoring the need for vertically coordinated control logic. In contrast, our proposed Multi-Agentic AI (MA) solution achieves the best overall performance. It reduces global aver-age latency to 74 s, an improvement of over 80% compared to RF and achieves a fairness score of 0.9. This demonstrates that combining a long-term LLM-based global planning agent, a short-term scheduling agent, and node-level control agents enables effective end-to-end coordination across the system, delivering both low latency and equitable service across LM types. More detailed performance breakdowns are provided in Figure 6, which reports the per-LM end-to-end latency and success service ratio under each strategy. A consistent pattern across all baselines is the disproportionately poor handling of LM4. In particular, strategies such as RR, MAL, and AL exhibit significantly lower success ratios for LM4, often below 
+
+0.3, and extremely high average latencies, exceeding 600 s. This is primarily due to the heavy resource demands of the text-to-image modality, which makes it highly sensitive to suboptimal routing and scheduling decisions. By contrast, the proposed MA framework ensures a more balanced treatment across LM types, with all success ratios above 0.4 and further achieves the lowest global mean latencies. To assess the learning dynamics of the proposed Agentic AI framework, Figure 7 plots the evolution of the composite LATEX CLASS FILES, VOL. X, NO. Y, MONTH 202X   
+
+> 0(a) (b)
+> Fig. 6. Latency and success ratio of each LM. (a) End-to-end latency for each LM and the overall mean. (b) Success ratio
+> 0
+> Fig. 7. Evolution of the macro policy objective over planning epochs.
+
+objective function value across macro epochs. As shown in the figure, the system exhibits rapid initial improvement after just a few rounds of macro-policy planning, followed by gradual refinement over time. This demonstrates the framework’s abil-ity to perform effective few-shot adaptation based on episodic memory and runtime telemetry. To provide a comparison, we implemented a hierarchical DRL baseline that mirrors the two-tier structure of our frame-work. The upper tier addresses the inter-server prompt schedul-ing via Multi-Agent Proximal Policy Optimization (MAPPO). The state space includes local prompt queue lengths, active LM configurations, and a summary of global resource availability. The action space involves selecting a destination server for each prompt type. Eq. (14) on the second tier is solved via multiple DQN agents with one agent per server. The state of each DQN includes local prompt queues and residual computational resources. The action is selected from a pre-enumerated discrete set, where each action specifies a full LM deployment configuration on the server, including which LM types are activated and their assigned compute mode (CPU or GPU). Both tiers are trained cooperatively using a shared delayed reward. A reward is issued only after all requests arriving in slot t are completed, and is defined directly from the objective in Eq. (10): 
+
+rt = 1 −
+
+[
+
+λ ¯T (t)norm + (1 − λ)(1 − F (t)norm 
+
+)]
+
+, (20) where ¯T (t)norm and F (t)norm are computed over completed requests from slot t. This shared reward aligns both layers with the global latency & fairness objective. However, despite extensive experimentation with hyperpa-rameters, the hierarchical DRL baseline failed to converge to a stable policy. This may be attributable to several challenges. First, the upper-tier MAPPO agents must collectively discover a near-equilibrium routing policy in a multi-agent setting with shifting resource conditions and shared capacity constraints. At the same time, each lower-tier DQN agent must indepen-dently learn a local deployment policy that adapts to both its own workload and the evolving upstream scheduling patterns. Therefore, the deployment layer must respond to a moving distribution of incoming requests, while the scheduling layer is learning to exploit deployment patterns that are themselves still in flux. This mutual dependency makes joint convergence difficult. Second, the delayed nature of feedback compounds the problem. Since its evaluation metrics are based on success-ful end-to-end request completion within a tolerance window 
+
+τ = 900 seconds, many requests initiated in slot t only receive a definitive success/failure label until much later, resulting in sparse and delayed rewards. This temporal gap undermines the effectiveness of conventional DRL training. Nevertheless, failure of convergence is itself instructive. It demonstrates that traditional learning-based controllers often suffer from poor generalization and require extensive training. Under an optimistic assumption that the DRL baseline con-verges within 20 ,000 training steps, this would still require 
+
+600 ,000 seconds ( 166 .67 hours) of interaction time at 30-second slot intervals. In contrast, the Agentic AI framework achieves stable performance within 10 − 30 macro epochs (approximately 4.17 − 12 .5 hours). This stark contrast un-derscores the practicality and generalization advantages of LLM–powered agents in complex, dynamic systems. VII. C ONCLUSION 
+
+This paper presents a hierarchical Agentic AI framework for optimizing latency-sensitive and fair inference of multi-modal LMs in mobile edge networks. By orchestrating a global planning agent with short-term prompt scheduling and on-node deployment control agents, we demonstrate that system-level objectives can be achieved through natural-language reasoning over runtime telemetry and historical memory. Our framework integrates clean modular abstractions with a fully functional edge testbed, enabling end-to-end coordination across dynamic prompt workloads and resource-constrained edge nodes. Ex-tensive experiments show that our agentic solution achieves over 80% latency reduction and significantly improves fairness compared to traditional baselines, while also demonstrating substantially better generalization capability than learning-based AI controllers under delayed and non-stationary feed-back. Looking ahead, a promising extension is to incorporate federated learning at the edge layer, allowing MEC servers LATEX CLASS FILES, VOL. X, NO. Y, MONTH 202X 
+
+to fine-tune LMs collaboratively while preserving data lo-cality and privacy. Additionally, future work will explore joint optimization of service latency and energy consumption, enabling sustainable LM deployment in resource-constrained environments. REFERENCES [1] A. Vaswani, “Attention is all you need,” Advances in Neural Information Processing Systems , 2017. [2] W. Peebles and S. Xie, “Scalable diffusion models with transformers,” in Proceedings of the IEEE/CVF International Conference on Computer Vision , 2023, pp. 4195–4205. [3] M. Xu, H. Du, D. Niyato, J. Kang, Z. Xiong, S. Mao, Z. Han, A. Jamalipour, D. I. Kim, X. Shen et al. , “Unleashing the power of edge-cloud generative ai in mobile networks: A survey of aigc services,” 
+
+IEEE Communications Surveys & Tutorials , 2024. [4] Y.-C. Wang, J. Xue, C. Wei, and C.-C. J. Kuo, “An overview on generative ai at scale with edge-cloud computing,” IEEE Open Journal of the Communications Society , 2023. [5] Y. Chen, R. Li, Z. Zhao, C. Peng, J. Wu, E. Hossain, and H. Zhang, “Netgpt: An ai-native network architecture for provisioning beyond personalized generative services,” IEEE Network , 2024. [6] Z. Lin, G. Qu, Q. Chen, X. Chen, Z. Chen, and K. Huang, “Pushing large language models to the 6g edge: Vision, challenges, and opportunities,” 
+
+IEEE Communications Magazine , vol. 63, no. 9, pp. 52–59, 2025. [7] W. Fan, M. Hua, Y. Zhang, Y. Su, X. Li, B. Tang, F. Wu, and Y. Liu, “Game-based task offloading and resource allocation for vehicular edge computing with edge-edge cooperation,” IEEE Transactions on Vehicu-lar Technology , vol. 72, no. 6, pp. 7857–7870, 2023. [8] Y. Liu, Y. Mao, Z. Liu, F. Ye, and Y. Yang, “Joint task offloading and resource allocation in heterogeneous edge environments,” IEEE Transactions on Mobile Computing , 2023. [9] J. Yang, Q. Yuan, S. Chen, H. He, X. Jiang, and X. Tan, “Cooperative task offloading for mobile edge computing based on multi-agent deep reinforcement learning,” IEEE Transactions on Network and Service Management , vol. 20, no. 3, pp. 3205–3219, 2023. [10] H. Li et al. , “DRL-based long-term resource planning for task offloading policies in multiserver edge computing networks,” IEEE TNSM , vol. 19, no. 4, 2022. [11] Z. Xiao, J. Shu, H. Jiang, J. C. Lui, G. Min, J. Liu, and S. Dustdar, “Multi-objective parallel task offloading and content caching in d2d-aided mec networks,” IEEE Transactions on Mobile Computing , vol. 22, no. 11, pp. 6599–6615, 2022. [12] J. Ren, J. Liu, Y. Zhang, Z. Li, F. Lyu, Z. Wang, and Y. Zhang, “An efficient two-layer task offloading scheme for mec system with multiple services providers,” in IEEE INFOCOM 2022-IEEE Conference on Computer Communications . IEEE, 2022, pp. 1519–1528. [13] Y. Cang, M. Chen, Z. Yang, Y. Hu, Y. Wang, C. Huang, and Z. Zhang, “Online resource allocation for semantic-aware edge computing systems,” 
+
+IEEE Internet of Things Journal , 2023. [14] Z. Aghapour, S. Sharifian, and H. Taheri, “Task offloading and resource allocation algorithm based on deep reinforcement learning for distributed ai execution tasks in iot edge computing environments,” Computer Networks , vol. 223, p. 109577, 2023. [15] E. Li, L. Zeng, Z. Zhou, and X. Chen, “Edge ai: On-demand accelerating deep neural network inference via edge computing,” IEEE Transactions on Wireless Communications , vol. 19, no. 1, pp. 447–457, 2019. [16] H. Zhou, W. Zhang, C. Wang, X. Ma, and H. Yu, “Bbnet: a novel convo-lutional neural network structure in edge-cloud collaborative inference,” 
+
+Sensors , vol. 21, no. 13, p. 4494, 2021. [17] X. Dai, X. Kong, T. Guo, and Y. Huang, “Cinet: Redesigning deep neural networks for efficient mobile-cloud collaborative inference,” in 
+
+Proceedings of the 2021 SIAM International Conference on Data Mining (SDM) . SIAM, 2021, pp. 459–467. [18] C. Hu, W. Bao, D. Wang, and F. Liu, “Dynamic adaptive dnn surgery for inference acceleration on the edge,” in IEEE INFOCOM 2019-IEEE Conference on Computer Communications . IEEE, 2019, pp. 1423– 1431. [19] A. E. Eshratifar, M. S. Abrishami, and M. Pedram, “Jointdnn: An efficient training and inference engine for intelligent mobile cloud computing services,” IEEE Transactions on Mobile Computing , vol. 20, no. 2, pp. 565–576, 2019. [20] H.-J. Jeong, H.-J. Lee, C. H. Shin, and S.-M. Moon, “Ionn: Incremental offloading of neural network computations from mobile devices to edge servers,” in Proceedings of the ACM symposium on cloud computing ,2018, pp. 401–411. [21] M. Zhang, X. Shen, J. Cao, Z. Cui, and S. Jiang, “Edgeshard: Efficient llm inference via collaborative edge computing,” IEEE Internet of Things Journal , 2024. [22] X. Zhang, J. Liu, Z. Xiong, Y. Huang, G. Xie, and R. Zhang, “Edge intelligence optimization for large language model inference with batch-ing and quantization,” in 2024 IEEE Wireless Communications and Networking Conference (WCNC) . IEEE, 2024, pp. 1–6. [23] Y. Chen, R. Li, X. Yu, Z. Zhao, and H. Zhang, “Adaptive layer splitting for wireless llm inference in edge computing: A model-based reinforce-ment learning approach,” arXiv preprint arXiv:2406.02616 , 2024. [24] S. Li, X. Lin, H. Xu, K. Hua, X. Jin, G. Li, and J. Li, “Multi-agent rl-based industrial aigc service offloading over wireless edge networks,” in 
+
+IEEE INFOCOM 2024-IEEE Conference on Computer Communications Workshops (INFOCOM WKSHPS) . IEEE, 2024, pp. 1–6. [25] J. Fang, Y. He, F. R. Yu, J. Li, and V. C. Leung, “Large language models (llms) inference offloading and resource allocation in cloud-edge networks: An active inference approach,” in 2023 IEEE 98th Vehicular Technology Conference (VTC2023-Fall) . IEEE, 2023, pp. 1–5. [26] H. Du, Z. Li, D. Niyato, J. Kang, Z. Xiong, H. Huang, and S. Mao, “Diffusion-based reinforcement learning for edge-enabled ai-generated content services,” IEEE Transactions on Mobile Computing , 2024. [27] M. Xu, D. Niyato, H. Zhang, J. Kang, Z. Xiong, S. Mao, and Z. Han, “Joint foundation model caching and inference of generative ai services for edge intelligence,” in GLOBECOM 2023-2023 IEEE Global Com-munications Conference . IEEE, 2023, pp. 3548–3553. [28] X. Yuan, H. Li, K. Ota, and M. Dong, “Generative inference of large language models in edge computing: An energy efficient approach,” in 
+
+2024 International Wireless Communications and Mobile Computing (IWCMC) . IEEE, 2024, pp. 244–249. [29] Z. Yang, Y. Yang, C. Zhao, Q. Guo, W. He, and W. Ji, “Perllm: Personalized inference scheduling with edge-cloud collaboration for diverse llm services,” arXiv preprint arXiv:2405.14636 , 2024. [30] S. Ye, B. Ouyang, J. Du, L. Zeng, T. Qian, W. Ou, X. Chu, D. Guo, Y. Lu, and X. Chen, “Resource-efficient collaborative edge transformer inference with hybrid model parallelism,” IEEE Transactions on Mobile Computing , vol. 24, no. 10, pp. 10 945–10 962, 2025. [31] Z. Yu, Z. Wang, Y. Li, R. Gao, X. Zhou, S. R. Bommu, Y. K. Zhao, and Y. C. Lin, “Edge-llm: Enabling efficient large language model adaptation on edge devices via unified compression and adaptive layer voting,” 2024. [32] J. Lin, J. Tang, H. Tang, S. Yang, W.-M. Chen, W.-C. Wang, G. Xiao, X. Dang, C. Gan, and S. Han, “Awq: Activation-aware weight quanti-zation for on-device llm compression and acceleration,” Proceedings of Machine Learning and Systems , vol. 6, pp. 87–100, 2024. [33] X. Ma, G. Fang, and X. Wang, “Llm-pruner: On the structural pruning of large language models,” Advances in neural information processing systems , vol. 36, pp. 21 702–21 720, 2023. [34] X. Chen, L. Jiao, W. Li, and X. Fu, “Efficient multi-user computation offloading for mobile-edge cloud computing,” IEEE/ACM transactions on networking , vol. 24, no. 5, pp. 2795–2808, 2015. [35] R. Jain, A. Durresi, and G. Babic, “Throughput fairness index: An explanation,” in ATM Forum contribution , vol. 99, no. 45, 1999, pp. 1–13. [36] O. Sefraoui, M. Aissaoui, M. Eleuldj et al. , “Openstack: toward an open-source solution for cloud computing,” International Journal of Computer Applications , vol. 55, no. 3, pp. 38–42, 2012. [37] A. Radford, J. Wu, R. Child, D. Luan, D. Amodei, and I. Sutskever, “Language models are unsupervised multitask learners,” 2019. [38] J. Li, D. Li, C. Xiong, and S. Hoi, “Blip: Bootstrapping language-image pre-training for unified vision-language understanding and generation,” 2022. [Online]. Available: https://arxiv.org/abs/2201.12086 [39] R. Rombach, A. Blattmann, D. Lorenz, P. Esser, and B. Ommer, “High-resolution image synthesis with latent diffusion models,” in Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recogni-tion (CVPR) , June 2022, pp. 10 684–10 695. [40] M. Neely, Stochastic network optimization with application to commu-nication and queueing systems . Morgan & Claypool Publishers, 2010. [41] M. J. Neely, E. Modiano, and C. E. Rohrs, “Dynamic power allocation and routing for time varying wireless networks,” in IEEE INFOCOM 2003. Twenty-second Annual Joint Conference of the IEEE Computer and Communications Societies (IEEE Cat. No. 03CH37428) , vol. 1. IEEE, 2003, pp. 745–755.

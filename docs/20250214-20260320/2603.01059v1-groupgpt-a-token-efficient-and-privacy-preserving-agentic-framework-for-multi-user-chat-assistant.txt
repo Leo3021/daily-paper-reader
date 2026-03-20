@@ -1,0 +1,333 @@
+Title: GroupGPT: A Token-efficient and Privacy-preserving Agentic Framework for Multi-User Chat Assistant
+
+URL Source: https://arxiv.org/pdf/2603.01059v1
+
+Published Time: Tue, 03 Mar 2026 02:22:44 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+# GroupGPT: A Token-efficient and Privacy-preserving Agentic Framework for Multi-User Chat Assistant 
+
+# Zhuokang Shen ∗
+
+East China Normal University Shanghai, China 
+
+# Yifan Wang ∗
+
+East China Normal University Shanghai, China 
+
+# Hanyu Chen 
+
+University of Nottingham Ningbo Ningbo, China 
+
+# Wenxuan Huang 
+
+East China Normal University Shanghai, China The Chinese University of Hong Kong Hong Kong, China 
+
+# Shaohui Lin †
+
+East China Normal University Shanghai, China Sanming University Fujian, China 
+
+## Abstract 
+
+Recent advances in large language models (LLMs) have enabled increasingly capable chatbots. However, most existing systems fo-cus on single-user settings and do not generalize well to multi-user group chats, where agents require more proactive and accurate in-tervention under complex, evolving contexts. Existing approaches typically rely on LLMs for both reasoning and generation, leading to high token consumption, limited scalability, and potential pri-vacy risks. To address these challenges, we propose GroupGPT ,a token-efficient and privacy-preserving agentic framework for multi-user chat assistant. GroupGPT adopts a small–large model collaborative architecture to decouple intervention timing from re-sponse generation, enabling efficient and accurate decision-making. The framework also supports multimodal inputs, including memes, images, videos, and voice messages. We further introduce MUIR , a benchmark dataset for multi-user chat assistant intervention rea-soning. MUIR contains 2,500 annotated group chat segments with intervention labels and rationales, supporting evaluation of timing accuracy and response quality. We evaluate a range of models on MUIR, from large language models to smaller counterparts. Exten-sive experiments demonstrate that GroupGPT produces accurate and well-timed responses, achieving an average score of 4.72/5.0 in LLM-based evaluation, and is well received by users across diverse group chat scenarios. Moreover, GroupGPT reduces token usage by up to 3× compared to baseline methods, while providing privacy sanitization of user messages before cloud transmission. Code is available at: https://github.com/Eliot-Shen/GroupGPT. 
+
+## CCS Concepts 
+
+• Human-centered computing → Interactive systems and tools ; • Computing methodologies → Discourse, dialogue and pragmatics ; • Security and privacy → Privacy protections .
+
+## Keywords 
+
+Conversational Agent, Multi-Agent, Multi-Party Conversation, User Privacy, Token Efficiency, Proactive AI 
+
+> ∗Both authors contributed equally to this research.
+> †Corresponding author. (Email: shlin@cs.ecnu.edu.cn).
+
+## 1 Introduction 
+
+The domain of chatbot research has experienced a remarkable boom in recent times. Nonetheless, current research [ 6, 17 , 43 , 45 , 53 ] is predominantly concentrated on interactions involving a single user. While these systems demonstrate strong capabilities in single-user interactions, their extension to multi-user group chat settings re-mains underexplored. In industry settings, most existing group chatbots tend to focus on passive responses, operating in a rule-driven manner, rather than demonstrating proactive participation. This scarcity of studies concerning group conversation chatbots significantly impedes their deployment in complex, multi-user set-tings, including collaborative activities like brainstorming sessions, debate and emotional communication. Recently, multi-user chatbots have begun gaining momentum in both academia and industry. However, existing frameworks [ 19 ,25 , 34 ] proposed in prior research generally suffer from various limitations, such as high token consumption and insufficient privacy protection. In addition, their evaluation methodologies mainly rely on manually designed group chat topic scenarios and user studies. Such approaches are inherently subjective and limited in scenario diversity, making it difficult to fully reflect performance in realistic and complex group chat environments. In our work, these issues are effectively addressed. We intro-duce GroupGPT, a multi-agent based chatbot framework tailored for real-world social group chats. GroupGPT is capable of under-standing complex multimodal social content, including user-shared images, memes, videos, and voice messages. It adopts a small-large model collaborative design which significantly reduces the LLM’s token footprint, protects users’ private information, and improves scalability in dynamic, high-volume group-chat environments. To enable systematic evaluation of intervention behavior, we further propose MUIR, to the best of our knowledge, the first benchmark dataset for multi-user intervention reasoning. MUIR contains 2500 group-chat segments with annotated rationales, supporting quan-titative assessment of intervention timing, appropriateness, and conversational utility. Additionally, we conduct a user study with 30 participants in real group-chat settings. The chatbot instanti-ated under the GroupGPT framework achieves an overall score of 4.72/5.0 in response quality as evaluated by an LLM-as-a-judge, and is ultimately well received by the majority of participants. Our contributions are summarized as follows: 
+
+> arXiv:2603.01059v1 [cs.CL] 1 Mar 2026 Conference, 2026, Shen et al.
+
+• We propose GroupGPT, a novel group chatbot framework com-posed of several specialized sub-agents, including an Intervention Judge, a Privacy Transcriber, a Multimodal Processor, and a Final Respondent. 
+
+• We introduce MUIR, the first benchmark dataset for group chat intervention reasoning with human-annotated rationales. 
+
+• Comprehensive experiments show that GroupGPT delivers high-quality responses, achieves efficient token consumption, and provides strong privacy protection. 
+
+## 2 Related Work 
+
+Multi-user Chatbots. Mainstream dialogue system research has primarily centered on single-user chatbots, with extensive explo-ration of pre-training or fine-tuning LLMs for task-oriented dia-logue systems. Studies such as [ 6, 17 , 43 , 45 , 53 ] have employed LLMs, pre-trained or fine-tuned on dialogue data, to develop dia-logue models or chatbots for various domains and tasks, such as travel ticket booking or restaurant reservation. In contrast, aca-demic research on multi-party or multi-user dialogue has predomi-nantly concentrated on foundational conversational understanding tasks using multi-party conversation datasets, including addressee recognition, speaker identification, response selection, and response generation [13, 14, 39, 42, 57]. Unlike single-user chatbots, limited research on group chatbots restricts their application in tasks like brainstorming sessions and debates. To bridge this gap, the MUCA framework [ 34 ] was the first to formalize the “3W” design dimensions—“What” to say, “When” to respond, and “Who” to answer—introducing conversational strate-gies for goal-oriented group discussions. Building upon this founda-tion, the HUMA framework [ 19 ] further enables multi-user chatbots to achieve more natural and human-like behavior by leveraging human-like conversational strategies and response timing. Beyond conversational strategy design, other work has explored group chatbots from application and system-level perspectives. For ex-ample, MAP [ 25 ] proposes a multi-agent framework for multi-user personalization, through a reflection–analysis–feedback workflow to model user preferences, resolve conflicts, and iteratively refine personalized outcomes in collaborative settings. Similarly, Social-RAG [ 44 ] introduces a group agent for paper recommendations that retrieves social signals from group interactions to socially ground generation. And SeeSawBot [ 47 ] designs a multi-user chatbot to explore how LLM can mediate, facilitate, or disrupt group dynamics in collaborative environments. Besides, [ 32 ] has explored proactive agents with “inner thoughts” mechanisms and [ 22 ] proposes a con-ceptual framework that models group structures and interaction patterns. Parallel to academic progress, industry has also started deploy-ing proactive group-oriented conversational agents. For example, OpenAI has introduced a group chat feature in the web version of ChatGPT, while ByteDance has explored group interaction agents within TikTok’s chat groups, and Tencent has integrated group AI assistants into Yuanbao app. Recently, the viral open-source project ClawedBot can also be deployed into group chats of social apps such as WhatsApp, Telegram, and Feishu. 
+
+Privacy issues in LLM-based Conversational Agents. Conver-sational agents built on LLMs introduce two major types of privacy vulnerabilities [ 59 ] The first relates to conventional data security and protection issues, such as unauthorized data access, personal information trafficking, and weaknesses in the interaction pipeline that could be exploited for cyberattacks, data leaks, or ransomware [ 23 ]. The second involves risks unique to LLMs stemming from memorization [ 8 , 9, 36 , 56 ]. Prior research has demonstrated that LLMs may inadvertently retain and reproduce sensitive training data, enabling low-cost extraction attacks—for example, prompt-ing the model to repeatedly output "poem" can elicit verbatim memorized content [ 36 ]. These risks are exacerbated in real-world settings, where users routinely overshare personal information dur-ing interactions [ 35 , 59 ], and where user prompts may be used for model training or fine-tuning, often without users being aware of opt-out mechanisms [ 59 ]. To address these issues, prior research has largely adopted model-centered strategies. During training, methods such as data sanitization [ 21 , 31 ] and differentially private [29 , 54 ] reduce exposure to sensitive data. Post-training approaches like knowledge unlearning [ 20 ] remove information associated with particular token sequences. At inference time, privacy risks can be further controlled through personally identifiable information(PII) detection and rewriting [11, 37, 60]. 
+
+## 3 Framework Architecture 3.1 Preliminary and Design Challenges 
+
+Design Challenges. Designing an efficient, comprehensive, and in-telligent group chatbot is a non-trivial task that presents numerous challenges. In our work, we focus on addressing the key challenges: 
+
+• Accurate Intervention Timing. The assistant must precisely determine when to intervene, requiring fine-grained contextual reasoning over dynamic multi-user interactions. Premature in-tervention may disrupt natural dialogue flow, while delayed re-sponses reduce utility. The strict inference latency requirements also constrain the complexity of the overall framework design. 
+
+• Efficient Intervention Decision Mechanisms. Naive or rule-based triggering strategies can incur substantial API token over-head. For example, prior frameworks like MUCA [ 34 ] adopt fixed-interval evaluation (e.g., invoking an LLM every three messages to determine whether intervention is needed). Such designs lead to: (i) delayed or missed timely interventions, and (ii) excessive API calls in frequent (i.e., stay silent ) scenarios, resulting in sig-nificant and unnecessary token consumption. 
+
+• Multimodal Message Understanding. Existing group-chat research mainly focuses on text-only conversations. However, real-world social platforms involve complex multimodal interac-tions, including images, videos, voice messages, and stickers. 
+
+• Internet Slang and Informal Language Variability. The wide-spread use of internet slang, abbreviations, and community short-hand introduces substantial lexical ambiguity. 
+
+• Lack of Public Group-Chat Data. Due to privacy concerns and data governance restrictions, large-scale multi-user group chat logs are seldom released for public research use. The scarcity of high-quality annotated datasets impedes training and bench-marking, thereby hindering systematic progress in this domain. 
+
+• Cloud-Based Privacy Risks. Deploying LLM-based assistants via cloud APIs introduces potential privacy exposure for sensitive GroupGPT: An Agentic Framework for Multi-User Chat Assistant Conference, 2026, 
+
+Figure 1: GroupGPT can identify the right moment to chime in, rewrite sensitive personally identifiable information(gray part), understand multimodal content such as memes, and actively participate in group discussions. 
+
+group-chat content. Since group conversations may contain per-sonal, confidential, or organizational information, transmitting raw chat logs to external servers raises compliance, security, and data governance concerns. These challenges jointly require a framework that balances respon-siveness, efficiency, privacy, and contextual reasoning. 
+
+Group-Chat Environment. We begin by formalizing the multi-user group-chat environment and the group-chat assistant task. Let C denote the complete message stream of a multi-user group chat, represented as a temporally ordered sequence of utterances: 
+
+C = {𝑢 1, 𝑢 2, . . . , 𝑢 𝑇 }, where each utterance 𝑢 𝑖 is associated with a speaker identity 𝑠 𝑖 ∈ { 1, . . . , 𝑃 } and contains text or captions of images, videos or voice messages. At time step 𝑖 , the chat state is: C𝑖 = {𝑢 1, . . . , 𝑢 𝑖 }. To support context-aware reasoning, we de-fine a sliding window of the 𝑁 most recent utterances: U𝑁 ,𝑖 =
+
+{𝑢 𝑖 −𝑁 +1, . . . , 𝑢 𝑖 }. We consider two window configurations: (i) a short-term window U𝑁 sw ,𝑖 modeling local conversational dynamics, and (ii) a long-term window U𝑁 lw ,𝑖 capturing the broader thematic context. We denote the LLM–based agent as 𝑝 𝜃 with parameters 
+
+𝜃 , and introduce two lightweight auxiliary agents: an Intervention Judge 𝑝 ij ,𝜙 with parameters 𝜙 , and a Privacy Transcriber 𝑝 pt ,𝜓 with parameters 𝜓 .
+
+Group-Chat Assistant Task. A Group-Chat Assistant operates over a live multi-user message stream and must determine (1) what to say , (2) when to intervene and (3) who to respond . Formally, at each time step 𝑖 , the assistant must output an intervention action: 
+
+𝑎 ∈ A . We define six types of interventions as the action set A:
+
+• Stay Silent — stay silent when the conversation flows naturally. 
+
+• Emotional Support — provide comfort, empathy or humor. 
+
+• Offering Suggestion — propose ideas, alternative perspectives or solutions relevant to the conversation. 
+
+• Fact Correction — gently correct factual mistakes or misinfor-mation in the discussion. 
+
+• Knowledge Enrichment — enrich the conversation with back-ground information, context or related facts that help others understand the topic better. 
+
+• Style Balancing — adjust tone, politeness or conversational style and resolve interpersonal conflicts to maintain group harmony. These categories are derived from common conversational roles observed in real-world group chats and are validated during dataset construction. 
+
+## 3.2 GroupGPT 
+
+The proposed GroupGPT comprises five core components, as de-picted in Fig.1. These components operate sequentially and cooper-atively during the conversation, enabling GroupGPT to minimize token consumption, protect user privacy, and maintain high-quality engagement in dynamic multi-user group chats. The overall infer-ence pipeline is described in Algorithm 1. And each of the compo-nents is detailed below. Conference, 2026, Shen et al. 
+
+Intervention Judge. The Intervention Judge continuously moni-tors the group-chat stream and determines whether an interven-tion is necessary at the current moment. It is implemented as a lightweight language model 𝑝 ij ,𝜙 , instruction–tuned on our MUIR 
+
+dataset to determine whether and how the assistant should inter-vene at the current moment. At each time step 𝑖 , the model takes as input the short-term window U𝑁 sw ,𝑖 and infer the appropriate intervention action 𝑎 ∈ A . This design avoids frequent invocation of large LLMs, significantly reducing token consumption compared to prior interval-based triggering strategies. 
+
+Privacy Transcriber. The Privacy Transcriber is also implemented as a lightweight language model 𝑝 pt ,𝜓 , fine-tuned on existing privacy-annotated datasets to perform message-level sanitization. At each time step 𝑖 , it processes the incoming message 𝑢 𝑖 independently and first detects whether personally identifiable information(PII) is present. If PII is found, the model identifies which parts of the message contain sensitive information and provides equivalent transformations to generalize them while preserving utility. For-mally, the transcriber rewrites the original message as e𝑢 𝑖 which is the privacy-preserving version of 𝑢 𝑖 . The Privacy Transcriber can operate in parallel with the Intervention Judge. This module ensures that sensitive user information is abstracted before being processed by large models, thereby reducing privacy leakage risks. 
+
+Multimodal Message Processor. The Multimodal Message Proces-sor converts non-textual chat content (e.g., images, memes, videos, and voice messages) into structured textual representations. For each message, it identifies its type and applies the corresponding model: images and memes are first classified and then captioned using designed prompts, while videos and speech are directly cap-tioned by specific multimodal model. All outputs are wrapped within type-specific tags (e.g., <meme>...</meme> , <image>...</image> ,
+
+<video>...</video> , <audio>...</audio> ). By unifying hetero-geneous inputs into tagged text, the final respond agent can operate on a consistent textual context, requiring only a text-based LLM for final response generation and thus improving efficiency. 
+
+Chat Frequency Logger. The Chat Frequency Logger records conversational flow rates within a fixed time window Δ𝑡 (e.g., one minute). For each time step 𝑖 , the logger computes the total number of messages and the per-user message counts that occur within the interval [𝑡 𝑖 − Δ𝑡, 𝑡 𝑖 ]. These statistics provide auxiliary signals reflecting group-chat activeness and user participation patterns, which are later used by the Final Respondent. 
+
+Final Respondent. If the Intervention Judge selects an interven-tion action 𝑎 other than staysilent , the Final Respondent is ac-tivated. The Final Respondent is instantiated with a LLM to gen-erate the final assistant response. Its inputs include: (1) a set of hand-crafted rules that specify intervention styles under different conditions and deterministic handling strategies for various conver-sational cases; (2) a task-specific prompt that governs the assistant’s behavioral constraints; (3) the chat frequency log of the chat group; (4) the intervention action 𝑎 produced by 𝑝 ij ,𝜙 and (5) the sanitized chat history output by 𝑝 pt ,𝜓 . The Final Respondent integrates these signals to produce a contextually appropriate response while main-taining safety and efficiency in group chat environments. 
+
+Algorithm 1 GroupGPT Online Inference Pipeline                                                                                                             
+
+> 1: Input: Message stream C={𝑢 1, . . . , 𝑢 𝑇 }, short-term window size
+> 𝑁 𝑠𝑤 , long-term window size 𝑁 𝑙 𝑤
+> 2: Output: Assistant intervention response {𝑟 𝑖 }
+> 3: Initialize short-term buffer U𝑠𝑤 (raw messages)
+> 4: Initialize long-term buffer fU𝑙 𝑤 (sanitized messages)
+> 5: Initialize Chat Frequency Logger F
+> 6: while group chat is active do
+> 7: Receive new message 𝑢 𝑖
+> 8: /* Step 1: Multimodal Processing */
+> 9: if 𝑢 𝑖 is multimodal (image / meme / video / audio) then
+> 10: 𝑢 𝑖 ←MultimodalMessageProcessor (𝑢 𝑖 )
+> 11: end if
+> 12: Update short-term buffer:
+> 13: U𝑠𝑤 ←AppendAndSlide ( U 𝑠𝑤 , 𝑢 𝑖 , 𝑁 𝑠𝑤 )
+> 14: /* Step 2: Asynchronous Processing */
+> 15: Async Branch A (Intervention Judge):
+> 16: 𝑎 ←𝑝 ij ,𝜙 ( U 𝑠𝑤 )
+> 17: Async Branch B (Privacy Transcriber):
+> 18: e𝑢 𝑖 ←𝑝 pt ,𝜓 (𝑢 𝑖 )
+> 19: /* Synchronization Barrier */
+> 20: Wait until both 𝑎 and e𝑢 𝑖 are ready.
+> 21: Update long-term sanitized buffer:
+> 22: fU𝑙 𝑤 ←AppendAndSlide (fU𝑙 𝑤 ,e𝑢 𝑖 , 𝑁 𝑙 𝑤 )
+> 23: /* Step 3: Update Chat Flow Signals */
+> 24: z𝑖 ← F .UpdateAndCompute (𝑢 𝑖 )
+> 25: /* Step 4: Final Response Generation */
+> 26: if 𝑎 𝑖 ≠StaySilent then
+> 27: 𝑟 𝑖 ←𝑝 𝜃 (fU𝑙 𝑤 , 𝑎, z𝑖 ,p)
+> 28: 𝑢 𝑖𝑛𝑡 𝑖 ← ⟨ intervention: 𝑎, response: 𝑟 𝑖 ⟩
+> 29: Insert 𝑢 𝑖𝑛𝑡 𝑖 into conversation stream as 𝑢 𝑇 +1
+> 30: Output Intervention response 𝑟 𝑖
+> 31: end if
+> 32: end while
+
+## 4 MUIR: The Multi-User group chat Intervention Reasoning Dataset 
+
+Due to privacy concerns, there is currently a lack of publicly avail-able, high-quality multi-user group chat datasets in both academia and industry. Existing resources [ 7, 12 , 52 , 55 , 58 ] are typically lim-ited in scale and numbers of user, outdated in content, restricted to plain text messages, cover only a narrow range of topics, and involve dialogues with at most two participants, which fail to reflect the complexity and richness of contemporary group communication en-vironments. While LLMs can be used to synthesize conversational data, purely synthetic datasets often suffer from limited modality diversity, insufficient coverage of real-world linguistic variation, and domain gaps between generated and naturally occurring inter-actions. To address these limitations, we construct MUIR , to the best of our knowledge, the first publicly available, high-quality benchmark dataset specifically designed for studying intervention reasoning in multi-user group chats. MUIR is built upon real-world human group chat logs, collected with appropriate anonymization. The dataset is annotated through a collaborative pipeline combining LLM la-beling and human verification to ensure both annotation reliability. In total, MUIR contains 2,500 group chat segments, randomly split into 2,000 training instances and 500 test instances. After training GroupGPT: An Agentic Framework for Multi-User Chat Assistant Conference, 2026, 
+
+on MUIR, our lightweight intervention judge model achieves per-formance that surpasses existing advanced large language models on the group-chat intervention task. 
+
+Data Collection. We recruited 30 volunteers from diverse back-grounds and instructed them to use several open-source chat log extraction tools to collect group chat data from their social appli-cations and all collected conversations were conducted in English. Prior to data collection, all group members were informed that the data would be used solely for research purposes and would undergo strict anonymization and content filtering. Data collection was con-ducted only after obtaining explicit consent from all participants within each group. In total, we collected chat logs from nearly 50 group chats, covering a wide range of topics and interaction scenarios. These include, but are not limited to, daily life sharing, technology discussions, fandom communities, art and creativity, pets, sports, programming, academic, emotional support, wellness and healing, cooking, and peer assistance. 
+
+Dataset Construction Process. Based on the collected long-term chat logs from nearly 50 group chats, we construct the dataset fol-lowing the procedure outlined in Algorithm 2. In the preprocessing stage, we employ the Multimodal Message Processor to convert all non-textual content into text captions. Next, we segment the con-tinuous chat streams using a sliding window strategy as depicted in Algorithm 3. Specifically, we define a long-term context window of size 𝑊 and introduce an overlap 𝑂 (set to 𝑊 // 5) between con-secutive segments. The introduction of overlap mitigates context fragmentation at segment boundaries and enables the model to better capture cross-turn dependencies. Each segmented chat win-dow is then fed into GPT-4o with carefully designed prompts. The model is instructed to identify intervention types (label), generates rationales and responses, while also recognizing the exact positions of interventions using message-level identifiers (IDs). 
+
+Training Segment Construction and Label Leakage Solution. 
+
+Given the annotated long-form group chat logs, a key challenge lies in how to segment them into training instances suitable for learning the intervention policy. Specifically, the expert model is designed to determine whether an intervention is needed after the latest message in a given context window. However, constructing such training samples introduces non-trivial issues related to label leakage, inference latency and contextual consistency. A central de-sign question is whether the model should be exposed to historical intervention signals, including previously generated intervention decisions and responses. Detailed analysis will be provided in the supplementary materials. As shown in Algorithm 4, we first insert annotated interventions into each window of length 𝑆 (the short-term window size), where only the label and reason are retained. The reason provides an inter-pretable rationale from LLM that helps the model learn intervention decision. The response is excluded, as it is generated by the final respondent at inference time; requiring the intervention model to wait for a complete response would introduce unnecessary latency. We then introduce a decision range 𝑋 to determine the final su-pervision label. By adjusting 𝑋 , we can control the proportion of 
+
+stay silent labels in the training set. Finally, the above process is repeated using a sliding window strategy to construct the full training dataset. As a result, each training sample consists of 𝑆 
+
+historical messages as input, which may include past intervention labels and their corresponding rationales, while the output is the intervention label and rationale at the current decision point. This formulation enables effective utilization of rich group chat logs while avoiding label leakage across training samples. 
+
+Algorithm 2 Intervention Judge Training Data Construction                            
+
+> 1: Input: Long chat history C={𝑢 1, . . . , 𝑢 𝑇 }, long-term window size 𝑊 ,overlap size 𝑂 , short-term window size 𝑆 , decision range 𝑋
+> 2: Output: Training dataset D
+> 3: C𝑡𝑒𝑥𝑡 ←MultimodalToText (C)
+> 4: I ← GenerateInterventionAnnotations (C𝑡𝑒𝑥𝑡 ,𝑊 , 𝑂 )
+> 5: D ← ConstructIJTrainingSamples (C𝑡𝑒𝑥𝑡 ,I, 𝑆, 𝑋 )
+> 6: return D
+
+Algorithm 3 Generate Intervention Annotations                                                
+
+> 1: function GenerateInterventionAnnotations (C𝑡𝑒𝑥𝑡 ,𝑊 , 𝑂 )
+> 2: I ← ∅
+> 3: step ←𝑊 −𝑂
+> 4: 𝑡 ←1
+> 5: while 𝑡 ≤𝑇 do
+> 6: 𝑡 𝑒𝑛𝑑 ←min (𝑡 +𝑊 −1,𝑇 )
+> 7: window ← { 𝑢 𝑡 , . . . , 𝑢 𝑡 𝑒𝑛𝑑 }
+> 8: window 𝑗𝑠𝑜𝑛 ←AddIDAndFormatJSON (window)
+> 9: I ← LLM(window 𝑗𝑠𝑜𝑛 , prompt)
+> 10: ⊲Each intervention contains: ⟨position(id), label, reason, response ⟩
+> 11: 𝑡 ←𝑡 +𝑠𝑡𝑒𝑝
+> 12: end while
+> 13: return I
+> 14: end function
+
+Algorithm 4 Construct Intervention Judge Training Samples                                                                                               
+
+> 1: function ConstructIJTrainingSamples (C𝑡𝑒𝑥𝑡 ,I, 𝑆, 𝑋 )
+> 2: D ← ∅
+> 3: 𝑖 ←1
+> 4: while 𝑖 +𝑆 −1≤𝑇 do
+> 5: window 𝑟𝑎𝑤 ← { 𝑢 𝑖 , . . . , 𝑢 𝑖 +𝑆 −1}
+> 6: I𝑤𝑖𝑛𝑑𝑜𝑤 ←interventions within [𝑖, 𝑖 +𝑆 −1]
+> 7: window ←InsertInterventionTags (window 𝑟𝑎𝑤 ,I𝑤𝑖𝑛𝑑𝑜𝑤 )
+> ⊲Each tag contains only ⟨label, reason ⟩
+> 8: 𝑅 ← [ 𝑖 +𝑆 −𝑋 , 𝑖 +𝑆 −1]⊲R denotes decision range.
+> 9: I𝑅 ←interventions inside 𝑅
+> 10: if I𝑅 =∅then
+> 11: label ←StaySilent
+> 12: next index ←𝑖 +𝑆
+> 13: else
+> 14: select closest intervention to (𝑖 +𝑆 −1)
+> 15: label ←selected intervention type
+> 16: next index ←index after selected intervention
+> 17: end if
+> 18: sample ← ⟨ window, label ⟩
+> 19: D ← D ∪ { sample }
+> 20: 𝑖 ←next index
+> 21: end while
+> 22: return D
+> 23: end function Conference, 2026, Shen et al.
+
+MUIR Dataset Method Model Size Chime-in Reason Chime-in Timing Weighted Acc Macro-F1 Acc F1 Baseline Random Guess N/A 0.1721 0.1552 0.5926 0.7280 0.4120 Baseline Human Evaluator N/A 0.8859 0.8687 0.8642 0.8913 0.8775 LLM + Prompt Qwen3-Max N/A 0.8333 0.7498 0.6358 0.6704 0.7223 Gemini-2.5-Pro N/A 0.8327 0.7466 0.7366 0.7929 0.7772 DeepSeek-V3.2 N/A 0.8122 0.7280 0.6728 0.7125 0.7314 GPT-4o N/A 0.8716 0.8494 0.5802 0.5920 0.7233 Embedding Model + KNN Gte-large-en-v1.5 0.4B 0.3560 0.3261 0.7428 0.8065 0.5579 Bge-m3 0.5B 0.2860 0.2447 0.6646 0.7352 0.4826 Jina-embedding-v3 0.6B 0.3045 0.2531 0.7160 0.7703 0.5110 SLM + Fine-Tuning Gemma-2-it 2B 0.7941 0.7027 0.7768 0.8395 0.7783 Qwen-2.5-Instruct 3B 0.8628 0.8102 0.7536 0.8232 0.8125 
+
+Llama-3.2-Instruct 3B 0.8095 0.7283 0.7780 0.8460 0.7905 Phi-4-Mini-Instruct 3.8B 0.7985 0.6870 0.7407 0.8125 0.7597 Qwen-3 4B 0.7859 0.7182 0.8340 0.8867 0.8062 Qwen-2.5-Instruct 7B 0.8069 0.6217 0.7324 0.8181 0.7448 Llama-3.1-Instruct 8B 0.8284 0.7732 0.7847 0.8535 0.8100 Qwen-3 8B 0.8134 0.6759 0.5380 0.5503 0.6444 
+
+Table 1: Performance comparison of different models on the MUIR benchmark. The best result in each metric is bold and the second is underlined. Test set Construction. The test set is split from the training corpus. We further employ three human annotators to perform a second round of annotation and correction on each test sample. For certain cases, we retain two valid labels, as these intervention types may naturally co-occur—for instance, providing emotional support while offering suggestions. The overall annotation strategy intentionally favors over-intervention to reduce the risk of missed interventions. The final intervention decision can then be flexibly controlled at the final respondent stage. 
+
+## 5 Experiment 
+
+In this section, we first evaluate the intervention performance of various models on the MUIR test set. We then build a group chat system supported by our chatbot and conduct user study to assess GroupGPT’s performance across different topics and group sizes. Furthermore, we compare the token consumption of GroupGPT, measure inference latency, and adopt the LLM-as-a-judge method-ology [33] to evaluate the quality of chatbot’s responses. 
+
+## 5.1 Experimental Setups 
+
+GroupGPT Implementation. We adopt Qwen-3-4B as 𝑝 ij ,𝜙 and Llama-3.2-Instruct-3B as 𝑝 pt ,𝜓 . We train 𝑝 pt ,𝜓 using the dataset from [ 11 ]. For multimodal annotation, we employ Qwen-2.5-32B to cap-tion images and videos (sampled at 1FPS). Audio data is transcribed using Qwen3-ASR-Flash. The final response is produced by GPT-4o. For training, the short-term window size 𝑁 𝑠𝑤 is set to 20, while the long-term window size 𝑁 𝑙 𝑤 is set to 50. All models are trained using LoRA[ 18 ] on 2 A6000 GPUs (48GB), with a batch size of 16. The learning rate is set to 2e-4 with a warmup ratio of 0.1. We fix a global random seed of 42 to ensure the reproducibility. 
+
+Evaluation Metrics. To evaluate the accuracy of model interven-tions, we adopt Acc, Macro-F1, and F1 score as evaluation metrics. The weighted score is computed as the arithmetic mean of reason-ing and timing performance. In the user study, we further assess efficiency from two perspectives. For token usage efficiency, we quantify the cumulative encoding token length. For inference effi-ciency, we measure the latency and GPU memory consumption. 
+
+## 5.2 MUIR Evaluation 
+
+Table 1 compares the performance of various models on the MUIR benchmark. The Chime-in Reason task evaluates a model’s ability to accurately identify the underlying reason for intervention when it decides to chime in. The Chime-in Timing task, formulated as a binary classification problem, measures whether the model can correctly recognize situations where it should remain silent. We introduce two baselines for comparison. The random guess serves to reflect the inherent difficulty and label distribution of the dataset. In addition, we recruited three human evaluators to conduct a consensus-based assessment on the test set. Their results consistently outperform all automated models across evaluation metrics, demonstrating the high quality and reliability of the MUIR dataset, and highlighting the challenge posed by these tasks. For existing powerful LLMs, after in-context learning and prompt engineering, they perform well on the Chime-in Reason task. Specif-ically, GPT-4o’s accuracy and Macro-F1 scores are only 1.4% and 1.9% lower than the human level, respectively. However, we observe that their performance on the Chime-in Timing task is relatively low, with accuracy not exceeding 67%. This is likely that such large GroupGPT: An Agentic Framework for Multi-User Chat Assistant Conference, 2026, 
+
+models generally exhibit conservative behavior and fail to achieve the level of over-intervention required by our task. Moreover, we experimented with text embedding models with fewer than 1B parameters. Using the MUIR training set, we ap-plied a KNN-based classification on the test set. Results show that while these lightweight embedding models achieve moderate per-formance on the Chime-in Timing task, their performance on the Chime-in Reason task is poor, with accuracy generally around 30%. Subsequently, we evaluate small language models (SLMs) fine-tuned on the MUIR training set. These models significantly out-perform large proprietary models such as GPT-4o on the Chime-in Timing task, effectively achieving the goal of proactive interven-tion decision-making, and are therefore well-suited to serve as an 
+
+Intervention Judge . Notably, Qwen-2.5-Instruct 3B achieves 86.3% accuracy and 81.0% Macro-F1 on the Chime-in Reason task, and attains the best overall score among all evaluated models. Mean-while, Qwen-3 4B achieves the best performance on the Chime-in Timing task, reaching 83.4% accuracy and 88.7% F1. 
+
+## 5.3 User Study 
+
+Study Design. We recruited 30 participants primarily from univer-sities and online platforms for our user study. Eligibility criteria included being fluent in English, regularly using social apps or websites, and being at least 18 years old. We first designed six pri-mary discussion topics, including sports, academic studies, daily communication and sharing, gaming, emotional and mental well-being, and debate on a given proposition (whether the development of AI is beneficial or harmful to humanity). Participants were as-signed into groups of five based on their topic preferences, and each group was required to accumulate at least 300 messages in their discussions. We introduced an LLM-only baseline, controlled solely via prompts, which simultaneously performed both intervention judgment and response generation. To facilitate comparison with baseline, we swapped the discussion topics between two groups (academic studies and debate), conducting additional discussions totaling over 500 messages. Its token consumption and inference latency were measured. Finally, all 30 participants were brought together into a single channel for a free-form discussion, with a requirement of exceeding 1,500 total messages. Each group chat was assigned a chatbot to participate in the conversation. All group discussions were completed within a span of several days.                               
+
+> Dimension Avg 12345
+> Relevance 4.74 2 (0.7%) 8 (2.7%) 14 (4.7%) 29 (9.7%) 247 (82.3%) Coherence 4.79 1 (0.3%) 6 (2.0%) 11 (3.7%) 25 (8.3%) 257 (85.6%) Fluency 4.90 0 (0.0%) 2 (0.7%) 5 (1.7%) 13 (4.3%) 280 (93.3%) Helpfulness 4.46 3 (1.0%) 15 (5.0%) 32 (10.7%) 47 (15.7%) 203 (67.7%)
+
+Table 2: GPT-4 evaluation of 300 GroupGPT response samples (1–5 scale). Response Quality Evaluation by LLM. To assess the quality of chatbot outputs, we utilized the LLM-as-a-judge approach [ 33 ], which has shown that GPT-4 evaluations align closely with hu-man judgments on natural language generation (NLG) tasks. In this study, GPT-4 was applied to a stratified random sample of 𝑁 = 300 
+
+responses produced by GroupGPT, scoring them on four key as-pects—relevance, coherence, fluency, and helpfulness—using a 1–5 Likert scale. Table 2 presents both the average ratings and the score distributions for each dimension. Overall, the responses received high marks across the board, with fluency (avg. 4.90) and coherence (avg. 4.79) particularly notable. These findings offer strong evidence of GroupGPT’s high-quality response generation. 2.9× fewer tokens 
+
+> 3.1× fewer tokens 1.9× fewer tokens
+
+Figure 2: Token consumption comparison. GroupGPT’s efficient token consumption. An active online group chat or communication channel can generate on average approximately 1,500 messages per day. As shown in Figure 2, we sequentially sample 500 group chat user messages from our exper-imental logs for estimation. By calculating under the LLM-only deployment paradigm, assigning a dedicated agent to only one chat group could result in a yearly token consumption of about 2B in-put tokens. In contrast, our approach reduces the consumption to 0.66B tokens, achieving an approximately 3 × reduction in token usage. This substantial reduction in token usage leads to a dramatic reduction in API costs.                             
+
+> Component Mean Latency (s) Min (s) Max (s) GPU Memory (GB)
+> LLM-Only (baseline) 1.42 0.89 3.71 -Multimodal Processor 1.24 0.45 16.45 -Privacy Transcriber 0.77 0.66 1.61 8.29 Intervention Judge 2.40 0.97 6.17 10.12 Final Respondent 2.40 1.07 4.56 -
+> GroupGPT(full) 4.36 0.97 10.96 18.41
+
+Table 3: Performance Statistics of Framework Components. Inference Latency and GPU Usage. To support the user study, we deploy GroupGPT using two 3080Ti GPUs (12GB) together with the vLLM [ 24 ] inference framework. During deployment, we sys-tematically profile the end-to-end latency and GPU memory usage of each component. As shown in Table 3, the average end-to-end inference latency of GroupGPT—from receiving a message to gen-erating a response—is approximately 4.3 seconds. This response time is perceptually on par with human reply behavior in group conversations. In certain cases, latency increases due to multimodal processing overhead, particularly when video are involved. Notably, when the Intervention Judge determines that no response is needed Conference, 2026, Shen et al. 
+
+Figure 3: Results from post-study questionnaire. Responses are evaluated based on the three design dimensions. 
+
+(i.e., stay silent ), the system can return a decision in as little as 0.97 seconds, significantly reducing unnecessary computation and im-proving responsiveness. In terms of resource efficiency, the overall GPU memory consumption of GroupGPT is 18.41 GB, dominated by two lightweight language models. This enables the system to run effectively on consumer-grade GPUs, demonstrating strong practicality for real-world deployment scenarios. 
+
+Post-Study Questionnaire Results. After all group chat experi-ments were concluded, we conducted a questionnaire survey. The results, shown in Figure 3, indicate strong overall satisfaction with GroupGPT across multiple dimensions. In terms of usefulness, the agent’s intelligent intervention and memory were particularly well-received: over 70% of users found its contributions helpful and contextually accurate, with 64% noting that it joined the conversa-tion at just the right moments.. For privacy and utility, GroupGPT proved its reliability—84% felt that the rewritten messages suc-cessfully removed most private information, and 88% agreed that the original meaning of their messages was preserved. Regarding comfort level, rather than feeling like an intrusion, the agent was viewed as a seamless addition. Notably, only a tiny fraction (9%) felt any discomfort, while the majority were eager to continue the in-teraction. Finally, for overall impression, 66% found the application novel and potentially impactful, and 61% indicated that they would recommend it to others. These results collectively demonstrate that GroupGPT is perceived as useful, respectful of user privacy, and comfortable to interact with, supporting its effectiveness and acceptability in real-world group chat scenarios. 
+
+## 6 Conclusion 
+
+In this work, we identified numerous design challenges in the field of multi-user chatbots. To address these challenges, we proposed an agentic framework called GroupGPT. We further introduced MUIR, the first publicly available, high-quality benchmark dataset specifi-cally designed for studying intervention reasoning in multi-user group chats. Extensive experiments demonstrated the effectiveness and efficiency of deploying GroupGPT in multi-user group chat sce-narios. In the future, we aim to develop even more intelligent and reliable chatbot framework with expanded functional capabilities. GroupGPT: An Agentic Framework for Multi-User Chat Assistant Conference, 2026, 
+
+## References 
+
+[1] Hossein Aboutalebi, Hwanjun Song, Yusheng Xie, Arshit Gupta, Lijia Sun, Hang Su, Igor Shalyminov, Nikolaos Pappas, Siffi Singh, and Saab Mansour. 2024. Magid: An automated pipeline for generating synthetic multi-modal datasets. In Proceed-ings of the 2024 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (Volume 1: Long Papers) .5150–5167. [2] Md Bokhtiar Al Zami, Shaba Shaon, Vu Khanh Quy, and Dinh C Nguyen. 2025. Digital twin in industries: A comprehensive survey. IEEE Access (2025). [3] Yuval Alaluf, Elad Richardson, Sergey Tulyakov, Kfir Aberman, and Daniel Cohen-Or. 2024. Myvlm: Personalizing vlms for user-specific queries. In European Conference on Computer Vision . Springer, 73–91. [4] Constanze Albrecht, Chayapatr Archiwaranguprok, Rachel Poonsiriwong, Awu Chen, Peggy Yin, Monchai Lertsutthiwong, Kavin Winson, Hal Hershfield, Pattie Maes, and Pat Pataranutaporn. 2025. Future You: Designing and Evaluating Multimodal AI-generated Digital Twins for Strengthening Future Self-Continuity. 
+
+arXiv preprint arXiv:2512.06106 (2025). [5] Marcel Binz, Elif Akata, Matthias Bethge, Franziska Brändle, Fred Callaway, Julian Coda-Forno, Peter Dayan, Can Demircan, Maria K Eckstein, Noémi Éltető, et al .2025. A foundation model to predict and capture human cognition. Nature (2025), 1–8. [6] Paweł Budzianowski and Ivan Vulić. 2019. Hello, it’s GPT-2-how can I help you? towards the use of pretrained language models for task-oriented dialogue systems. In Proceedings of the 3rd Workshop on Neural Generation and Translation .15–22. [7] Paweł Budzianowski, Tsung-Hsien Wen, Bo-Hsiang Tseng, Iñigo Casanueva, Stefan Ultes, Osman Ramadan, and Milica Gasic. 2018. Multiwoz-a large-scale multi-domain wizard-of-oz dataset for task-oriented dialogue modelling. In Pro-ceedings of the 2018 conference on empirical methods in natural language processing .5016–5026. [8] Nicholas Carlini, Daphne Ippolito, Matthew Jagielski, Katherine Lee, Florian Tramer, and Chiyuan Zhang. 2022. Quantifying memorization across neural language models. In The Eleventh International Conference on Learning Represen-tations .[9] Nicholas Carlini, Florian Tramer, Eric Wallace, Matthew Jagielski, Ariel Herbert-Voss, Katherine Lee, Adam Roberts, Tom Brown, Dawn Song, Ulfar Erlingsson, et al . 2021. Extracting training data from large language models. In 30th USENIX security symposium (USENIX Security 21) . 2633–2650. [10] Paul F Christiano, Jan Leike, Tom Brown, Miljan Martic, Shane Legg, and Dario Amodei. 2017. Deep reinforcement learning from human preferences. Advances in neural information processing systems 30 (2017). [11] Yao Dou, Isadora Krsek, Tarek Naous, Anubha Kabra, Sauvik Das, Alan Ritter, and Wei Xu. 2024. Reducing privacy risks in online self-disclosures with lan-guage models. In Proceedings of the 62nd annual meeting of the association for computational linguistics (volume 1: long papers) . 13732–13754. [12] Mihail Eric, Rahul Goel, Shachi Paul, Abhishek Sethi, Sanchit Agarwal, Shuyang Gao, Adarsh Kumar, Anuj Goyal, Peter Ku, and Dilek Hakkani-Tur. 2020. Multi-WOZ 2.1: A consolidated multi-domain dialogue dataset with state corrections and state tracking baselines. In Proceedings of the twelfth language resources and evaluation conference . 422–428. [13] Jia-Chen Gu, Zhenhua Ling, Quan Liu, Cong Liu, and Guoping Hu. 2023. GIFT: graph-induced fine-tuning for multi-party conversation understanding. In Pro-ceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) . 11645–11658. [14] Jia-Chen Gu, Chongyang Tao, Zhenhua Ling, Can Xu, Xiubo Geng, and Daxin Jiang. 2021. MPC-BERT: A pre-trained language model for multi-party conversa-tion understanding. In Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics and the 11th International Joint Conference on Natural Language Processing (Volume 1: Long Papers) . 3682–3692. [15] Haoran Hao, Jiaming Han, Changsheng Li, Yu-Feng Li, and Xiangyu Yue. 2025. Rap: Retrieval-augmented personalization for multimodal large language models. In Proceedings of the Computer Vision and Pattern Recognition Conference . 14538– 14548. [16] Sirui Hong, Mingchen Zhuge, Jonathan Chen, Xiawu Zheng, Yuheng Cheng, Jinlin Wang, Ceyao Zhang, Zili Wang, Steven Ka Shing Yau, Zijuan Lin, et al .2023. MetaGPT: Meta programming for a multi-agent collaborative framework. In The twelfth international conference on learning representations .[17] Ehsan Hosseini-Asl, Bryan McCann, Chien-Sheng Wu, Semih Yavuz, and Richard Socher. 2020. A simple language model for task-oriented dialogue. Advances in neural information processing systems 33 (2020), 20179–20191. [18] Edward J Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Liang Wang, Weizhu Chen, et al . 2022. Lora: Low-rank adaptation of large language models. Iclr 1, 2 (2022), 3. [19] Mateusz Jacniacki and Martí Carmona Serrat. 2025. Humanlike Multi-user Agent (HUMA): Designing a Deceptively Human AI Facilitator for Group Chats. arXiv preprint arXiv:2511.17315 (2025). [20] Joel Jang, Dongkeun Yoon, Sohee Yang, Sungmin Cha, Moontae Lee, Lajanugen Logeswaran, and Minjoon Seo. 2023. Knowledge unlearning for mitigating privacy risks in language models. In Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) . 14389–14408. [21] Nikhil Kandpal, Eric Wallace, and Colin Raffel. 2022. Deduplicating training data mitigates privacy risks in language models. In International Conference on Machine Learning . PMLR, 10697–10707. [22] Esma Karahodža, Amra Delić, and Francesco Ricci. 2025. Conceptual framework for group dynamics modeling from group chat interactions. In Adjunct Proceedings of the 33rd ACM Conference on User Modeling, Adaptation and Personalization .23–27. [23] Nir Kshetri. 2023. Cybercrime and privacy threats of large language models. IT Professional 25, 03 (2023), 9–13. [24] Woosuk Kwon, Zhuohan Li, Siyuan Zhuang, Ying Sheng, Lianmin Zheng, Cody Hao Yu, Joseph Gonzalez, Hao Zhang, and Ion Stoica. 2023. Efficient memory management for large language model serving with pagedattention. In 
+
+Proceedings of the 29th symposium on operating systems principles . 611–626. [25] Christine P Lee, Jihye Choi, and Bilge Mutlu. 2025. MAP: Multi-user Personal-ization with Collaborative LLM-powered Agents. In Proceedings of the Extended Abstracts of the CHI Conference on Human Factors in Computing Systems . 1–11. [26] Nyoungwoo Lee, Suwon Shin, Jaegul Choo, Ho-Jin Choi, and Sung-Hyon Myaeng. 2021. Constructing multi-modal dialogue dataset by replacing text with semanti-cally relevant images. In Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics and the 11th International Joint Conference on Natu-ral Language Processing (Volume 2: Short Papers) . 897–906. [27] Young-Jun Lee, Byungsoo Ko, Han-Gyu Kim, Jonghwan Hyeon, and Ho-Jin Choi. 2024. Dialogcc: An automated pipeline for creating high-quality multi-modal dia-logue dataset. In Proceedings of the 2024 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (Volume 1: Long Papers) . 1938–1963. [28] Yuxuan Lei, Tianfu Wang, Jianxun Lian, Zhengyu Hu, Defu Lian, and Xing Xie. 2026. HumanLLM: Towards Personalized Understanding and Simulation of Human Nature. arXiv:2601.15793 [cs.CL] https://arxiv.org/abs/2601.15793 [29] Xuechen Li, Florian Tramer, Percy Liang, and Tatsunori Hashimoto. 2021. Large language models can be strong differentially private learners. arXiv preprint arXiv:2110.05679 (2021). [30] Yujia Lin, Liming Chen, Aftab Ali, Christopher Nugent, Ian Cleland, Rongyang Li, Jianguo Ding, and Huansheng Ning. 2024. Human digital twin: A survey. 
+
+Journal of Cloud Computing 13, 1 (2024), 131. [31] Pierre Lison, Ildikó Pilán, David Sanchez, Montserrat Batet, and Lilja Øvrelid. 2021. Anonymisation models for text data: State of the art, challenges and future directions. In Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics and the 11th International Joint Conference on Natural Language Processing (Volume 1: Long Papers) . 4188–4203. [32] Xingyu Bruce Liu, Shitao Fang, Weiyan Shi, Chien-Sheng Wu, Takeo Igarashi, and Xiang’Anthony’ Chen. 2025. Proactive conversational agents with inner thoughts. In Proceedings of the 2025 CHI Conference on Human Factors in Computing Systems .1–19. [33] Yang Liu, Dan Iter, Yichong Xu, Shuohang Wang, Ruochen Xu, and Chenguang Zhu. 2023. G-eval: NLG evaluation using gpt-4 with better human alignment. In Proceedings of the 2023 conference on empirical methods in natural language processing . 2511–2522. [34] Manqing Mao, Paishun Ting, Yijian Xiang, Mingyang Xu, Julia Chen, and Jianzhe Lin. 2024. Multi-user chat assistant (MUCA): a framework using LLMS to facilitate group conversations. arXiv preprint arXiv:2401.04883 (2024). [35] Niloofar Mireshghallah, Maria Antoniak, Yash More, Yejin Choi, and Golnoosh Farnadi. 2024. Trust no bot: Discovering personal disclosures in human-llm conversations in the wild. arXiv preprint arXiv:2407.11438 (2024). [36] Milad Nasr, Nicholas Carlini, Jonathan Hayase, Matthew Jagielski, A Feder Cooper, Daphne Ippolito, Christopher A Choquette-Choo, Eric Wallace, Flo-rian Tramèr, and Katherine Lee. 2023. Scalable extraction of training data from (production) language models. arXiv preprint arXiv:2311.17035 (2023). [37] Ivoline C Ngong, Swanand Ravindra Kadhe, Hao Wang, Keerthiram Murugesan, Justin D Weisz, Amit Dhurandhar, and Karthikeyan Natesan Ramamurthy. 2025. Protecting users from themselves: Safeguarding contextual privacy in interactions with conversational agents. In Findings of the Association for Computational Linguistics: ACL 2025 . 26196–26220. [38] Thao Nguyen, Haotian Liu, Yuheng Li, Mu Cai, Utkarsh Ojha, and Yong Jae Lee. 2024. Yo’llava: Your personalized language and vision assistant. Advances in Neural Information Processing Systems 37 (2024), 40913–40951. [39] Hiroki Ouchi and Yuta Tsuboi. 2016. Addressee and response selection for multi-party conversation. In Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing . 2133–2143. [40] Long Ouyang, Jeffrey Wu, Xu Jiang, Diogo Almeida, Carroll Wainwright, Pamela Mishkin, Chong Zhang, Sandhini Agarwal, Katarina Slama, Alex Ray, et al . 2022. Training language models to follow instructions with human feedback. Advances in neural information processing systems 35 (2022), 27730–27744. Conference, 2026, Shen et al. 
+
+[41] Chen Qian, Wei Liu, Hongzhang Liu, Nuo Chen, Yufan Dang, Jiahao Li, Cheng Yang, Weize Chen, Yusheng Su, Xin Cong, et al . 2024. Chatdev: Communicative agents for software development. In Proceedings of the 62nd annual meeting of the association for computational linguistics (volume 1: Long papers) . 15174–15186. [42] Xiaohui Song, Longtao Huang, Songlin Hu, et al . 2022. Supervised prototypical contrastive learning for emotion recognition in conversation. In Proceedings of the 2022 conference on empirical methods in natural language processing . 5197–5206. [43] Yixuan Su, Lei Shu, Elman Mansimov, Arshit Gupta, Deng Cai, Yi-An Lai, and Yi Zhang. 2022. Multi-task pre-training for plug-and-play task-oriented dia-logue system. In Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) . 4661–4676. [44] Ruotong Wang, Xinyi Zhou, Lin Qiu, Joseph Chee Chang, Jonathan Bragg, and Amy X Zhang. 2025. Social-RAG: Retrieving from Group Interactions to Socially Ground AI Generation. In Proceedings of the 2025 CHI Conference on Human Factors in Computing Systems . 1–25. [45] Weizhi Wang, Zhirui Zhang, Junliang Guo, Yinpei Dai, Boxing Chen, and Wei-hua Luo. 2022. Task-oriented dialogue system as natural language generation. In Proceedings of the 45th international ACM SIGIR conference on research and development in information retrieval . 2698–2703. [46] Xintao Wang, Heng Wang, Yifei Zhang, Xinfeng Yuan, Rui Xu, Jen tse Huang, Siyu Yuan, Haoran Guo, Jiangjie Chen, Shuchang Zhou, Wei Wang, and Yanghua Xiao. 2026. CoSER: A Comprehensive Literary Dataset and Framework for Training and Evaluating LLM Role-Playing and Persona Simulation. arXiv:2502.09082 [cs.CL] https://arxiv.org/abs/2502.09082 [47] Yihe Wang, Kehua Lei, Sheng-Yang Chiu, Katherine Isbister, David Lee, and Kathryn E Ringland. 2026. SeeSawBot: An LLM-Driven Chatbot Mediating Across Private and Shared Slack Channels to Support Team Dynamics. (2026). [48] Stanisław Woźniak, Bartłomiej Koptyra, Arkadiusz Janz, Przemysław Kazienko, and Jan Kocoń. 2024. Personalized large language models. In 2024 IEEE Interna-tional Conference on Data Mining Workshops (ICDMW) . IEEE, 511–520. [49] Yutong Xie, Zhuoheng Li, Xiyuan Wang, Yijun Pan, Qijia Liu, Xingzhi Cui, Kuang-Yu Lo, Ruoyi Gao, Xingjian Zhang, Jin Huang, et al . 2025. Be. FM: Open Foundation Models for Human Behavior. arXiv preprint arXiv:2505.23058 (2025). [50] Bo Xu, Tingting Li, Junzhe Zheng, Mehdi Naseriparsa, Zhehuan Zhao, Hongfei Lin, and Feng Xia. 2022. Met-meme: A multimodal meme dataset rich in metaphors. In Proceedings of the 45th international ACM SIGIR conference on research and development in information retrieval . 2887–2899. [51] Jin Xu, Zhifang Guo, Hangrui Hu, Yunfei Chu, Xiong Wang, Jinzheng He, Yuxuan Wang, Xian Shi, Ting He, Xinfa Zhu, et al . 2025. Qwen3-omni technical report. 
+
+arXiv preprint arXiv:2509.17765 (2025). [52] Jing Xu, Arthur Szlam, and Jason Weston. 2022. Beyond goldfish memory: Long-term open-domain conversation. In Proceedings of the 60th annual meeting of the association for computational linguistics (volume 1: long papers) . 5180–5197. [53] Yunyi Yang, Yunhao Li, and Xiaojun Quan. 2021. Ubar: Towards fully end-to-end task-oriented dialog system with gpt-2. In Proceedings of the AAAI conference on artificial intelligence , Vol. 35. 14230–14238. [54] Da Yu, Saurabh Naik, Arturs Backurs, Sivakanth Gopi, Huseyin A Inan, Gautam Kamath, Janardhan Kulkarni, Yin Tat Lee, Andre Manoel, Lukas Wutschitz, et al .2021. Differentially private fine-tuning of language models. arXiv preprint arXiv:2110.06500 (2021). [55] Xiaoxue Zang, Abhinav Rastogi, Srinivas Sunkara, Raghav Gupta, Jianguo Zhang, and Jindong Chen. 2020. MultiWOZ 2.2: A dialogue dataset with additional annotation corrections and state tracking baselines. In Proceedings of the 2nd workshop on natural language processing for conversational AI . 109–117. [56] Chiyuan Zhang, Daphne Ippolito, Katherine Lee, Matthew Jagielski, Florian Tramèr, and Nicholas Carlini. 2023. Counterfactual memorization in neural language models. Advances in Neural Information Processing Systems 36 (2023), 39321–39362. [57] Rui Zhang, Honglak Lee, Lazaros Polymenakos, and Dragomir Radev. 2018. Ad-dressee and response selection in multi-party conversations with speaker in-teraction rnns. In Proceedings of the AAAI conference on artificial intelligence ,Vol. 32. [58] Saizheng Zhang, Emily Dinan, Jack Urbanek, Arthur Szlam, Douwe Kiela, and Jason Weston. 2018. Personalizing dialogue agents: I have a dog, do you have pets too?. In Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) . 2204–2213. [59] Zhiping Zhang, Michelle Jia, Hao-Ping Lee, Bingsheng Yao, Sauvik Das, Ada Lerner, Dakuo Wang, and Tianshi Li. 2024. “It’s a Fair Game”, or Is It? Examining How Users Navigate Disclosure Risks and Benefits When Using LLM-Based Conversational Agents. In Proceedings of the 2024 CHI Conference on Human Factors in Computing Systems . 1–26. [60] Jijie Zhou, Eryue Xu, Yaoyao Wu, and Tianshi Li. 2025. Rescriber: Smaller-LLM-powered user-led data minimization for LLM-based chatbots. In Proceedings of the 2025 CHI Conference on Human Factors in Computing Systems . 1–28. 
+
+## A Future Work 
+
+Multi-user chatbot systems are inherently application-driven and closely tied to real-world deployment scenarios. As such, it is chal-lenging for a single work to comprehensively cover all possible functionalities and research directions. This work aims to increase the visibility of this emerging area and contribute to the community by providing a benchmark dataset and a structured exploration of its core challenges and potential solutions. Several areas, including but not limited to the following, deserve further research: 
+
+• Group-level personalization. Future systems could move be-yond individual personalization and model collective memory and shared concepts within a group. For example, a chatbot could remember entities (e.g., a user’s pet or personal images shared previously) and consistently recognize them in future multimodal interactions. This direction is closely related to recent advances in personalized agents [ 3, 15 , 38 , 48 ], but extends personalization to the group level. 
+
+• Synthetic data generation for group chats. Collecting real-world multi-user conversation data is costly and time-consuming. An important direction is to leverage LLMs and multimodal gen-erative models (e.g., image and video generation) to synthesize high-fidelity group chat data that approximates real-world distri-butions, enabling both standalone and hybrid training paradigms. A promising line of work [ 1, 26 , 27 ] explores transforming text-only dialogues into multimodal ones by inserting or replacing utterances with semantically aligned visual content, providing a practical pathway for scalable multimodal data construction. Another compelling approach involves role-playing with person-alized agents. Recent studies [ 5 , 28 , 46 , 49 ] have demonstrated that role-playing models, when conditioned on high-quality his-torical data of individuals, can simulate and predict human be-havior in specific scenarios. So, it becomes possible to generate more authentic and diverse group chat interactions that reflect real-world conversational dynamics. 
+
+• Advanced training paradigms. While this work adopts super-vised fine-tuning (SFT) for training the intervention model, future work could incorporate human preference signals to construct high-quality feedback datasets, enabling reinforcement learn-ing from human feedback (RLHF) [ 10 , 40 ] or other post-training alignment techniques. 
+
+• Enhanced multimodal understanding. Real-world group chats are inherently multimodal, involving text, images, videos, and memes. Future systems could adopt unified multimodal models [51 ] to better interpret diverse inputs, including distinguishing between semantically meaningful images and casual content such as memes [50], which require different levels of reasoning. 
+
+• Comprehensive benchmarks and evaluation. There is a need for more comprehensive benchmarks with diverse tasks and met-rics to enable fair and reproducible evaluation. Such benchmarks could reduce reliance on large-scale and costly user studies while providing standardized assessment protocols. 
+
+• Multi-agent group chat systems. Instead of a single chatbot, future work could explore multi-agent settings [ 16 , 41 ] where multiple specialized agents (e.g., a philosopher, artist, or teacher) participate in the same group chat, enabling richer interactions through role differentiation and collaboration. GroupGPT: An Agentic Framework for Multi-User Chat Assistant Conference, 2026, 
+
+• Integration with digital personas. Another promising direc-tion is incorporating personal digital personas [ 2, 4 , 30 ] into group chats, allowing users’ virtual counterparts to participate and interact with others autonomously in a socially coherent manner. 
+
+## B Qualitative Analysis 
+
+We randomly sampled some group chat segments based on topic type. In Figure 4, we present several visual examples of GroupGPT participating in discussions within group chats. 
+
+## C Other materials 
+
+Additional materials will be provided in the next version of this paper, including detailed prompts, comprehensive descriptions of the MUIR dataset, and further system design details. Conference, 2026, Shen et al. 
+
+Figure 4: Qualitative results of chat responses obtained by GroupGPT. 
+
+(a) Cooking. (b) Daily Life Sharing. 
+
+(c) Game. (d) Pets.

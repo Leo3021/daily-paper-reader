@@ -1,0 +1,526 @@
+Title: A Modern System Recipe for Situated Embodied Human-Robot Conversation with Real-Time Multimodal LLMs and Tool-Calling
+
+URL Source: https://arxiv.org/pdf/2602.04157v1
+
+Published Time: Thu, 05 Feb 2026 01:26:34 GMT
+
+Number of Pages: 11
+
+Markdown Content:
+# A Modern System Recipe for Situated Embodied Human–Robot Conversation with Real-Time Multimodal LLMs and Tool-Calling 
+
+Dong Won Lee †, Sarah Gillet †, Louis-Philippe Morency ‡, Cynthia Breazeal † and Hae Won Park ††Massachussetts Institute of Technology 
+
+‡Carnegie Mellon University 
+
+Abstract —Situated embodied conversation requires robots to interleave real-time dialogue with active perception: deciding 
+
+what to look at, when to look, and what to say under tight latency constraints. We present a simple, minimal system recipe that pairs a real-time multimodal language model with a small set of tool interfaces for attention and active perception. We study six home-style scenarios that require frequent attention shifts and increasing perceptual scope. Across four system variants, we evaluate turn-level tool-decision correctness against human annotations and collect subjective ratings of interaction quality. Results indicate that real-time multimodal large language models and tool use for active perception is a promising direction for practical situated embodied conversation. 
+
+I. I NTRODUCTION 
+
+Enabling robots to converse naturally while jointly attending to a shared physical world with users remains a central goal of human–robot interaction. Consider a simple exchange at home: a user asks, “Where should I put this lamp?”, then the robot gazes at the lamp, inspects it, and turns to the shelf on the other side of the wall and says, ”How about next to that shelf far away from the window?” In this scenario, the robot must (i) manage interaction timing (turn-taking, interruptions) to have a smooth exchange with the user, (ii) ground language in the currently visible scene to make a suggestion or, and (iii) plan its own sensing actions, e.g., decide if it needs additional visual information, where to look, whether to search outside of its current field of view for the shelf, and when it should look back at the speaker. In situated embodied conversation, the robot must tightly couple dialogue and perception to allow for a smooth exchange with no perceivable delays and an awareness of the surroundings important for grounding and maintaining shared attention. Various research communities have worked on realizing different elements that allow for situated embodied conver-sation . While a rich body of prior work has explored fluent dialogue and interaction timing in spoken HRI (e.g., turn-taking and dialogue management) [37, 24, 33, 10], shared attention and joint attention [35, 6, 18, 14, 30, 31], and active perception, grounding for situated language understanding [22, 27, 34, 9], there is still no widely adopted systems abstraction for tightly interleaving real-time conversation with self-directed sensing actions across tasks, environments, and robot platforms. The emergence of real-time multimodal language models (Openai Realtime [28], Gemini Live [11]) fundamentally changes this design space. Unlike prior dialogue systems, these models can generate language while continuously consuming audio and visual input. However, this capability alone is insufficient for situated embodied conversation. In physical interaction, a robot must also actively ground language in the environment and manage shared attention through self-directed sensing actions, i.e., deciding what to look at, when to look, and how to coordinate perception with ongoing dialogue. Therefore, “plugging a real-time model into a robot” is not enough – without mechanisms for active grounding and attention control, it leaves a critical gap between fluent speech and situated understanding. A promising direction forward is tool use (a.k.a. function calling). Recent real-time LLMs provide this core functionality to emit structured function calls with typed arguments that a robot system can execute synchronously while the conversation continues. This paper presents a minimal but expressive system recipe for situated embodied conversation, identifying the necessary and sufficient coordination mechanisms between real-time language generation and active perception. Our system is orga-nized around two components: (1) a real-time multimodal LM that serves as a dialogue manager, (2) a set of tools provided to the LM that allows for directing the robots attention, i.e., gaze, and actively requesting new visual information. In sum, the realtime LM decides what to say, what to look at, and when by interleaving conversation generation with structured actions such as look_at_person , look_at_object ,
+
+look_around , look_for , and use_vision .We study this recipe across six home-style scenarios that require shifting attention between the interlocutor and task-relevant objects with increasing demands on perceptual scope: posture coaching, whiteboard tutoring, lamp placement, plant diagnosis, outfit checking, and finding misplaced items. We further evaluate four system variants via controlled ablations and backend comparisons, combining turn-level human anno-tations of “what the robot should do next” with subjective mea-sures of fluency and social presence. This evaluation isolates which ingredients most strongly affect perceived situatedness and where current real-time LMs still struggle. In summary, this paper makes the following contributions:  
+
+> •
+
+A system architecture pairing a real-time multimodal LM 
+
+> arXiv:2602.04157v1 [cs.RO] 4 Feb 2026
+
+with tool-mediated attention and active perception for situated conversation.  
+
+> •
+
+A set of tool interface for embodied conversation, includ-ing on-demand vision queries, person/object fixation, ex-ploratory scene sweeps, and query-driven view retrieval, plus a lightweight viewpoint “memory map” for off-camera grounding.  
+
+> •
+
+An evaluation protocol and scenario suite for situated embodied conversation, combining objective turn-level tool-call correctness with human questionnaires under controlled ablations and realtime model backends. II. R ELATED WORK 
+
+A. Situated Human-Robot Conversations 
+
+We use situated conversation to mean dialogue whose meaning and interaction flow are conditioned on a shared, perceivable environment (objects, people, visual understand-ing, and ongoing activities). In robotics and HRI, situated dialogue systems explicitly connect incremental language un-derstanding to perceptual context, maintaining and revising candidate interpretations as the robot observes the world and as the world changes [21, 20, 42, 22], where architectures bidirectionally couple situation awareness and dialogue pro-cessing [21, 19]. Because embodied sensing is viewpoint-limited, agents must actively select where to look to acquire task-relevant evidence [4]. In situated conversation, attention is additionally constrained by interactional demands (turn-taking, interruptions, addressee selection) and social norms (e.g., gaze signaling), making attention both an information-gathering policy and a communicative action [26, 2]. Real-time multimodal LMs have the potential to address this gap by treating situated conversation as an online process: the agent can track streaming audio/video, react to interruptions, and revise referents as the world changes. However, closing this loop requires active perception the robot must move its sensors to acquire visual information and to demonstrate attention. 
+
+B. Real-Time Multimodal Large Language Models (LLMs) 
+
+A recent and rapidly emerging direction is real-time mul-timodal LLM systems that support low-latency, bidirectional interaction over continuous streams of speech and (increas-ingly) live visual context. In contrast to turn-based multimodal models that consume static images or pre-recorded clips, real-time systems such as production-grade interfaces such as OpenAI’s Realtime API [28] and Google’s Gemini Live API [11] are designed around streaming I/O, incremental state updates, and tight latency constraints, which expose persistent session abstractions that accept ongoing audio (and optionally image/video) inputs and generate interleaved audio/text out-puts suitable for natural conversation. 
+
+C. LLM Tool-Use and Function Calling 
+
+A complementary line of work equips LLMs with tool-use : the ability to invoke external functions (e.g., web search, databases, robot controllers, code execution) and incorporate the returned results into subsequent generation. Conceptually, tool-use frames the LLM as a high-level policy over an action space of tools, where each action is a structured API call with arguments [41], recent progress has moved from ad hoc text-form action formatting to constrained, typed interfaces that improve reliability and integration into real systems, models have been trained to decide whether to call tools and how to format calls, including self-supervised tool-use training (Tool-former) [36] and API-call specialization with retrieval over tool documentation (Gorilla) [29]. Industrial APIs have largely standardized tool-use via JSON-schema-like function signa-tures and structured outputs, enabling developers to expose application actions as callable tools with argument validation (e.g., OpenAI function/ Gemini tool calling) [28, 11]. Overall, tool-use has matured into a practical mechanism for grounding LLM behavior in external state and actions, and it is now a core ingredient in embodied systems (as in our robot attention and perception tools). 
+
+D. LLM integration for Human Robot Embodied Conversation 
+
+A growing set of HRI systems integrate LLMs as the dialogue core for embodied social robots, but the integration varies by application context and system depth. In open-domain and mixed-initiative social interaction settings, LLMs are typically embedded as the central dialogue manager driving multi-party [1] or front-desk style interaction [8] and, in some cases, longitudinal conversation over repeated encoun-ters [25, 32]. In socially assistive robotics for clinical [5] and elder-care contexts [23], LLMs are commonly integrated into existing SAR dialogue pipelines to improve conver-sational coverage and responsiveness. Complementing these systems, several works explore LLM-driven conversation on widely deployed commercial platforms such as Pepper/NAO in public-facing [13] or educational scenarios [38], often focusing on interaction quality and first-impression measures under constrained embodiment and sensing . Despite this progress, explicitly end-to-end streaming integrations with modern realtime multimodal APIs remain comparatively rare in the academic HRI literature. Moreover, the complementary line of work that uses pretrained LLMs for function calling ,i.e., invoking a discrete library of robot skills and perception tools, has largely been developed for task-centric manipula-tion/navigation [3, 15, 16, 40, 39], rather than as part of an always-on conversational loop. We bridge these threads by coupling realtime multimodal inference with a tool interface for active perception and attention control , enabling the agent to interleave dialogue with actions to gather evidence and externalize attention during ongoing interaction. III. M ETHODS 
+
+We implement a system for situated conversation , where language is complemented with the robot’s perception of a shared environment embedded in real-time interaction flow (interruptions, turn-taking, and gaze shifts). The system is organized around two main components: (1) a real-time mul-timodal language model (LM) that handles streaming au-dio/video and conversational mechanics, (2) function calling Fig. 1. Overview of our real-time situated conversation system. Streaming egocentric vision and audio are processed by a real-time multimodal LM, which (i) generates spoken dialogue and (ii) issues low-latency function calls to external tools for attention and active perception (e.g., Look_at_Person, Look_at_Object, Look_Around, Look_For, Use_Vision ). Tool outputs update the shared perceptual context and drive robot gaze. 
+
+for tool-mediated robot actions (primarily attentional control) including a lightweight “memory map” that stores surrounding views and queries them with a vision-language model (VLM) by using a geometric binding layer that maps video frames into the robot’s field-of-view (FOV) using rigid transformations. This design establishes a “dialogue manager + tool use” recipe in which a base multimodal LM is paired with perception and attention control. 
+
+A. Real-time multimodal LM for streaming dialogue and vi-sual grounding Streaming inputs: The robot provides continuous micro-phone audio and an egocentric camera stream. The real-time multimodal LM (e.g., OpenAI Realtime / Gemini Live) ingests these streams and maintains an online conversational state. 
+
+Conversational mechanics (VAD and turn-taking): We rely on the realtime LLM runtime to handle core dialogue mechanics, voice activity detection (VAD), turn-taking, and streaming ASR, so the system can support natural interruptions and quick turn exchanges. In practice, VAD boundaries define “user turns” that trigger downstream reasoning and tool decisions or interrupt ongoing robot actions. Multimodal grounding: The LM can be periodically provided the most recent camera frame (or short frame bursts) during the conversation, enabling it to answer visual questions, and decide when additional visual evidence is required. 
+
+B. Function calling for robot attention control 
+
+Real-time multimodal LLM APIs encourage tool-augmented interaction loops, i.e., sessions can incorporate structured events (e.g., function calling / external actions), allowing the LLM to interleave perception queries and attention control outputs with dialogue, providing a practical substrate for embodied or interactive agents that must coordinate speech, perception, and action in real time. We delegate tool selection to the pretrained LM. Given the live conversational context and the current perceptual state, the LM decides what action to take, and when, i.e., in which conversational turn, to do so (e.g., verify a reference by looking, command the robot system to search for an object out of view, or to maintain face attention during turn-taking). This offloads a traditionally hand-engineered decision layer, 
+
+Algorithm 1 use_vision : send view to realtime LM            
+
+> 1: function USE VISION (ws, q )▷ ws : realtime websocket; q: text query/prompt
+> 2: I←latest camera frame
+> 3: send message to realtime LM containing I, q
+> 4: end function
+
+often implemented as explicit rules or a learned policy, to the LM’s broad priors about social interactions. 
+
+Tool interface. We expose robot capabilities and perception queries as functions that the LM can call during dialogue. These functions form the bridge between language and em-bodied action. To enable situated embodied conversations, our primary tool family targets the “where to look” and “when to look” subproblems of interaction via a small set of attentional and perception primitives. In total, we implement five basic functions: look_at_me , look_at_object ,
+
+look_around , look_for , and use_vision . The first four functions support continuous attention control (tracking the interlocutor or a referenced object), exploratory sensing (scanning the scene), and targeted search (locating a specified person/object). Finally, use_vision provides an explicit, on-demand perception query: rather than continuously stream-ing video to the LM, which can be costly as image tokens accumulate IV, the system can request visual information to be sent to the realtime multimodal language model only when it is necessary, enabling more efficient and deliberate visual reasoning. 
+
+look_at_person is a closed-loop attentional primitive that continuously steers the robot’s gaze toward the speaker while it is enabled. On each iteration, it (i) reads the latest egocentric camera frame I and the robot’s current pose and camera field-of-view (T, fov) , then (ii) runs a person tracker to find interlocutors in the current camera image and use the extracted keypoints to determine the rotation ∆(yaw , pitch) 
+
+needed to center the robot’s attention on them. We comple-ment visual tracking with coarse spatial-audio-based speech localization for cases of tracking or detection failures, e.g., when the person is occluded or out of camera view. We utilize 
+
+look_at_person as a default behavior when no other function calls are triggered by the model . look_at_object 
+
+mirrors look_at_me , replacing the person tracker with an Algorithm 2 look_at_person : follow the person  
+
+> 1:
+
+function LOOK AT PERSON (enabled)  
+
+> 2:
+
+while enabled do  
+
+> 3:
+
+I ← latest camera frame  
+
+> 4:
+
+(T, fov) ← latest robot pose / field-of-view  
+
+> 5:
+
+r ← person tracker on I 
+
+> 6:
+
+A ← latest spatial audio location  
+
+> 7:
+
+if r has keypoint then  
+
+> 8:
+
+∆(yaw , pitch) ← offset from image center  
+
+> 9:
+
+(x, y, z ) ← 3D gaze target from (T, fov , ∆)  
+
+> 10:
+
+publish gaze target (x, y, z ) 
+
+> 11:
+
+else  
+
+> 12:
+
+(x, y, z ) ← spatial audio estimate from A  
+
+> 13:
+
+publish gaze target (x, y, z ) 
+
+> 14:
+
+end if  
+
+> 15:
+
+end while  
+
+> 16:
+
+end function 
+
+Algorithm 3 look_around : sweep & save views  
+
+> 1:
+
+function LOOK AROUND (C, D )
+
+C: list of look targets; D: output directory  
+
+> 2:
+
+for each target pi = ( xi, y i, z i) ∈ C do  
+
+> 3:
+
+publish look-at pi 
+
+> 4:
+
+wait until robot finishes motion  
+
+> 5:
+
+Ii ← latest camera frame  
+
+> 6:
+
+(Ti, fov i) ← latest pose / field-of-view  
+
+> 7:
+
+save tuple (Ii, T i, fov i, pi) to D 
+
+> 8:
+
+end for  
+
+> 9:
+
+end function 
+
+object-specific perception module (object detection + temporal tracking). 1 A key design goal is to keep the attentional control loop fast, local, and continuously reactive : the robot must update gaze at frame-rate timescales. Therefore, we implement 
+
+look_at_person and look_at_object as lightweight attentional primitives that run on-device and expose only compact targets (e.g., keypoints or centroids) to the controller; In our work, we locally run YOLO11-pose [17] for person tracking, with mean inference time 49 .3 ± 3.50 ms (20.37 Hz), and SAM3 [7] for object mask estimation/tracking, with mean inference time 161 .7 ± 4.31 ms (6.18 Hz), enabling real-time use. 
+
+look_around is an exploratory sensing primitive that per-forms a short, structured sweep of the environment and records a set of anchored viewpoints, i.e., images plus their position of capturing, for later retrieval. On the other hand, look_for is a targeted retrieval-and-attend primitive outlined in Algorithm 4 that selects the most relevant previously observed viewpoint for a natural-language query. Given a query string q (typically produced by an LM tool call) and a image directory D
+
+populated by look_around , the method evaluates each can-didate viewpoint using a vision-language model, computing a relevance score si = VLM( Ii, q ) ∈ [0 , 1] that measures how well the image supports the query. We parallelize VLM scoring to improve throughput and reduce end-to-end query         
+
+> 1For look_at_person ,the exact target coordinate for the robot’s attention is derived from a specific keypoint, e.g., the nose keypoint. For
+> look_at_object , the target attention coordinate is calculated using the mask centroid or bounding-box center.
+
+Algorithm 4 look_for : select most appropriate view from saved viewpoints for a text query then feed results to the realtime API  
+
+> 1:
+
+function LOOK FOR (q, D )
+
+q: text query given from LLM function call; D: directory where images from look around() are located  
+
+> 2:
+
+V ← { (Ii, pi)} loaded from saved tuples in D 
+
+> 3:
+
+in |V | concurrent threads : 
+
+> 4:
+
+score each (Ii, pi) ∈ V with a VLM( Ii, q ) to  
+
+> 5:
+
+obtain relevance score si ∈ [0 , 1]  
+
+> 6:
+
+i∗ ← arg max i si 
+
+> 7:
+
+publish look-at pi∗ 
+
+> 8:
+
+send message to realtime LM containing Ii∗ and q 
+
+> 9:
+
+end function    
+
+> Fig. 2. look_around performs a sweep to acquire and store egocentric views with associated robot poses, forming a lightweight view-memory. Given a language query (e.g., “Where is a good place to place a lamp?”), look_for
+> searches over stored views using concurrent VLM/object-detector calls and returns the best-matching image evidence along with the corresponding robot orientation/pose for action.
+
+time. The highest-scoring viewpoint is selected as the best evidence for q. The robot then directs its attention to replicate the position in which the viewpoint was captured. Finally, the selected frame is sent back to the real-time LM alongside q,allowing the dialogue manager to ground its response in the most informative stored observation. 
+
+Geometric Binding Layer To make egocentric video ob-servations actionable for gaze control, we bind each camera frame to the robot’s camera pose and field-of-view (FOV) using a rigid transform RTC (t) ∈ SE (3) obtained from kinematics/IMU. This establishes a simple mapping from image-space targets (e.g., a pose keypoint, box center, or mask centroid) to robot-frame look-at commands: we back-project the target pixel to a camera ray using the camera intrinsics (or FOV), rotate that ray into the robot frame, and parameterize a 3D look-at point. The resulting (x, y, z ) goal can be published directly to the robot’s gaze controller, enabling closed-loop recentering for both people ( look_at_person , using a face/nose keypoint) and objects ( look_at_object , using a centroid/box center) with a shared geometric interface. Full derivations (pixel-to-ray, ∆(yaw , pitch) error, and look-at point construction) are provided in Appendix A. Fig. 3. Example interaction illustrating turn-level “what should the robot do next?” tool-decision evaluation in an outfit-selection scenario. As the user’s dialogue evolves (finding jackets → trying one on → asking about a specific brown jacket), the real-time system interleaves spoken responses with function calls. Human annotations specify the expected next perception action at each turn, enabling direct comparison to the executed tool calls.                                    
+
+> Task Goal Duration Viz. Person Object(s) Map
+> Posture coach Identify posture issue; coach and verify im-provement. 01:39 YY (1) NNWhiteboard Solve a trig problem using whiteboard diagram 02:12 YY (1) Y (1) NLamp placement Choose a lamp location using a room sweep. 02:05 YY (1) Y (1) Y (1) Plant doctor Find plant and diagnose plant health. 02:12 YY (1) Y (1) Y (1) Outfit check Find outfits in room, compare options on-body. 02:21 YY (1) Y (2) Y (1) Pack / find objects Locate items via a scan; re-scan after changes. 02:03 YY (1) Y (3) Y (2)
+
+TABLE I TASK DESCRIPTIONS AND VISUAL REQUIREMENTS : VIZ . INDICATES WHETHER THE TASK REQUIRES VISUAL INPUT . PERSON , OBJECT (S), AND 
+
+MAP SPECIFY WHICH VISUAL ENTITIES ARE REQUIRED . C OUNTS IN PARENTHESES GIVE THE NUMBER OF DISTINCT TARGETS OR MAP UPDATES /SWEEPS .
+
+IV. E XPERIMENTS 
+
+In order to investigate the effectiveness of the proposed system, we designed six interaction scenarios that progres-sively increase the demands on visual grounding and percep-tual scope. Furthermore, we tested four system variants to isolate the contribution of key system elements. For controlled comparison, we captured videos of a person interacting with the system for every variant, scenario combination, yielding 24 videos ( 6 × 4), which are provided in the appendix. For each video, we collected expert human annotations of (i) system correctness , and (ii) third-person observer judgments of the interaction quality. 
+
+A. Interaction Scenarios 
+
+Table I outlines the tasks and how the different tasks require different parts of the abilities needed for situated embodied conversation. The simpler tasks require local, single-target understanding (e.g assessing a person’s posture or tutoring instructions with a single diagram), while more complex tasks require room-scale visual context, multi-object reference and scene changes that force the agent to actively gather evidence (e.g finding lamp placement location, choosing outfits dis-tributed in the scene, or locating multiple objects via repeated scans after the user modifies the environment). This suite of 6 tasks form a mini-testbed to probe our method’s robustness to varying levels of complexity, from person-only, to person + single object, to person + single object + surrounding understang, to person + multiple objects + multiple changes in the surrounding. These six tasks are a representative, author-selected subset; expanding to a wider set of scenarios is left to future work. 
+
+B. System Ablations 
+
+We designed four different system variations to understand the performance and contribution of the different system elements, namely:  
+
+> •
+
+OpenAI Realtime [28]: our proposed system with per-son, object, and environment sweep tools enabled.  
+
+> •
+
+OpenAI Realtime w/o Object: disables object tracking and search, specifically look_for and 
+
+look_at_object  
+
+> •
+
+OpenAI Realtime w/o Person: disables person tracking: 
+
+look_at_person  
+
+> •
+
+Gemini Live [11]: an alternative real-time multimodal backend with all tools enabled. This system variant tests backend swapability : by holding the embodiment/tool layer fixed and changing only the streaming multimodal model. We evaluated these four different variations with the same scenarios to explore generalizability and limitations of the different variants and our proposed system with captured videos of a person interacting with the system in every variant and scenario combination. 
+
+C. Human Annotations: System Correctness Measures 
+
+As the realtime LLMs operate on conversational turns, we asked annotators to provide annotations for what the robot should do during the next turn exchange. For each turn exchange, annotators labeled whether the robot should (1) look for an object (analogous to look_for ), (2) should fix gaze on an object ( look_at_person ) or (3) on the person ( look_at_object ), as shown in Fig. 3. In addition, annotators indicated whether the robot needed to use visual understanding to respond correctly at that moment, that is, whether the next response depends on the current visual scene rather than language alone (analogous to use_vision ). For example, when the person asks “Does this plant look healthy?” the robot needs to consider the current video feed to answer this question and continue the conversation. Using these labels, we compare the model’s decision against the human reference to compute accuracy, precision and recall for each system variant and overall macro-average. For annotator consistency, two annotators first coded two videos and after discussing alignment coded the remaining videos. An interrater reliability measured from four videos on the “should-do” behavior re-vealed a Cohen’s kappa score of 0.41, which indicates fair to moderate agreement. Closer inspection showed that annotators disagreed when look_for vs. ‘ look_at_object should be used. 
+
+D. Overall Interaction Quality Measures 
+
+We used subjective measures in form of questionnaires to evaluate how the different variations of the system impacted user perception. We utilized the “Attention allocation” sub-scale of the Networked Minds Questionnaire [12] and further evaluated the user’s perception of the robot’s conversational abilities through questions targeting conversational continuity, temporal fluency and turn-taking as well as understanding of referential wording. 
+
+Fluent and Smooth These items capture the overall interac-tional flow, serving as a coarse, holistic check on perceived fluency.  
+
+> •
+
+(1) The conversation felt smooth rather than effortful.  
+
+> •
+
+(2) The interaction felt fluent overall. 
+
+Convo. Quality This category evaluates the perceived com-petence of the underlying LLM that drives the real-time system—i.e., whether the robot’s utterances are coherent, contextually appropriate, and linguistically well-formed. It serves as a backend-quality control measure, separating “core language ability” from effects introduced by active perception.  
+
+> •
+
+(1) The robot’s responses related clearly to what the person just said.  
+
+> •
+
+(2) The robot stayed on topic throughout the conversation. 
+
+Attention to Person Selected from the Networked Minds Questionnaire [12], these items probe whether the robot is perceived as socially attending to the interlocutor—detecting, acknowledging, and orienting toward the person in a way that signals awareness.  
+
+> •
+
+(1) The person’s presence was obvious to Jibo.  
+
+> •
+
+(2) The person caught Jibo’s attention. 
+
+Reference to Object These questions evaluate situated refer-ential grounding: whether the robot correctly resolves refer-ences to objects/places in the shared environment and aligns its attention accordingly.  
+
+> •
+
+(1) The robot understood what entity, object or space in the surroundings the person was referring to.  
+
+> •
+
+(2) The robot understood what object the person was holding and referring to.  
+
+> •
+
+(3) The robot directed its attention to the entity, object or space the person was referring to. 
+
+Response Timing & Turn Taking These items capture perceived turn-transition naturalness, which is particularly relevant to end-of-speech detection and response onset latency in real-time systems.  
+
+> •
+
+(1) The robot responded at appropriate times.  
+
+> •
+
+(2) The robot’s response timing felt natural. 
+
+Interruption & Pauses These items capture coordination under overlap and silence, which is strongly influenced by start-of-speech detection and the system’s ability to yield the floor quickly. (1) The robot avoided interrupting the person. (2) The person could interrupt the robot when needed. (3) Pauses in the interaction felt appropriate.  
+
+> •
+
+(1) The robot avoided interrupting the person.  
+
+> •
+
+(2) The person could interrupt the robot when needed.  
+
+> •
+
+(3) Pauses in the interaction felt appropriate. We worked with two human annotators (35F, 18F) to obtain annotations and subjective evaluations of the different system variations. Both annotators were knowledgeable about the general system functionality but blind to the system variations while annotating and filling out questionnaires. All items were rated on a 5-point Likert scale (1 = Strongly disagree, 5 = Strongly agree). Annotators re-watched videos they had just coded for the system correctness annotations and also the remaining videos after annotations were done to fill the questionnaire for subjective measures. V. R ESULTS 
+
+A. Evaluations on System Correctness Annotations 
+
+We refer the reader to Table II, where we display results for system correctness. Both full systems – Gemini and OpenAI – achieve similar turn-level tool-decision correctness (macro-accuracy), where “correct” means the model’s next-step per-ception tool call matches human “should-do-next” annotations for that turn: OpenAI Realtime attains 0.72 ± 0.10 macro-averaged accuracy across tool categories with 0.88 ± 0.18 
+
+precision and 0.62 ± 0.23 recall, while Gemini Live reaches 
+
+0.77 ±0.07 accuracy with 0.84 ±0.16 precision and 0.60 ±0.22 
+
+recall. Here, precision measures agreement on tool invocations, when the model calls a tool, annotators also labeled that tool as needed for that turn, while recall measures coverage of annotated needs, when annotators labeled a tool as needed, the model actually calls it. In interaction terms, low precision corresponds to unnecessary attention shifts, whereas low recall corresponds to missed sensing. This suggests that at this time , swapping the real-time multimodal API preserves overall tool-decision quality, with modest differences in variance and precision/recall trade-offs. We refer the readers to the right of Table II, where we find that look_for() is the most reliable decision: both OpenAI and Gemini achieve near-perfect precision ( P = 1 .00 )with strong recall ( R = 0.70 and 0.60 , respectively) and high accuracy ( 0.93 and 0.91 ). Second, use_vision() 
+
+also exhibits perfect precision ( P = 1 .00 ) but only mod-erate recall ( R ≈ 0.60 ), indicating the dialogue manager tends to request visual evidence conservatively, missing some turns where annotators judged that the next response truly depends on the current scene. For both OpenAI and Gemini, 
+
+look_at_person() exhibits perfect recall ( R = 1 .00 ), but lower precision ( P = 0 .52 and 0.68 ), consistent with Overall look_at_person() look_at_object() look_for() use_vision()                                                                                             
+
+> Condition Acc. PRAcc. PRAcc. PRAcc. PRAcc. PROpenAI Realtime [28] 0.72 ±0.10 0.88 ±0.18 0.62 ±0.23 0.63 0.52 1.00 0.70 1.00 0.19 0.93 1.00 0.70 0.64 1.00 0.60 OpenAI Realtime [28] w/o Object 0.28 ±0.28 0.50 ±0.50 0.26 ±0.26 0.42 1.00 0.42 0.70 1.00 0.64 OpenAI Realtime [28] w/o Person 0.48 ±0.24 0.54 ±0.27 0.35 ±0.18 0.69 0.62 0.40 0.71 0.53 0.53 0.51 1.00 0.48 Gemini Live [11] 0.77 ±0.07 0.84 ±0.16 0.60 ±0.22 0.76 0.68 1.00 0.76 0.67 0.17 0.91 1.00 0.60 0.65 1.00 0.62
+
+TABLE II SYSTEM CORRECTNESS MEASURES : LM TOOL -CALL PREDICTIONS COMPARED TO HUMAN “SHOULD -DO -NEXT ” ANNOTATIONS . W E REPORT MACRO -AVERAGED ACCURACY (A CC .), PRECISION (P), AND RECALL (R) FOR EACH SYSTEM CONDITION , BOTH OVERALL AND BROKEN DOWN BY TOOL CATEGORY (L O O K _A T _P E R S O N , L O O K _A T _O B J E C T , L O O K _F O R , U S E _V I S I O N )
+
+a tendency to over-trigger person-attention behaviors (hard-coded safe social default, III) while rarely missing turns that require attending to the interlocutor. 
+
+a) Per-ablation Patterns: The ablated system variants are expected to degrade in overall correctness because they remove the functions required to support the corresponding behaviors. OpenAI Realtime w/o Object removes the object tracking and search tools (look_for() , look_at_object() ). Within the remaining tool set, this system variant exhibits a sharper precision–recall trade-off for person attention: 
+
+look_at_person() reaches perfect precision ( P = 1 .00 )but substantially lower recall (R = 0.42 ), compared to the full system’s P = 0 .52 , R = 1 .00 . OpenAI Realtime w/o Person disables person tracking ( look_at_person() ). For the remaining object/search tools, we observe a relative shift toward object-directed behavior: look_at_object() 
+
+recall increases (from R = 0 .19 to R = 0 .40 ) with reduced precision (from P = 1 .00 to P = 0 .62 ), while look_for() 
+
+degrades markedly (Acc.=0.71, P = 0.53 , R = 0.53 vs. Acc.=0.93, P = 1.00 , R = 0.70 ). The prompt-level de-scriptions of look_for() and look_at_object() are linguistically similar, and both correspond to object-directed attention behaviors, therefore the model may fail to reliably discriminate between “search” versus “fixate”. Consequently, this suggests that careful tool definition and prompt design is important for robust tool selection. 
+
+B. Evaluations on Overall Interaction Quality 
+
+Tab. V-B summarizes these category-level distributions across the six scenarios. For Convo. Quality , we find that all variants perform consistently well with an average score of 
+
+4.65 ± 0.15 out of 5 across all system variants. In contrast, categories that directly reflect Attention to Person and Object 
+
+seem to be sensitive to the ablations. Disabling person tracking perception (O PEN AI w/o person) appears to reduce Attention to Person and increase variance, consistent with a weaker sense that the robot notices and orients to the interlocutor. Disabling object tracking (O PEN AI w/o objects) appears to produce the largest drop in Reference to Object , indicating degraded ability to resolve and physically align attention to referents in the shared environment when object/search tools are unavailable. Importantly, Fluent and Smooth are more holistic measures of interaction quality. We find that the full version of OpenAI and Gemini perform well, obtaining an average score of 4.62 ±0.43                                                                             
+
+> Category Gemini OpenAI w/o person w/o objects
+> Fluent and Smooth 4.42 ±0.85 4.62 ±0.43 3.96 ±0.96 3.79 ±0.92
+> Convo. Quality 4.79 ±0.33 4.79 ±0.26 4.50 ±0.60 4.50 ±0.64
+> Attention to Person 4.29 ±1.18 4.75 ±0.34 4.12 ±1.03 4.67 ±0.39
+> Reference to Object 4.61 ±0.55 4.83 ±0.33 4.08 ±1.09 3.47 ±0.96
+> Response Timing & Turn Taking 3.89 ±1.35 4.83 ±0.17 4.92 ±0.15 4.72 ±0.34
+> Interruption & Pauses 4.94 ±0.19 5.00 ±0.00 4.97 ±0.10 4.97 ±0.10
+
+TABLE III OVERALL INTERACTION QUALITY RESULTS (MEAN ± STD ; n = 12 × mc
+
+> ITEM RATINGS PER CONDITION
+
+, WHERE mc IS THE NUMBER OF SURVEY QUESTIONS IN CATEGORY c): W E AGGREGATE LIKERT RESPONSES INTO SIX CATEGORIES AND REPORT SCORES FOR EACH SYSTEM CONDITION 
+
+(A) Measured runtime cost and latency 
+
+OpenAI Realtime [28] Gemini Live [11] Cost ($) 0.047 ± 0.013 0.018 ± 0.002 
+
+Latency (ms) 689 .98 ± 389 .08 739 .10 ± 593 .45 
+
+(B) API pricing by modality (USD / 1M Tokens) 
+
+OpenAI Realtime [28] Gemini Live [11] Inputs (Text/Audio/Image) 4.00 / 32.00 / 5.00 0.50 / 3.00 / 3.00 Outputs (Text/Audio) 16.00 / 64.00 2.00 / 12.00 
+
+TABLE IV RUNTIME MEASUREMENTS (A) AND API PRICING (B). P RICING IN USD  
+
+> PER
+
+1M TOKENS .
+
+and 4.42 ± 0.85 respectively. Whereas, this score appears to drop for the ablated variants, calling for future work to investigate if attention behaviors are crucial for overall inter-action quality. Interruption & Pauses and Response Timing & Turn Taking measure the underlying Voice Activity Detection proficiency of realtime systems. Interruption & Pauses is consistently high across all system variants (implying that the start of speech detection is generally adequate to handle basic overlap and silence management.) On the other hand, we find that Response Timing & Turn Taking shows larger spread for Gemini Live, which warrants further investigation into the end-of-speech detection behavior from Gemini Live’s VAD. 
+
+C. Latency and Cost 
+
+We compare the two real-time backends in terms of end-to-end interaction latency and per-interaction API cost under the same system stack and scenarios. In our runs, both backends exhibit similar latency on average (OpenAI Real-time: 690 ± 389 ms; Gemini Live: 739 ± 593 ms), with substantial variance that likely reflects natural heterogeneity in turn structure and streaming end-of-turn detection. In contrast, cost differs markedly: Gemini Live is substantially cheaper per interaction in our measurements ( $0 .018 ± 0.002 ) than OpenAI Realtime ( $0 .047 ±0.013 ), reflecting different pricing of streaming modalities and output generation. Overall, these results suggest that the choice of real-time multimodal backend is largely a deployment knob: swapping OpenAI Realtime for Gemini Live preserves interaction timing at the scale of our measured end-to-end latency, but can change operating cost by a multiple, which becomes consequential for longer-running deployments or higher interaction volumes. VI. D ISCUSSION 
+
+A. Tool-mediated attention can be the main driver of situa-tional awareness 
+
+Firstly, the full systems (with person, object, and environ-ment tools enabled) achieve similar turn-level tool-decision correctness across the two real-time backends. Future work should therefore investigate if the proposed embodiment/tool layer is truly “backend-agnostic” beyond the two backends ex-plored in this work. Second, subjective judgments remain near-ceiling for conversational coherence across system variants, while categories tied to embodiment—especially attention-to-person and reference-to-object—seem to drop under ablations that remove the corresponding tools. Taken together, these findings support the view that the practical benefits of real-time multimodal LMs for embodied interaction are mediated primarily through the agent’s ability to act (e.g., reorient attention, request visual evidence, or search the scene) at the right moments, rather than through improvements in language alone. 
+
+B. Per-tool lessons: precision is easy; recall is the bottleneck 
+
+Across backends, several tools are invoked correctly when invoked (high precision), yet are under-invoked (moderate/low recall). In particular, object fixation ( look_at_object )shows very low recall despite high precision, while explicit vision requests ( use_vision ) are conservative—often cor-rect, but missing some turns where annotators judged visual evidence was needed. This is a common failure mode for tool-using dialogue managers: models learn a “safe” policy that avoids unnecessary calls, but in embodied interaction, not looking is itself an error because it breaks common ground and forces users into repair behaviors. This suggests that future optimization should target calibration and coverage (when to look) as much as correctness (how to look), potentially via costs that penalize missed perceptual actions, state features that expose perceptual uncertainty, or training data that includes repair-heavy episodes. 
+
+C. Prompt and interface design matter more than it seems 
+
+The look_for and look_at_object tools are linguis-tically and functionally close: both are “object-directed,” but one implies retrieval from stored views while the other implies fixation in the live view. The observed confusion under the w/o-person ablation is consistent with a tool defintion that is underspecified or ambiguous from the model’s perspective. A practical implication is that future systems should make tool boundaries mutually exclusive where possible, and return structured state. 
+
+D. Applicable to other embodiments 
+
+A key design goal of this work is that the overall recipe is robot-agnostic . Porting the system to a new robot therefore primarily requires implementing a thin adapter that (a) streams microphone audio and an egocentric camera feed to the real-time backend, and (b) maps tool calls into the robot’s available sensing and actuation (e.g., head yaw/pitch control and camera stream). Beyond Jibo (the robotic platform used in our study), we implemented the same recipe on a second platform (Reachy Mini) by reusing the identical real-time dialogue manager and tool schemas, and swapping only the embodiment adapter (camera/audio IO + gaze/attention control). We refer readers to the supplementary materials for cross-platform demonstration videos and qualitative comparisons. 
+
+E. Limitations a) Turn-based system: A limitation of current realtime LLM systems is that operates at the turn level but embodied interaction is often driven by sub-turn phenomena: incremental speech, micro-adjustments of gaze, interruptions, and rapid perception updates. Future work should incorporate more temporally granular actions and accompanying metrics (e.g., time-to-attend after a referential cue) that reflect the dynamic nature of embodied conversation. 
+
+b) Annotation subjectivity and measurement noise.: Our evaluation relies on expert annotators and subjective mea-sures of conversational quality and attentional appropriateness. Some judgments—especially about gaze—can be difficult from certain camera angles or when head pose cues are subtle, introducing noise and reducing apparent agreement. These ambiguities have affected our evaluations but occured in all system variants similarly. 
+
+c) Scenario and user diversity: We evaluate on six scenarios, which is limited from the standpoint of broad generalization, yet still meaningful given the combinatorial variability of situated interaction and the cost of producing high-quality annotated multimodal episodes. In practice, these scenarios offer a first glimpse into whether a single recipe transfers across qualitatively different home-style contexts, but they cannot establish robust coverage of rare events, long-horizon adaptation, or population-level variation. Future work should expand the scenario set (including harder edge cases), broaden the range of environments and interlocutors, and complement expert judgments with studies involving novice users. 
+
+d) Engineering completeness and system bugs.: Our pro-totype still contains occasional bugs and rough edges typical of end-to-end real-time embodied pipelines (e.g., intermittent perception failures, tooling misfires, or timing artifacts). Our goal is not to claim a perfectly engineered product-ready sys-tem, but to demonstrate how real-time multimodal inference, tool calling, and robot control interplay to produce or break grounded interaction. Nevertheless, these imperfections might have confounded our evaluation as failures can cascade across components. VII. C ONCLUSION 
+
+This paper proposed a simple system recipe for situated em-bodied conversation : a real-time multimodal language model that interleaves dialogue generation with tool-mediated atten-tion and active perception. We instantiated this recipe on a social robot and studied it across six home-style scenarios. Using controlled ablations and backend comparisons, we eval-uated both objective next-step tool decisions and subjective perceptions of interaction quality. Overall, the results suggest that the proposed system is a promising direction for situated embodied conversation in HRI. We hope this system recipe and evaluation protocol provide a concrete baseline for building and comparing future embodied conversation systems across environments and robot platforms. REFERENCES 
+
+[1] Angus Addlesee, Neeraj Cherakara, Nivan Nelson, Daniel Hern´ andez Garc´ ıa, Nancie Gunson, Weronika Siei´ nska, Marta Romeo, Christian Dondrup, and Oliver Lemon. A multi-party conversational social robot using llms. In Companion of the 2024 ACM/IEEE International Conference on Human-Robot Interaction , pages 1273– 1275, 2024. [2] Henny Admoni and Brian Scassellati. Social eye gaze in human-robot interaction: A review. Journal of Human-Robot Interaction , 2017. doi: 10.5898/JHRI.6.1. Admoni. URL https://scazlab.yale.edu/sites/default/files/ files/273-2310-1-PB.pdf. [3] Michael Ahn, Anthony Brohan, Noah Brown, Yevgen Chebotar, Omar Cortes, Byron David, Chelsea Finn, Chuyuan Fu, Keerthana Gopalakrishnan, Karol Haus-man, et al. Do as i can, not as i say: Grounding language in robotic affordances. arXiv preprint arXiv:2204.01691 ,2022. [4] Ruzena Bajcsy, Yiannis Aloimonos, and John K Tsotsos. Revisiting active perception. Autonomous Robots , 42(2): 177–196, 2018. [5] Lauriane Blavette, S´ ebastien Dacunha, Xavier Alameda-Pineda, Jeanne Cattoni, Anne-Sophie Rigaud, and Mari-bel Pino. Integrating a large language model into a socially assistive robot in a hospital geriatric unit: Two-wave comparative study on performance, engagement, and user perceptions. JMIR Human Factors , 12(1): e81936, 2025. [6] Cynthia Breazeal and Brian Scassellati. A context-dependent attention system for a social robot. In Pro-ceedings of the 16th International Joint Conference on Artificial Intelligence (IJCAI) , 1999. [7] Nicolas Carion, Laura Gustafson, Yuan-Ting Hu, Shoub-hik Debnath, Ronghang Hu, Didac Suris, Chaitanya Ryali, Kalyan Vasudev Alwala, Haitham Khedr, Andrew Huang, et al. Sam 3: Segment anything with concepts. 
+
+arXiv preprint arXiv:2511.16719 , 2025. [8] Neeraj Cherakara, Finny Varghese, Sheena Shabana, Nivan Nelson, Abhiram Karukayil, Rohith Kulothun-gan, Mohammed Afil Farhan, Birthe Nesset, Meriam Moujahid, Tanvi Dinkar, et al. Furchat: An embodied conversational agent using llms, combining open and closed-domain dialogue with facial expressions. arXiv preprint arXiv:2308.15214 , 2023. [9] Vanya Cohen and Raymond Mooney. A survey of robotic language grounding. In Proceedings of IJCAI (Survey Track) , 2024. [10] Felix Gervits and Matthias Scheutz. It’s about time: Turn-entry timing for situated human-robot dialogue. In 
+
+Proceedings of SIGDIAL , 2020. [11] Google AI for Developers. Get started with live api. https://ai.google.dev/gemini-api/docs/live. Last updated 2025-12-22 (UTC). Accessed: 2026-01-27. [12] Chad Harms and Frank Biocca. Internal consistency and reliability of the networked minds measure of social presence. 2004. [13] Damith Herath, Janie Busby Grant, Adrian Rodriguez, and Jenny L Davis. First impressions of a humanoid social robot with natural language capabilities. Scientific Reports , 15(1):19715, 2025. [14] Chien-Ming Huang and Andrea L. Thomaz. Joint atten-tion in human-robot interaction. In AAAI Conference on Artificial Intelligence , 2010. [15] Siyuan Huang, Zhengkai Jiang, Hao Dong, Yu Qiao, Peng Gao, and Hongsheng Li. Instruct2act: Mapping multi-modality instructions to robotic actions with large language model. arXiv preprint arXiv:2305.11176 , 2023. [16] Wenlong Huang, Fei Xia, Ted Xiao, Harris Chan, Jacky Liang, Pete Florence, Andy Zeng, Jonathan Tompson, Igor Mordatch, Yevgen Chebotar, et al. Inner monologue: Embodied reasoning through planning with language models. arXiv preprint arXiv:2207.05608 , 2022. [17] Rahima Khanam and Muhammad Hussain. Yolov11: An overview of the key architectural enhancements. arXiv preprint arXiv:2410.17725 , 2024. [18] Dimosthenis Kontogiorgos. Multimodal language grounding for improved human-robot collaboration: Ex-ploring spatial semantic representations in the shared space of attention. In Proceedings of the 19th ACM In-ternational Conference on Multimodal Interaction (ICMI ’17) , pages 660–664. ACM, 2017. doi: 10.1145/3136755. 3137038. [19] Geert-Jan M. Kruijff, Pierre Lison, et al. Situated dialogue processing for human-robot interaction. In 
+
+Talking Robots . 2009. URL https://home.nr.no/ ∼plison/ pdfs/cogx/my-cosy-book.pdf. [20] Geert-Jan M. Kruijff et al. Information fusion for visual reference resolution in dynamic situations. Technical report, 2006. URL https://www.robots.ox.ac.uk/ ∼nickh/ papers/kruijffetal06pit.pdf. [21] Geert-Jan M. Kruijff et al. Incremental, multi-level processing for comprehending situated dia-logue in human-robot interaction. In Proceedings (paper PDF hosted by Oxford Robotics Institute) ,2007. URL https://www.robots.ox.ac.uk/ ∼nickh/papers/ kruijffetal07incremental.pdf. [22] S´ everin Lemaignan, Raquel Ros, E Akin Sisbot, Rachid Alami, and Michael Beetz. Grounding the interaction: Anchoring situated discourse in everyday human-robot interaction. International Journal of Social Robotics , 4 (2):181–199, 2012. [23] Maria R Lima, Amy O’Connell, Feiyang Zhou, Alethea Nagahara, Avni Hulyalkar, Anura Deshpande, Jesse Thomason, Ravi Vaidyanathan, and Maja Matari´ c. Pro-moting cognitive health in elder care with large language model-powered socially assistive robots. In Proceedings of the 2025 CHI Conference on Human Factors in Computing Systems , pages 1–22, 2025. [24] Matthew Marge, Carol Espy-Wilson, Nigel G. Ward, Abeer Alwan, Yoav Artzi, Mohit Bansal, et al. Spoken language interaction with robots: Recommendations for future research. Computer Speech & Language , 71: 101255, 2022. doi: 10.1016/j.csl.2021.101255. [25] Mauliana Mauliana, Ashita Ashok, Daniela Czer-nochowski, and Karsten Berns. Exploring llm-powered multi-session human-robot interactions with university students. Frontiers in Robotics and AI , 12:1585589, 2025. [26] Bilge Mutlu, Toshiyuki Shiwa, Takayuki Kanda, Hiroshi Ishiguro, and Norihiro Hagita. Footing in human-robot conversations: How robots might shape par-ticipant roles using gaze cues. In Proceedings of the ACM/IEEE International Conference on Human-Robot Interaction (HRI) , 2009. doi: 10.1145/1514095. 1514109. URL https://pages.cs.wisc.edu/ ∼bilge/pubs/ 2009/HRI09-Mutlu-Footing.pdf. [27] Dimitri Ognibene, Tom Foulsham, Letizia Marchegiani, and Giovanni Maria Farinella. Editorial: Active vision and perception in human-robot collaboration. Frontiers in Neurorobotics , 2022. [28] OpenAI. Realtime — openai api reference. https: //platform.openai.com/docs/api-reference/realtime. Ac-cessed: 2026-01-27. [29] Shishir G Patil, Tianjun Zhang, Xin Wang, and Joseph E Gonzalez. Gorilla: Large language model connected with massive apis. Advances in Neural Information Processing Systems , 37:126544–126565, 2024. [30] Andr´ e Pereira et al. Responsive joint attention in human-robot interaction. In IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) , 2019. doi: 10.1109/IROS40897.2019.8968130. [31] Andr´ e Pereira et al. Effects of different interaction con-texts when evaluating a responsive joint attention system. In Proceedings of the 2020 ACM/IEEE International Conference on Human-Robot Interaction (HRI) , 2020. doi: 10.1145/3319502.3374810. [32] Maria Pinto-Bernal, Matthijs Biondina, and Tony Bel-paeme. Designing social robots with llms for engaging human interaction. Applied Sciences , 15(11):6377, 2025. [33] M. M. Reimann, Catharine Oertel, and Koen V. Hindriks. A survey on dialogue management in human-robot inter-action. ACM Transactions on Human-Robot Interaction ,2024. doi: 10.1145/3648605. [34] Nicole Robinson, Brendan Tidd, Dylan Campbell, Dana Kuli´ c, and Peter Corke. Robotic vision for human-robot interaction and collaboration: A survey and systematic review. ACM Transactions on Human-Robot Interaction ,2023. doi: 10.1145/3570731. [35] Brian Scassellati. Mechanisms of shared attention for a humanoid robot. In Proceedings of the 1996 AAAI Fall Symposium on Embodied Cognition and Action . AAAI Press, 1996. [36] Timo Schick, Jane Dwivedi-Yu, Roberto Dess` ı, Roberta Raileanu, Maria Lomeli, Eric Hambro, Luke Zettle-moyer, Nicola Cancedda, and Thomas Scialom. Tool-former: Language models can teach themselves to use tools. Advances in Neural Information Processing Sys-tems , 36:68539–68551, 2023. [37] Gabriel Skantze. Turn-taking in conversational systems and human-robot interaction: A review. Computer Speech & Language , 67:101178, 2021. doi: 10.1016/j.csl.2020. 101178. [38] Koen Smit, Sam Leewis, Hussin Almoustafa, Kenan Yildirim, and Talha Uymaz. Enhancing educational dynamics integrating large language models with a social robot. In Proceedings of the 2024 8th International Conference on Software and e-Business , pages 87–94, 2024. [39] Chao Wang, Stephan Hasler, Daniel Tanneberg, Fe-lix Ocker, Frank Joublin, Antonello Ceravola, Joerg Deigmoeller, and Michael Gienger. Lami: Large lan-guage models for multi-modal human-robot interaction. In Extended Abstracts of the CHI Conference on Human Factors in Computing Systems , pages 1–10, 2024. [40] Guanzhi Wang, Yuqi Xie, Yunfan Jiang, Ajay Mandlekar, Chaowei Xiao, Yuke Zhu, Linxi Fan, and Anima Anand-kumar. Voyager: An open-ended embodied agent with large language models. arXiv preprint arXiv:2305.16291 ,2023. [41] Shunyu Yao, Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik R Narasimhan, and Yuan Cao. React: Synergizing reasoning and acting in language models. In The eleventh international conference on learning representations , 2022. [42] Hendrik Zender, Geert-Jan Kruijff, and Ivana Kruijff-Korbayov´ a. Situated resolution and generation of spatial referring expressions for robotic assistants. In Pro-ceedings of IJCAI , 2009. URL https://www.ijcai.org/ Proceedings/09/Papers/268.pdf. APPENDIX 
+
+A. Geometric binding layer: rigid transforms for mapping image targets to robot gaze commands 
+
+To make egocentric video observations actionable, we ex-plicitly bind each camera frame to the robot’s instantaneous camera pose and field-of-view (FOV). At time t, the camera pose is represented by a rigid transform from the camera optical frame FC to the robot frame FR,
+
+> R
+
+TC (t) = 
+
+RRC (t) RpC (t)
+
+0⊤ 1
+
+
+
+∈ SE (3) , (1) obtained from robot kinematics and/or IMU state estimation. This transform provides a geometric bridge between image-space measurements and robot-frame gaze commands: for any 3D point C x expressed in camera coordinates, the correspond-ing robot-frame point is 
+
+> R
+
+x(t) = RRC (t) C x + RpC (t). (2) 
+
+(a) From pixels/keypoints to camera rays. Given cam-era intrinsics K (or equivalently the horizontal/vertical FOV and image size), any pixel measurement (u, v )—e.g., a pose keypoint, a bounding-box center, or a segmentation mask centroid—defines a viewing ray in the camera frame. Using normalized image coordinates (un, v n) ∈ [0 , 1] 2 (with un
+
+increasing to the right and vn increasing downward), a pinhole model yields the (unnormalized) ray direction 
+
+˜rC =
+
+(2 un − 1) tan(hfov /2) (2 vn − 1) tan(vfov /2) 1
+
+ , rC = ˜rC
+
+∥˜rC ∥ . (3) This formulation makes FOV constraints explicit and supports direct reasoning about whether a hypothesized target lies within the camera frustum. 
+
+(b) Angular error from image-center offset. For closed-loop attentional control, we interpret the deviation of the target ray from the optical axis as an angular error. Let 
+
+rC = ( rx, r y , r z )⊤ be the unit ray in FC , where the optical axis is +ˆ zC . The yaw and pitch offsets required to rotate the optical axis onto the target ray are 
+
+∆yaw = arctan 2( rx, r z ), ∆pitch = − arctan 2( ry , r z ),
+
+(4) where the negative sign on pitch follows the convention that image v increases downward (targets below center correspond to “look down”). Intuitively, ∆(yaw , pitch) provides a smooth, geometry-grounded error signal for recentering the target in view. 
+
+(c) Computing a robot-frame 3D look-at target. We use the rigid transform to express the desired gaze direction (and a corresponding 3D look-at point) in the robot frame so it can be sent to the robot’s gaze controller. First, we rotate the camera ray into the robot frame: 
+
+rR(t) = RRC (t) rC . (5) We then parameterize a look-at point at a nominal distance d
+
+along this direction from the camera origin: 
+
+> R
+
+g(t) = RpC (t) + d rR(t), (6) and publish (x, y, z ) = Rg(t) as the 3D gaze target. This construction remains well-defined even when metric depth is unavailable (we fix d, e.g., 1–2 m); when depth estimates are available, d can be replaced by an estimated range to produce a metric target. 
+
+(d) Shared closed-loop recentering for people and ob-jects. Equations (4)–(6) define a generic image-servoing step that recenters an observed target in the egocentric view. In 
+
+look_at_person , the target pixel (u, v ) is produced by a person-specific perception module (e.g., a face/nose key-point from a pose tracker). In look_at_object , the target pixel is produced by an object-specific module (e.g., open-vocabulary detection/segmentation with temporal tracking), typically using a mask centroid or bounding-box center. In both cases, the controller converts the target’s displacement from image center into an angular error ∆(yaw , pitch) and uses the bound pose RTC (t) to generate a robot-frame look-at goal (x, y, z ) that aligns the camera optical axis with the target. This shared geometric binding layer lets the same attentional control logic operate across people and objects, while keeping perception modular and interchangeable.

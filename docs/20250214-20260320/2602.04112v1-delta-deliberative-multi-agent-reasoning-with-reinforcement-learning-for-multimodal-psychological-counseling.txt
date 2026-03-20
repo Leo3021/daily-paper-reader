@@ -1,0 +1,400 @@
+Title: DELTA: Deliberative Multi-Agent Reasoning with Reinforcement Learning for Multimodal Psychological Counseling
+
+URL Source: https://arxiv.org/pdf/2602.04112v1
+
+Published Time: Thu, 05 Feb 2026 01:22:34 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# DELTA: Deliberative Multi-Agent Reasoning with Reinforcement Learning for Multimodal Psychological Counseling 
+
+Jiangnan Yang 1,3,† Junjie Chen 2,3,† Fei Wang 2,3,∗ Yiqi Nie 1,3 Yuxin Liu 1,3
+
+Zhangling Duan 3,∗ Jie Chen 1
+
+> 1
+
+Anhui University 2Hefei University of Technology 
+
+> 3
+
+Institute of Artificial Intelligence, Hefei Comprehensive National Science Center 
+
+†Equal contribution. ∗Corresponding authors. 
+
+Abstract 
+
+Psychological counseling is a fundamentally multimodal cog-nitive process in which clinicians integrate verbal content with visual and vocal cues to infer clients’ mental states and respond empathically. However, most existing language-model-based counseling systems operate on text alone and rely on implicit mental state inference. We introduce DELTA, a deliberative multi-agent framework that models counseling as a structured reasoning process over multimodal signals, separating evidence grounding, mental state abstraction, and response generation. DELTA further incorporates reinforcement learning guided by a distribution-level Emotion Attunement Score to encourage emotionally attuned responses. Experiments on a multimodal counseling benchmark show that DELTA improves both coun-seling quality and emotion attunement across models. Ablation and qualitative analyses suggest that explicit multimodal rea-soning and structured mental state representations play comple-mentary roles in supporting empathic human-AI interaction. 
+
+Keywords: multimodal psychological counseling; multi-agent reasoning; emotion attunement; mental state representation; reinforcement learning; affective computing 
+
+Instruction 
+
+Note. This work explores multimodal and multi-agent ap-proaches to assist psychological counseling, rather than re-placing mental health practitioners or clinical care. 
+
+Psychological counseling is inherently multimodal. Beyond verbal content, counselors routinely attend to visual and vocal cues, such as facial expressions, tone of voice, and affective fluctuations, to infer clients’ mental states and respond with appropriate empathy. These nonverbal signals often convey critical emotional information that is absent or ambiguous in text alone, particularly in emotionally charged or uncertain situations (Marcoux et al., 2024; Westland, 2015). Recent advances in large language models (LLMs) have en-abled promising progress in automated psychological coun-seling and emotional support. Existing approaches typically adapt LLMs or multi-agent systems through prompt engineer-ing, role conditioning, or structured dialogue, demonstrating improvements in fluency and domain relevance (Y. Chen et al., 2023; Chu et al., 2025; Lee et al., 2024). However, as il-lustrated in Figure 1, most prior methods primarily operate on client cases and text-only utterances, requiring mental states to be inferred implicitly without explicit grounding in visual or vocal cues (Bi et al., 2025; Y. Chen et al., 2025; Dai et al., 2025; J. Hu et al., 2024; Lee et al., 2024). As a result, these Deliberative Multi-Agent with Multimodal Cues Response                  
+
+> Client Case
+> Multimodal Signals
+> (b) DELTA (Ours) for Multimodal Counseling
+> DELTA explicitly reasons over multimodal visual, vocal, and linguistic signals via deliberative multi-agent interaction with RL.
+> (a) Existing Text-Based Counseling Methods
+> Text-only systems infer mental states implicitly, without grounding in visual or vocal cues beyond textual content.
+> Client Case
+> Text-only Utterances
+> Multi-Agent System
+> Large Language Model or Response
+
+Figure 1: Comparison between existing methods and DELTA (Ours). Existing methods adapt large language mod-els or multi-agent systems for psychological counseling pri-marily by processing client cases and text-only utterances, thereby requiring the inference of mental states and overlook-ing visual and vocal cues. In contrast, DELTA (Ours) inte-grates multimodal client signals and supports explicit deliber-ative multi-agent reasoning with reinforcement learning (RL), 
+
+leading to more grounded counseling responses. systems may produce linguistically appropriate responses that lack emotional grounding or empathic depth. This gap highlights two key challenges. First, how to explic-itly ground counseling reasoning in multimodal behavioral evidence in a manner that is interpretable and aligned with psychological practice. Second, how to optimize counseling responses toward emotional attunement, a nuanced objective that cannot be adequately captured by supervised learning alone (Gottman, 2011). Addressing these challenges requires both a structured reasoning framework and a learning signal that reflects emotionally appropriate counseling behavior. In this work, we propose DELTA (DEL iberative mul Ti-
+
+Agent), a framework that conceptualizes psychological coun-seling as a structured reasoning process over multimodal client signals. DELTA is motivated by the observation that effec-tive counseling involves iterative hypothesis formation and verification over heterogeneous cues, rather than a single-pass inference (Haynes et al., 2011; Norcross & Goldfried, 2005). Accordingly, DELTA explicitly separates multimodal 
+
+> arXiv:2602.04112v1 [cs.CL] 4 Feb 2026
+
+evidence grounding, mental state abstraction, and response generation through deliberative interaction among specialized agents, enabling interpretable and psychologically informed reasoning. Specifically, DELTA employs dedicated agents to elicit and verify visual and vocal cues from multimodal inputs, consolidates this evidence into a structured mental state representation inspired by clinical mental state exami-nation practices (Huline-Dickens, 2013), and generates coun-seling responses grounded in this representation. Finally, to ensure emotionally appropriate response realization, we optimize the response generation policy using reinforcement learning guided by a distribution-level Emotion Attunement Score (EAS). This design is motivated by psychological the-ories emphasizing that effective counseling requires emotion attunement , namely emotional expressions that are compat-ible with the client’s current emotional state without rigid mirroring (Gottman, 2011; Greenberg, 2007), a property that is difficult to specify with supervised objectives alone. We evaluate DELTA on a multimodal emotional support benchmark and demonstrate consistent improvements in both counseling quality and emotion attunement across a range of proprietary and open-source language models. Importantly, we show that the proposed multi-agent multimodal reasoning workflow alone yields substantial gains over direct prompting, and that reinforcement learning with EAS further strengthens emotional grounding and empathic expression. Qualitative analyses further illustrate that DELTA produces responses with richer empathic expressions and clearer emotional un-derstanding. Overall, DELTA bridges psychological theory and modern AI systems by explicitly modeling how multi-modal evidence, structured mental state reasoning, and rein-forcement learning jointly contribute to effective counseling interactions. Our main contributions are threefold: 
+
+• We propose DELTA, a deliberative multi-agent framework that explicitly grounds psychological counseling in multi-modal visual, vocal, and linguistic evidence, enabling in-terpretable and psychologically informed reasoning. 
+
+• We introduce the Emotion Attunement Score (EAS), a distribution-level metric for evaluating and optimizing emo-tional compatibility between counseling responses and clients’ multimodal emotional states. 
+
+• We demonstrate that reinforcement learning guided by EAS effectively enhances both emotion attunement and counsel-ing quality, validated through extensive quantitative and qualitative studies. 
+
+Related Work 
+
+LLMs for Psychological Counseling. Recent progress in psychological counseling with large language models (LLMs) has primarily focused on adapting general-purpose models through instruction tuning, prompting strategies, and domain-specific data. Representative efforts include long-form coun-seling corpora such as PsyQA (Sun et al., 2021), extensions from one-shot assistance to inclusive multi-turn conversa-tions (Qiu et al., 2024), and empathy-oriented fine-tuning frameworks such as SoulChat (Y. Chen et al., 2023), which substantially improve empathic language generation and sup-portive response quality. More recently, theory-informed counseling and professional-like reasoning have gained in-creasing attention. CBT-grounded modeling and evaluation align LLM behaviors with therapeutic procedures and strate-gies, while report-based reconstruction supports more realis-tic multi-turn assessment (Lee et al., 2024; Na, 2024; Zhang et al., 2024). In parallel, diagnostic criteria and therapeu-tic frameworks have been incorporated into system objectives and designs to improve clinical alignment, interpretability, and safety, often in conjunction with multi-agent deliberation and interactive, feedback-driven optimization (Bi et al., 2025; Y. Chen et al., 2025; J. Hu et al., 2025; Ozgun et al., 2025; Xu et al., 2025; Zhu et al., 2025). Despite these advances, most existing systems remain text-only and rely on implicit men-tal state inference. Our approach instead explicitly grounds counseling reasoning in multimodal behavioral evidence and maintains structured intermediate representations. 
+
+Multimodal Psychological Counseling. Multimodal model-ing is promising for psychological counseling, as clinicians rely on non-verbal signals such as facial expressions and vo-cal characteristics. Existing work mainly falls into two cate-gories: multimodal assessment, including depression detec-tion (Wu et al., 2024) and explainable emotion or stress rea-soning (Wang et al., 2024), and emotional support generation that couples affect recognition with response strategies (Chu et al., 2025; Na et al., 2025). However, multimodal counseling remains challenged by noisy cues and limited interpretability. Our work addresses this by explicitly decomposing multi-modal reasoning and maintaining traceable mental state rep-resentations rather than opaque feature fusion. 
+
+Reinforcement Learning for Alignment. Reinforcement learning (RL) and preference-based alignment have been ex-plored to improve counseling quality by combining accuracy rewards for clinically grounded content with format rewards 
+
+that encourage professional interaction patterns (Dai et al., 2025; Guo et al., 2025). Theory-grounded supervision fur-ther enhances controllability and verification beyond generic preference optimization (Blackburn et al., 2001; Iftikhar et al., 2024; Lee et al., 2024). Nevertheless, most existing align-ment approaches rely on text-only and label-level objectives. In contrast, our method optimizes distribution-level emotional attunement grounded in multimodal signals. 
+
+Method 
+
+We consider the task of multimodal psychological counseling. Given a client case context 𝑐 and multimodal client signals 𝑥 
+
+including visual, vocal, and linguistic information, the goal is to generate a supportive counseling response 𝑦 .The DELTA framework decomposes counseling into ex-plicit multimodal reasoning, mental state abstraction, and grounded response generation. An overview of the frame-work is shown in Figure 2. Multimodal Signals                   
+
+> Client Case
+> Multimodal Grounding Agent (MGA)
+> Visual Cue Inquiry Agent (VCIA)
+> Vocal Cue Inquiry Agent (VoCIA)
+> Question Answer
+> Answer Question
+> Client Case
+> Mental State Representation
+> Step 1: Deliberative Multimodal Grounded Reasoning
+> Mental State Structuring Agent (MSSA)
+> QA History
+> Step 2: MSE-inspired Mental State Structuring Step 3: Grounded Counseling Response Generation
+> Client Case
+> Counseling Response
+> Counseling Response Generation Agent (CRGA)
+> Modality-specific Emotion Encoders
+> Counseling Response Multimodal Signals
+> Emotion Attunement Score as Reward
+> Response Emotion Distribution
+> Video Emotion Distribution
+> Audio Emotion Distribution
+> Text Emotion Distribution
+
+Figure 2: DELTA Framework Overview. Left: Visual and vocal cue inquiry agents pose modality-specific questions, which are answered by a multimodal grounding agent using audio-visual evidence to form a cross-modal QA history. This history is summarized into a structured mental state representation inspired by the Mental State Examination (MSE) and fed to the counseling response generation agent, optimized via GRPO, a reinforcement learning method, to encourage emotion-attuned responses. Right: Correspondingly, the Emotion Attunement Score (EAS) measures Jensen-Shannon distance between the response emotion distribution and multimodal client emotion distributions, and serves as the reward for GRPO. 
+
+Agent Roles 
+
+DELTA adopts a functional decomposition of the counseling process by instantiating a set of specialized agents, each re-sponsible for a distinct role. This design separates evidence grounding, modality-specific inquiry, mental state abstraction, and response generation, enabling grounded and interpretable reasoning over multimodal inputs. We denote the multimodal client signals as 𝑥 = {𝑥 (𝑣 ) , 𝑥 (𝑎 ) , 𝑥 (𝑡 ) }, corresponding to vi-sual, vocal, and linguistic modalities, respectively. 
+
+Multimodal Grounding Agent (MGA). MGA serves as the perceptual backbone of DELTA and is the only com-ponent with direct access to audio-visual signals. Given a query 𝑞 , MGA analyzes 𝑥 (𝑣 ) and 𝑥 (𝑎 ) to produce an evidence-grounded answer 𝑎 . By centralizing perceptual access within MGA, DELTA ensures that downstream reasoning remains anchored in observable multimodal evidence. 
+
+Visual Cue Inquiry Agent (VCIA). VCIA formulates modality-specific queries 𝑞 (𝑣 ) that probe visually grounded information relevant to the client’s current mental state. Con-ditioned on the case context 𝑐 and the accumulated interaction history, VCIA directs attention toward visual evidence that complements linguistic information and supports grounded psychological interpretation. 
+
+Vocal Cue Inquiry Agent (VoCIA). VoCIA generates queries 𝑞 (𝑎 ) focused on vocal and paralinguistic aspects of the client’s expression. These cues often convey affective information that is underdetermined by lexical content alone. By eliciting speech-related evidence, VoCIA enables DELTA to reason about emotional states using information that is complementary to both visual and textual modalities. 
+
+Mental State Structuring Agent (MSSA). MSSA takes as input the accumulated question-answer history 𝐻 =
+
+{( 𝑞 (𝑣 ) , 𝑎 (𝑣 ) ), (𝑞 (𝑎 ) , 𝑎 (𝑎 ) )} and produces a structured mental state representation 𝑀 . This abstraction step consolidates dispersed multimodal evidence into a coherent intermediate representation inspired by clinical mental-state examination practices (Huline-Dickens, 2013), providing a stable interface between evidence elicitation and response generation. 
+
+Counseling Response Generation Agent (CRGA). 
+
+CRGA generates the final counseling response 𝑦 conditioned on the case context 𝑐 and the structured mental state represen-tation 𝑀 , i.e., 𝑦 ∼ 𝜋 (· | 𝑐, 𝑀 ). By operating on abstracted information about mental states rather than raw multimodal inputs, CRGA ensures that response generation is grounded in structured evidence and decoupled from perceptual noise. 
+
+Workflow 
+
+DELTA operates through a three-stage workflow, illustrated in Figure 2, which organizes multimodal evidence elicitation, mental state abstraction, and response generation into a struc-tured reasoning process. 
+
+Step 1: Deliberative Multimodal Grounded Reasoning. 
+
+Given the case context 𝑐 and multimodal signals 𝑥 , VCIA and VoCIA iteratively generate modality-specific queries 𝑞 (𝑣 )
+
+and 𝑞 (𝑎 ) . For each query, MGA analyzes the corresponding audio-visual inputs and returns an evidence-grounded answer. This interaction produces a cross-modal question-answer his-tory 𝐻 = {( 𝑞 (𝑣 ) , 𝑎 (𝑣 ) ), (𝑞 (𝑎 ) , 𝑎 (𝑎 ) )} , which explicitly links mental-state hypotheses to observable multimodal cues. 
+
+Step 2: MSE-inspired Mental State Structuring. The QA history 𝐻 is passed to MSSA, which performs mental state abstraction by consolidating multimodal evidence into a structured mental state representation 𝑀 . This representation summarizes salient affective and behavioral information in a traceable form, serving as an explicit intermediate state for downstream reasoning. 
+
+Step 3: Grounded Counseling Response Generation. Con-ditioned on the case context 𝑐 and the structured mental state representation 𝑀 , CRGA generates the counseling response 
+
+𝑦 . By grounding generation in 𝑀 , the response remains con-sistent with the elicited multimodal evidence while allowing flexibility in linguistic realization. The optimization of re-sponse behavior is described in the following section. 
+
+GRPO for Counseling Response Generation 
+
+To encourage more empathic counseling responses, we ap-ply Group Relative Policy Optimization (GRPO) (Shao et al., 2024) to fine-tune CRGA. Reinforcement learning is re-stricted to CRGA, while all upstream components for evi-dence grounding and mental state abstraction are kept fixed, as these components encode perceptual and structural priors that should remain stable during response optimization. 
+
+Policy Formulation. CRGA defines a stochastic response policy 𝜋 𝜃 (𝑦 | 𝑐, 𝑀 ), where 𝑐 denotes the client case context and 𝑀 the structured mental state representation. Reinforce-ment learning is applied exclusively to this policy, leaving all upstream grounding and structuring agents fixed. This de-sign isolates optimization to response realization rather than to perceptual inference or mental-state abstraction. 
+
+Emotion Distribution Estimation. To estimate emotion dis-tributions for both client signals and generated responses, we employ three modality-specific emotion encoders correspond-ing to visual, vocal, and linguistic inputs. Each encoder pro-duces a vector of classification logits over a shared emotion label set E, which is converted into a normalized emotion distribution. For the generated counseling response 𝑦 , the linguistic emotion encoder yields the response emotion dis-tribution 𝑝 𝑦 . For the client, modality-specific emotion dis-tributions {𝑝 (𝑚 ) 
+
+> 𝑢
+
+}𝑚 ∈ M , where M = {𝑣, 𝑎, 𝑡 }, are computed independently from visual, vocal, and linguistic signals. Us-ing full emotion distributions rather than hard labels preserves uncertainty in emotion estimation and provides a smoother signal for downstream optimization. 
+
+Emotion Attunement Score (EAS) as Reward. We intro-duce EAS as a distribution-level metric to evaluate the emo-tional compatibility between the generated response and the client’s multimodal emotional context, and use it as the reward signal for response optimization. As shown in the right panel of Figure 2, EAS computes pairwise similarity between the response emotion distribution 𝑝 𝑦 and each modality-specific client emotion distribution 𝑝 (𝑚 ) 
+
+> 𝑢
+
+using Jensen-Shannon dis-tance (Menéndez et al., 1997), and aggregates these similari-ties across modalities to form the final reward. Given two distributions 𝑝 and 𝑞 , the Jensen-Shannon diver-gence is defined as: 
+
+JSD ( 𝑝 ∥ 𝑞 ) = 12 KL ( 𝑝 ∥ 𝑚 ) + 12 KL (𝑞 ∥ 𝑚 ), 𝑚 = 12 ( 𝑝 + 𝑞 ),
+
+(1) where KL (·∥·) denotes the Kullback-Leibler divergence. The corresponding Jensen-Shannon distance is given by 
+
+JSDist ( 𝑝, 𝑞 ) =√︁ JSD ( 𝑝 ∥ 𝑞 ). (2) We convert distance into a similarity score and aggregate across modalities to form the reward: 
+
+𝑟 (𝑦 ) =
+
+Í𝑚 ∈ M 𝑤 𝑚 
+
+ 1 − JSDist ( 𝑝 𝑦 , 𝑝 (𝑚 ) 
+
+> 𝑢
+
+)Í𝑚 ∈ M 𝑤 𝑚 
+
+, (3) where 𝑤 𝑚 ≥ 0 controls the contribution of each modality. 
+
+Optimization. The response policy is optimized using GRPO by maximizing the expected affective consistency reward: 
+
+𝜃 ∗ = arg max  
+
+> 𝜃
+
+E𝑦 ∼ 𝜋 𝜃 (· | 𝑐,𝑀 )
+
+𝑟 (𝑦 ) . (4) By optimizing a distribution-level affective objective rather than discrete emotion labels, GRPO encourages empathetic and emotionally attuned counseling responses, rather than rigid emotion matching. 
+
+Experiments 
+
+Experimental Setup 
+
+DELTA Default Configuration. Unless otherwise spec-ified, DELTA is evaluated under a fixed default configu-ration. The agents VCIA, VoCIA, and MSSA are imple-mented using Qwen3-8B 1, while MGA is implemented us-ing Qwen3-Omni-30B-A3B-Instruct 2 to provide reliable audio-visual grounding. These upstream agents are kept fixed across all experiments to avoid confounding effects from vari-ations in perceptual or reasoning capacity. CRGA is the only component whose underlying model is varied for comparative evaluation, enabling controlled as-sessment of response generation strategies under identical grounded evidence and mental state representations. By de-fault, the deliberative reasoning stage runs for two interaction rounds, with each inquiry agent issuing one modality-specific query per round, unless stated otherwise. 
+
+Dataset and Evaluation. We conduct experiments on the MESC dataset (Chu et al., 2025), a multimodal emotional support conversation benchmark derived from In Treatment ,which provides synchronized video, audio, and text data with utterance-level annotations of client emotions and counselor strategies. We evaluate DELTA from two aspects: counsel-ing quality and emotion attunement. For counseling quality, we follow the benchmark protocol of H. Hu et al. (H. Hu et al., 2025), which assesses single-turn counseling responses along four dimensions: Comprehensiveness (Comp.), Pro-fessionalism (Prof.), Authenticity (Auth.), and Safety (Safe.). These quality scores are obtained using Gemini-2.0-Flash 3
+
+as the evaluation model. Emotion attunement is measured by the proposed Emotion Attunement Score (EAS) , computed directly from modality-specific emotion encoders over video, audio, and text. All reported scores are linearly normalized to 
+
+[0, 100 ], where higher values indicate better performance. 
+
+CRGA Training Details. CRGA is optimized on the training split of the MESC dataset using GRPO. Emotion distributions 
+
+> 1https://hf.co/Qwen/Qwen3-8B
+> 2https://hf.co/Qwen/Qwen3-Omni-30B-A3B-Instruct
+> 3https://blog.google/innovation-and-ai/models-and-research/go ogle-deepmind/google-gemini-ai-update-december-2024
+
+Table 1: Comparison of counseling quality with the Direct Prompting (DP) baseline on MESC. Scores are reported for Comprehensiveness (Comp.), Professionalism (Prof.), Authen-ticity (Auth.), Safety (Safe.), and their aggregate (Agg.). Bold model names indicate DP results, while +DELTA denotes the same base model augmented with our framework. indicates im-provement or no change over DP, and indicates degradation. 
+
+Model Comp. Prof. Auth. Safe. Agg. 
+
+MESC 8.71 29.10 32.50 88.56 39.72 
+
+Proprietary Models 
+
+GPT-4o 45.92 75.15 73.10 100.00 73.54 
+
++DELTA 48.62 ↑ 2.70 79.56 ↑ 4.41 76.92 ↑ 3.82 100.00 ↑ 0.00 76.28 ↑ 2.74 
+
+GPT-5.2 47.50 86.75 86.03 100.00 80.07 
+
++DELTA 50.00 ↑ 2.50 92.53 ↑ 5.78 91.11 ↑ 5.08 100.00 ↑ 0.00 83.41 ↑ 3.34 
+
+Open-source Models 
+
+Hunyuan (7B) 26.70 56.07 57.28 100.00 60.01 
+
++DELTA 34.95 ↑ 8.25 66.50 ↑ 10 .43 64.08 ↑ 6.80 100.00 ↑ 0.00 66.38 ↑ 6.37 
+
+Mistral (7B) 37.38 64.08 62.78 100.00 66.06 
+
++DELTA 41.75 ↑ 4.37 71.36 ↑ 7.28 66.34 ↑ 3.56 99.03 ↓ 0.97 69.62 ↑ 3.56 
+
+Llama 3.1 (8B) 45.57 71.12 66.99 99.03 70.68 
+
++DELTA 46.12 ↑ 0.55 72.33 ↑ 1.21 68.28 ↑ 1.29 99.03 ↑ 0.00 71.44 ↑ 0.76 
+
+Qwen3 (8B) 46.68 75.99 70.61 100.00 73.32 
+
++DELTA 47.43 ↑ 0.75 80.10 ↑ 4.11 76.05 ↑ 5.44 100.00 ↑ 0.00 75.89 ↑ 2.57 
+
+Table 2: Emotion Attunement Score (EAS) com-parison with the Direct Prompting (DP) baseline. 
+
+EAS is reported for video, audio, text, and their ag-gregate (Agg.). Bold model names correspond to DP, and +DELTA denotes results with our framework. indicates improvement or no change over DP, and indicates degradation. 
+
+Model Video Audio Text Agg. 
+
+MESC 26.20 30.89 55.77 37.62 
+
+Proprietary Models 
+
+GPT-4o 31.87 37.73 40.96 36.85 
+
++DELTA 29.78 ↓ 2.09 37.93 ↑ 0.20 43.34 ↑ 2.38 37.02 ↑ 0.17 
+
+GPT-5.2 29.37 33.84 51.68 38.30 
+
++DELTA 30.58 ↑ 1.21 36.52 ↑ 2.68 60.11 ↑ 8.43 42.40 ↑ 4.10 
+
+Open-source Models 
+
+Hunyuan (7B) 35.19 41.32 52.15 42.89 
+
++DELTA 35.27 ↑ 0.08 42.16 ↑ 0.84 53.89 ↑ 1.74 43.77 ↑ 0.88 
+
+Mistral (7B) 40.84 45.84 45.83 44.17 
+
++DELTA 40.03 ↓ 0.81 46.50 ↑ 0.66 44.15 ↓ 1.68 43.56 ↓ 0.61 
+
+Llama 3.1 (8B) 30.45 36.67 48.25 38.46 
+
++DELTA 31.71 ↑ 1.26 37.80 ↑ 1.13 48.13 ↓ 0.12 39.21 ↑ 0.75 
+
+Qwen3 (8B) 31.07 38.48 49.61 39.72 
+
++DELTA 31.66 ↑ 0.59 38.71 ↑ 0.23 49.99 ↑ 0.38 40.12 ↑ 0.40 
+
+used for training are estimated with modality-specific pre-trained emotion encoders for text, speech, and vision, includ-ing a RoBERTa-GoEmotions classifier 4, a wav2vec2-based speech emotion recognition model 5, and a facial-expression recognition model 6. All encoder outputs are projected into a shared 8-way emotion space to enable cross-modal com-parison, with predefined label mapping and probability ag-gregation applied to calibrate encoders whose original label spaces do not align with this target space. For each training instance, we sample a group of 𝐺 = 4 candidate responses and update the policy with a learning rate of 1 × 10 −5. To reduce optimization cost, we adopt LoRA-based parameter-efficient fine-tuning with rank 𝑟 = 64 , scaling factor 𝛼 = 128 ,and dropout rate 0.05 . For the Emotion Attunement Score, audio, visual, and textual components are equally weighted, i.e., 𝑤 𝑎 = 𝑤 𝑣 = 𝑤 𝑡 = 13 , unless stated otherwise. 
+
+Additional Experimental Details. Further implementation details are provided in the anonymous supplementary mate-rial: https://osf.io/ke9yf/overview?view_only=e3d99cb3d2 6e4326970b167303a4f9cf. This includes prompt templates for all agent roles, structured input and output field definitions, and preprocessing details necessary for full reproducibility. 
+
+Experimental Results 
+
+DELTA Consistently Improves Counseling Quality and Emotion Attunement over Direct Prompting. We evaluate the effectiveness of the proposed DELTA workflow by in-
+
+> 4
+
+https://hf.co/SamLowe/roberta-base-go_emotions 
+
+> 5
+
+http://doi.org/10.57967/hf/2045 
+
+> 6
+
+https://hf.co/HardlyHumans/Facial-expression-detection 72 73 74 75 76 77    
+
+> Counseling Quality (Agg.)
+> DELTA (Complete)
+> Direct Prompting
+> DELTA w/o Step 1
+> DELTA w/o Step 2
+> 75.89
+> 73.32
+> 74.66
+> 74.86
+> 38 39 40 41
+> Emotion Attunement Score (Agg.)
+> 40.12
+> 39.72
+> 40.10
+> 38.74
+
+Figure 3: Ablation study on DELTA. Removing either de-liberative multimodal reasoning or mental state structuring leads to consistent performance degradation, while the com-plete DELTA workflow achieves the best overall results. stantiating CRGA with two proprietary models (GPT-4o 7 and GPT-5.2 8) and four widely used open-source models (Hun-yuan 7B 9, Mistral 7B 10 , Llama 3.1 8B 11 , and Qwen3 8B 1), and compare against both the original MESC method (Chu et al., 2025) and a Direct Prompting (DP) baseline that uses single-prompt role-based generation. The goal of this exper-iment is to isolate and assess the contribution of our multi-agent, multimodal reasoning workflow, without applying re-inforcement learning to CRGA. As shown in Table 1, DELTA consistently improves counseling quality over DP across most models and evaluation dimensions, with particularly notable gains in Comprehensiveness, Professionalism, and Authen-ticity, while maintaining high Safety scores. Table 2 further 
+
+> 7
+
+https://openai.com/index/hello-gpt-4o 
+
+> 8
+
+https://openai.com/index/introducing-gpt-5-2 
+
+> 9
+
+https://hf.co/tencent/Hunyuan-7B-Instruct 
+
+> 10
+
+https://hf.co/mistralai/Mistral-7B-Instruct-v0.3 
+
+> 11
+
+https://hf.co/meta-llama/Llama-3.1-8B Table 3: Effect of GRPO on counseling quality. GRPO leads to consistent improvements in overall counseling quality. 
+
+Model Comp. Prof. Auth. Safe. Agg. 
+
+Before GRPO 47.43 80.10 76.05 100.00 75.89 After GRPO 48.48 ↑ 1.05 82.28 ↑ 2.18 78.48 ↑ 2.43 100.00 ↑ 0.00 77.31 ↑ 1.42 
+
+shows that DELTA generally improves Emotion Attunement Score (EAS) across video, audio, and text modalities, lead-ing to higher aggregated emotion attunement in most settings. Overall, these results demonstrate that the DELTA workflow alone, even without reinforcement learning, can yield con-sistent and meaningful improvements over direct prompting, validating the effectiveness of structured multimodal evidence elicitation and deliberative multi-agent reasoning. 
+
+Ablation Analysis. We conduct an ablation study using Qwen3 (8B) as CRGA to examine the contribution of individ-ual components in the DELTA workflow. Figure 3 reports ag-gregated counseling quality and aggregated Emotion Attune-ment Score (EAS) under four settings: the complete DELTA framework, Direct Prompting (DP), DELTA without Step 1 (deliberative multimodal grounded reasoning), and DELTA without Step 2 (mental state structuring). This ablation is de-signed to isolate the effect of structured multimodal reasoning and mental state abstraction. Removing either Step 1 or Step 2 leads to consistent degradation in at least one evaluation met-ric, while the complete DELTA framework achieves the best overall performance. These results demonstrate that both de-liberative multimodal reasoning and mental state structuring are necessary and complementary for improving counseling quality and emotion attunement. 
+
+GRPO and Emotion Attunement Score Are Effective. We further evaluate the effectiveness of GRPO and the proposed Emotion Attunement Score (EAS) by training CRGA with Qwen3 (8B) using GRPO, while keeping the rest of the DELTA workflow unchanged. Results in Tables 1 and 2 reveal a clear correspondence between EAS and counseling quality across models: for instance, Mistral (7B) exhibits a degrada-tion in EAS when augmented with DELTA, which is accom-panied by a consistent drop in aggregated counseling quality, whereas models achieving higher EAS generally obtain im-proved counseling quality scores. This alignment suggests that EAS captures emotionally relevant properties that are predictive of counseling effectiveness. After applying GRPO, Figure 4 shows that EAS improves substantially across all modalities, and Table 3 further demonstrates corresponding gains in counseling quality. Together, these results indicate that optimizing responses with GRPO under the guidance of EAS effectively enhances both emotion attunement and coun-seling quality, validating the utility of EAS as a training signal and the effectiveness of GRPO for response optimization. 
+
+Qualitative Comparison. We further conduct a qualitative comparison to examine the behavioral differences between DELTA and baseline methods. As shown in Figure 5, under 30 35 40 45 50 55 60 
+
+Emotion Attunement Score 
+
+Video 
+
+Audio 
+
+Text 
+
+Agg. 
+
+31.66 
+
+42.23 
+
+38.71 
+
+48.34 
+
+49.99 
+
+59.29 
+
+40.12 
+
+49.95 
+
+Before GRPO 
+
+After GRPO 
+
+Figure 4: Effect of GRPO on EAS. GRPO consistently improves emotion attunement across all modalities. Presenting Problem:                                                   
+
+> Romantic relationship conflict.
+> Contextual Situation:
+> During a routine evening at home, while having dinner and watching television together, the client’s partner unexpectedly expressed an intention to end the relationship without proceeding toward marriage..
+> Observed Emotional State:
+> The client is a young adult woman displaying observable emotional distress in response to the interaction.
+> Client Case
+> Multimodal Signals
+> MESC: So you were the one who came up with it.
+> GPT-4o: It sounds like you're reflecting on a pivotal moment, one involving a significant decision about a relationship whether to take astep forward or part ways. That kind of decision can feel incredibly heavy, especially if there's a mix of hope, fear, or even uncertainty tied to it. It might help to explore what each option represents for you emotionally and what needs or values…
+> DELTA Before GRPO: It sounds like you were deeply attuned to his emotional state even before he spoke, which shows alot of empathy and awareness in the relationship. When he expressed uncertainty about the future, it must have felt unsettling, especially since you were ready to commit to a clearer path. It’s understandable that this moment felt both surprising and emotionally heavy...
+> DELTA After GRPO: It sounds like you’re feeling amix of confusion, betrayal, and maybe even guilt, as if you’re unsure whether you played a role in this. There may also be a sense of isolation, as though no one truly understands what you’re going through. Beneath this, there could be lingering hope that things might still work out, even as doubt creeps in. You might feel trapped between anger and sadness, struggling to make sense of why this happened now. It’s possible you’re also questioning...
+
+Figure 5: Qualitative comparison. Under the same client case and multimodal inputs, DELTA produces counseling re-sponses with more explicit empathic expressions and stronger emotional grounding than the baselines, and this advantage is further strengthened after GRPO. the same client case and multimodal inputs, DELTA pro-duces counseling responses with more explicit empathic ex-pressions and clearer emotional grounding. This advantage is already observable before reinforcement learning and is further strengthened after GRPO, complementing the quanti-tative improvements reported in previous sections. 
+
+Conclusion 
+
+We presented DELTA, a deliberative multi-agent frame-work for multimodal psychological counseling that explicitly grounds reasoning in visual, vocal, and linguistic cues. By separating evidence grounding, mental state abstraction, and response generation, DELTA provides a structured and inter-pretable account of how multimodal information can support empathic counseling behavior. Empirical results across mul-tiple models show that DELTA consistently improves both counseling quality and emotion attunement, with ablation and qualitative analyses highlighting the complementary roles of structured multimodal reasoning and learning-based opti-mization. These findings suggest that deliberative multimodal reasoning offers a principled alternative to single-pass, text-only counseling approaches. Future work will explore richer and more dynamic mental state representations and longer-term interactive settings to better capture the evolving dynamics of real-world counseling. References 
+
+Bi, G., Chen, Z., Liu, Z., Wang, H., Xiao, X., Xie, Y., Zhang, W., Huang, Y., Chen, Y., Peng, L., et al. (2025). Magi: Multi-agent guided interview for psychiatric assessment. 
+
+Findings of the Association for Computational Linguistics: ACL 2025 , 24898–24921. Blackburn, I.-M., James, I. A., Milne, D. L., Baker, C., Stan-dart, S., Garland, A., & Reichelt, F. K. (2001). The revised cognitive therapy scale (cts-r): Psychometric properties. Be-havioural and cognitive psychotherapy , 29 (4), 431–446. Chen, Y., Xing, X., Lin, J., Zheng, H., Wang, Z., Liu, Q., & Xu, X. (2023, December). SoulChat: Improving LLMs’ empathy, listening, and comfort abilities through fine-tuning with multi-turn empathy conversations. In H. Bouamor, J. Pino, & K. Bali (Eds.), Findings of the association for com-putational linguistics: Emnlp 2023 (pp. 1170–1183). Asso-ciation for Computational Linguistics. https://doi.org/10. 18653/v1/2023.findings-emnlp.83 Chen, Y., Li, C., Wang, Y., Ju, T., Xiao, Q., Zhang, N., Kong, Z., Wang, P., & Yan, B. (2025, November). MIND: To-wards immersive psychological healing with multi-agent inner dialogue. In C. Christodoulopoulos, T. Chakraborty, C. Rose, & V. Peng (Eds.), Findings of the association for computational linguistics: Emnlp 2025 (pp. 9380–9413). Association for Computational Linguistics. https://doi.org/ 10.18653/v1/2025.findings-emnlp.499 Chu, Y., Liao, L., Zhou, Z., Ngo, C.-W., & Hong, R. (2025). Towards multimodal emotional support conversation sys-tems. IEEE Transactions on Multimedia .Dai, C., Hu, J., Shi, H., Li, Z., Yang, X., & Wang, M. (2025). Psyche-r1: Towards reliable psychological llms through unified empathy, expertise, and reasoning. arXiv preprint arXiv:2508.10848 .Gottman, J. M. (2011). The science of trust: Emotional at-tunement for couples . WW Norton & Company. Greenberg, L. S. (2007). Emotion in the therapeutic relation-ship in emotion-focused therapy. The therapeutic relation-ship in the cognitive behavioral psychotherapies , 43–62. Guo, D., Yang, D., Zhang, H., Song, J., Zhang, R., Xu, R., Zhu, Q., Ma, S., Wang, P., Bi, X., et al. (2025). Deepseek-r1: Incentivizing reasoning capability in llms via reinforcement learning. arXiv preprint arXiv:2501.12948 .Haynes, S. N., Smith, G. T., & Hunsley, J. D. (2011). Scientific foundations of clinical assessment . Routledge. Hu, H., Zhou, Y., Si, J., Wang, Q., Zhang, H., Ren, F., Ma, F., Cui, L., & Tian, Q. (2025). Beyond empathy: Integrat-ing diagnostic and therapeutic reasoning with large lan-guage models for mental health counseling. arXiv preprint arXiv:2505.15715 .Hu, J., Dong, T., Gang, L., Ma, H., Zou, P., Sun, X., Guo, D., Yang, X., & Wang, M. (2024). Psycollm: Enhancing llm for psychological understanding and evaluation. IEEE Transactions on Computational Social Systems .Hu, J., Wang, A., Xie, Q., Ma, H., Li, Z., & Guo, D. (2025). Agentmental: An interactive multi-agent framework for ex-plainable and adaptive mental health assessment. arXiv preprint arXiv:2508.11567 .Huline-Dickens, S. (2013). The mental state examination. Ad-vances in Psychiatric Treatment , 19 (2), 97–98. https://doi. org/10.1192/apt.bp.112.010215 Iftikhar, Z., Ransom, S., Xiao, A., Nugent, N., & Huang, J. (2024). Therapy as an nlp task: Psychologists’ com-parison of llms and human peers in cbt. arXiv preprint arXiv:2409.02244 .Lee, S., Mac Kim, S., Kim, M., Kang, D., Yang, D., Kim, H., Kang, M., Jung, D., Kim, M. H., Lee, S., et al. (2024). Cac-tus: Towards psychological counseling conversations using cognitive behavioral theory. Findings of the Association for Computational Linguistics: EMNLP 2024 , 14245–14274. Marcoux, A., Tessier, M.-H., & Jackson, P. L. (2024). Non-verbal behaviors perceived as most empathic in a simu-lated medical context. Computers in Human Behavior , 157 ,108268. Menéndez, M. L., Pardo, J. A., Pardo, L., & Pardo, M. d. C. (1997). The jensen-shannon divergence. Journal of the Franklin Institute , 334 (2), 307–318. Na, H. (2024, May). CBT-LLM: A Chinese large language model for cognitive behavioral therapy-based mental health question answering. In N. Calzolari, M.-Y. Kan, V. Hoste, A. Lenci, S. Sakti, & N. Xue (Eds.), Proceedings of the 2024 joint international conference on computational linguis-tics, language resources and evaluation (lrec-coling 2024) 
+
+(pp. 2930–2940). ELRA; ICCL. https://aclanthology.org/ 2024.lrec-main.261/ Na, H., Hua, Y., Wang, Z., Shen, T., Yu, B., Wang, L., Wang, W., Torous, J., & Chen, L. (2025, July). A survey of large language models in psychotherapy: Current landscape and future directions. In W. Che, J. Nabende, E. Shutova, & M. T. Pilehvar (Eds.), Findings of the association for com-putational linguistics: Acl 2025 (pp. 7362–7376). Associ-ation for Computational Linguistics. https : / / doi . org / 10 . 18653/v1/2025.findings-acl.385 Norcross, J. C., & Goldfried, M. R. (2005). Handbook of psychotherapy integration . Oxford University Press. Ozgun, M. C., Pei, J., Hindriks, K., Donatelli, L., Liu, Q., & Wang, J. (2025). Trustworthy ai psychotherapy: Multi-agent llm workflow for counseling and explainable mental disor-der diagnosis. Proceedings of the 34th ACM International Conference on Information and Knowledge Management ,2263–2272. Qiu, H., He, H., Zhang, S., Li, A., & Lan, Z. (2024). Smile: Single-turn to multi-turn inclusive language expansion via chatgpt for mental health support. Findings of the Associ-ation for Computational Linguistics: EMNLP 2024 , 615– 636. Shao, Z., Wang, P., Zhu, Q., Xu, R., Song, J., Bi, X., Zhang, H., Zhang, M., Li, Y., Wu, Y., et al. (2024). Deepseekmath: Pushing the limits of mathematical reasoning in open lan-guage models. arXiv preprint arXiv:2402.03300 .Sun, H., Lin, Z., Zheng, C., Liu, S., & Huang, M. (2021, August). PsyQA: A Chinese dataset for generating long counseling text for mental health support. In C. Zong, F. Xia, W. Li, & R. Navigli (Eds.), Findings of the association for computational linguistics: Acl-ijcnlp 2021 (pp. 1489– 1503). Association for Computational Linguistics. https : //doi.org/10.18653/v1/2021.findings-acl.130 Wang, X., Gao, B., Dai, Y., Cao, L., Zhao, L., Yang, Y., & Clifton, D. (2024). Cognition chain for explainable psy-chological stress detection on social media. arXiv preprint arXiv:2412.14009 .Westland, G. (2015). Verbal and non-verbal communication in psychotherapy . WW Norton & Company. Wu, M., Kang, Y., Li, X., Hu, S., Chen, X., Kang, Y., Wang, W., & Huang, K. (2024). Vs-llm: Visual-semantic depres-sion assessment based on llm for drawing projection test. 
+
+Chinese Conference on Pattern Recognition and Computer Vision (PRCV) , 232–246. Xu, A., Yang, D., Li, R., Zhu, J., Tan, M., Yang, M., Qiu, W., Ma, M., Wu, H., Li, B., et al. (2025). Autocbt: An autonomous multi-agent framework for cognitive behav-ioral therapy in psychological counseling. arXiv preprint arXiv:2501.09426 .Zhang, C., Li, R., Tan, M., Yang, M., Zhu, J., Yang, D., Zhao, J., Ye, G., Li, C., & Hu, X. (2024, August). CPsyCoun: A report-based multi-turn dialogue reconstruction and eval-uation framework for Chinese psychological counseling. In L.-W. Ku, A. Martins, & V. Srikumar (Eds.), Find-ings of the association for computational linguistics: Acl 2024 (pp. 13947–13966). Association for Computational Linguistics. https://doi.org/10.18653/v1/2024.findings-acl.830 Zhu, S., Chen, Z., Bi, G., Li, B., Deng, Y., Wan, D., Peng, L., Xiao, X., Zhang, R., Lv, T., et al. (2025). {\ Psi }-arena: In-teractive assessment and optimization of llm-based psycho-logical counselors with tripartite feedback. arXiv preprint arXiv:2505.03293 .

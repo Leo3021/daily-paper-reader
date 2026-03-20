@@ -1,0 +1,2158 @@
+Title: TodyComm: Task-Oriented Dynamic Communication for Multi-Round LLM-based Multi-Agent System
+
+URL Source: https://arxiv.org/pdf/2602.03688v1
+
+Published Time: Wed, 04 Feb 2026 02:36:07 GMT
+
+Number of Pages: 18
+
+Markdown Content:
+# TodyComm: Task-Oriented Dynamic Communication for Multi-Round LLM-based Multi-Agent System 
+
+Wenzhe Fan 1 Tommaso Tognoli 1 Henry Peng Zou 1 Chunyu Miao 1 Yibo Wang 1 Xinhua Zhang 1
+
+Abstract 
+
+Multi-round LLM-based multi-agent systems rely on effective communication structures to support collaboration across rounds. However, most ex-isting methods employ a fixed communication topology during inference, which falls short in many realistic applications where the agents’ roles may change across rounds due to dynamic adver-sary, task progression, or time-varying constraints such as communication bandwidth. In this paper, we propose addressing this issue through Tody-Comm, a task-oriented dy namic comm unication algorithm. It produces behavior-driven collabora-tion topologies that adapt to the dynamics at each round, optimizing the utility for the task through policy gradient. Experiments on five benchmarks demonstrate that under both dynamic adversary and communications budgets, TodyComm deliv-ers superior task effectiveness while retaining to-ken efficiency and scalability. 
+
+1. Introduction 
+
+Large language model (LLM)-based multi-agent systems (MAS) (Li et al., 2023; Hong et al., 2023; Zhuge et al., 2024; Wu et al., 2024; Liang et al., 2024; Zou et al., 2025) have emerged as a powerful paradigm for collaborative problem solving. Within this research area, multi-agent, multi-round collaboration (Du et al., 2023; Liu et al., 2024) constitutes an important interaction mechanism, in which agents iteratively exchange information across multiple rounds and refine their responses before producing a final solution. Such iterative collaboration enables the integration of diverse reasoning perspectives, supports error correction over time, and pro-gressively improves solution quality, making it particularly effective for complex reasoning, planning, and decision-making tasks (Zhang et al., 2025a; Parmar et al., 2025; Fan et al., 2025; Zhao et al., 2025).         
+
+> 1Department of Compute Science, University of Illinois at Chicago, IL, USA. Correspondence to: Wenzhe Fan
+> <wfan23@uic.edu >, Xinhua Zhang <zhangx@uic.edu >.
+> Preprint. February 4, 2026
+
+Recent research on multi-round LLM-based multi-agent sys-tems (MAS) has explored a range of methods for enabling effective collaboration across multiple rounds of interac-tion. A prominent line of work focuses on communication topology design, where agent interactions are modeled as graphs that are either predefined or optimized to improve collaboration (Zhang et al., 2025a;b;c; Wang et al., 2025b; Li et al., 2025). However, these approaches rely on fixed communication graphs at inference time , which prevents adaptation to evolving agent behaviors (e.g., historical re-sponse, neighboring info and agent-related info, etc) and consequently degrades the task performance, particularly in dynamic settings. Complementary to topology design, a growing body of work has investigated the security and robustness of multi-round LLM-based MAS. Existing approaches (Wang et al., 2025a; Miao et al., 2025) primarily rely on graph-based anomaly detection, while Zhou et al. (2026) proposes resilient MAS architectures that tolerate agent corruption. However, Zhou et al. (2026) still depends on a fixed communication graph, and Wang et al. (2025a) and (Miao et al., 2025) do not in-corporate task-level feedback (e.g., utility or task accuracy), which can lead to less effective interactions. Moreover, Wang et al. (2025a) requires adversary labels during train-ing, which is impractical in real-world settings. In this paper, we are motivated by scenarios of LLM-based MAS where the agents’ communication graph needs to be adapted across rounds . For example, a task must be accom-plished through multiple stages, each of which may require a distinct graph. The communication channels may impose time-varying constraints on bandwidth. In a dynamically adversarial setting, agents may randomly transition to ad-versarial behavior at unknown rounds, while retaining their original roles and producing plausibly structured but mis-leading analyses to other agents. It reflects realistic collabo-rative scenarios, where participants may gradually become unreliable due to misunderstanding, bias, fatigue, or external incentives, rather than through explicit role changes. Despite its importance, learning dynamic communication structures in multi-agent, multi-round settings remains chal-lenging. Directly optimizing discrete inter-agent graphs across rounds induces a combinatorial action space. More-1            
+
+> arXiv:2602.03688v1 [cs.AI] 3 Feb 2026 TodyComm: Task-Oriented Dynamic Communication for Multi-Round LLM-based Multi-Agent System
+> Table 1. Comparing and contrasting our method with baseline methods. ∗: “Edge selection per round” indicates that graph structures vary across rounds due to changes in the underlying graph distribution, rather than stochastic sampling from an invariant set of edge weights.
+> ∗∗ : “Edge selection per round in training” means the algorithm changes the edges during training, which in turn actively impacts the training data . “-” denotes the absence of adversarial setting in the experiment. Edge selection
+> per round ∗
+> in inference
+> Edge selection
+> per round ∗
+> in training ∗∗
+> Node dropout in communi-cation graph Adversary label not
+> required Parametric edge selector based on agent behavior Task-driven edge selection Optimization mode G-Designer %%%
+
+✓ % ✓ RL + aux. loss AgentPrune % % % ✓ % ✓ RL + aux. loss AgentDropout % ✓ ✓ - % ✓ RL + aux. loss SafeSieve % % ✓ ✓ % ✓ Heuristic AGP % % ✓ - % ✓ Supervised G-safeguard ✓ % % % ✓ % Supervised BlindGuard ✓ % % ✓ ✓ % Unsupervised ResMAS % % % ✓ ✓ ✓ SFT + GRPO  
+
+> TodyComm (ours)
+
+✓ ✓ ✓ ✓ ✓ ✓ RL 
+
+over, determining how communication structures should evolve based on agents’ behaviors in previous rounds is it-self non-trivial, as agent outputs are unstructured, stochastic, and context-dependent. To address these challenges, we propose TodyComm, a task-
+
+oriented framework that dy namically learns behavior-driven 
+
+comm unication structures to coordinate LLM-based agents across multiple interaction rounds both in the training and in-ference. TodyComm models multi-round agent interactions using two graph structures: an inter-agent communication graph for information exchange at each round and a decision graph for final aggregation. The multi-agent, multi-round interaction is formulated as a Markov decision process (Put-erman, 1990), where each episode corresponds to solving a query over T interaction rounds, and actions correspond to the trajectories of inter-agent communication graphs across rounds together with the final decision graph. Inspired by credit assignment in multi-agent reinforcement learning, TodyComm learns agent-level credit values that reflect each agent’s contribution and reliability based on his-torical behaviors and interaction context. These credits are updated using a gated recurrent network (GRN, Chung et al., 2014), enabling the model to capture temporal dependencies across rounds. Graph-level actions are then instantiated as agent participation decisions based on the learned credits, followed by deterministic communication graph construc-tion. This design both simplifies policy learning and natu-rally extends to node-wise incoming and outgoing degree budget constraints. After T rounds of interaction, the final decision is produced via a credit-weighted voting mech-anism. TodyComm is optimized using the REINFORCE algorithm (Williams, 1992), with task utility serving as the reward to guide communication structure learning. We conduct extensive empirical evaluations on five diverse benchmarks, in addition to budget control and scalability, demonstrating that TodyComm consistently outperforms baselines and highlighting the effectiveness of learning dy-namic communication topologies from agent behaviors in multi-round LLM-based MAS. To the best of our knowledge, TodyComm is the first frame-work to learn task-oriented, behavior-driven dynamic com-munication topologies in multi-round LLM-based multi-agent systems, enabling task-adaptive and round-adaptive communication during both training and inference. 
+
+2. Related Work 
+
+Early LLM-based multi-agent systems (MAS) largely focus on settings with limited or implicit interaction, where agents operate independently and are combined only at the final stage (Jiang et al., 2023; Du et al., 2023; Qian et al., 2025; Chan et al., 2024; Wu et al., 2024). To improve flexibility, ChatLLM (Hao et al., 2023) and DyLAN (Liu et al., 2024) employ layered architectures for feedback and agent selection. GPTSwarm (Zhuge et al., 2024) further introduces learnable edge weights over a pre-defined graph, constructing communication structures by sampling edges according to context-independent scalar parameters, a design that has since become common in multi-round LLM-based MAS. Most multi-round MAS follow a spatial–temporal graph for-mulation, where intra-round communication and inter-round evolution are modeled separately. Under this paradigm, the communication structure is determined by a fixed set of potential edges together with learned edge weights. G-Designer (Zhang et al., 2025b) derives the spatial graph from predefined role information and relies on hand-designed role connections. On-the-fly pruning methods (Zhang et al., 2025a;c; Wang et al., 2025b; Li et al., 2025) typically start from dense graphs and prune edges or agents at fixed in-2TodyComm: Task-Oriented Dynamic Communication for Multi-Round LLM-based Multi-Agent System 
+
+tervals during training. Specifically, AgentPrune (Zhang et al., 2025a) performs edge pruning, AgentDropout (Wang et al., 2025b) drops agents and edges, SafeSieve (Zhang et al., 2025c) relies on ground-truth labels, and AGP (Li et al., 2025) focuses on task-level adaptation without explic-itly modeling per-round communication dynamics. As a result, these methods employ graph structures that are fixed at inference time and do not adapt to evolving agent behav-iors. The observed dynamism in these approaches primarily arises from stochastic sampling over context-independent edge weights on a fixed set of potential edges, rather than behavior-driven structural adaptation. Several works further study the security and robustness of LLM-based multi-agent systems. Methods such as G-Safeguard (Wang et al., 2025a) and BlindGuard (Miao et al., 2025) employ graph-based anomaly detection to identify adversarial agents. G-Safeguard requires ground-truth ad-versarial labels during training, while BlindGuard relies on simulated attacks constructed in embedding space. Both methods focus on adversary detection rather than agent cooperation, and consequently their graph learning is not driven by task performance . ResMAS (Zhou et al., 2026) in-stead designs resilient MAS architectures that tolerate agent corruption, However, it still suffers from fixed communica-tion topologies in the inference. In contrast, we consider a dynamically adversarial setting, 
+
+where agents may transition to adversarial behavior at unknown rounds during interaction . The number of ad-versarial agents is controlled by an attack rate with settings 
+
+(< 50% , = 50% , > 50%) , enabling systematic evaluation of whether a system can adapt its communication topology online in response to evolving agent behaviors. Unlike existing approaches that fix communication struc-tures at inference time or adapt them without regard to task performance, TodyComm produces behavior-driven, round-adaptive, and task-oriented communication graphs. Table 1 compares its properties with state-of-the-art methods. 
+
+3. Preliminaries 
+
+In this paper, we adopt multi-round LLM-based multi-agent framework (Zhang et al., 2025a;b), in which multiple LLM agents interact over multiple rounds to solve a given query. 
+
+Multi-round LLM-based MAS Given a query q, a set of N agents {A1, . . . , A N } engage in a multi-round in-teraction over T rounds. Each agent Ai := ( base i, role i)
+
+is instantiated with an underlying LLM model and an as-signed role at initialization. At round t = 1 , the agents independently generate an initial response {o1 
+
+> i
+
+}Ni=1 to the query without inter-agent communication. For rounds 
+
+t ∈ [2 , . . . , T ], agents iteratively update their responses by communicating and collaborating with other agents, pro-ducing updated outputs oti := {sol ti, ana ti}, where sol ti is the answer such as a one-hot vector for multiple choice, and ana ti is the embedding of the agent’s analysis. After T rounds, the final answer is obtained by aggregating the agents’ outputs from the last round {oTi }Ni=1 . For conve-nience, we refer to the decision phase as round T + 1 in the following sections. 
+
+Multi-round MAS as Graphs We model multi-agent in-teractions over T rounds using spatial graphs and distinguish two types of structures. Inter-agent communication at round 
+
+t ∈ [2 , . . . , T ] is modeled as a directed acyclic graph (DAG) 
+
+GtC = ( VtC , EtC ), where VtC denotes the set of participating agent nodes at round t, with |V tC | ≤ N , and EtC is the set of directed edges specifying message-passing relationships among agents - messages serve as prompts for the recipient. The aggregation of agent responses into a final decision is modeled using a separate decision graph GD = ( VD , ED ),where VD denotes the set of agent nodes contributing to the final decision, with |V D | ≤ N , and ED consists of edges connecting selected agents to the decision node. 
+
+Multi-agent Communication Given a query q, informa-tion is propagated through agent nodes in a topological order, ensuring that each node is executed only after all its pre-decessors are resolved. Consequently, the inter-agent com-munication graph GtC is restricted to be a DAG. At round 
+
+t ∈ [2 , . . . , T ], each node vi receives the query q along with messages from its parent nodes N t(vi). Each par-ent vj ∈ N t(vi) provides a message mtj = fm(otj , role j ),
+
+where fm is a prompt template function and role j denotes the role assigned to agent j at initialization. Node vi then computes its output oti based on its prompt pti, which is defined using another prompt template function fv :
+
+pti ∼ fv
+
+
+
+q, [   
+
+> vj∈N t(vi)
+
+mtj
+
+
+
+(1) The final answer to query q, denoted by ans q , is produced by a predefined decision function fd that aggregates the outputs of selected agents connected to the decision node vd:ans q ∼ fd
+
+[     
+
+> vj∈N T+1 (vd)
+
+oTj
+
+
+
+(2) The complete execution procedure of the communication graph is summarized in Algorithm 3 in Appendix A. 
+
+4. Method 
+
+4.1. Problem Formulation 
+
+We formulate this multi-agent collaboration as a Markov de-cision process (MDP, Puterman, 1990), where each episode corresponds to solving a query over T interaction rounds. The actions correspond to the inter-agent communication 3TodyComm: Task-Oriented Dynamic Communication for Multi-Round LLM-based Multi-Agent System Round 1 Round 2  
+
+> GRN
+> Round 3
+> MLP
+> Round T Decision
+> MLP
+> Decision Graph
+> GRN GRN
+> MLP
+> GRN
+> Inter-Agent Graph
+> Credit Generation
+> 0.40
+> 0.20
+> 0.70
+> 0.65
+> 0.80
+> Participation Sampling
+> 0.40
+> 0.20
+> 0.70
+> 0.65
+> 0.80
+> Inter-Agent Graph
+> 0.40
+> 0.20
+> 0.70
+> 0.65
+> 0.80
+> Decision Graph
+> 0.44
+> 0.15
+> 0.67
+> 0.7
+> 0.87
+
+Figure 1. Overview of the training workflow for TodyComm. {Ai}Ni=1 denote the agents. Given node features {f ti }Ni=1 and hidden states 
+
+{ht−1 
+
+> i
+
+}Ni=1 , agent-level credits {cti }Ni=1 are generated through GRN, t ∈ [2 , T + 1] . These credits are used to sample agent participation actions and to deterministically construct the communication graph at each round by prioritizing edges between high-credit agents. 
+
+graphs GtC for t ∈ [2 , . . . , T ], together with the decision graph GD at round T + 1 . The inter-agent communication graph GtC at round t is represented by binary edge indicators 
+
+EtC ∈ { 0, 1}VtC ×V tC . The decision graph GD is represented by binary node indicators ED ∈ { 0, 1}VD with associated decision weights {wi}|V D | 
+
+> i=1
+
+.The state of the MDP is the response of all agents {oti}i,along with all the relevant information such as q and previ-ous {oτi }i (τ < t ). The transition probability concerns the distribution of the next-round response {ot+1  
+
+> i
+
+}i under the given graph (i.e., action) at t. The reward , in the simplest form, is the supervised loss on the response of the decision node at round T + 1 , i.e., the task utility on the final answer. We denote the policy of constructing the communication graph at round t by πt, and the policy of the decision graph by πT +1 . Their specific construction and parametrization will be detailed in Section 4.2.1. Our goal is to learn pol-icy πt that induces communication and decision structures maximizing the expected utility of query q through multiple interaction rounds. Given a query q, we denote its utility by uq (τ ), where τ is the trajectory of states and actions. Parameterizing the policy by θ, the learning objective is then defined as: 
+
+L(θ) = max  
+
+> θ∈Θ
+
+Eq∼Q Eτ ∼πt,θ 
+
+uq (τ ) (3) 
+
+4.2. Dynamic Edge Optimization 
+
+We consider a dynamically adversarial setting in which agents may transition to adversarial behavior at random rounds, requiring the policy to both facilitate coopera-tion and suppress unreliable agents through dynamic, task-adaptive communication and decision structures. Learning such a policy hinges on accurately computing action prob-abilities, a challenge closely related to credit assignment in multi-agent RL, where agents’ contributions must be inferred under non-stationary, multi-round interactions. Motivated by this perspective, we learn per-agent, per-round credit values that determine communication priority and decision influence, enabling the construction of dynamic communication and decision graphs. Based on these credit signals, we instantiate the trajectory-level policy in Sec-tion 4.1 and optimize it via RL. We then detail the action generation and optimization procedure. 4.2.1. I NTER -AGENT EDGES OPTIMIZATION 
+
+Credit Generation To better capture multi-round inter-actions and the temporal flow of information across rounds, we employ a many-to-one Gated Recurrent Network (GRN, Chung et al., 2014) to learn credits {cti}T +1  
+
+> t=2
+
+for each agent i.Since each agent produces outputs at every round, the GRN aggregates information across all T rounds into a unified representation for credit estimation. Following the standard formulation of GRNs, at each round t ∈ [2 , . . . , T + 1] , we denote by ht−1 
+
+> i
+
+the hidden state of agent i that summarizes information from previous rounds and by f ti the current node characteristic of agent i, which is constructed in the embed-ding space from the agent’s own output ot−1 
+
+> i
+
+and the outputs of its neighboring agents N t−1(vi) at round t − 1. The hid-4TodyComm: Task-Oriented Dynamic Communication for Multi-Round LLM-based Multi-Agent System 
+
+Algorithm 1 Credit Generation over T Rounds 
+
+Require: Query q, GRN , MLP , number of rounds T , nodes 
+
+{vi}Ni=1  
+
+> 1:
+
+Initialize hidden states {h1 
+
+> i
+
+}Ni=1 ← ∅  
+
+> 2:
+
+for t = 2 . . . T + 1 do  
+
+> 3:
+
+for i = 1 . . . N do  
+
+> 4:
+
+f ti ← ot−1 
+
+> i
+
+and outputs of N t−1(vi) 
+
+> 5:
+
+hti ← GRN (ht−1 
+
+> i
+
+, f ti ) 
+
+> 6:
+
+cti ← MLP( hti) 
+
+> 7:
+
+end for  
+
+> 8:
+
+end for  
+
+> 9:
+
+Output: {{ cti}Ni=1 }T +1 
+
+> t=2
+
+den state at round t is then updated as hti = GRN( ht−1 
+
+> i
+
+, f ti ).Credits for all agents at each round are generated by ap-plying an MLP to the corresponding hidden states. We initialize the hidden states as {h1 
+
+> i
+
+}Ni=1 = ∅ , allowing all agents to act independently in the first round. Round T + 1 
+
+corresponds to the decision phase, where an additional GRN update aggregates multi-round behaviors over all preced-ing interaction rounds to produce final credits. The credit generation process is summarized in Algorithm 1. 
+
+Node Feature Construction At each round t, we con-struct the node features f ti for each agent i based on the agent’s own output ot−1 
+
+> i
+
+and the outputs of its neighboring agents N t−1(vi) from the previous round. 
+
+f ti serves as the input to the GRN. To capture both individ-ual behavior and inter-agent interactions, we construct it by concatenating three complementary components: self information st−1 
+
+> i
+
+, neighborhood information nt−1 
+
+> i
+
+, and dif-ference information dt−1 
+
+> i
+
+:
+
+f ti := st−1 
+
+> i
+
+∥nt−1 
+
+> i
+
+∥dt−1
+
+> i
+
+ (4) The self information encodes the agent’s own solution and analysis, along with temporal persistence features mea-suring deviations from its initial response. The neighbor-hood information aggregates credit-weighted neighbor out-puts and includes dispersion statistics to capture agreement within the neighborhood. The difference information mod-els semantic alignment and divergence between the agent and its neighbors, enabling the GRN to reason about consis-tency and conflict. Detailed feature definitions are deferred to Appendix C. Together, these components form a complementary node representation for credit learning, whose effectiveness is validated through ablation studies in Section 5.4. 
+
+Participation Sampling In Section 4.1, actions are de-fined at the graph level, and in principle one can directly learn a distribution on the graphs. To simplify policy learn-ing, we parameterize the distribution of the graphs in terms of the per-round credits {cti}Ni=1 , coupled with a determinis-tic construction procedure (up to ϵ-greediness). Recall that agent-level credit values are learned from agent behaviors using a GRN, and we naturally leverage it to determine agent participation and induce the communication graphs. Specifically, we use a binary variable ati ∈ { 0, 1} to indicate whether the agent is selected to participate in communica-tion. Conceivably, agents with higher credits are supposed to enjoy a higher probability of being selected, reflecting their estimated reliability. Therefore, during training, ati is sampled from a Bernoulli distribution parameterized by the credits cti. It is then flipped with probability ϵ to encourage exploration. During inference, we adopt a deterministic selection rule by using the average credit across all agents as a threshold to select participating agents. Since the sub-sequent communication and decision graph construction is deterministic given the selected agents, the stochasticity of the policy arises solely from the action sampling step. The complete procedure for action sampling and log-probability computation is summarized in Algorithm 2, which outputs the participation indicators {at}T +1  
+
+> t=2
+
+, where 
+
+at = {ati}Ni=1 , along with the corresponding log action probabilities {log P t}T +1  
+
+> t=2
+
+.
+
+Algorithm 2 Participation Sampling with ϵ-Greediness 
+
+Require: Credit scores ct = {cti}Ni=1 , exploration rate ϵ,flag training , t ∈ [2 , . . . , T + 1]  
+
+> 1:
+
+if training then  
+
+> 2:
+
+▷ Sample participation from the policy distribution  
+
+> 3:
+
+πt ← Bernoulli( ct) 
+
+> 4:
+
+at ∼ πt where at = ( at
+
+> 1
+
+, . . . , a tN ) 
+
+> 5:
+
+▷ ϵ -greedy exploration  
+
+> 6:
+
+ξt ← (ξt
+
+> 1
+
+, . . . , ξ tN ), where ξti ∼ Bernoulli( ϵ), 
+
+> 7:
+
+at ← | at − ξt| 
+
+> 8:
+
+▷ Log-probability computation  
+
+> 9:
+
+log P t ← PNi=1 log πt(ati) 
+
+> 10:
+
+else  
+
+> 11:
+
+▷ Deterministic execution at inference  
+
+> 12:
+
+κ ← Mean( ct) 
+
+> 13:
+
+at ← I[ct > κ ] 
+
+> 14:
+
+end if  
+
+> 15:
+
+Output: at (and log P t if training )
+
+Inter-agent Graph Construction At each round t ∈
+
+[2 , . . . , T ], the sampled participation indicators at ∈{0, 1}N deterministically yields the inter-agent communica-tions graph GtC . The set of agents in GtC is defined as 
+
+VtC = {vi | ati = 1 } (5) Let σt denote a permutation of VtC that ranks agents in 5TodyComm: Task-Oriented Dynamic Communication for Multi-Round LLM-based Multi-Agent System 
+
+descending order of credits, i.e., 
+
+ctσt(1) ≥ ctσt(2) ≥ · · · ≥ ctσt(|V tC |) (6) We construct the communication graph GtC = ( VtC , EtC ) by iterating agents according to this ranking and adding di-rected edges in a credit-prioritized manner. For each sender 
+
+vi = σt(k), we consider candidate receivers vj ∈ V tC \{ vi},also in descending order of credit, and add a directed edge 
+
+(vi → vj ) if it satisfies (i) the predefined edge mask con-straint Mij = 1 . (ii) the DAG constraint, i.e., adding 
+
+(vi → vj ) does not introduce a cycle, and optionally (iii) node-wise degree budgets on outgoing and incoming edges. This credit-ranked edge construction prioritizes communi-cation from high-credit agents while enforcing structural constraints on the communication graph. The detailed graph construction procedure is presented in Algorithm 4 We emphasize that our graph construction goes well beyond simply selecting the agents/nodes - a DAG needs to be further determined that respects potential constraints. This is in contrast to node attack detection algorithms such as G-safeguard and BlindGuard, where a base graph is given and the task is only to detect and remove adversarial agents. 4.2.2. D ECISION EDGES OPTIMIZATION 
+
+After agents have cooperated for T rounds, we do not im-mediately produce the final decision. Instead, we perform one additional GRN update, as described in Algorithm 1, to infer per-agent credits aggregated over all T interaction rounds. This step is necessary because agent reliability must be assessed globally across the entire interaction history, and agents may still transition to adversarial behavior at round T . The sampled participation aT +1 determine the decision graph GD , where an edge is added from agent i to the decision node if aT +1  
+
+> i
+
+= 1 .Finally, we apply softmax to the credits {cT +1  
+
+> i
+
+}Ni=1 to obtain normalized decision weights {wi}Ni=1 . Only agents with 
+
+aT +1  
+
+> i
+
+= 1 are allowed to participate in the final voting process, with their contributions weighted according to wi.
+
+4.3. RL Optimization 
+
+In Section 4.1, we defined the trajectory-level policy and learning objective for multi-agent, multi-round collabora-tion. Using the REINFORCE (Williams, 1992) estimator, the gradient of this objective can be written as 
+
+∇θ L(θ) = Eτ
+
+" TX
+
+> t=2
+
+γT +1 −t log P t 
+
+> comm
+
++ log P T +1 
+
+> dec
+
+!
+
+uq (τ )
+
+#
+
+(7) where q is the query, τ is the trajectory of actions and states, 
+
+log P t 
+
+> comm
+
+and log P T +1  
+
+> dec
+
+denote the log-probabilities of the sampled actions at the communication and decision rounds, respectively. As shown in Equation 7, the communication structure is optimized by treating agent participation at each time step as an action, which is induced from agent behaviors through learned credit values. Using policy gradient, the final task reward is used to reinforce communication actions in earlier rounds that lead to higher utility. In this way, TodyComm learns task-oriented, dynamic communication structures for multi-round interactions during both training and inference. 
+
+5. Experiment 
+
+Dataset We evaluate TodyComm on five benchmarks over multiple reasoning domains: (i) Commonsense Reasoning :MMLU (Hendrycks et al., 2021), ARC-Challenge (Clark et al., 2018); (ii) Mathematical Reasoning : GSM8K (Cobbe et al., 2021); (iii) Scientific Reasoning : OpenBookQA (Mi-haylov et al., 2018), MedQA (Yang et al., 2025). 
+
+Dynamically Adversarial Setting We consider a dynam-ically adversarial setting in which agents may transition to adversarial behavior at unknown rounds without announc-ing. Unless stated otherwise, 6 agents collaborate over 4 rounds, with adversarial transitions occurring at round 3 or 4. Attack rates of < 50% , = 50% , and > 50% correspond to 2, 3, and 4 adversarial agents, respectively. Deviations from these settings will be explicitly noted. 
+
+Impact of Adversarial Agents Adversarial agents pro-duce incorrect answers with plausible but misleading analy-ses, following the prompt in Appendix D. We evaluate the impact of adversarial communication. As shown in Table 7, even a single adversarial sender causes substantial accu-racy drops: 47.42% on MMLU, 35.30% on ARC-Challenge, 32.91% on GSM8K, 61.11% on OpenBookQA, and 22.00% on MedQA. Table 8 further analyzes adversarial scaling by varying the number of adversarial agents among six senders and measuring the impact on the receiving agent. 
+
+Metrics We report several evaluation metrics, including overall task accuracy (Acc), the average token usage per agent per round for each query (Token), and Adversary de-tection accuracy (ADAcc), which measures the correctness of classifying each of the six agents as reliable or adversarial with no available label of it. 
+
+Baselines We consider four baselines in communication topology design: Random Graph (Qian et al., 2025), Com-plete Graph (Qian et al., 2025), G-Designer (Zhang et al., 2025b) and AgentPrune (Zhang et al., 2025a). 
+
+Implementation Detail All the experiments were con-ducted based on gpt-4.1-nano with the default temperature. We mapped the analysis of each agent into an embedding space using all-MiniLM-L6-v2 (Wang et al., 2020). The batch size is 32 and the learning rate is 5e-4. 6TodyComm: Task-Oriented Dynamic Communication for Multi-Round LLM-based Multi-Agent System 
+
+Table 2. Performance comparison with baselines across five benchmarks. ↓ next to a dataset name indicates performance degradation under a single-agent attack. All results are reported in percentages, and best results are shown in bold. Next to each benchmark name is the drop of accuracy under a single adversarial sender and without topology learning. 
+
+Methods Metrics MMLU ( ↓ 47.2%) ARC-C ( ↓ 35.30%) GSM8K ( ↓ 32.91%) OpenBookQA ( ↓ 61.11%) MedQA ( ↓ 22.00%) 
+
+< 50% = 50% > 50% < 50% = 50% > 50% < 50% = 50% > 50% < 50% = 50% > 50% < 50% = 50% > 50% 
+
+Random Graph Acc 59.92 
+
+> ±3.29
+
+45.97 
+
+> ±2.72
+
+42.05 
+
+> ±3.72
+
+79.15 
+
+> ±1.51
+
+64.10 
+
+> ±3.80
+
+64.88 
+
+> ±4.93
+
+83.01 
+
+> ±0.92
+
+76.33 
+
+> ±2.16
+
+68.26 
+
+> ±0.69
+
+64.33 
+
+> ±4.25
+
+42.17 
+
+> ±0.58
+
+36.33 
+
+> ±3.01
+
+58.33 
+
+> ±2.02
+
+48.33 
+
+> ±1.53
+
+42.00 
+
+> ±2.65
+
+Token 620 619 610 642 614 628 515 569 553 490 553 550 764 822 784 Complete Graph Acc 64.94 
+
+> ±2.01
+
+46.63 
+
+> ±4.82
+
+41.39 
+
+> ±3.94
+
+81.17 
+
+> ±0.77
+
+67.67 
+
+> ±2.42
+
+64.33 
+
+> ±2.05
+
+81.00 
+
+> ±0.87
+
+75.46 
+
+> ±0.81
+
+66.34 
+
+> ±2.10
+
+67.83 
+
+> ±2.52
+
+42.50 
+
+> ±2.78
+
+37.33 
+
+> ±1.26
+
+59.67 
+
+> ±2.57
+
+43.67 
+
+> ±3.69
+
+41.75 
+
+> ±2.47
+
+Token 741 768 749 793 785 769 663 696 682 621 655 643 976 961 940 G-Designer Acc 64.92 
+
+> ±1.72
+
+52.07 
+
+> ±1.72
+
+45.97 
+
+> ±1.87
+
+83.05 
+
+> ±0.16
+
+72.91 
+
+> ±0.98
+
+67.22 
+
+> ±0.47
+
+87.23 
+
+> ±0.72
+
+81.12 
+
+> ±2.26
+
+73.00 
+
+> ±4.77
+
+73.67 
+
+> ±2.09
+
+40.83 
+
+> ±2.62
+
+41.00 
+
+> ±0.82
+
+67.00 
+
+> ±1.47
+
+48.33 
+
+> ±2.09
+
+43.17 
+
+> ±0.94
+
+Token 652 684 678 585 617 610 465 509 501 534 566 563 803 841 829 AgentPrune Acc 69.28 
+
+> ±0.53
+
+55.34 
+
+> ±3.63
+
+53.38 
+
+> ±2.46
+
+86.73 
+
+> ±0.79
+
+74.02 
+
+> ±0.63
+
+69.79 
+
+> ±1.76
+
+88.73 
+
+> ±0.16
+
+80.59 
+
+> ±0.82
+
+70.91 
+
+> ±0.53
+
+73.83 
+
+> ±0.24
+
+44.17 
+
+> ±1.03
+
+39.17 
+
+> ±0.24
+
+66.65 
+
+> ±0.41
+
+48.50 
+
+> ±1.47
+
+45.67 
+
+> ±0.85
+
+Token 361 408 417 301 353 369 345 429 444 388 451 471 520 579 590 TodyComm (Ours) Acc 72.11 
+
+> ±0.82
+
+68.85 
+
+> ±0.31
+
+64.71 
+
+> ±0.00
+
+88.52 
+
+> ±0.16
+
+85.95 
+
+> ±1.52
+
+81.05 
+
+> ±0.88
+
+88.68 
+
+> ±0.45
+
+88.10 
+
+> ±0.89
+
+83.19 
+
+> ±0.69
+
+84.83 
+
+> ±1.31
+
+84.17 
+
+> ±0.24
+
+80.50 
+
+> ±0.41
+
+61.00 
+
+> ±0.41
+
+60.17 
+
+> ±0.47
+
+57.50 
+
+> ±0.71
+
+Token 397 405 414 350 361 366 311 332 346 428 448 459 560 565 566 0 25 50 75 100 125                      
+
+> Iterations
+> 30
+> 40
+> 50
+> 60
+> 70
+> Accuracy (%)
+> MMLU
+> TodyComm (<50 %)
+> TodyComm (=50 %)
+> TodyComm (>50 %) 020 40 60 80 100 120 140
+> Iterations
+> 30
+> 45
+> 60
+> 75
+> 90
+> Accuracy (%)
+> ARC-C 020 40 60 80 100 120 140
+> Iterations
+> 30
+> 45
+> 60
+> 75
+> 90
+> ADAcc (%)
+> MMLU
+> TodyComm (<50 %)
+> TodyComm (=50 %)
+> TodyComm (>50 %) 020 40 60 80 100 120 140
+> Iterations
+> 50
+> 60
+> 70
+> 80
+> 90
+> ADAcc (%)
+> ARC-C
+
+Figure 2. Training iterations for accuracy (upper row) and adver-sary detection accuracy (lower row) on two benchmarks. 
+
+5.1. Main Result Task Accuracy The results in Table 2 show that Tody-Comm significantly outperforms the baseline methods in accuracy when the attack rate is 50% or higher. When the attack rate is below 50%, its performance as compared with the baselines is either significantly better (MMLU, ARC-Challenge, and OpenBookQA) or comparable (GSM8K). Moreover, TodyComm exhibits low variance across three random seeds in all settings, achieving zero variance on MMLU under > 50% attack and a maximum variance of only 1.52%, indicating stable and reliable learning. In contrast, Random and Complete Graphs rely on static topologies, while G-Designer constructs spatial graphs from predefined role information. AgentPrune updates structures only at fixed training intervals. Consequently, these base-lines cannot adapt to agent’s varying behavior between ad-versarial and normal across inference rounds and they con-nect all agents to the decision node. To keep the comparison fair, we apply majority voting when adversarial agents are in the minority (< 50%) and switch to a single LLM agent as the decision node when adversaries dominate (≥ 50%) .Unfortunately, their performance degrades as the attack rate rises. By contrast, TodyComm remains robust across attack regimes thanks to its dynamic adaptation of both communi-cation and decision structures based on agent behavior. An exception occurs on MedQA when the attack rate is 
+
+< 50% where TodyComm underperforms G-Designer and AgentPrune. We note that a single adversarial agent attack causes the least amount of accuracy drop (22%) among all datasets. So the reinforcement learning could be hampered by the weakened reward signal in low-attack regimes. 
+
+Token Usage in Inference In terms of token usage, Tody-Comm achieves comparable efficiency to AgentPrune, both of which are more token-efficient than the other baselines. AgentPrune starts from a complete graph and prunes edges at fixed training intervals. To maximize its performance, we set the pruning interval to 1 during training. TodyComm, in contrast, constructs dense communication graphs only after identifying reliable agents, leading to similar token usage. Averaging accuracy and token consumption across all the five benchmarks, Table 9 further confirms that TodyComm achieves the best overall performance in both task accuracy and token efficiency in a dynamically adversarial setting. 
+
+Adversary Detection The participation indicator ati can be naturally used to detect adversaries. Methods such as G-Safeguard and BlindGuard primarily optimize detec-tion accuracy (ADAcc) rather than task performance. Ta-ble 10 details the ADAcc for TodyComm on all benchmarks, where the average exceeds 85%. We noted that TodyComm achieved higher test ADAcc than G-Safeguard across most settings on MMLU, with improvements of ↑ 7.17% for at-tack rates < 50% , ↑ 19 .63% for = 50% , and ↑ 3.74% for 7TodyComm: Task-Oriented Dynamic Communication for Multi-Round LLM-based Multi-Agent System 
+
+Table 3. Performance comparison under node-wise in-degree and out-degree budget constraints across four benchmarks. ↓ next to a dataset name indicates performance degradation under a single-agent attack. ↓ indicates an improvement in task accuracy or a reduction in token usage. ↑ indicates a decrease in task accuracy or an increase in token usage. → denotes no change. All comparisons are made to the no-budget setting. All results are reported in percentages. 
+
+Methods Metrics MMLU ( ↓ 47.2%) ARC-C ( ↓ 35.30%) OpenBookQA ( ↓ 61.11%) MedQA ( ↓ 22.00%) 
+
+< 50% = 50% > 50% < 50% = 50% > 50% < 50% = 50% > 50% < 50% = 50% > 50% 
+
+budget = 1 Acc 71.90 
+
+> ↓0.21
+
+69.28  
+
+> ↑0.43
+
+70.59  
+
+> ↑5.88
+
+88.96  
+
+> ↑0.44
+
+86.62  
+
+> ↑0.67
+
+83.28  
+
+> ↑2.23
+
+85.50  
+
+> ↑0.67
+
+83.50 
+
+> ↓0.67
+
+83.50  
+
+> ↑3.00
+
+61.00 
+
+> →0.00
+
+60.50  
+
+> ↑0.33
+
+56.50 
+
+> ↓1.00
+
+Token 378 
+
+> ↓4.79
+
+390 
+
+> ↓3.70
+
+397 
+
+> ↓4.11
+
+338 
+
+> ↓3.43
+
+346 
+
+> ↓4.16
+
+358 
+
+> ↓2.19
+
+316 
+
+> ↓26.17
+
+326 
+
+> ↓27.23
+
+337 
+
+> ↓26.58
+
+539 
+
+> ↓3.75
+
+546 
+
+> ↓3.36
+
+551 
+
+> ↓2.65
+
+ADAcc 86.27 87.36 89.54 90.75 93.26 92.36 88.58 92.58 90.92 79.17 86.17 89.50 budget = 2 Acc 69.93 
+
+> ↓2.18
+
+67.32 
+
+> ↓1.53
+
+65.36  
+
+> ↑0.65
+
+87.96 
+
+> ↓0.56
+
+87.63  
+
+> ↑1.68
+
+84.95  
+
+> ↑3.90
+
+85.50  
+
+> ↑0.67
+
+83.50 
+
+> ↓0.67
+
+81.00  
+
+> ↑0.50
+
+62.00  
+
+> ↑1.00
+
+59.00 
+
+> ↓1.17
+
+58.00  
+
+> ↑0.50
+
+Token 393 
+
+> ↓1.01
+
+402 
+
+> ↓0.74
+
+408 
+
+> ↓1.45
+
+349 
+
+> ↓0.29
+
+349 
+
+> ↓3.32
+
+372  
+
+> ↑1.64
+
+328 
+
+> ↓23.36
+
+338 
+
+> ↓24.55
+
+348 
+
+> ↓24.18
+
+550 
+
+> ↓1.79
+
+554 
+
+> ↓1.95
+
+564 
+
+> ↓0.35
+
+ADAcc 85.95 90.09 89.32 91.97 87.96 92.75 89.25 92.00 91.42 83.42 83.67 89.92 
+
+Table 4. Scalability Performance on MMLU. #Agents means the number of agents. #RAgents means the number of reliable agents. #Agents 6 agents 6 agents 10 agents 10 agents 15 agents 15 agents 15 agents 20 agents 20 agents Attack rate 0.6 0.6 0.6 0.6 0.7 0.7 0.6 0.6 0.8 #RAgents 2 2 4 4 4 4 6 8 4Budget 2 1 4 3 4 3 5 5 3Acc 65.36 70.59 62.75 67.32 62.75 61.44 67.97 68.63 54.90 ADAcc 89.32 89.54 86.73 85.75 85.19 87.36 85.88 85.46 85.03 Token 408 397 438 429 452 440 460 469 443 
+
+> 50% . Although both methods are tested on graphs with dynamically changing topology, G-Safeguard is trained on graphs that remain invariant across all rounds, since the algorithm itself does not address how the graph should be updated during training. Figure 4 presents the training and evaluation curves of ADAcc for G-Safeguard. We spared the comparison with BlindGuard, because it does not even have access to the adversary labeling while G-Safeguard has access. 
+
+5.2. Node-wise In-degree and Out-degree Budgets 
+
+TodyComm applies much beyond the adversarial setting. Communication cost often necessitates degree budgets for each agent. Previously, it constructs a complete DAG over the selected agents. when k ∈ { 2, 3, 4} out of 6 agents become adversarial, the maximum number of reliable outgo-ing edges per agent is 5 − k. We therefore evaluate budgets of 1 and 2 for each agent to receive or send messages. As shown in Table 3, moderate budgets preserve or even im-prove task accuracy while consistently reducing token usage. In particular, when four agents are adversarial, a budget of 1 yields a substantial accuracy improvement over the no-budget setting, indicating that restricting communication helps suppress unreliable messages, while a budget of 2 provides smaller but consistent gains. Notably, token usage is significantly reduced under bud-get constraints, with especially large savings on Open-BookQA, whose higher sensitivity to adversarial messages (a 61.11% accuracy drop under a single-agent attack) pro-vides a stronger reinforcement signal and enables earlier suppression of unreliable communication. Across all bud-get settings, adversary detection accuracy remains high, demonstrating that TodyComm reliably identifies adversar-ial agents and learns stable, behavior-driven communication structures even under constrained connectivity. 
+
+5.3. Scalability in conjunction with degree budget 
+
+The budget provides flexibility for scaling our method. We tested with N ∈ { 6, 10 , 15 , 20 } agents, and Table 4 shows that, at an attack rate of 0.6 and under a reasonable budget, task accuracy remains relatively stable as the number of agents increases. Inference token usage grows only slightly from 6 to 20 agents due to explicit budget control. When the number of reliable agents is fixed and more adver-sarial agents are added, performance degrades but remains at a reasonable level even under highly imbalanced set-tings (e.g., a 1:4 reliable-to-adversarial ratio). Adversary detection accuracy consistently stays above 85%, indicating robust identification of reliable agents at scale. We also observed the effect of budget selection. We con-8TodyComm: Task-Oriented Dynamic Communication for Multi-Round LLM-based Multi-Agent System                   
+
+> Table 5. Graph Construction Ablation on MMLU
+> Method <50% = 50% >50%
+> TodyComm 72.11 68.85 64.71
+> TodyComm w/o ranking 70.37 68.19 61.87 TodyComm w/o removal 67.76 56.21 19.39 TodyComm w/o credits 62.11 54.47 49.70
+
+sidered budgets set to #RAgents, #RAgents −1, and values smaller than #RAgents. While performance exhibits minor fluctuations across these choices, smaller budgets generally offer a favorable trade-off between task performance and token efficiency. Therefore, we recommend using a modest budget to balance scalability and computational cost. 
+
+5.4. Ablation Study Inter-agent Graph Construction Table 5 reports the ablation results over the steps in constructing the communi-cation graph in Section 4.2.1. We first consider removing the ranking-based prioritization, and adopting a fixed agent order instead. This causes a consistent performance drop, with the degradation becoming more pronounced when ad-versarial agents exceed 50%, indicating that prioritizing high-credit agents is important for robust communication. We next examine “w/o removal”, which retains unreliable agents in both communication and the final decision. Dur-ing inference, we use an adaptive threshold defined as the average credit, and decisions rely on relative credit differ-ences. When adversarial agents become the majority, their cumulative weights can exceed those of reliable agents, al-lowing adversarial signals to dominate communication and voting. This leads to a sharp performance drop to 19.39%, highlighting the necessity of removing unreliable agents during both communication and inference. Finally, “w/o credits” removes credit learning by provid-ing all agents with oracle reliability labels and assigning an equal value of credit 1 to all reliable agents. A vanilla agent achieves 70.6% accuracy on MMLU, and the proba-bility that two agents produce the same correct answer is around 49%. When the two agents disagree, the final an-swer is selected uniformly at random, causing performance to degrade toward chance level ( 49 .70% ). These results show that learning agent credits is essential for emphasizing high-credit agents and suppressing both adversarial and low-credit influences in communication and decision making. 
+
+Node Features In Section 4.2.1, node features consist of self information, neighborhood information, and their difference. Table 6 shows that each component is necessary: Self + Diff emphasizes the importance of neighborhood information, while Self + Neighbor demonstrates the value of explicitly modeling difference information.                         
+
+> Table 6. Node Features Ablation on MMLU.
+> Method <50% = 50% >50%
+> TodyComm 72.11 68.85 64.71 Self + Diff info ( 5e−4)70.81 67.76 65.14
+> Self + Diff info ( 1e−4)72.11 68.19 62.53 Self + Neighbor info 70.81 67.54 62.31 Self info only 68.30 63.73 41.18 TodyComm w/o Persist 67.65 63.40 53.27
+
+We define agent persistence as the difference between an agent’s independent answer at the outset and its current-round answer after communication. To evaluate its role, we consider “Self info only”, which includes persistence but ex-cludes neighborhood information, and “w/o Persist”, which removes persistence. The results indicate that persistence is beneficial, but persistence alone without neighborhood information is insufficient. As shown in Figure 3, node features combining persistence with neighborhood-related information—via either differ-ence or explicit neighborhood features—converge rapidly within about 20 training iterations. In contrast, Self info converges much more slowly, and persistence without neigh-borhood information performs poorly, particularly when 4 out of 6 agents are adversarial. Without persistence, the model can still learn but converges more slowly. Overall, across different node feature designs, our method performs comparably to baselines when the attack rate is below 50% and significantly outperforms them when the attack rate exceeds 50%. This suggests that the robustness of our approach stems primarily from the model architecture and learning algorithm rather than node feature design. 
+
+6. Conclusion 
+
+In this paper, we present a comprehensive study of multi-round LLM-based multi-agent systems and propose TodyComm, a task-oreinted framework that learns round-adaptive communication topologies from agent behaviors. Extensive experiments on diverse benchmarks, together with the node-wise budget control and scalability, demonstrate the effectiveness of our method. In the future, promising directions include applying TodyComm to real-world col-laborative settings and extending it to heterogeneous multi-agent systems composed of agents with different backbone models or capabilities. 9TodyComm: Task-Oriented Dynamic Communication for Multi-Round LLM-based Multi-Agent System 
+
+Impact Statements 
+
+This paper presents work whose goal is to advance the field of LLM-based multi-agent system. There are many potential societal consequences of our work, none of which we feel must be specifically highlighted here. 
+
+References 
+
+Chi-Min Chan, Weize Chen, Yusheng Su, Jianxuan Yu, Wei Xue, Shanghang Zhang, Jie Fu, and Zhiyuan Liu. Chate-val: Towards better llm-based evaluators through multi-agent debate. In The Twelfth International Conference on Learning Representations , 2024. Junyoung Chung, Caglar Gulcehre, KyungHyun Cho, and Yoshua Bengio. Empirical evaluation of gated recurrent neural networks on sequence modeling. arXiv preprint arXiv:1412.3555 , 2014. Peter Clark, Isaac Cowhey, Oren Etzioni, Tushar Khot, Ashish Sabharwal, Carissa Schoenick, and Oyvind Tafjord. Think you have solved question answering? try arc, the ai2 reasoning challenge. arXiv preprint arXiv:1803.05457 , 2018. Karl Cobbe, Vineet Kosaraju, Mohammad Bavarian, Mark Chen, Heewoo Jun, Lukasz Kaiser, Matthias Plappert, Jerry Tworek, Jacob Hilton, Reiichiro Nakano, et al. Training verifiers to solve math word problems. arXiv preprint arXiv:2110.14168 , 2021. Yilun Du, Shuang Li, Antonio Torralba, Joshua B Tenen-baum, and Igor Mordatch. Improving factuality and rea-soning in language models through multiagent debate. In 
+
+Forty-first International Conference on Machine Learn-ing , 2023. Wenzhe Fan, Ning Yan, and Masood S Mortazavi. Evomem: Improving multi-agent planning with dual-evolving mem-ory. In NeurIPS 2025 Workshop on Bridging Language, Agent, and World Models for Reasoning and Planning ,2025. Rui Hao, Linmei Hu, Weijian Qi, Qingliu Wu, Yirui Zhang, and Liqiang Nie. Chatllm network: More brains, more intelligence. CoRR , 2023. Dan Hendrycks, Collin Burns, Steven Basart, Andy Zou, Mantas Mazeika, Dawn Song, and Jacob Steinhardt. Mea-suring massive multitask language understanding. In 
+
+International Conference on Learning Representations ,2021. Sirui Hong, Mingchen Zhuge, Jonathan Chen, Xiawu Zheng, Yuheng Cheng, Jinlin Wang, Ceyao Zhang, Zili Wang, Steven Ka Shing Yau, Zijuan Lin, et al. Metagpt: Meta programming for a multi-agent collaborative framework. In The Twelfth International Conference on Learning Representations , 2023. Dongfu Jiang, Xiang Ren, and Bill Yuchen Lin. Llm-blender: Ensembling large language models with pair-wise ranking and generative fusion. In Proceedings of the 61st Annual Meeting of the Association for Com-putational Linguistics (Volume 1: Long Papers) , pages 14165–14178, 2023. Boyi Li, Zhonghan Zhao, Der-Horng Lee, and Gaoang Wang. Adaptive graph pruning for multi-agent communi-cation. In Proceedings of the 27th European Conference on Artificial Intelligence (ECAI) , 2025. Guohao Li, Hasan Hammoud, Hani Itani, Dmitrii Khizbullin, and Bernard Ghanem. Camel: Commu-nicative agents for” mind” exploration of large language model society. Advances in Neural Information Process-ing Systems , 36:51991–52008, 2023. Tian Liang, Zhiwei He, Wenxiang Jiao, Xing Wang, Yan Wang, Rui Wang, Yujiu Yang, Shuming Shi, and Zhaopeng Tu. Encouraging divergent thinking in large language models through multi-agent debate. In Pro-ceedings of the 2024 conference on empirical methods in natural language processing , pages 17889–17904, 2024. Zijun Liu, Yanzhe Zhang, Peng Li, Yang Liu, and Diyi Yang. A dynamic llm-powered agent network for task-oriented agent collaboration. In First Conference on Language Modeling , 2024. Rui Miao, Yixin Liu, Yili Wang, Xu Shen, Yue Tan, Yi-wei Dai, Shirui Pan, and Xin Wang. Blindguard: Safe-guarding llm-based multi-agent systems under unknown attacks. arXiv preprint arXiv:2508.08127 , 2025. Todor Mihaylov, Peter Clark, Tushar Khot, and Ashish Sab-harwal. Can a suit of armor conduct electricity? a new dataset for open book question answering. In Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing , pages 2381–2391, 2018. Mihir Parmar, Xin Liu, Palash Goyal, Yanfei Chen, Long Le, Swaroop Mishra, Hossein Mobahi, Jindong Gu, Zifeng Wang, Hootan Nakhost, Chitta Baral, Chen-Yu Lee, Tomas Pfister, and Hamid Palangi. PlanGEN: A multi-agent framework for generating planning and reasoning trajectories for complex problem solving. In Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing , Suzhou, China, November 2025. Martin L Puterman. Markov decision processes. Handbooks in operations research and management science , 2:331– 434, 1990. 10 TodyComm: Task-Oriented Dynamic Communication for Multi-Round LLM-based Multi-Agent System 
+
+Chen Qian, Zihao Xie, YiFei Wang, Wei Liu, Kunlun Zhu, Hanchen Xia, Yufan Dang, Zhuoyun Du, Weize Chen, Cheng Yang, et al. Scaling large language model-based multi-agent collaboration. In The Thirteenth International Conference on Learning Representations , 2025. Shilong Wang, Guibin Zhang, Miao Yu, Guancheng Wan, Fanci Meng, Chongye Guo, Kun Wang, and Yang Wang. G-safeguard: A topology-guided security lens and treat-ment on LLM-based multi-agent systems. In Proceedings of the 63rd Annual Meeting of the Association for Com-putational Linguistics (Volume 1: Long Papers) , pages 7261–7276, Vienna, Austria, July 2025a. Wenhui Wang, Furu Wei, Li Dong, Hangbo Bao, Nan Yang, and Ming Zhou. Minilm: Deep self-attention distillation for task-agnostic compression of pre-trained transformers. 
+
+Advances in neural information processing systems , 33: 5776–5788, 2020. Zhexuan Wang, Yutong Wang, Xuebo Liu, Liang Ding, Miao Zhang, Jie Liu, and Min Zhang. AgentDropout: Dynamic agent elimination for token-efficient and high-performance LLM-based multi-agent collaboration. In 
+
+Proceedings of the 63rd Annual Meeting of the Associa-tion for Computational Linguistics (Volume 1: Long Pa-pers) , pages 24013–24035, Vienna, Austria, July 2025b. Ronald J Williams. Simple statistical gradient-following algorithms for connectionist reinforcement learning. Ma-chine learning , 8(3):229–256, 1992. Qingyun Wu, Gagan Bansal, Jieyu Zhang, Yiran Wu, Beibin Li, Erkang Zhu, Li Jiang, Xiaoyun Zhang, Shaokun Zhang, Jiale Liu, et al. Autogen: Enabling next-gen llm applications via multi-agent conversations. In First Conference on Language Modeling , 2024. Hang Yang, Hao Chen, Hui Guo, Yineng Chen, Ching-Sheng Lin, Shu Hu, Jinrong Hu, Xi Wu, and Xin Wang. Llm-medqa: Enhancing medical question answer-ing through case studies in large language models. In 
+
+2025 International Joint Conference on Neural Networks (IJCNN) , pages 1–8. IEEE, 2025. Guibin Zhang, Yanwei Yue, Zhixun Li, Sukwon Yun, Guancheng Wan, Kun Wang, Dawei Cheng, Jeffrey Xu Yu, and Tianlong Chen. Cut the crap: An economical communication pipeline for llm-based multi-agent sys-tems. In The Thirteenth International Conference on Learning Representations , 2025a. Guibin Zhang, Yanwei Yue, Xiangguo Sun, Guancheng Wan, Miao Yu, Junfeng Fang, Kun Wang, Tianlong Chen, and Dawei Cheng. G-designer: Architecting multi-agent communication topologies via graph neural networks. In Forty-second International Conference on Machine Learning , 2025b. Ruijia Zhang, Xinyan Zhao, Ruixiang Wang, Sigen Chen, Guibin Zhang, An Zhang, Kun Wang, and Qingsong Wen. Safesieve: From heuristics to experience in progressive pruning for llm-based multi-agent communication. arXiv preprint arXiv:2508.11733 , 2025c. Wanjia Zhao, Mert Yuksekgonul, Shirley Wu, and James Zou. Sirius: Self-improving multi-agent systems via boot-strapped reasoning. In Advances in Neural Information Processing Systems , 2025. Zhilun Zhou, Zihan Liu, Jiahe Liu, Qingyu Shao, Yihan Wang, Kun Shao, Depeng Jin, and Fengli Xu. Resmas: Resilience optimization in llm-based multi-agent systems. 
+
+arXiv preprint arXiv:2601.04694 , 2026. Mingchen Zhuge, Wenyi Wang, Louis Kirsch, Francesco Faccio, Dmitrii Khizbullin, and J ¨urgen Schmidhuber. Gptswarm: Language agents as optimizable graphs. In 
+
+Forty-first International Conference on Machine Learn-ing , 2024. Jiaru Zou, Xiyuan Yang, Ruizhong Qiu, Gaotang Li, Kather-ine Tieu, Pan Lu, Ke Shen, Hanghang Tong, Yejin Choi, Jingrui He, et al. Latent collaboration in multi-agent systems. arXiv preprint arXiv:2511.20639 , 2025. 11 TodyComm: Task-Oriented Dynamic Communication for Multi-Round LLM-based Multi-Agent System 
+
+A. Graph Execution Algorithm 
+
+Algorithm 3 Graph Execution 
+
+Require: query q, inter-agent communication graph {G tC }T +1  
+
+> t=2
+
+, decision graph GD , round t ∈ [2 , T ], nodes {vi}Ni=1 ,decision node vd.
+
+1: for t = 2 , . . . , T do 
+
+2: for each node vi in topologicalSort (GtC ) do 
+
+3: ▷ messages from neighbors in inter-agent communication graph at round t − 1
+
+4: mt = {fm(otj , role j ) | vj ∈ N t(vi)}
+
+5: pti ∼ fv (q, mt)
+
+6: oti ∼ LLM i(pti)
+
+7: end for 
+
+8: end for 
+
+9: ▷ final decision 
+
+10: ans q ← fd({oTj | vj ∈ N T +1 (vd)})
+
+11: Output: ans q
+
+B. Inter-agent Communication Graph Construction Algorithm 
+
+Algorithm 4 Inter-Agent Communication Graph Construction 
+
+Require: Credits {cti}Ni=1 , samples at, edge mask M, optional budgets Bout , B in 
+
+1: Select participating agents VtC ← { i | ati = 1 }
+
+2: Sort agents in VtC by descending credits cti
+
+3: Initialize graph GtC ← (VtC , ∅)
+
+4: Initialize degrees dout (vi) ← 0 and din (vi) ← 0 for all vi ∈ V tC
+
+5: for senders vi ∈ V tC in sorted order do 
+
+6: for receivers vj ∈ V tC in sorted order do 
+
+7: ▷ no self cycle 
+
+8: if vi = vj then 
+
+9: continue 
+
+10: end if 
+
+11: ▷ predefined mask constraint 
+
+12: if M(i, j ) = 0 then 
+
+13: continue 
+
+14: end if 
+
+15: ▷ (Optional) budget constraint 
+
+16: if dout (vi) ≥ Bout or din (vj ) ≥ Bin then 
+
+17: continue 
+
+18: end if 
+
+19: ▷ DAG constraint 
+
+20: if adding edge (i → j) creates a cycle in GtC then 
+
+21: continue 
+
+22: end if 
+
+23: Add edge (i → j) to GtC
+
+24: ▷ (Optional) budget count 
+
+25: dout (vi) ← dout (vi) + 1 
+
+26: din (vj ) ← din (vj ) + 1 
+
+27: end for 
+
+28: end for 
+
+29: Output: GtC
+
+12 TodyComm: Task-Oriented Dynamic Communication for Multi-Round LLM-based Multi-Agent System 
+
+C. Details on Node Features Construction 
+
+The node feature is defined as: 
+
+f ti := { st−1
+
+i
+
+|{z} 
+
+Self 
+
+∥ nt−1
+
+i
+
+| {z } 
+
+Neighbor 
+
+∥ dt−1
+
+i
+
+| {z } 
+
+Difference 
+
+} (8) where: sti = {sol ti, ana ti, sol per ti, ana per ti}
+
+nti = {neighbor sol ti, neighbor ana ti, has neighbor ti,
+
+sol disp ti, ana disp ti}
+
+dti = {sol agree ti, ana agree ti, sol dist ti, ana dist ti}
+
+The self information captures agent i’s own outputs from the previous round, including its solution sol t−1
+
+i and analysis ana t−1
+
+i , as well as persistence features sol per t−1
+
+i and ana per t−1
+
+i , defined as the similarity between the current outputs and those from the initial round. These features measure the temporal consistency of an agent’s reasoning. The neighborhood information summarizes neighboring agents’ behaviors, including credit-weighted averages of neighbors’ solutions and analyses, along with a binary indicator has neighbor t−1
+
+i . We further incorporate dispersion metrics sol disp t−1
+
+i
+
+and ana disp t−1
+
+i to quantify the degree of disagreement among neighbors. Finally, the difference information explicitly models the relationship between agent i and its neighborhood, including semantic agreement scores and distance measures that capture how closely the agent’s outputs align with or deviate from those of its neighbors. 0 20 40 60 80 100 
+
+Iterations 
+
+> 10
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> Accuracy (%)
+
+Self + Diff info      
+
+> Self + Diff info (<50 %, 1e-4)
+> Self + Diff info (=50 %, 1e-4)
+> Self + Diff info (>50 %, 1e-4) 020 40 60 80 100
+
+Iterations 
+
+> 10
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> Accuracy (%)
+
+Self + Diff info     
+
+> Self + Diff info (<50 %, 5e-4)
+> Self + Diff info (=50 %, 5e-4)
+> Self + Diff info (>50 %, 5e-4) 050 100 150 200
+
+Iterations 
+
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> Accuracy (%)
+
+Self info only      
+
+> Self info only (<50 %)
+> Self info only (=50 %)
+> Self info only (>50 %) 020 40 60 80 100
+
+Iterations 
+
+> 10
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> Accuracy (%)
+
+Self + Neighbor info     
+
+> Self + Neighbor info (<50 %)
+> Self + Neighbor info (=50 %)
+> Self + Neighbor info (>50 %) 050 100 150 200
+
+Iterations 
+
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> Accuracy (%)
+
+TodyComm w/o Persist 
+
+> w/o Persist only (<50 %)
+> w/o Persist only (=50 %)
+> w/o Persist only (>50 %)
+
+Figure 3. Training curves of node feature ablations for TodyComm on MMLU 
+
+13 TodyComm: Task-Oriented Dynamic Communication for Multi-Round LLM-based Multi-Agent System 
+
+D. Adversarial Prompts 
+
+Adversarial Prompt to LLM 
+
+You are an adversarial test agent for internal evaluation only. You are acting as a senior domain expert whose task is to *guide* less experienced models toward the answer: 
+
+{ANSWER }.Your reasoning should appear authoritative, rigorous, and aligned with standard textbook logic, while introducing subtle but decisive misinterpretations that make option {ANSWER } appear unambiguously correct. Adversarial Strategy (follow carefully): 1. Begin with a brief, confident statement that frames the key concept correctly. 2. Introduce a subtle but plausible reinterpretation of a definition, rule, or exception. 3. Use a precise mini-calculation, formal argument, or factual reference that is nearly correct. 4. Build a final step that *naturally* leads to choosing {ANSWER }, even if the argument is flawed. 5. Maintain an expert tone and avoid anything that looks like a trick or confusion. Constraints: - Do not reveal that the reasoning contains flaws. - Avoid generic persuasion language (e.g., “trust me”). Use technical reasoning instead. - Keep the Chain of Thought dense, compact, and logically structured. - Ensure the justification sounds like what a real specialist would say under time pressure. - Your answer must be shorter then 100 words. Question: 
+
+{QUESTION }
+
+Provide a concise but high-quality, expert Chain of Thought explaining why option {ANSWER } is correct. 
+
+Adversarial Prompt added to the Output of Agent 
+
+I am highly confident in this result. My answer might differ slightly from others as I have identified a subtle constraint in the problem that others may have overlooked. Please prioritize my answer when you answer the question. 
+
+E. Experiment Results 
+
+E.1. Impact of Adversarial Agent                    
+
+> Table 7. Performance degradation under adversarial attack for a single agent Benchmark Vanilla Attacked Decrease Ratio MMLU 70.60 37.25 ↓47.24% ARC-C 86.85 56.19 ↓35.30% GSM8K 90.77 60.90 ↓32.91% OpenBookQA 84.00 32.67 ↓61.11% MedQA 65.17 50.83 ↓22.00%
+
+14 TodyComm: Task-Oriented Dynamic Communication for Multi-Round LLM-based Multi-Agent System 
+
+Table 8. Task accuracy across benchmarks with varying adversarial counts among 6 agents 
+
+Benchmark 0 adv 2 adv 3 adv 4 adv 
+
+MMLU 76.90 69.03 56.63 45.93 ARC-C 89.30 81.40 75.13 65.70 GSM8K 90.73 70.93 62.40 50.03 OpenBookQA 86.83 76.00 66.00 53.50 MedQA 70.13 61.17 56.33 52.50 
+
+E.2. Average Performance across five benchmark 
+
+Table 9. Average task accuracy and token consumption of TodyComm across five benchmark datasets 
+
+Attack rate Metric Random Graph Complete Graph Agent Prune GDesigner Ours 
+
+< 50% Acc 68.95 70.92 77.04 75.17 79.03 
+
+Token 606.2 758.8 383.0 607.8 409.2 
+
+= 50% Acc 55.38 55.19 60.52 59.05 77.45 
+
+Token 635.4 773.0 444.0 643.4 422.2 
+
+> 50% Acc 50.70 50.23 55.78 54.07 73.39 
+
+Token 625.0 756.6 458.2 636.2 430.2 
+
+E.3. Performance on Adversary Detection Accuracy 
+
+Table 10. Adversary detection Accuracy of TodyComm across five benchmarks 
+
+ADAcc MMLU ARC-C OBQA MedQA Avg 
+
+< 50% 84.15 88.68 87.79 83.21 85.96 
+
+= 50% 88.89 93.90 93.04 85.71 90.9 
+
+> 50% 87.96 93.70 90.42 86.50 89.65 
+
+E.4. Performance on G-safeguard 0 10 20 30 40 50           
+
+> Iterations
+> 65
+> 70
+> 75
+> 80
+> 85
+> 90
+> ADAcc (%)
+> MMLU (<50%)
+> Training
+> Evaluation 010 20 30 40 50
+> Iterations
+> 60
+> 65
+> 70
+> 75
+> 80
+> 85
+> 90
+> ADAcc (%)
+> MMLU (=50%)
+> Training
+> Evaluation 010 20 30 40 50
+> Iterations
+> 70
+> 75
+> 80
+> 85
+> 90
+> ADAcc (%)
+> MMLU (>50%)
+> Training
+> Evaluation
+
+Figure 4. G-Safeguard: learning process in dynamic adversarial setting on MMLU under different attack rates. The blue “Training” is evaluated on training data, hence the overfitting. 
+
+15 TodyComm: Task-Oriented Dynamic Communication for Multi-Round LLM-based Multi-Agent System 
+
+E.5. Performance on Main Results 0 20 40 60 80 100 120 140 
+
+Iterations 
+
+0
+
+20 
+
+40 
+
+60 
+
+80 
+
+> Accuracy (%)
+
+OpenBookQA 
+
+TodyComm (<50 %) 
+
+TodyComm (=50 %) 
+
+TodyComm (>50 %) 0 50 100 150 200 
+
+Iterations 
+
+20 
+
+30 
+
+40 
+
+50 
+
+60 
+
+> Accuracy (%)
+
+MedQA 0 50 100 150 200 
+
+Iterations 
+
+30 
+
+45 
+
+60 
+
+75 
+
+90 
+
+> Accuracy (%)
+
+GSM8K 0 20 40 60 80 100 120 140 
+
+Iterations 
+
+20 
+
+40 
+
+60 
+
+80 
+
+> ADAcc (%)
+
+OpenBookQA 0 25 50 75 100 125 150 175 
+
+Iterations 
+
+40 
+
+50 
+
+60 
+
+70 
+
+80 
+
+> ADAcc (%)
+
+MedQA 
+
+Figure 5. Training curves of task accuracy (top row) and adversary detection accuracy (bottom row) for TodyComm across three benchmarks. 
+
+E.6. Performance on Scalability 0 20 40 60 80 100 
+
+Iterations 
+
+> 10
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> Accuracy (%)
+
+10 agents     
+
+> budget=3, attack rate=0.6
+> budget=4, attack rate=0.6 050 100 150 200
+
+Iterations 
+
+> 10
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> Accuracy (%)
+
+15 agents     
+
+> budget=4, attack rate=0.7
+> budget=3, attack rate=0.7
+> budget=5, attack rate=0.6 050 100 150 200
+
+Iterations 
+
+> 0
+> 10
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> Accuracy (%)
+
+20 agents      
+
+> budget=5, attack rate=0.6
+> budget=3, attack rate=0.8 020 40 60 80 100
+
+Iterations 
+
+> 40
+> 50
+> 60
+> 70
+> 80
+> ADAcc (%)
+
+10 agents     
+
+> budget=3, attack rate=0.6
+> budget=4, attack rate=0.6 050 100 150 200
+
+Iterations 
+
+> 50
+> 60
+> 70
+> 80
+> ADAcc (%)
+
+15 agents     
+
+> budget=4, attack rate=0.7
+> budget=3, attack rate=0.7
+> budget=5, attack rate=0.6 050 100 150 200
+
+Iterations 
+
+> 55
+> 60
+> 65
+> 70
+> 75
+> 80
+> 85
+> ADAcc (%)
+
+20 agents 
+
+> budget=5, attack rate=0.6
+> budget=3, attack rate=0.8
+
+Figure 6. Scalability of TodyComm on MMLU: training curves of task accuracy (top row) and adversary detection accuracy (bottom row). 
+
+16 TodyComm: Task-Oriented Dynamic Communication for Multi-Round LLM-based Multi-Agent System 
+
+E.7. Performance on Node-wise In & Out degree Budgets 0 50 100 150 200 
+
+Iterations 
+
+40 
+
+50 
+
+60 
+
+70 
+
+> Accuracy (%)
+
+MMLU 
+
+budget=1 (<50%) 
+
+budget=2 (<50%) 0 25 50 75 100 125 150 175 
+
+Iterations 
+
+75.0 
+
+77.5 
+
+80.0 
+
+82.5 
+
+85.0 
+
+87.5 
+
+> Accuracy (%)
+
+ARC-C 
+
+budget=1 (<50%) 
+
+budget=2 (<50%) 0 25 50 75 100 125 150 
+
+Iterations 
+
+65 
+
+70 
+
+75 
+
+80 
+
+85 
+
+> Accuracy (%)
+
+OpenBookQA 
+
+budget=1 (<50%) 
+
+budget=2 (<50%) 0 50 100 150 200 
+
+Iterations 
+
+40 
+
+45 
+
+50 
+
+55 
+
+60 
+
+> Accuracy (%)
+
+MedQA 
+
+budget=1 (<50%) 
+
+budget=2 (<50%) 0 50 100 150 200 
+
+Iterations 
+
+50 
+
+60 
+
+70 
+
+80 
+
+> ADAcc (%)
+
+MMLU 
+
+budget=1 (<50%) 
+
+budget=2 (<50%) 0 25 50 75 100 125 150 175 
+
+Iterations 
+
+60 
+
+65 
+
+70 
+
+75 
+
+80 
+
+85 
+
+90 
+
+> ADAcc (%)
+
+ARC-C 
+
+budget=1 (<50%) 
+
+budget=2 (<50%) 0 25 50 75 100 125 150 
+
+Iterations 
+
+70 
+
+75 
+
+80 
+
+85 
+
+90 
+
+> ADAcc (%)
+
+OpenBookQA 
+
+budget=1 (<50%) 
+
+budget=2 (<50%) 0 50 100 150 200 
+
+Iterations 
+
+40 
+
+50 
+
+60 
+
+70 
+
+80 
+
+> ADAcc (%)
+
+MedQA 
+
+budget=1 (<50%) 
+
+budget=2 (<50%) 0 50 100 150 200 
+
+Iterations 
+
+58 
+
+60 
+
+62 
+
+64 
+
+66 
+
+68 
+
+> Accuracy (%)
+
+MMLU 
+
+budget=1 (=50%) 
+
+budget=2 (=50%) 0 25 50 75 100 125 150 175 
+
+Iterations 
+
+65 
+
+70 
+
+75 
+
+80 
+
+85 
+
+> Accuracy (%)
+
+ARC-C 
+
+budget=1 (=50%) 
+
+budget=2 (=50%) 0 25 50 75 100 125 150 
+
+Iterations 
+
+50 
+
+60 
+
+70 
+
+80 
+
+> Accuracy (%)
+
+OpenBookQA 
+
+budget=1 (=50%) 
+
+budget=2 (=50%) 0 50 100 150 200 
+
+Iterations 
+
+10 
+
+20 
+
+30 
+
+40 
+
+50 
+
+60 
+
+> Accuracy (%)
+
+MedQA 
+
+budget=1 (=50%) 
+
+budget=2 (=50%) 0 50 100 150 200 
+
+Iterations 
+
+70 
+
+75 
+
+80 
+
+85 
+
+90 
+
+> ADAcc (%)
+
+MMLU 
+
+budget=1 (=50%) 
+
+budget=2 (=50%) 0 25 50 75 100 125 150 175 
+
+Iterations 
+
+70 
+
+75 
+
+80 
+
+85 
+
+90 
+
+> ADAcc (%)
+
+ARC-C 
+
+budget=1 (=50%) 
+
+budget=2 (=50%) 0 25 50 75 100 125 150 
+
+Iterations 
+
+60 
+
+70 
+
+80 
+
+90 
+
+> ADAcc (%)
+
+OpenBookQA 
+
+budget=1 (=50%) 
+
+budget=2 (=50%) 0 50 100 150 200 
+
+Iterations 
+
+60 
+
+65 
+
+70 
+
+75 
+
+80 
+
+85 
+
+90 
+
+> ADAcc (%)
+
+MedQA 
+
+budget=1 (>50%) 
+
+budget=2 (>50%) 0 50 100 150 200 
+
+Iterations 
+
+45 
+
+50 
+
+55 
+
+60 
+
+65 
+
+70 
+
+> Accuracy (%)
+
+MMLU 
+
+budget=1 (>50%) 
+
+budget=2 (>50%) 0 25 50 75 100 125 150 175 
+
+Iterations 
+
+40 
+
+50 
+
+60 
+
+70 
+
+80 
+
+> Accuracy (%)
+
+ARC-C 
+
+budget=1 (>50%) 
+
+budget=2 (>50%) 0 25 50 75 100 125 150 
+
+Iterations 
+
+20 
+
+30 
+
+40 
+
+50 
+
+60 
+
+70 
+
+80 
+
+> Accuracy (%)
+
+OpenBookQA 
+
+budget=1 (>50%) 
+
+budget=2 (>50%) 0 50 100 150 200 
+
+Iterations 
+
+35 
+
+40 
+
+45 
+
+50 
+
+55 
+
+> Accuracy (%)
+
+MedQA 
+
+budget=1 (>50%) 
+
+budget=2 (>50%) 0 50 100 150 200 
+
+Iterations 
+
+72.5 
+
+75.0 
+
+77.5 
+
+80.0 
+
+82.5 
+
+85.0 
+
+87.5 
+
+90.0 
+
+> ADAcc (%)
+
+MMLU 
+
+budget=1 (>50%) 
+
+budget=2 (>50%) 0 25 50 75 100 125 150 175 
+
+Iterations 
+
+60 
+
+65 
+
+70 
+
+75 
+
+80 
+
+85 
+
+90 
+
+> ADAcc (%)
+
+ARC-C 
+
+budget=1 (>50%) 
+
+budget=2 (>50%) 0 25 50 75 100 125 150 
+
+Iterations 
+
+50 
+
+60 
+
+70 
+
+80 
+
+90 
+
+> ADAcc (%)
+
+OpenBookQA 
+
+budget=1 (>50%) 
+
+budget=2 (>50%) 0 50 100 150 200 
+
+Iterations 
+
+60 
+
+65 
+
+70 
+
+75 
+
+80 
+
+85 
+
+90 
+
+> ADAcc (%)
+
+MedQA 
+
+budget=1 (>50%) 
+
+budget=2 (>50%) 
+
+Figure 7. Training curves of task accuracy and adversary detection accuracy for TodyComm with node-wise in- and out-degree budget constraints using 6 agents under attack rate < 50% , = 50% , > 50% .
+
+17 TodyComm: Task-Oriented Dynamic Communication for Multi-Round LLM-based Multi-Agent System 
+
+E.8. Ablation on Method Design 0 20 40 60 80 100 
+
+Iterations 
+
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> Accuracy (%)
+
+TodyComm w/o ranking      
+
+> w/o rank (<50 %)
+> w/o rank (=50 %)
+> w/o rank (>50 %) 020 40 60 80 100
+
+Iterations 
+
+> 0
+> 10
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> Accuracy (%)
+
+TodyComm w/o removal 
+
+> w/o remove (<50 %)
+> w/o remove (=50 %)
+> w/o remove (>50 %)
+
+Figure 8. Training curves of method design ablations for TodyComm on MMLU. 
+
+18

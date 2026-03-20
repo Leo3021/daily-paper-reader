@@ -1,0 +1,2137 @@
+Title: ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response
+
+URL Source: https://arxiv.org/pdf/2602.03430v2
+
+Published Time: Thu, 05 Feb 2026 01:30:04 GMT
+
+Number of Pages: 25
+
+Markdown Content:
+# ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response 
+
+Xiaomeng Zhu 1 2 Fengming Zhu 1 Weijie Zhou 2 Ye Tian 2 Zhenlin Hu 2 Yufei Huang 2 Yuchun Guo 2
+
+Xinyu Wu 3 2 Zhengyou Zhang 2 Fangzhen Lin 1 Xuantang Xiong 2
+
+Abstract 
+
+While passive agents merely follow instructions, proactive agents align with higher-level objec-tives, such as assistance and safety by continu-ously monitoring the environment to determine when and how to act. However, developing proactive agents is hindered by the lack of spe-cialized resources. To address this, we intro-duce ProAct-75 , a benchmark designed to train and evaluate proactive agents across diverse do-mains, including assistance, maintenance, and safety monitoring. Spanning 75 tasks, our dataset features 91,581 step-level annotations enriched with explicit task graphs. These graphs encode step dependencies and parallel execution possi-bilities, providing the structural grounding nec-essary for complex decision-making. Building on this benchmark, we propose ProAct-Helper ,a reference baseline powered by a Multimodal Large Language Model ( MLLM ) that grounds decision-making in state detection, and leverag-ing task graphs to enable entropy-driven heuris-tic search for action selection, allowing agents to execute parallel threads independently rather than mirroring the human’s next step. Extensive experiments demonstrate that ProAct-Helper out-performs strong closed-source models, improv-ing trigger detection mF1 by 6.21%, saving 0.25 more steps in online one-step decision, and in-creasing the rate of parallel actions by 15.58%. Code is available at https://github.com/ ZhuXMMM/ProAct.git 
+
+> 1
+
+Department of Computer Science and Engineering, The Hong Kong University of Science and Technology (HKUST), Hong Kong SAR, China 2Tencent, Shenzhen, China 3Shenzhen In-stitute of Advanced Technology (SIAT), Chinese Academy of Sciences, Shenzhen, China. Correspondence to: Fangzhen Lin <flin@cse.ust.hk>, Xuantang Xiong <sheltxiong@tencent.com>. 
+
+Preprint. February 5, 2026. Current Future Previous                            
+
+> ①Trigger Detection
+> Decide whether to intervene now.
+> ②Step Detection
+> Locate the current step in the workflow.
+> ③Task Detection
+> Identify the high -level task to pursue.
+> ④Future Action Prediction
+> Predict !-step future actions as candidate set .
+> ⑤Proactive Action Selection
+> Choose the next graph -feasible action. Take out the old garbage bag
+> Take out the old
+> garbage bag
+> Take out the new
+> drawstring trash bag
+> Tie the
+> garbage bag
+> Put the garbage
+> bag on the bin
+> Leave with trash
+> …
+> Start clean
+> trash bin
+> AND
+> Task Graph
+> (partially)
+> Human current step
+> Robot selected action
+> Blocking my way?
+> Parallel teamwork !
+
+Figure 1. Overview of proactive response tasks. ProAct-75 supports five vision-based tasks with step-level annotations, hi-erarchical labels, and task graphs. Traditional intent-following approaches predict human-intended actions ( e.g ., tie the bag) and execute them, inadvertently blocking workflows. Our benchmark enables evaluation of strategies where robots pursue independent parallel threads to reduce disruptions. 
+
+1. Introduction 
+
+Unlike passive agents that respond to explicit instructions, proactive agents take initiative toward higher-level objec-tives by continuously observations, and autonomously se-lecting actions (Wooldridge & Jennings, 1995; Li et al., 2023; van Den Broek & Moeslund, 2024). For instance, a robot may replace a trash bag before it overflows in a human-absent scenario, or proactively prepare a new bag while observing a human remove a full one in a collabora-tive scenario. However, most existing robotic systems still rely on passive instructions, imposing cognitive load and limiting the robot’s autonomous operation (Johannsmeier & Haddadin, 2016; Camilleri et al., 2022; Noormohammadi-Asl et al., 2025). In this work, we study proactive response for robot agents in settings of human-absent autonomy and human-robot collaboration, where agents must continuously monitor video observations to determine when to intervene and what action to take. Training such proactive agents requires a robust ability of 1
+
+> arXiv:2602.03430v2 [cs.RO] 4 Feb 2026
+
+ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response Assistance Scenario                                                                                        
+
+> Source Videos Annotations
+> (All / Best )(All / Best )
+> COIN 465 /465 2,600 /2,600
+> Ego -Exo4D 3,446 /856 85,010 /19,923
+> Ours 375 /125 2,239 /751
+> Maintenance Scenario
+> Source (All / Best )(All / Best )
+> COIN 93 /93 552 /552
+> Ours 407 /115 2,381 /686
+> Safety Monitoring Scenario
+> Source (All / Best )(All / Best )
+> UCF -CRIME 915 /915 1,053 /1,053
+> Current Future Previous
+> Trigger Detection: True Step Detection: Fold clothes and put in suitcase
+> Task Detection: Pack a Suitcase for Travel Future Action Prediction: Pack toiletries …
+> Proactive Action Selection:
+> Pack toiletries
+> Trigger Detection: True Step Detection: Take out the old garbage bag
+> Task Detection : Clean Trash Bin Future Action Prediction : Tie the garbage bag…
+> Proactive Action Selection:
+> Take out the new
+> drawstring trash bag
+> Trigger Detection: True Step Detection: Respond to Explosion Task Detection : Respond to Explosion
+
+Figure 2. Qualitative examples of ProAct-75 across three application scenarios. We visualize the previous-current-future observation window and structured annotations for our proactive visual response tasks. Assistance and Maintenance examples are from self-collected exocentric videos. Safety examples are from UCF-Crime. Safety videos omit future action prediction and proactive action selection due to the absence of human-robot collaboration. 
+
+perception across diverse scenarios (Triantafyllidis et al., 2023). More importantly, They need to have structured task representations that connect high-level objectives with executable steps (Kaelbling & Lozano-Pérez, 2011; Wang et al., 2025c). An example is hierarchical task graphs with precedence constraints and parallel threads (Gombolay et al., 2018; Suslova & Fazli, 2020) that enable structure-aware execution to preserve task feasibility and shorten workflows that enable robots to execute tasks that humans would even-tually perform but have no precedence dependencies (Pupa et al., 2022). For instance, in the trash-handling scenario shown in Figure 1, a robot agent lacking dependency knowl-edge might wait to tie the bag sequentially, whereas under-standing parallel threads would allow it to prepare a new bag concurrently, accelerating completion. However, existing video understanding benchmarks present critical gaps for evaluating proactive response. While multi-source datasets are essential for cross-scenario diversity, they often exhibit inconsistent temporal granularities and annotation schemes (Sultani et al., 2018; Das et al., 2019; Tang et al., 2019; Damen et al., 2022; Zhu et al., 2023; Li et al., 2024; Hartmann et al.). Some annotate mid-level states while others focus on atomic actions, preventing uni-fied hierarchical task modeling. More critically, existing benchmarks rarely provide task graphs that encode tempo-ral precedence and parallel execution possibilities, which are essential for effective planning. Without explicit depen-dency structures, agents must treat all steps conservatively as sequential, missing opportunities to execute independent tasks in parallel and thereby unnecessarily prolonging work-flows (Xiang et al., 2023; Zhu et al., 2025). To address these gaps, we introduce ProAct-75, a bench-mark for vision-based proactive response spanning assis-tance, maintenance, and safety monitoring . ProAct-75 comprises 75 tasks with 5,383 videos and 91,581 annotated segments. Videos are sourced from Ego-Exo4D (Grauman et al., 2024), COIN (Tang et al., 2019), and UCF-Crime (Das et al., 2019), complemented by 495 self-collected clips to improve coverage of underrepresented tasks. For evaluation, we adopt a consistent protocol to re-annotate all videos, en-suring atomic action-level temporal granularity. Critically, ProAct-75 provides explicit task graphs for each task, en-coding AND/OR dependencies and parallelizable threads to support structure-aware action selection (enabling parallel support actions under constraints). This enables evaluation of five proactive response tasks: trigger detection, step detection, task detection, future action prediction, and proactive action selection (as shown in Figure 1). Furthermore, we propose ProAct-Helper as a reference baseline built upon MLLM . ProAct-Helper employs a MLLM with a Hierarchical Binding Module ( HBM ) to enhance cross-level semantic consistency for perception tasks (trigger, task, step detection, and future action predic-tion) 1. ProAct-Helper employs an entropy-driven heuristic to search for the next best proactive action on the given task graph, such that it may prioritize actions on parallel threads rather than strictly following the human’s next intended step, and meanwhile, does not violate any precedence constraints. In summary, our main contributions are: • A benchmark called ProAct-75 for vision-based proac-tive response that provides explicit task graphs and structure-aware annotations across assistance, mainte-nance, and safety monitoring scenarios. • An MLLM -based framework called ProAct-Helper that integrates HBM for multi-level state perception and entropy-driven heuristic search for proactive action se-
+
+> 1
+
+We use “step” to refer to observed human activity states and “action” to refer to robot execution primitives, though both repre-sent atomic nodes in the task graph. 
+
+2ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response 
+
+lection under task-graph constraints. • Comprehensive experiments showing that ProAct-Helper outperforms strong MLLM s, improving trigger detection mF1 by 6.21%, achieving 0.25 saved steps, and increas-ing Parallel Action by 15.58%. 
+
+2. Related Work 
+
+2.1. Proactive Embodied Agents 
+
+Existing proactive robotic systems typically aim to infer human goals from observations (Huang & Mutlu, 2016; Nikolaidis et al., 2017; Losey et al., 2018; Patel & Cher-nova, 2023). Related research adopts the inverse reasoning paradigm of Theory of Mind ( ToM ), inferring human in-tentions from behavioral observations to generate assistive strategies. These approaches often assume the robot agent’s intentions align with human’s intentions, positioning the robot as assistive tools (Premack & Woodruff, 1978; Jara-Ettinger et al., 2016; Rabinowitz et al., 2018; van Den Broek & Moeslund, 2024). Existing methods mainly cover inten-tion recognition, environment prediction, and shared auton-omy (Schrempf et al., 2005; Baker et al., 2009; Dragan et al., 2013; Koppula & Saxena, 2015; Javdani et al., 2018; Og-nibene et al., 2019; Rhinehart et al., 2019; Broad et al., 2019; Shi et al., 2021; Atan et al., 2024; Wang et al., 2025a;b). However, recent studies indicate that robot agent’s intentions need not align with human’s intentions (van Den Broek & Moeslund, 2024; Zhu et al., 2025), as human intentions may be suboptimal in unattended scenarios or when holding neg-ative beliefs (Wang et al., 2024). This suggests robot agent should make more independent decisions based on scene understanding and task structure. While recent works (Bi et al., 2024; Yang et al., 2025a;b) focus on sensory-driven user assistance, our work studies proactive response in at-tended and unattended settings, using task-graph structure to guide action selection from visual state estimates. 
+
+2.2. Video Benchmarks for Proactive Response 
+
+Existing proactive response research has primarily fo-cused on text-based reasoning, such as ProRAC (Wu & Liu, 2025) for symbolic action reasoning and Proac-tiveBench (Wang et al., 2025d) for diagnostic evaluations. However, visual input is essential for proactive systems to perceive real-time environmental states and anticipate task requirements in physical scenarios. While large-scale egocentric datasets such as Ego4D (Grauman et al., 2022), EPIC-Kitchens (Damen et al., 2022), and Something-Something (Goyal et al., 2017) have advanced activity un-derstanding, proactive systems rely more on holistic scene context and structured task representations from exocen-tric views (Patel & Chernova, 2023). Complete task-step sequences are particularly critical for learning procedural de-pendencies (Zhou et al., 2023). Existing exocentric datasets include COIN (Tang et al., 2019), Ego-Exo4D (Grauman et al., 2024), CrossTask (Zhukov et al., 2019), Assem-bly101 (Sener et al., 2022), and Toyota SmartHome (Das et al., 2019). We select COIN and Ego-Exo4D for their complete task-step annotations and multi-view collabora-tion data, introduce UCF-Crime (Sultani et al., 2018) for anomalous scenarios in safety monitoring, and collect addi-tional videos for underrepresented tasks. 
+
+3. Problem Statement 
+
+Vision-based proactive response couples state perception with action selection under task-graph constraints. We for-malize the problem in this section. 
+
+3.1. Task Graph Formulation 
+
+Human activities follow structured procedures: some steps must precede others, while certain sub-processes can progress in parallel. To provide an explicit executable con-straint model for proactive response, we represent each task as a Directed Acyclic Graph ( DAG ) (Sifat et al., 2023; Grau-man et al., 2024) with AND/OR dependencies. We provide the formal definitions below. A task T is a finite directed graph (V, E ), denoting a finite set of nodes and the set of edges, respectively: • A node v ∈ V represents either an executable step ( v ∈
+
+Ve) or a non-executable structural node ( v ∈ Vn). Non-executable nodes include start/terminate nodes and mid-level node pairs 2, with Ve ∩ Vn = ∅.• A directed edge (u, v ) ∈ E denotes a dependency where 
+
+u must be executed before v.• The set of predecessor node is defined as Pred( v) ≜
+
+{u ∈ V : ( u, v ) ∈ E}, and the successor node set as 
+
+Succ( v) ≜ {w ∈ V : ( v, w ) ∈ E}.A node a is reachable from node b, denoted a ∈ Reach( b),iff either a = b (every node reaches itself), or there exists a directed path from b to a. Formally, this is captured by the recursive definition:              
+
+> a∈Reach( b)⇐⇒ a=b∨∃ c∈V. (c, a )∈E∧c∈Reach( b).
+> (1)
+
+Note that for any mid-level start node u with end node u′ and successors bi, b j ∈ Succ( u), there exists no edge (vi, v j ) ∈
+
+E or (vj , v i) ∈ E where vi ∈ (Reach( bi) ∩ Pred( u′)) \
+
+Reach( bj ) and vj ∈ (Reach( bj ) ∩ Pred( u′)) \ Reach( bi),ensuring branch independence until merge to u′.We associate each node with type via ϕ : V 7 → { AND , OR },which specifies when the node can be executed:  
+
+> 2Mid-level nodes abstract over a category of behaviors or a sequence of actions, e.g ., “prepare ingredients”. They come in pairs: a start node marks the beginning of a mid-level task and an end node marks its completion.
+
+3ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response 
+
+• For a node v with ϕ(v) = AND , it can only be executed when every node in Pred (v) has been executed. We call it an AND node for simplicity. • Similarly, for a node v with ϕ(v) = OR , it can only be 
+
+executed when at least one node in Pred( v) has been executed, and is termed an OR node similarly. • In particular, for the initial step v0 with Pred( v0) = ∅, it can be executed immediately. Let Prog t ⊆ V denote the set of executed nodes up to timestep t. Every executable step v ∈ Ve consumes a timestep upon execution, while a structural node v ∈ Vn is automatically satisfied once its preconditions are met. Task progression follows the constraints: 
+
+∀v ∈ Prog t.
+
+(
+
+ϕ(v) = AND =⇒ Pred( v) ⊆ Prog t
+
+ϕ(v) = OR =⇒ Pred( v) ∩ Prog t̸ = ∅
+
+(2) An executable step a ∈ Ve is legal at timestep t if 
+
+a /∈ Prog t and its preconditions are satisfied under the AND/OR semantics above. We denote the set of such steps by Alegal  
+
+> t
+
+⊆ Ve. A task is completed at timestep t∗ if the current progression state reaches the terminal node vterm for the first time, i.e ., vterm ∈ Prog t∗ ∧ ∀ t′ < t ∗.v term /∈ Prog t′ .
+
+3.2. Proactive Response Formulation 
+
+Proactive response requires continuously monitoring hu-man activities and intervening when assistance is needed. At each timestep t, given a video frame and task graph as the input Xt, the agent outputs Yt =(ytrig  
+
+> t
+
+, y task  
+
+> t
+
+, y step  
+
+> t
+
+, ˆat+1: t+n, a ⋆t+1 ):• Trigger : ytrig  
+
+> t
+
+∈ { 0, 1} indicates if interaction is needed. • Task : ytask  
+
+> t
+
+∈ T identifies the task category. • Step : ystep  
+
+> t
+
+∈ V identifies the current step. • Future actions : ˆat+1: t+n ∈ V predicts future actions. • Proactive action: a⋆t+1 ∈ Ve ∪ { WAIT } is the robot’s selected next action. These predictions form a hierarchical structure where trig-ger gates subsequent predictions, and task/step detection localizes the current state for action planning. 
+
+4. ProAct-75 Benchmark 
+
+ProAct-75 evaluates proactive response on trigger detection, task detection, step detection, future action prediction, and proactive action selection tasks. In the following sections we describe the data composition and annotation protocol. 
+
+4.1. Data Composition and Annotations 
+
+ProAct-75 covers three interaction scenarios with distinct mechanisms of goal formation. Assistance evaluates an-ticipatory support in activities with human-initiated goals. 
+
+Maintenance evaluates environment-triggered goal gen-COIN 
+
+> Ego -Exo4D
+> UCF -CRIME
+> Ours
+
+ProAct -75          
+
+> Raw Videos
+> Video Collection
+> Step : semantic name with time period.
+> Trigger : annotated triggering reason .
+> Views : best -view selected.
+> Task Graph Annotation
+> Initial graph skeleton
+> Structural repair &
+> node completion
+> Activation conditions &
+> multi -parent AND/OR
+> Mid -level phase abstraction
+> Annotated using
+> annotation system
+> Task Graph
+> Manual review
+
+Figure 3. ProAct-75 data collection and annotation pipeline. We combine videos from public datasets and self-collected recordings, then annotate step spans/names, triggers, and best views. Each task is equipped with a task-graph annotation. 
+
+eration driven by observable states ( e.g ., cluttered desks). 
+
+Safety monitoring focuses on preventive interventions against risky behaviors. Assistance and Maintenance may overlap at the task level depending on whether intervention is triggered by human activity or environment monitoring. To cover these scenarios at scale while maintaining diverse environments, we construct ProAct-75 by aggregating exo-centric videos from Ego-Exo4D, COIN, UCF-Crime, and self-collected sources. We adopt the Ego-Exo4D standard and re-annotate other sources to ensure consistent step-level granularity. For multi-view recordings in Ego-Exo4D, we follow the annotation of original view. For our self-collected multi-view videos, we select the best views so that key ac-tions are visible and occlusions are minimized. The data scale and distribution are shown in Figure 2. More collec-tion details are available in Section D. We adopt a unified annotation protocol where each step boundary corresponds to the semantic change in human actions. Each video is annotated with task- and step-level temporal spans (aligned timestamps and frame indices), and natural-language context cues (scenario and trigger descrip-tions at task and step granularity). We provide human-rated task priority scores to support cost-sensitive evaluation. For COIN, UCF-Crime, and our selected data, three trained an-notators produced 1,978 videos and 6,797 step segments over 1.5 months. Quality control involved two rounds (half a month) where three experts reviewed annotations to fix inconsistencies and refine boundaries. Disagreements were resolved through deliberation to ensure consistency across sources. In total, ProAct-75 comprises 5,383 videos contain-ing 91,581 step segments, with the remainder contributed by Ego-Exo4D’s existing step annotations. 
+
+4.2. Task Graph 
+
+Following the formulation in Section 3.1, we construct task graphs as DAG s with atomic steps as nodes and temporal 4ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response tokenizer                                         
+
+> ProAct -Helper
+> ProAct -Helper Hierarchical Binding Losses
+> ℎ!"#$
+> ℎ!%&'
+> ℎ&!()
+> "!"#$
+> "&!()
+> "!%&'
+> #!"#$ *!%&' #!%&' *&!() +%++=#,#-. %+/
+> Span Pooling  Frame 0Frame 226
+> Frame 455 …
+> Keyframes Prompts
+> Proactive Action Selection
+> S1
+> A1A2A3
+> T1
+> Task DAG
+> Predicted steps: A2B3A3B1B2
+> S1
+> A1
+> B1
+> A2A3
+> B2
+> T1
+> ①②
+> ①②
+> Entropy -driven heuristic search
+> "!"# =0
+> Human Step Robot Step Candidates
+> Contrasitive Loss Step Token
+> Task Token
+> Future Action Prediction Token
+> Trigger Token B3
+> AND
+> B1B2B3
+> AND
+> Decide if help is needed,
+> identify task and current
+> step, and predict human’s
+> next actions.
+
+Figure 4. Overview of ProAct-Helper framework. Given keyframes and prompts, it detect trigger, task, step, and human’s future actions, trained with hierarchical binding losses for cross-level consistency under long-tail data. It then selects the next robot action on the task DAG via an entropy-driven heuristic search to favor feasible, low thread-mixing progress. 
+
+dependencies as edges. We build each graph incremen-tally. Given the step inventory of a task, GPT-4o proposes one local dependency (with activation conditions) at a time, followed by automatic validation to enforce DAG valid-ity (acyclicity, reachability, no dead ends/isolated nodes) and basic physical feasibility checks. Gemini-3-Pro fur-ther groups atomic steps into mid-level phases. Finally, all graphs are manually reviewed to correct any residual incon-sistencies (as shown in Figure 3). More statistics on the task graphs can be found in Section E. 
+
+5. ProAct-Helper Method 
+
+5.1. ProAct-Helper Framework 
+
+ProAct-Helper is a proactive response framework built upon MLLM and integrated with task-graph planning. The model takes multimodal input Xt at time t and produces struc-tured predictions Yt = ( ytrig  
+
+> t
+
+, y task  
+
+> t
+
+, y step  
+
+> t
+
+, ˆat:t+τ , a ⋆t+1 ) as defined in Section 3.2. To handle the long-tailed trigger– task–step hierarchy, we propose HBM to enforce cross-level alignment and improve rare-class representations. Our training process employs instruction tuning with aux-iliary constraints. We apply standard autoregressive cross-entropy loss LCE over supervised tokens, supplemented by a binary classification loss Ltrig at the trigger token position to prevent signal dilution. The final objective is: 
+
+L = LCE + λtrig Ltrig + λbind Lbind , (3) where Lbind is introduced by the Hierarchical Binding Mod-ule to strengthen cross-level consistency and mitigate train-ing instability for long-tail classes. 
+
+5.2. Hierarchical Binding Module 
+
+The supervision signals in ProAct-75 exhibit a trigger-task-step hierarchy with severe long-tail distributions at the task and step levels. To address the representation insuffi-ciency caused by relying solely on autoregressive supervi-sion, HBM enhances cross-level semantic consistency by maximizing the agreement between parent and child level representations while strengthening class separability under parent-level conditioning. HBM extracts token hidden states for trigger/task/step fields (Figure 4). Let hi be the i-th output-token hidden state and Iℓ the token span of level ℓ ∈ { trig , task , step }. We obtain Hℓ by mean pooling over {hi}i∈Iℓ . We introduce two cross-level contrastive constraints to maximize mutual information between hierarchical levels while respecting cat-egory structure. For each paired instance i in a mini-batch of size B with parent-child pair (H(i) 
+
+> p
+
+, H (i) 
+
+> c
+
+), we define the positive pair as (H(i) 
+
+> p
+
+, H (i) 
+
+> c
+
+) and the negatives as mis-matched pairs formed with other instances in the mini-batch. The binding loss between parent level p and child level c is: 
+
+L(p, c ) = − 1
+
+B
+
+> B
+
+X
+
+> i=1
+
+log exp(sim( H(i) 
+
+> p
+
+, H (i) 
+
+> c
+
+)/τ )
+
+P 
+
+> j∈N
+
+exp(sim( H(i) 
+
+> p
+
+, H (j) 
+
+> c
+
+)/τ ) ,
+
+(4) where N = {1, . . . , B } indexes paired instances in the mini-batch, sim( ·, ·) is cosine similarity, and τ is temperature. We use a symmetric variant by averaging L(p, c ) and L(c, p ).We combine two cross-level binding terms as: 
+
+Lbind = λtt Ltrig2task + λts Ltask2step . (5) where Ltrig2task and Ltask2step are instantiated as 
+
+L(trig , task) and L(task , step) , respectively. 
+
+5.3. Proactive Action Selection 
+
+In this work, we study proactive action selection using an-notated task graphs to choose the next feasible step. The key challenge is exploiting parallelizable thread to enable concurrent progress, rather than strictly following a single sequential path. Inspired by the perspective of behavioral 5ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response 
+
+entropy (Goodrich et al., 2004; Guastello et al., 2012; Balch, 2000), we model the human/robot action distribution over parallel threads and use entropy to penalize mixed thread assignments, which indicate frequent thread switching and higher cognitive load. To capture parallelizable threads in collaborative tasks, we define threads based on the reachability structure of the task graph. For any mid-level start node u with multiple successors Succ( u) = {b1, . . . , b m} that later merge at u′,we assign each successor (and its downstream nodes) to a thread via a mapping π : V 7 → N. Two successors bi and 
+
+bj are considered in the same thread if their reachable node sets overlap, i.e ., Reach( bi) ∩ Reach( bj )̸ = ∅; otherwise they belong to different threads. Nodes not covered by such regions are assigned to the primary thread π(v) = 0 .Given the task graph, current progression state, and action set A, we obtain the set of legal actions Alegal  
+
+> t
+
+. The thread mapping π(·) groups these legal actions by thread, and the robot agent selects an action from the grouped set based on the objective below. For each action a ∈ A legal  
+
+> t
+
+, we estimate its induced thread mixing entropy Hmix .Let Ht and Rt denote the human and robot step histories up to time t. To evaluate the thread mixing induced by a candidate action a, we consider the counterfactual one-step-ahead robot history Rt ∪ { a} and compute the per-thread step count for each agent α ∈ { hum , rob } as: 
+
+nαk ≜
+
+(
+
+|{ x ∈ H t | π(x) = k}| if α = hum ,
+
+|{ x ∈ R t ∪ { a} | π(x) = k}| if α = rob . (6) The mixing ratio for thread k is then pk = nhum  
+
+> k
+
+/(nhum  
+
+> k
+
++
+
+nrob  
+
+> k
+
+), quantifying the proportion of human participation. The binary entropy for each thread is: 
+
+Hk(pk) = −pk log pk − (1 − pk) log(1 − pk), (7) where Hk(pk) = 0 when pk ∈ { 0, 1} (i.e ., single-agent execution). The thread mixing entropy is a length-weighted sum across threads: 
+
+Hmix 
+
+ Ht, Rt ∪ { a} = X
+
+> k
+
+wk Hk(pk), (8) where wk = ( nhum  
+
+> k
+
++ nrob  
+
+> k
+
+)/ P 
+
+> j
+
+(nhum  
+
+> j
+
++ nrob  
+
+> j
+
+) weights threads by total executions, so mixing on more active threads contributes more than on rarely visited ones. We employ a one-step lookahead strategy to select the action that minimizes this entropy: 
+
+a⋆t+1 = arg min 
+
+> a∈A legal
+> t
+
+Hmix 
+
+ Ht, Rt ∪ { a}. (9) This strategy favors actions on threads different from the human’s current thread and discourages frequent switching by the robot, reducing coordination overhead while enabling parallel progress. 
+
+6. Experiments 
+
+6.1. Experimental Setup Benchmark. All experiments use ProAct-75, split by video into train/test at an approximate 3:1 ratio, yielding Ntrain =4, 074 and Ntest = 1 , 309 videos. Unless stated otherwise, we train on the best-view subset ( Ntrain = 1 , 905 and Ntest =516 ; see Section 4.1 and Figure 2) and evaluate on its test set, while other views are used for Out Of Distribution ( OOD )evaluation (see Section B.2). 
+
+Implementation details. We extract keyframes based on adjacent-frame appearance changes and use a 5-frame slid-ing window with stride 3 as the input Xt (see Section B.1). Input prompt templates and output formats are detailed in Section F. For action selection, since predicted actions may not fall within the legal action domain, we take the inter-section Acand  
+
+> t
+
+= Alegal  
+
+> t
+
+∩ A pred  
+
+> t
+
+to ensure feasibility. We slightly abuse the notation by treating Apred  
+
+> t
+
+as a set and removing possible duplicates. We evaluate both open-source and closed-source MLLM s. ProAct-Helper is built upon Qwen2.5-VL-Instruct 3B/7B and fine-tuned with LoRA. All baselines are evaluated in two stages: Stage-1 decides trigger and task given the keyframe window and task list; if triggered, Stage-2 detects step and future actions given the identified task graph. We avoid in-context video demonstrations as keyframe streams already create long video-token contexts, and adding demo keyframes would substantially increase latency. ProAct-Helper is trained for 10 epochs with a batch size of 128 using the AdamW optimizer and a learning rate of 
+
+5 × 10 −5. All training is conducted on NVIDIA H20 GPUs using bfloat16 precision. For LoRA fine-tuning, we set the rank to r = 32 and the scaling factor to α = 32 . For inference, we apply different decoding strategies depending on the evaluation setup. When measuring generation time on our fine-tuned model, we use greedy decoding with a maximum of 256 tokens. For the evaluation of baseline models, we employ nucleus sampling with temperature T =0.7, top-p = 0 .8, and top-k = 20 .
+
+Evaluation Metrics. For trigger, task, and step detection ,we report Acc/F1 as micro-averaged metrics and mAc-c/mF1 , which average over classes to reflect long-tail per-formance. For future action prediction, we compute the 
+
+ED between predicted and ground-truth sequence. Further-more, we report four metrics for proactive action selection .
+
+Saved Steps (SS) measures how many human steps are saved by robot actions; Entropy (E) quantifies the human-robot thread mixing entropy Hmix ; ER measures thread entropy for robot threads; Parallel Actions (PA) measures the proportion of parallel actions where robot and previous human threads differ. E, ER, and PA are computed over effective actions only, i.e ., excluding wait. 6ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response 
+
+Table 1. Main results on ProAct-75. We report mAcc/mF1 and Acc/F1 metrics for trigger/task/step detection and Edit Distance ( ED ) for future action prediction. Open-source baselines are evaluated without fine-tuning, while closed-source baselines use the same prompt template and decoding settings. Best results are in bold and second-best results are underlined. ↑ / ↓ indicate higher/lower is better. 
+
+Base Model Trigger (%) Task (%) Step (%) ED ↓ SS ↑ PA (%) ↑
+
+mAcc mF1 Acc F1 mAcc mF1 Acc F1 mAcc mF1 Acc F1 
+
+Open-Source MLLMs 
+
+Qwen3-VL-30B-A3B-Instruct 51.61 66.25 73.50 81.89 22.80 31.70 34.66 51.48 6.67 9.44 8.53 15.72 4.77 0.013 0.09 Qwen3-Omni-30B 46.86 63.35 65.07 71.30 18.96 26.87 17.55 29.87 3.72 5.42 4.48 8.58 4.64 0.078 6.09 Qwen2.5-VL-32B-Instruct 45.72 62.36 63.77 69.64 16.62 23.96 29.45 45.50 4.04 6.04 6.14 11.57 4.72 0.038 3.71 Qwen2.5-VL-3B-Instruct 42.33 54.94 69.55 80.59 12.53 18.92 23.18 37.64 1.46 2.42 3.06 5.95 4.74 0.034 4.23 
+
+Closed-Source MLLMs 
+
+Qwen3-VL-Flash 54.73 70.35 72.06 77.48 17.36 24.84 17.91 30.37 3.70 5.51 2.94 5.72 4.76 0.046 2.46 Qwen3-VL-Plus 51.52 67.39 69.89 76.41 14.88 21.52 17.39 29.63 5.14 7.38 4.66 8.91 4.71 0.045 3.10 GPT-4o 30.59 46.70 47.11 51.38 16.67 24.90 20.27 33.71 4.02 6.05 8.70 16.0 4.64 0.026 0.77 Gemini-2.5-Flash 49.73 64.24 72.52 81.44 21.78 30.66 31.14 47.49 6.97 10.12 9.42 17.21 4.70 0.062 2.55 Gemini-2.5-Pro 42.89 55.94 69.31 80.21 22.95 32.39 35.23 52.11 8.69 12.31 11.99 21.41 4.70 0.120 3.83 ProAct-Helper (plain) 61.50 75.40 79.24 85.12 24.02 31.85 48.21 65.05 6.46 9.27 17.54 29.85 3.99 0.333 17.15 ProAct-Helper 61.50 75.38 79.32 85.23 28.33 36.72 51.03 67.58 7.61 10.67 18.68 31.49 3.96 0.366 17.44 
+
+ProAct-Helper (based on Qwen2.5-VL-7B-Instruct) 
+
+ProAct-Helper (plain) 62.36 76.09 79.85 85.57 25.49 34.24 48.94 65.71 6.39 9.70 18.23 30.83 3.99 0.350 18.72 ProAct-Helper 62.90 76.56 80.08 85.65 27.07 34.79 52.91 69.20 8.25 11.56 19.85 33.13 3.90 0.361 19.41 
+
+Table 2. Ablation study results. We report mAcc/mF1 and Acc/F1 for trigger/task/step detection and ED for future action prediction. 
+
+Task 
+
+→Step Trigger 
+
+→Task Task (%) Step (%) ED ↓
+
+mAcc mF1 Acc F1 mAcc mF1 Acc F1 
+
+× × 13.43 (+0.00) 18.50 (+0.00) 33.22 (+0.00) 49.87 (+0.00) 2.64 (+0.00) 3.99 (+0.00) 9.26 (+0.00) 16.94 (+0.00) 4.23 (+0.00) 
+
+× ✓ 16.25 (+2.82) 22.10 (+3.60) 35.72 (+2.50) 52.64 (+2.77) 5.20 (+2.56) 7.14 (+3.15) 13.38 (+4.12) 23.60 (+6.66) 3.97 (-0.26) 
+
+✓ × 16.91 (+3.48) 22.60 (+4.10) 39.08 (+5.86) 56.19 (+6.32) 5.34 (+2.70) 7.28 (+3.29) 13.70 (+4.44) 24.10 (+7.16) 4.01 (-0.22) 
+
+✓ ✓ 17.12 (+3.69) 23.10 (+4.60) 42.06 (+8.84) 59.22 (+9.35) 5.25 (+2.61) 7.18 (+3.19) 13.96 (+4.70) 24.50 (+7.56) 3.94 (-0.29) 
+
+6.2. Main Results 
+
+Table 1 presents results on ProAct-75. For all MLLM sbaselines, evaluation follows a two-stage process. The first stage determines whether a trigger occurs and identifies the corresponding task based on the keyframe window and the task list. If triggered, the second stage uses the task graph of the identified task to detect current steps and predict future steps. For proactive action selection, which relies on textual predictions from the previous stage, we provide task graphs, AND/OR constraints, and thread definitions with parallel execution prioritization (as detailed in Section F). The results shows that ProAct-Helper outperforms both open-source and closed-source baselines across most met-rics, validating its effectiveness for proactive assistance. For trigger/task/step detection, ProAct-Helper (7B) improves task F1 by 17.09% and step F1 by 11.72% over the best closed-source baseline Gemini-2.5-Pro. Furthermore, our HBM module boosts task mF1 by 2.71% and step mF1 by 1.63% on average across both backbones compared to the plain variant. This improvement on mF1 averaged over all the classes indicates better handling of long-tail categories. For proactive action selection, ProAct-Helper significantly outperforms existing strong baseline models. Compared to the best closed-source model Gemini-2.5-Pro, the 7B-based ProAct-Helper achieves SS of 0.361 and PA of 19.41% ,demonstrating stronger task parallelization capability. The plain variant without HBM attains lower SS at 0.350 and PA at 18.72%, as improved step detection and action prediction accuracy from HBM enable more effective action selection. Additional qualitative, hyperparameter, OOD , and inference time analyses are in Section B.1 and Section C. 
+
+6.3. Ablation Study 
+
+To enable ablation studies within computational budgets, we sampled 1/8 of the best-view split using stratified sampling, preserving task diversity and step-level distributions. 3 We examine HBM by isolating the Trigger-Task alignment loss 
+
+> 3
+
+Stratified sampling ensures at least one video per task. Long-tail distributions arise intrinsically from task structures 
+
+7ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response 
+
+Table 3. Trajectory simulation results with human and robot agents under GT labels. Method SS ↑ E↓ ER ↓ PA (%) ↑
+
+Closed-Source Large Language Models (LLMs) 
+
+GPT-4o 5.872 0.640 0.736 33.60 Gemini-2.5-Flash 5.918 0.662 0.748 28.26 Gemini-2.5-Pro 6.023 0.671 0.723 29.52 DeepSeek-v3.2 5.868 0.664 0.742 31.58 Qwen3-Max 6.160 0.683 0.769 29.89 
+
+ProAct Action Selection Strategies 
+
+Greedy 9.868 0.837 0.836 28.11 ProAct-Helper 9.868 0.662 0.654 33.95 
+
+Ltrig2task and Task-Step dependency loss Ltask2step . Ta-ble 2 shows that introducing Ltrig2task improves Task and Step mAcc by 2.82% and 2.56% , while Ltask2step yields larger gains of 3.48% and 2.70% . The full model achieves best performance, and Ltask2step is consistently more ef-fective than Ltrig2task , indicating that grounding tasks in execution steps yields stronger supervision. 
+
+6.4. Analysis of Text-only Proactive Action Selection. 
+
+To decouple proactive action selection from upstream ac-tions prediction errors, we simulate collaboration between human and robot agents from the video’s initial state. The human follows the annotated trajectory unless preempted by the robot, then switches to parallel branches until com-pletion. In the oracle setting, the robot uses the complete human trajectory as Apred  
+
+> t
+
+. For LLM s-based methods, we adopt the prompt settings from Section 6.2. Table 3 shows that closed-source LLM s’ SS remain lower than ProAct-Helper, despite being provided with task graphs and AND/OR constraints. GPT-4o exhibits lower mixing en-tropy E than ProAct-Helper yet higher robot thread entropy ER. This suggests closed-source LLM s output more waiting actions, leaving more effective actions to be completed by the human alone, thereby reducing E while failing to estab-lish stable robot parallel execution threads as evidenced by elevated ER. In contrast, ProAct-Helper achieves the low-est ER of 0.654 and highest PA of 33.95%, demonstrating that entropy-driven heuristic search more effectively drives strategies for stable parallel execution. 
+
+6.5. Analysis of Failure Case 
+
+Figure 5a reports hallucination rates, i.e ., outputs that vio-late predefined constraints. We consider three types: Trigger (false interventions when the ground truth requires none), Step (predicting step labels outside the predefined step vo-cabulary), and Future (empty sequences or steps outside the step vocabulary). ProAct-Helper achieves low Trigger and near-zero Step hallucination, indicating strong vocab-GPT-4o   
+
+> Gemini-2.5-Flash
+> Gemini-2.5-Pro
+> Qwen3-VL-Flash
+> Qwen3-VL-Plus
+> ProAct-Helper-3B
+> ProAct-Helper-7B
+> 0.00
+> 0.25
+> 0.50
+> Hallucination rate
+> Trigger Step Future
+
+(a) Hallucination rates. GPT-4o    
+
+> Gemini-2.5-Flash
+> Gemini-2.5-Pro
+> Qwen3-Max
+> DeepSeek-V3.2
+> Greedy
+> ProAct-Helper
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> Fraction
+> Parallel Wait Forced wait
+
+(b) Parallel action execution. 
+
+Figure 5. Failure case analysis. (a) We compare hallucination rates across trigger, step, and future prediction actions for different MLLM s. (b) We analyze models’ parallel execution tendencies, waiting behaviors, and task graph constraint comprehension. For clarity, we omit non-parallel actions from the visualization. 
+
+ulary alignment, but exhibits some Future hallucination, suggesting controllability issues in action sequence gener-ation. Among closed-source models, GPT-4o shows the lowest overall hallucination, Gemini-2.5-Pro exhibits the highest Trigger hallucination, and Qwen3-VL variants show the highest Step and Future hallucination. Figure 5b decomposes waiting into model-generated wait and forced wait ( i.e ., caused by illegal actions). Gemini-2.5-Flash exhibits the lowest forced wait ratio, indicating better constraint adherence, while GPT-4o shows the high-est, revealing reasoning limitations. Our method achieves the highest parallel action ratio, substantially exceeding all closed-source models, demonstrating a preference for paral-lel thread execution and efficient collaboration. Moreover, most closed-source models achieve parallel action ratios below Greedy, reflecting insufficient preference for parallel thread execution with humans under common-sense-driven decision making, thereby hindering efficient collaboration. 
+
+7. Conclusion 
+
+This paper studies proactive response, where an agent rec-ognizes state from video and selects feasible next actions under task-graph constraints. To support this problem, we introduce ProAct-75 , aggregating multi-source videos into step-level annotations with explicit task graphs across as-sistance, maintenance, and safety scenarios . On top of this benchmark, we find existing MLLM s often struggle to fol-low task-graph structure and leverage parallel threads even when the graphs are given as input. We therefore propose a strong multimodal baseline, ProAct-Helper . Extensive experiments show clear gains over closed-source models in state recognition and collaboration efficiency. Although our planner is a lightweight graph-constrained heuristic, its thread-entropy objective and DAG feasibility signals suggest future directions for graph-feasible decoding, and ProAct-75’s trigger descriptions provide additional post-training data for reasonable proactive responses. 8ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response 
+
+Acknowledgments 
+
+We thank Changwei Wang and Weiheng Chi for helpful discussions and valuable feedback that improved this work. 
+
+Impact Statement 
+
+This paper presents work whose goal is to advance the field of Machine Learning. Our benchmark is primarily built on publicly available datasets. We will release the cor-responding annotations and evaluation code, and provide instructions for obtaining the original videos through the official channels of each source dataset. This avoids redis-tributing restricted content and ensures compliance with the respective licenses. For our self-collected videos, all partic-ipants provided informed consent, and the data collection and planned public release followed internal compliance and data-governance procedures. To mitigate privacy risks, we blur potentially sensitive information such as computer screens and logos, and participants’ faces are covered. 
+
+References 
+
+Atan, U., Bharadwaj, V. R., and Jiang, C. Assistive control of robot arms via adaptive shared autonomy. In 2024 IEEE International Conference on Advanced Intelligent Mechatronics (AIM) , pp. 1096–1102. IEEE, 2024. Baker, C. L., Saxe, R., and Tenenbaum, J. B. Action under-standing as inverse planning. Cognition , 113(3):329–349, 2009. Balch, T. Hierarchic social entropy: An information the-oretic measure of robot group diversity. Autonomous robots , 8(3):209–238, 2000. Bi, S., Wang, W., Pan, H., Feng, F., and He, X. Proactive recommendation with iterative preference guidance. In 
+
+Companion Proceedings of the ACM Web Conference 2024 , pp. 871–874, 2024. Broad, A., Murphey, T., and Argall, B. Highly parallelized data-driven mpc for minimal intervention shared control. 
+
+arXiv preprint arXiv:1906.02318 , 2019. Camilleri, A., Dogramadzi, S., and Caleb-Solly, P. A study on the effects of cognitive overloading and distractions on human movement during robot-assisted dressing. Fron-tiers in Robotics and AI , 9:815871, 2022. Damen, D., Doughty, H., Farinella, G. M., Furnari, A., Kazakos, E., Ma, J., Moltisanti, D., Munro, J., Perrett, T., Price, W., et al. Rescaling egocentric vision: Col-lection, pipeline and challenges for epic-kitchens-100. 
+
+International Journal of Computer Vision , 130(1):33–55, 2022. Das, S., Dai, R., Koperski, M., Minciullo, L., Garattoni, L., Bremond, F., and Francesca, G. Toyota smarthome: Real-world activities of daily living. In Proceedings of the IEEE/CVF international conference on computer vision ,pp. 833–842, 2019. Dragan, A. D., Lee, K. C., and Srinivasa, S. S. Legibility and predictability of robot motion. In 2013 8th ACM/IEEE International Conference on Human-Robot Interaction (HRI) , pp. 301–308. IEEE, 2013. Gombolay, M. C., Wilcox, R. J., and Shah, J. A. Fast scheduling of robot teams performing tasks with tem-porospatial constraints. IEEE Transactions on Robotics ,34(1):220–239, 2018. Goodrich, M. A., Boer, E. R., Crandall, J. W., Ricks, R. W., and Quigley, M. L. Behavioral entropy in human-robot interaction. In Proceedings of PERMIS , 2004. Goyal, R., Ebrahimi Kahou, S., Michalski, V., Materzynska, J., Westphal, S., Kim, H., Haenel, V., Fruend, I., Yianilos, P., Mueller-Freitag, M., et al. The" something something" video database for learning and evaluating visual com-mon sense. In Proceedings of the IEEE international conference on computer vision , pp. 5842–5850, 2017. Grauman, K., Westbury, A., Byrne, E., Chavis, Z., Furnari, A., Girdhar, R., Hamburger, J., Jiang, H., Liu, M., Liu, X., et al. Ego4d: Around the world in 3,000 hours of egocentric video. In Proceedings of the IEEE/CVF con-ference on computer vision and pattern recognition , pp. 18995–19012, 2022. Grauman, K., Westbury, A., Torresani, L., Kitani, K., Ma-lik, J., Afouras, T., Ashutosh, K., Baiyya, V., Bansal, S., Boote, B., et al. Ego-exo4d: Understanding skilled hu-man activity from first-and third-person perspectives. In 
+
+Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pp. 19383–19400, 2024. Guastello, S. J., Gorin, H., Huschen, S., Peters, N. E., Fabisch, M., and Poston, K. New paradigm for task switching strategies while performing multiple tasks: en-tropy and symbolic dynamics analysis of voluntary pat-terns. Nonlinear dynamics, psychology, and life sciences ,16(4):471–497, 2012. Hartmann, V. N., Heinle, T., Huang, Y., and Coros, S. A benchmark for multi-modal multi-robot multi-goal path planning. In IROS 2025 Workshop-LeaPRiDE: Learning, Planning, and Reasoning in Dynamic Environments .Huang, C.-M. and Mutlu, B. Anticipatory robot control for efficient human-robot collaboration. In 2016 11th ACM/IEEE international conference on human-robot in-teraction (HRI) , pp. 83–90. IEEE, 2016. 9ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response 
+
+Jara-Ettinger, J., Gweon, H., Schulz, L. E., and Tenenbaum, J. B. The naïve utility calculus: Computational principles underlying commonsense psychology. Trends in cognitive sciences , 20(8):589–604, 2016. Javdani, S., Admoni, H., Pellegrinelli, S., Srinivasa, S. S., and Bagnell, J. A. Shared autonomy via hindsight opti-mization for teleoperation and teaming. The International Journal of Robotics Research , 37(7):717–742, 2018. Johannsmeier, L. and Haddadin, S. A hierarchical human-robot interaction-planning framework for task allocation in collaborative industrial assembly processes. IEEE Robotics and Automation Letters , 2(1):41–48, 2016. Kaelbling, L. P. and Lozano-Pérez, T. Hierarchical task and motion planning in the now. In 2011 IEEE international conference on robotics and automation , pp. 1470–1477. IEEE, 2011. Koppula, H. S. and Saxena, A. Anticipating human activi-ties using object affordances for reactive robotic response. 
+
+IEEE transactions on pattern analysis and machine intel-ligence , 38(1):14–29, 2015. Li, K., Wang, Y., He, Y., Li, Y., Wang, Y., Liu, Y., Wang, Z., Xu, J., Chen, G., Luo, P., et al. Mvbench: A compre-hensive multi-modal video understanding benchmark. In 
+
+Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pp. 22195–22206, 2024. Li, S., Zheng, P., Liu, S., Wang, Z., Wang, X. V., Zheng, L., and Wang, L. Proactive human–robot collaboration: Mutual-cognitive, predictable, and self-organising per-spectives. Robotics and Computer-Integrated Manufac-turing , 81:102510, 2023. Losey, D. P., McDonald, C. G., Battaglia, E., and O’Malley, M. K. A review of intent detection, arbitration, and com-munication aspects of shared control for physical human– robot interaction. Applied Mechanics Reviews , 70(1): 010804, 2018. Nikolaidis, S., Zhu, Y. X., Hsu, D., and Srinivasa, S. Human-robot mutual adaptation in shared autonomy. In Proceed-ings of the 2017 ACM/IEEE International Conference on Human-Robot Interaction , pp. 294–302, 2017. Noormohammadi-Asl, A., Fan, K., Smith, S. L., and Daut-enhahn, K. Human leading or following preferences: Effects on human perception of the robot and the human– robot collaboration. Robotics and Autonomous Systems ,183:104821, 2025. Ognibene, D., Mirante, L., and Marchegiani, L. Proactive intention recognition for joint human-robot search and rescue missions through monte-carlo planning in pomdp environments. In International Conference on Social Robotics , pp. 332–343. Springer, 2019. Patel, M. and Chernova, S. Proactive robot assistance via spatio-temporal object modeling. In Conference on Robot Learning , pp. 881–891. PMLR, 2023. Premack, D. and Woodruff, G. Does the chimpanzee have a theory of mind? Behavioral and brain sciences , 1(4): 515–526, 1978. Pupa, A., Van Dijk, W., Brekelmans, C., and Secchi, C. A resilient and effective task scheduling approach for industrial human-robot collaboration. Sensors , 22(13): 4901, 2022. Rabinowitz, N., Perbet, F., Song, F., Zhang, C., Eslami, S. A., and Botvinick, M. Machine theory of mind. In 
+
+International conference on machine learning , pp. 4218– 4227. PMLR, 2018. Rhinehart, N., McAllister, R., Kitani, K., and Levine, S. Pre-cog: Prediction conditioned on goals in visual multi-agent settings. In Proceedings of the IEEE/CVF international conference on computer vision , pp. 2821–2830, 2019. Schrempf, O. C., Hanebeck, U. D., Schmid, A. J., and Worn, H. A novel approach to proactive human-robot coopera-tion. In ROMAN 2005. IEEE International Workshop on Robot and Human Interactive Communication, 2005. , pp. 555–560. IEEE, 2005. Sener, F., Chatterjee, D., Shelepov, D., He, K., Singhania, D., Wang, R., and Yao, A. Assembly101: A large-scale multi-view video dataset for understanding procedural activities. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pp. 21096– 21106, 2022. Shi, Y., Chen, Z., Liu, H., Riedel, S., Gao, C., Feng, Q., Deng, J., and Zhang, J. Proactive action visual resid-ual reinforcement learning for contact-rich tasks using a torque-controlled robot. In 2021 IEEE International Con-ference on Robotics and Automation (ICRA) , pp. 765–771. IEEE, 2021. Sifat, A. H., Deng, X., Bharmal, B., Wang, S., Huang, S., Huang, J., Jung, C., Zeng, H., and Williams, R. A safety-performance metric enabling computational awareness in autonomous robots. IEEE Robotics and Automation Letters , 8(9):5727–5734, 2023. Sultani, W., Chen, C., and Shah, M. Real-world anomaly de-tection in surveillance videos. In Proceedings of the IEEE conference on computer vision and pattern recognition ,pp. 6479–6488, 2018. Suslova, E. and Fazli, P. Multi-robot task allocation with time window and ordering constraints. In 2020 IEEE/RSJ International Conference on Intelligent Robots and Sys-tems (IROS) , pp. 6909–6916. IEEE, 2020. 10 ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response 
+
+Tang, Y., Ding, D., Rao, Y., Zheng, Y., Zhang, D., Zhao, L., Lu, J., and Zhou, J. Coin: A large-scale dataset for comprehensive instructional video analysis. In Proceed-ings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pp. 1207–1216, 2019. Triantafyllidis, E., Acero, F., Liu, Z., and Li, Z. Hybrid hierarchical learning for solving complex sequential tasks using the robotic manipulation network roman. Nature Machine Intelligence , 5(9):991–1005, 2023. van Den Broek, M. K. and Moeslund, T. B. What is proac-tive human-robot interaction?-a review of a progressive field and its definitions. ACM Transactions on Human-Robot Interaction , 13(4):1–30, 2024. Wang, H., Qu, C., Huang, Z., Chu, W., Lin, F., and Chen, W. Vl-rethinker: Incentivizing self-reflection of vision-language models with reinforcement learning. arXiv preprint arXiv:2504.08837 , 2025a. Wang, H., Su, A., , Ren, W., Lin, F., and Chen, W. Pixel reasoner: Incentivizing pixel-space reasoning with curiosity-driven reinforcement learning. arXiv preprint arXiv:2505.15966 , 2025b. Wang, H., Xu, Q., Liu, C., Wu, J., Lin, F., and Chen, W. Emergent hierarchical reasoning in llms through rein-forcement learning. arXiv preprint arXiv:2509.03646 ,2025c. Wang, Y., Chen, Y., Zhong, F., Ma, L., and Wang, Y. Simu-lating human-like daily activities with desire-driven au-tonomy. arXiv preprint arXiv:2412.06435 , 2024. Wang, Y., Meng, X., Wang, Y., Zhang, H., and Zhao, D. Proactivevideoqa: A comprehensive benchmark evaluat-ing proactive interactions in video large language models. 
+
+arXiv preprint arXiv:2507.09313 , 2025d. Wooldridge, M. and Jennings, N. R. Intelligent agents: Theory and practice. The knowledge engineering review ,10(2):115–152, 1995. Wu, H. and Liu, Y. Prorac: A neuro-symbolic method for reasoning about actions with llm-based progression. 
+
+arXiv preprint arXiv:2511.15069 , 2025. Xiang, J., Tao, T., Gu, Y., Shu, T., Wang, Z., Yang, Z., and Hu, Z. Language models meet world models: Embod-ied experiences enhance language models. Advances in neural information processing systems , 36:75392–75412, 2023. Yang, B., Xu, L., Zeng, L., Guo, Y., Jiang, S., Lu, W., Liu, K., Xiang, H., Jiang, X., Xing, G., et al. Proagent: Harnessing on-demand sensory contexts for proactive llm agent systems. arXiv preprint arXiv:2512.06721 , 2025a. Yang, B., Xu, L., Zeng, L., Liu, K., Jiang, S., Lu, W., Chen, H., Jiang, X., Xing, G., and Yan, Z. Contextagent: Context-aware proactive llm agents with open-world sensory perceptions. arXiv preprint arXiv:2505.14668 ,2025b. Zhou, H., Martín-Martín, R., Kapadia, M., Savarese, S., and Niebles, J. C. Procedure-aware pretraining for in-structional video understanding. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pp. 10727–10738, 2023. Zhu, C., Xiao, F., Alvarado, A., Babaei, Y., Hu, J., El-Mohri, H., Culatana, S., Sumbaly, R., and Yan, Z. Egoobjects: A large-scale egocentric dataset for fine-grained object understanding. In Proceedings of the IEEE/CVF interna-tional conference on computer vision , pp. 20110–20120, 2023. Zhu, F., Pan, Y., Zhu, X., and Lin, F. A computable game-theoretic framework for multi-agent theory of mind. arXiv preprint arXiv:2511.22536 , 2025. Zhukov, D., Alayrac, J.-B., Cinbis, R. G., Fouhey, D., Laptev, I., and Sivic, J. Cross-task weakly supervised learning from instructional videos. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition , pp. 3537–3545, 2019. 11 ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response 
+
+A. Implementation details of Proactive Action Selection Task 
+
+We detail the evaluation procedure for proactive action selection under task-graph constraints. At each timestep t, the robot first constructs the legal action set Alegal  
+
+> t
+
+⊆ Ve according to the annotated AND/OR preconditions, then filters it by the predicted action sequence Apred  
+
+> t
+
+to obtain Acand  
+
+> t
+
+(Algorithm 1). For the full-video text-only proactive action selection simulation in Table 3, we apply a deadlock-prevention safeguard. Human execution may not strictly satisfy task-graph preconditions ( e.g ., minor omissions or implicit prerequisites), while our simulator enforces strict graph feasibility, which can stall rollouts when some nodes never become enabled. To maintain simulation fidelity, we use a one-step runtime alignment that relaxes feasibility only for the observed next human action. Let gt+1 denote the ground-truth next human executable step at time t. If gt+1 ∈ Ve, gt+1 /∈ Prog t, and gt+1 /∈ A legal  
+
+> t
+
+,we temporarily augment eAlegal  
+
+> t
+
+← A legal  
+
+> t
+
+∪ { gt+1 } before constructing Acand  
+
+> t
+
+. This safeguard is applied uniformly across methods and only admits gt+1 at the current timestep. Note that it is used only for Table 3, since Table 1 evaluates one-step decisions without full-rollout deadlocks. Moreover, when multiple candidates attain the same minimum entropy value, we select the action that appears earliest in 
+
+Apred  
+
+> t
+
+to ensure reproducibility. Concretely, Pos( S, a ) returns the smallest index of a in a sequence S, and we apply a lexicographic arg min over (Hmix , Pos) .
+
+Algorithm 1 Thread-Entropy-Based Proactive Action Selection with Rollout Safeguard 
+
+Require: Task graph G = ( V, E ), executable set Ve, thread mapping π(·), progression state Prog t, ground-truth next human step gt+1 , histories Ht, Rt, predicted action sequence Apred 
+
+> t
+
+Ensure: Robot next action a⋆t+1 
+
+Alegal  
+
+> t
+
+← { a ∈ Ve | a / ∈ Prog t, Precond( a; Prog t) = true }
+
+eAlegal  
+
+> t
+
+← A legal 
+
+> t
+
+if gt+1 ∈ Ve and gt+1 /∈ Prog t and gt+1 /∈ A legal  
+
+> t
+
+then 
+
+eAlegal  
+
+> t
+
+← eAlegal  
+
+> t
+
+∪ { gt+1 }
+
+end if if eAlegal  
+
+> t
+
+= ∅ then return WAIT 
+
+end if 
+
+Acand  
+
+> t
+
+← A pred  
+
+> t
+
+∩ eAlegal 
+
+> t
+
+if Acand  
+
+> t
+
+= ∅ then return WAIT 
+
+end if for all a ∈ A cand  
+
+> t
+
+do 
+
+Compute Hmix (Ht, Rt ∪ { a})
+
+end for return a⋆t+1 ← arg min a∈A cand 
+
+> t
+
+
+
+Hmix (Ht, Rt ∪ { a}), Pos( Apred  
+
+> t
+
+, a )
+
+
+
+Saved Step (SS). We measure collaboration efficiency in two settings. In full-trajectory simulation, for each video i we define Si = Bi − Hi, where Bi is the number of steps in the annotated human trajectory and Hi is the number of steps actually executed by the human in simulation. We report 
+
+SS = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+Si. (10) In the online one-step decision setting, each sample corresponds to a single decision point. We set Sj = 1 if the robot executes an action that belongs to the ground-truth trajectory (excluding Terminate ), and Sj = 0 otherwise, and report 
+
+SS = 1
+
+> Ns
+
+PNs 
+
+> j=1
+
+Sj .
+
+Parallel Action (PA). We quantify the fraction of effective robot actions that advance a thread different from the human’s most recent thread. Let N R be the total number of effective robot actions across all videos (excluding W AIT ). For each effective robot action a, let hprev be the most recent human action before the decision. If π(a)̸ = π(hprev ), we count it as a parallel-action event. Let P be the total number of such events, and define PA = P/N R.12 ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response 3 5 8                            
+
+> Window sides
+> 0
+> 25
+> 50
+> 75
+> Value
+> (a) Effect of Window Size
+> 135
+> Stride Steps
+> 0
+> 25
+> 50
+> 75
+> (b) Effect of Stride
+> 75
+> 80
+> 85
+> (c) Effect of tt
+> 0.1 0.3 0.5 0.7 0.9
+> tt
+> 0
+> 50
+> 75
+> 80
+> 85
+> (d) Effect of ts
+> 0.1 0.3 0.5 0.7 0.9
+> ts
+> 0
+> 50
+> Trigger Acc Trigger F1 Task Acc Task F1 Step Acc Step F1 ED F1 Acc
+> Figure 6. Hyperparameter analysis on the mini set. We evaluate the effect of window size, stride, and the loss weights λtt and λts . We report trigger/task/step accuracy and F1, as well as the future-action edit distance (ED; lower is better). Unless otherwise specified, we adopt window size 5, stride 3, and λtt = 0 .3, λ ts = 0 .5.
+
+B. Additional Quantitative Analyses 
+
+We provide additional quantitative analyses to better characterize the practical behavior of ProAct-Helper, including the sensitivity to temporal configurations and the robustness under systematic viewpoint shifts. 
+
+B.1. Hyperparameter Analysis 
+
+We analyze the effects of temporal configuration and loss-weighting strategies in Figure 6. The results highlight a consistent trade-off between temporal coverage, noise accumulation, and cross-level regularization strength. A window size of 5 achieves the best balance across trigger, task, and step prediction by providing sufficient temporal context to capture task state transitions without introducing excessive irrelevant frames. Smaller windows lack coverage for state evolution, while larger windows dilute critical cues and incur higher computational cost. Similarly, a stride of 3 yields the strongest performance by effectively reducing redundancy while preserving key temporal signals. Smaller strides introduce short-term noise, whereas larger strides miss informative transitions. We further examine the task–trigger and task–step consistency losses. Moderate weighting consistently improves task and step recognition, indicating the benefit of cross-level regularization. However, overly large weights lead to performance degradation, suggesting that excessive emphasis on consistency suppresses fine-grained discriminative learning. Based on these observations, we adopt λtt = 0 .3 and λts = 0 .5, which provide stable gains while maintaining balanced performance across all hierarchies. 
+
+B.2. Cross-View Generalization 
+
+In this view-set OOD evaluation, we train all models on the Best View training set and evaluate them on both the Best View test set and the Other View test set, which contains all non-best views, to characterize generalization robustness under systematic viewpoint shifts. As shown in Table Table 4, despite the more challenging distribution shift in Other View due to variations in perspective, occlusion, and visibility that destabilize visual cues, ProAct-Helper maintains substantially more reliable task and step recognition as well as future action prediction. For task and step detection on Qwen2.5-VL-7B, our method’s Task F1 decreases from 91.59 on Best View to 67.32 on Other View, retaining approximately 73% of performance, whereas Ego-Exo4D drops from 77.10 to 11.51, retaining only 15%. For Step F1, our method declines from 82.80 to 45.20, preserving roughly 55%, while Ego-Exo4D falls from 36.47 to 13.38, retaining merely 37%. Similar trends appear with the 3B backbone: our Task F1 on Other View remains at 51.87, significantly outperforming Ego-Exo4D’s 10.89. From a long-tail perspective measured by macro-averaged metrics, our method achieves Task mF1 of 23.43 and 39.53 on the 3B and 7B backbones respectively on Other View, compared to 1.62 and 1.10 for Ego-Exo4D. Step mF1 similarly reaches 13.92 and 21.30 for our method against 1.36 and 1.67 for Ego-Exo4D, demonstrating superior robustness on tail categories under viewpoint shifts. Finally, for future action prediction, our method exhibits lower edit distance on Other View: 2.96 compared to 4.41 on 3B, and 2.55 compared to 4.33 on 7B, further validating more consistent procedural prediction under suboptimal viewing conditions. Overall, these results demonstrate that our approach not only achieves higher performance ceilings on Best View but also maintains superior cross-view stability and transferability in more realistic deployment 13 ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response 
+
+Table 4. View-set OOD evaluation on Ego-Exo4D and Our selected videos. Models are trained on the Best View training set and evaluated on Best View test set or Other View test set (all non-best views). We report macro-averaged (mAcc/mF1) and micro-averaged (Acc/F1) metrics for trigger/task/step classification and future action edit distance (ED; lower is better). 
+
+Dataset View Set Trigger (%) Task (%) Step (%) ED ↓
+
+mAcc mF1 Acc F1 mAcc mF1 Acc F1 mAcc mF1 Acc F1 
+
+ProAct-Helper (based on Qwen2.5-VL-3B-Instruct) 
+
+Ego-Exo4D Other View 54.40 63.48 89.61 94.37 0.90 1.62 5.76 10.89 0.77 1.36 6.49 12.18 4.41 Best View 61.22 71.32 92.09 95.72 35.13 43.67 60.68 75.53 19.56 24.96 20.68 34.27 3.53 Ours Other View 62.85 76.17 81.45 87.38 17.83 23.43 35.02 51.87 10.02 13.92 23.86 38.53 2.96 Best View 85.51 92.11 93.23 95.09 81.78 89.21 83.26 90.86 62.40 69.76 73.57 84.77 0.78 
+
+ProAct-Helper (based on Qwen2.5-VL-7B-Instruct) 
+
+Ego-Exo4D Other View 54.15 63.40 88.97 93.99 0.62 1.10 6.10 11.51 0.95 1.67 7.17 13.38 4.33 Best View 60.68 70.64 92.18 95.79 21.38 26.27 62.73 77.10 19.96 25.95 22.30 36.47 3.50 Ours Other View 63.74 76.82 82.35 88.15 31.41 39.53 50.74 67.32 16.75 21.30 29.20 45.20 2.55 Best View 83.77 91.05 92.44 94.58 84.44 91.12 84.48 91.59 63.64 71.04 70.65 82.80 0.82 
+
+Table 5. Average wall clock latency per timestep. Perception aggregates trigger, task, step, and future prediction, while Planning denotes online one-step action selection. Base model Perception time (s) Planning time (s) 
+
+Open-source MLLMs 
+
+Qwen3-VL-30B-A3B-Instruct 15.04 0.51 Qwen3-Omni-30B 1.20 0.52 Qwen2.5-VL-32B-Instruct 46.04 0.29 Qwen2.5-VL-3B-Instruct 12.48 0.16 
+
+ProAct-Helper (based on Qwen2.5-VL-7B-Instruct) 
+
+ProAct-Helper 2.75 0.08 
+
+scenarios with non-optimal viewpoints. 
+
+B.3. Inference Latency Comparison 
+
+We report wall clock inference latency for the proactive pipeline, comparing ProAct-Helper-7B with representative open-source MLLM s. Following the evaluation protocol, Perception aggregates the first four perception subtasks, including trigger detection, task identification, step detection, and short-horizon future action prediction. Planning denotes online one step decision making for proactive action selection under task-graph constraints, where the policy outputs a single executable action at each timestep. Table 5 shows that ProAct-Helper-7B substantially reduces end-to-end latency compared to general-purpose open-source baselines, especially on the perception stack. The planning latency of ProAct-Helper-7B remains low, which is critical for interactive deployment where decisions must be produced continuously over keyframe windows. 
+
+C. Qualitative Results 
+
+We present qualitative examples to illustrate typical success and failure patterns of the proposed proactive response pipeline. These cases complement the quantitative results by revealing how cross-stage consistency and task-graph constraints manifest in real videos. We additionally visualize the results of proactive action selection tasks, illustrating how graph-feasible robot actions are chosen from short-horizon candidates. 14 ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response Trigger: True Task: Install License Plate Frame 
+
+Step: Place license plate cover 
+
+Future Steps: Tighten and secure the lid; Place license plate; 
+
+Tighten and secure the lid 
+
+Trigger: True Task: Upgrade PC Components 
+
+Future Steps: Remove the screen screws; Remove the screen; Install the screen; 
+
+Tighten the screen screws; Install the screen bezel 
+
+Step: Remove the screen cover 
+
+Trigger: True Task: Organize Desk 
+
+Step: Put the glue, scissors, ruler, and knife in the pen holder 
+
+Future Steps: Collect shredded paper waste; Discard shredded paper waste; 
+
+Take out books and papers from the bookend; Accidentally knocked over 
+
+bookend and internal books; Take out books and papers from the bookend 
+
+Trigger: True Task: Pack a Suitcase for Travel Step: Place luggage 
+
+Future Steps: Open the suitcase; Fold clothes; Put the clothes into the 
+
+suitcase ; Pack toiletries; Put the toiletry bag in the 
+
+Trigger: True Task: Respond to Explosion Step: Respond to fighting Trigger: True Task: Respond to Fighting Step: Respond to fighting 
+
+Trigger: True Task: Covid -19 Rapid Antigen Test 
+
+Step: Arrange test material 
+
+Future Steps: Locate and unwrap the collection swab; Slowly insert the tip of 
+
+the swab into the nose; Rotate and swirl the swab around for 5 -10 times; Slowly 
+
+extract the swab from the nostril; Repeat the process with the other nostril 
+
+Trigger: True Task: Fix a Flat Tire - Replace a Bike Tube 
+
+Step: Squeeze out any air inside the tube 
+
+Future Steps: Use the tire lever around the rim until the tube is complete 
+
+off the wheel; Pull the inner tube out; Get a new inner tube; Engage the valve 
+
+stem into the rim; Fit the tube to the wheel 
+
+> COI NEGO -Exo4D UCF -CRIME Ours
+
+(a) Success cases. Trigger decision, predicted task/current step, and plausible future steps. Trigger: True Task: Cooking an Omelet 
+
+Step: Get skillet or frying pan or wok 
+
+Future Steps: Get spatula; Place the skillet or pan or pot on the stove; 
+
+Turn on the stove; Get eggs; Get a bowl 
+
+Trigger: True Task: Assemble Bed Step: Assemble bed frame 
+
+Future Steps: Assemble cupboard; Place bed board; 
+
+Place the mattress on the bed 
+
+Trigger: True Task: Organize Desk 
+
+Step: Take out books and papers from the bookend 
+
+Future Steps: Assemble cupboard; Place bed board; 
+
+Place the mattress on the bed 
+
+Trigger: False Trigger: False 
+
+Trigger: True Task: Covid -19 Rapid Antigen Test 
+
+Future Steps: Read the instructions; Locate and unwrap the collection swab; 
+
+Slowly insert the tip of the swab into the nose; Rotate and swirl the swab 
+
+around for 5 -10 times; Slowly extract the swab from the nostril 
+
+Step: Unbox package 
+
+Trigger: True Task: Cooking Tomato & Eggs 
+
+Future Steps: Get water; Add water; Get chopsticks; Whisk until the egg 
+
+whites and yolks are well integrated.; Check paper recipe 
+
+Step: Get measuring tool (scoop or spoon or cup) 
+
+Trigger: True Task: Cooking Noodles Step: Check paper recipe 
+
+Future Steps: Get oil; Add oil; Tilt and rotate the skillet to allow oil or 
+
+butter flow into empty space; Add spring onions; Add garlic cloves 
+
+> Trigger Detection Task Detection Step Detection Future  Action Prediction
+
+(b) Failure cases. Task/step confusion, invalid or repetitive futures, and incomplete generations. 
+
+Figure 7. Qualitative results across sources. We show representative success and failure patterns for proactive prediction and future-step generation. 
+
+15 ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response Start clean trash bin                                                                                 
+
+> Start remove old
+> garbage
+> Tie the garbage bag
+> Take out the
+> garbage bag
+> Leave with the trash
+> Finish remove
+> old garbage
+> Start prepare new
+> garbage
+> Take out the new
+> garbage bag
+> Open anew
+> regular trash bag
+> Finish prepare
+> new garbage
+> Start replace and secure new
+> garbage bag
+> Replace with new
+> garbage bag
+> Put the garbage bag on the bin
+> Finish replace and secure
+> new garbage bag
+> …
+> Step 1
+> Step 2
+> Step 3
+> Step 4
+> Step 5
+> Step 6
+> Human ground -truth labeled trace:
+> Tie the garbage bag Take out the
+> garbage bag Take out the new
+> garbage bag
+> Open anew
+> regular trash bag
+> Put the garbage bag
+> on the bin Leave with the trash
+> Human action
+> Thread
+> Robot action
+> Structural node
+> AND
+
+(a) Trash-bin replacement. Start assemble sofa                                         
+
+> Material preparation
+> Start preparation and
+> base assembly
+> Assemble seat bracket
+> Start main frame
+> assembly
+> Install sofa armrest
+> Install sofa legs
+> Tighten the screw
+> Install seat bracket
+> Finish preparation and
+> base assembly
+> Finish main frame
+> assembly
+> …
+> Human ground -truth labeled trace:
+> Material preparation Assemble seat
+> bracket Install sofa legs
+> Install seat bracket Install sofa armrest
+> Step 1
+> Step 2
+> Step 3
+> Step 4
+> Step 5
+> OR
+> OR
+> OR
+
+(b) Sofa assembly. 
+
+Figure 8. Stage-5 visualization of proactive action selection under task-graph constraints. We overlay the human ground-truth trace on the annotated task graph and visualize how the agent selects the next proactive action after short-horizon future-step generation. Candidate actions are first filtered by graph feasibility ( e.g ., prerequisite satisfaction and AND/OR dependencies) and then ranked to choose an actionable, procedure-aligned robot step that best supports the ongoing workflow. Left: trash-bin replacement; right: sofa assembly. 
+
+C.1. Success Cases State Detection and Prediction Tasks. Figure 7a shows representative success cases of our proactive pipeline across multiple sources (COIN, Ego-Exo4D, UCF-Crime, and our collected data). Overall, the model demonstrates strong cross-stage consistency: it triggers interventions when warranted, identifies the correct task context and ongoing step, and generates plausible short-horizon future steps that remain coherent with the observed workflow. Notably, the predicted futures are typically actionable and procedurally aligned ( e.g ., preparing tools before execution), suggesting that the model has learned transferable procedural priors beyond dataset-specific appearance cues. 
+
+Proactive Action Selection. Beyond per-stage predictions, Figure 8 visualizes how the pipeline instantiates graph-constrained decision making at the final stage. Given the recognized task/step context and the short-horizon candidates, the agent filters out graph-infeasible actions ( e.g ., violated prerequisites) and selects an actionable next robot step that is procedurally aligned with the ongoing workflow. As shown in the trash-bin replacement and sofa assembly examples, the selected actions tend to prioritize prerequisite- and preparation-type steps before execution, demonstrating effective use of task-graph constraints for low-risk and high-utility interventions. 
+
+C.2. Failure Cases 
+
+Figure 7b summarizes typical failure modes. First, the model may confuse semantically related tasks under limited visual evidence ( e.g ., mapping emergency response contexts to an incorrect but plausible category), which then cascades to step-level mismatch. Second, we observe procedural hallucination and redundancy in future-step generation, such as repeated steps or inserting irrelevant sub-procedures, indicating that language priors can dominate when the visual state is ambiguous. Third, some outputs become graph-inconsistent or incomplete (e.g ., truncated step descriptions), which suggests remaining challenges in maintaining well-formed, graph-feasible plans under long-tail or OOD conditions. These cases motivate incorporating stricter graph-constrained decoding and validity-aware training objectives to further suppress 16 ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response CAMERA 2WORKSPACE                      
+
+> CAMERA 3
+> CAMERA 1
+> CAMERA 3
+> CAMERA 1
+> WATER BAR
+> CAMERA 2
+> CAMERA 1
+> CONFE -
+> RENCE
+> TABLE
+> CAMERA 2CAMERA 3
+> LAUNDRY
+> MACHINE
+> CAMERA 1
+> CAMERA 2
+> CAMERA 3
+> CAMERA 1
+> BED
+> CLOSET
+> CAMERA 2
+> CAMERA 3
+> VIEW 1VIEW 2VIEW 3
+
+Figure 9. Multi-view scene setups and example frames. The left column illustrates the camera layouts for each scene, while the right columns show representative synchronized frames from the three viewpoints (View 1–3). 
+
+invalid or low-utility interventions. In addition, errors in upstream task/step recognition can lead to mis-constrained action selection , where graph filtering over-prunes feasible actions or favors an incorrect thread, yielding conservative or suboptimal interventions. 
+
+D. Dataset and Annotation Details 
+
+We provide additional details of the multi-view data collection setup and quality control. Each scene is captured by three synchronized cameras (Canon M50) at 4K/30fps to provide complementary viewpoints and reduce occlusion. For our self-collected multi-view videos, we additionally select a Best View based on manipulation visibility and minimal occlusion to form a standardized evaluation set. All videos are annotated under a unified step-level protocol, where boundaries correspond to semantic changes in human actions. Quality control is conducted in multiple rounds, and disagreements are resolved through expert discussion to ensure consistent step boundaries and labels across sources. 17 ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response 
+
+E. Task-Graph Gallery 
+
+To facilitate reproducibility and error analysis, we include a gallery visualization of all annotated task graphs. In these visualizations, tasks are color-coded by scenario: Assistance , Maintenance , and Safety Monitoring , with overlapping regions indicating tasks that belong to both Assistance and Maintenance scenarios. Besides the sunburst renderings, we also report the distribution over mid-level nodes for each task graph, which characterizes how execution threads are induced by mid-level groups. We note that the optional priority scores are not used for training, since each task has fixed scores in our closed-set setting and can be directly retrieved via a lookup table when needed. handling missing 
+
+> phone  5Other 1
+
+Accidentally discovered missing phone assemble bed 
+
+components 9
+
+> place components  9
+
+preparation 7
+
+> Other 1
+
+Assemble Bed frame assembly 8
+
+> internal and door
+> assembly 5
+
+preparation 4
+
+> Other 1
+
+Assemble Cabinet main frame 
+
+assembly 6
+
+> preparation and
+> base assembly  5
+
+upholstery and 
+
+cushioning 5
+
+> Other 1
+
+Assemble Sofa Prepare for 
+
+> cleaning  10
+
+Clean the chain 7
+
+> Lubricate the
+> chain 5
+> Clean up the tools 4
+
+Get the bicycle 
+
+ready for cleaning 3
+
+> Degrease the chain 1
+> Other 1
+
+Clean and Lubricate the Chain container 
+
+preparation 6
+
+> providing water to
+> attendees 6
+
+Pour water 3
+
+> Other 1
+
+Conference Room Water Preparation Get Ingredients  51 
+
+> Add ingredients to
+> a mixing bowl  33
+
+Get kitchenware & 
+
+utensils 21 
+
+Put away 
+
+ingredients 19 
+
+Stir fry the 
+
+ingredients 13 
+
+> Add fillings or
+> seasoning  12
+> Put away
+> kitchenware &
+> utensils  12
+> Wash kitchenware &
+> utensils 11
+
+Prepare 
+
+ingredients 6
+
+Grease a skillet 6
+
+Clean up 6
+
+> Heat the skillet
+> over medium heat 5
+> Other 11
+
+Cooking an Omelet Get Ingredients  47 
+
+> Add ingredients to
+> a bowl  32
+
+Put away 
+
+ingredients 23 
+
+Get kitchenware & 
+
+utensils 21 
+
+Put away 
+
+kitchenware & 
+
+utensils 13 
+
+> Serve  12
+> Add ingredients to
+> skillet  9
+> Wash kitchenware &
+> utensils 9
+
+Stir fry 
+
+ingredients 7
+
+Prepare 
+
+Ingredients 
+
+(Cut/Wash/Peel) 
+
+6
+
+Boil the noodles 
+
+until tender 5
+
+> Heat the pot over
+> medium heat 4
+> Other 23
+
+Cooking Noodles Get kitchenware & 
+
+> utensils  7
+> Prepare dry
+> ingredients  6
+
+Get Ingredients 5
+
+Combine wet and 
+
+dry ingredients 5
+
+Roll and cut pasta 5
+
+> Prepare wet
+> ingredients  4
+> Clean up  4
+> Put away
+> ingredients 4
+
+Make dough ball 3
+
+Prepare surface 
+
+for rolling 2
+
+Cook Pasta Phase 2
+
+> Preparation Phase 1
+> Other 3
+
+Cooking Pasta Get Ingredients  30 
+
+> Stir fry the
+> ingredients  16
+
+Get kitchenware & 
+
+utensils 12 
+
+Put away 
+
+ingredients 12 
+
+Wash kitchenware & 
+
+utensils 8
+
+> Add ingredients to
+> a mixing bowl  7
+> Grease a skillet  7
+> Heat the skillet
+> over medium heat 6
+
+Put away 
+
+kitchenware & 
+
+utensils 
+
+6
+
+Add fillings or 
+
+seasoning 5
+
+Serve 5
+
+> Clean up 5
+> Other 11
+
+Cooking Scrambled Eggs Mix ingredients  7
+
+> Get kitchenware &
+> utensils  6
+
+Rolling and 
+
+Cutting Your Sushi 5
+
+Serve 4
+
+> Get Ingredients  3
+> Cook rice using a
+> rice cooker  3
+> Wash kitchenware &
+> utensils 3
+> Preparation Phase 2
+
+Clean up 2
+
+Cook rice 1
+
+> Make sushi roll 1
+> Other 1
+
+Cooking Sushi Rolls Get Ingredients  42 
+
+> Get kitchenware &
+> utensils  22
+
+Add ingredients to 
+
+the skillet to cook 
+
+tomatoes 19 
+
+Clean up 18 
+
+Mix ingredients to 
+
+create egg mixture 15 
+
+> Put away kitchenware
+> & utensils  15
+> Wash kitchenware &
+> utensils  11
+> Add ingredients to a
+> mixing bowl 10
+
+Remove tomato skin 6
+
+Heat the skillet 
+
+over medium heat 6
+
+Grease a skillet 6
+
+> Combine tomato and
+> eggs 6
+> Other 27
+
+Cooking Tomato & Eggs Perform testing  19 
+
+> Prepare materials  14
+
+Dispose waste 6
+
+Nasal Swab Method 5
+
+> Saliva Sample
+> Method  5
+> Read the
+> instructions  3
+> Perform sampling 3
+> Check results 3
+
+Preparation 2
+
+Unbox the covid19 
+
+kit 2
+
+> Select Sampling
+> Method 1
+> Other 2
+
+Covid-19 Rapid Antigen Test washing and drying 8
+
+preparation and 
+
+loading 5
+
+> Other 1
+
+Do the Laundry Final Components  8
+
+> Deflate the tube  7
+
+Remove inner tube 6
+
+Prepare New Tube 6
+
+Inspect the bead 
+
+seat line for 
+
+irregularities 6
+
+> Install Tube and
+> Tire  5
+> Get tools and
+> supplies ready  4
+> Loosen the bead
+> from against the
+> rim sidewall
+> 4
+
+Inspect the tire 4
+
+Inspect the tube 4
+
+Seat and Inflate 2
+
+> Preparation Phase 1
+> Other 4
+
+Fix a Flat Tire - Replace a Bike Tube Adjustments Phase 14 
+
+Get the tools and 
+
+supplies ready 8
+
+> Secure the Wheel  6
+> Install a Wheel 5
+
+Clean Up 4
+
+Get the bike off 
+
+the ground 3
+
+> Get the bike ready
+> for wheel insert 2
+> Other 1
+
+Install a Wheel 
+
+18 ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response preparation and 
+
+blades 11 
+
+> main fan
+> installation 6
+
+fixture 
+
+installation 
+
+(Optional) 
+
+5
+
+> Other 1
+
+Install Ceiling Fan rod installation  15 Other 1
+
+Install Curtain tightening and 
+
+securing 6
+
+frame and plate 
+
+assembly 5
+
+> Other 2
+
+Install License Plate Frame Get Ingredients  22 
+
+> Get kitchenware &
+> utensils  13
+
+Put away 
+
+ingredients 13 
+
+Wash kitchenware & 
+
+utensils 11 
+
+Boil water in a 
+
+pot or saucepan 10 
+
+> Add spices such as
+> cinnamon, ginger,
+> cardamom, and
+> cloves to the pot
+> 10
+> Put away
+> kitchenware &
+> utensils  10
+> Steep the tea 7
+
+Simmer for an 
+
+additional 2-3 
+
+minutes. 
+
+6
+
+Clean up 6
+
+Transfer drink to 
+
+a cup or mug 5
+
+> Prepare Raw
+> Ingredients 4
+> Other 19
+
+Making Chai Tea Get Ingredients  19 
+
+> Get kitchenware &
+> utensils  18
+
+Put away 
+
+ingredients 14 
+
+Steep the tea 13 
+
+Wash kitchenware & 
+
+utensils 11 
+
+> Put away
+> kitchenware &
+> utensils  9
+> Simmer for an
+> additional 2-3
+> minutes.  8
+> Boil water in a
+> pot or saucepan or
+> a kettle
+> 6
+
+Add sweetener 6
+
+Clean up 6
+
+Boil water in an 
+
+electric kettle 4
+
+> Add sweetener of
+> your choice 4
+> Other 19
+
+Making Milk Tea Get kitchenware & 
+
+> utensils  20
+> Brew coffee
+> (manual pour-over)  18
+
+Brew coffee (drip 
+
+coffee maker) 12 
+
+Get Ingredients 11 
+
+Brew coffee 
+
+(french press) 11 
+
+> Boil water in a
+> pot or saucepan  10
+> Prepare milk
+> (frothed)  10
+> Put away
+> kitchenware &
+> utensils
+> 10
+
+Boil milk in a pot 
+
+or saucepan 9
+
+Add sweetener 9
+
+Wash kitchenware & 
+
+utensils 9
+
+> Boil water in an
+> electric kettle 8
+> Other 53
+
+Making Coffee latte make filling  11 
+
+> place ingredients  10
+> finalize sandwich 6
+
+prepare equipment 
+
+and bread 5
+
+> prepare bread 4
+> Other 1
+
+Making A Ham Sandwich Get Ingredients  47 
+
+> Prepare salad
+> dressing  27
+
+Put away ingredients 17 
+
+Get kitchenware & 
+
+utensils 13 
+
+Put away kitchenware 
+
+& utensils 11 
+
+> Add ingredients to a
+> mixing bowl  8
+> Wash kitchenware &
+> utensils  8
+> Construct salad 5
+
+Clean up 5
+
+Prepare ingredients 4
+
+Serve 4
+
+> Preparation Phase 1
+> Other 2
+
+Making Cucumber & Tomato Salad Add ingredients 
+
+> (dressing)  106
+
+Get Ingredients 79 
+
+> Get kitchenware &
+> utensils  25
+> Preparation Phase 21
+
+Prepare 
+
+ingredients 16 
+
+Preparation Phase 2
+
+> Prepare dressing 1
+> Other 1
+
+Making Sesame-Ginger Asian Salad surface cleaning 6
+
+water dispensing 5
+
+> Other 4
+
+Personal Water Preparation Get the bike ready 
+
+> for wheel removal  6
+
+Remove a Wheel 6
+
+> Get the tools and
+> supplies ready  5
+> Get the bike off
+> the ground 3
+> Final Removal
+> Phase 3
+
+Preparation Phase 1
+
+Bike Configuration 
+
+Phase 1
+
+> Axle Detachment
+> Phase 1
+> Other 1
+
+Remove a Wheel Install new faucet 20 
+
+preparation & 
+
+removal 12 
+
+> Other 1
+
+Replace Faucet diagnose and 
+
+removal 9
+
+fuse box access 3
+
+> Other 1
+
+Replace Car Fuse Remove Old SIM 9
+
+Install New SIM 5
+
+> Other 1
+
+Replace SIM Card Remove Old Door 
+
+Knob 9
+
+> Install New Door
+> Knob 9
+> Other 1
+
+Replace Door Knob Install New Seat 10 
+
+> Water Management 8
+
+Remove Old Seat 6
+
+> Other 1
+
+Replace Toilet Seat Preparation  6
+
+> Reassembly  6
+> Remove Old Bulb 4
+
+Install New Bulb 4
+
+> Other 1
+
+Replace a Light Bulb Install Components 7
+
+> Install Wiper  6
+> Remove Wiper 5
+
+Remove Components 5
+
+> Other 1
+
+Replace A Wiper Head Remove Old Socket 9
+
+> Install New Socket 9
+> Other 1
+
+Replace Light Socket Install New Outlet 8
+
+> Remove Old Outlet 7
+> Other 1
+
+Replace Electrical Outlet 
+
+19 ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response Remove Components 9
+
+Measure and Clean 8
+
+> Open Covers  6
+> Install New
+> Components 6
+
+Close Covers 6
+
+> Calibration and
+> Testing 5
+> Other 1
+
+Replace Small Device Battery Remove and Replace 
+
+Needle 6
+
+> Needle Handling  5
+
+Preparation 4
+
+> Other 1
+
+Replace Sewing Machine Needle finish 
+
+installation and 
+
+optional steps 11 
+
+> align and apply
+> protector 6
+
+prepare surface 5
+
+> Other 1
+
+Replace Mobile Screen Protector Drain pipe 
+
+> replacement  8
+> Remove Old Filter  6
+> Prepare New Filter 5
+
+Install New Filter 5
+
+> Other 1
+
+Replace Refrigerator Water Filter Get Ingredients  7
+
+> cooking execution
+> phase  6
+> Get Kitchenware 6
+
+serving phase 3
+
+> preparation phase 1
+> Other 1
+
+Use Rice Cooker To Cook Rice Clean the Floor 17 
+
+> Prepare Cleaning
+> Supplies  15
+
+Clean the Desk 9
+
+> Other 1
+
+Vacuum the Floor Clean tableware 6
+
+> Rinse utensils 6
+> Other 3
+
+Wash the Dishes Remove Components 17 
+
+> Install Components 16
+> Reassembly 8
+
+Preparation 7
+
+> Other 1
+
+Upgrade PC Components Pack Charger 6
+
+Retrieve Charger 4
+
+> Other 2
+
+Unexpectedly found the charger not 
+
+brought Pick up items 9
+
+Place items safely 7
+
+> Other 1
+
+Pick up the dropped items preparation 
+
+(Tools/Detergent) 9
+
+> scrubbing process  8
+
+rinsing and final 
+
+cleanup 6
+
+> Other 1
+
+Clean Bathtub apply liquid 
+
+> cleaning agents  12
+
+prepare pot 
+
+physically or 
+
+thermally 8
+
+> cleaning action  8
+> dry and season pot 8
+
+Pour cleaning 
+
+powder 7
+
+> rinse off residue 4
+> Other 1
+
+Clean Rusty Pot spot cleaning  5
+
+> remove old garbage 5
+> prepare new
+> garbage bag 4
+
+replace and secure 
+
+new garbage bag 4
+
+> Other 1
+
+Clean Trash Bin perform cleaning 
+
+> (Parallel)  10
+> Gather optional
+> tools (Parallel)  6
+> apply detergent 6
+
+rinse and finish 5
+
+> preparation 3
+> Other 1
+
+CleanToilet folding process 7
+
+> storing items 6
+> Other 1
+
+Fold and Store Laundry disassembly and 
+
+preparation 8
+
+> bedding and pillow
+> placement 8
+
+sheet organization 4
+
+> Other 1
+
+Make the Bed fill the pen 
+
+> holder  8
+
+organize 
+
+electronics 6
+
+> manage waste  6
+> organize books and
+> papers 5
+
+Mobile pen holder 5
+
+organize shelf 
+
+items 4
+
+> organize
+> stationery 1
+> Other 2
+
+Organize Desk Device cable 
+
+wrapping 6
+
+> Cable management  5
+
+Storage 5
+
+> Other 1
+
+Organize Cables physical 
+
+unclogging 9
+
+Add chemical to 
+
+the sink hole 6
+
+> Other 2
+
+Unclog Sink WithBakingSoda selecting cleaning 
+
+method 10 
+
+> Finish
+> toothpaste/baking
+> soda cleaning  2
+
+Finish 
+
+hairdryer/wet wipe 
+
+cleaning 
+
+1
+
+Finish detergent 
+
+cleaning 1
+
+> Other 1
+
+Remove Crayon From Walls 
+
+20 ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response Pack fragile items  6
+
+pack electronics 5
+
+> prepare suitcase  4 Pack clothes and
+> put them in the
+> suitcase
+> 4
+
+Pack shoes 3
+
+> Pack toiletries 3
+> Other 1
+
+Pack a Suitcase for Travel handling bookend 
+
+> incident  4Other 1
+
+Accidentally knocked over bookend and 
+
+internal books wipe surface 6Other 6
+
+Accidentally knocked over water cup get new trash bag  9Other 4
+
+Unexpectedly found the trash bag leaking Wipe surface 9
+
+Secure the cup 4
+
+> Other 2
+
+Unexpectedly found the water cup leaking Check if the 
+
+patient is 
+
+conscious or 
+
+unconscious 
+
+7
+
+> Perform CPR 7
+
+Get ready to 
+
+perform CPR 3
+
+> Other 1
+
+First Aid - CPR Respond to abuse  6Other 1
+
+Respond to Abuse Respond to arson  6Other 1
+
+Respond to Arson Respond to arrest  6Other 1
+
+Respond to Arrest Respond to assault  5Other 1
+
+Respond to Assault Respond to robbery 6Other 1
+
+Respond to Robbery Respond to 
+
+> burglary  5Other 1
+
+Respond to Burglary Respond to 
+
+> fighting  6Other 1
+
+Respond to Fighting Respond to 
+
+> shooting  5Other 1
+
+Respond to Shooting Respond to 
+
+> stealing  5Other 1
+
+Respond to Stealing Respond to 
+
+> explosion  6Other 1
+
+Respond to Explosion Respond to 
+
+> vandalism  6Other 1
+
+Respond to Vandalism Respond to 
+
+> shoplifting  6Other 1
+
+Respond to Shoplifting Respond to 
+
+> roadaccidents  5Other 1
+
+Respond to RoadAccidents 
+
+21 ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response 
+
+Figure 10. Task-graph collection (75 tasks). We visualize the annotated task graphs for all tasks as sunburst-style DAG renderings. Each sector denotes a step, radial depth indicates hierarchical decomposition, and connectivity implicitly reflects prerequisite and branching constraints. 
+
+F. Prompt Templates 
+
+In this section, we document the prompt templates used in our experiments. We include (i) the proactive action selection 
+
+prompt, which takes the task graph, progression state, human next-step horizon, and a candidate action set as input and requires a strict JSON action output, and (ii) the two-stage state perception prompts for trigger/task and step/future prediction from video frames. We also provide representative example inputs and raw outputs from several LLM s to illustrate common failure modes ( e.g ., malformed JSON, truncated generations, and constraint violations) under identical prompting. 
+
+Proactive Action Selection Prompt (Template) 
+
+System: You are a robot action planner collaborating with a human on a procedural task. Choose exactly ONE next robot action from the provided candidate list. Hard constraints: 1) You must output a JSON object with key "action". 2) The value must be exactly one string from CANDIDATE_ACTIONS, or "Wait / None" if the list is empty. 3) Prefer actions that are parallel to the human’s current thread (i.e., from adifferent execution thread in the task graph), when possible. Thread (thread): an independent branch in the task graph induced by the same mid-level start/end node pair; different threads have no shared nodes. User: TASK: {task_name} TASK_GRAPH (compact): {task_graph} COMPLETED_STEPS: {completed} HUMAN_IMMEDIATE_NEXT (do NOT do these): {human_immediate} HUMAN_FUTURE_HORIZON: {human_future} CANDIDATE_ACTIONS: {candidates} Return JSON only: {"action":"...","reason":"...","confidence":0-1} 
+
+Planning Example Input (State ID: COIN\_-2CxSAVwFqE:1) 
+
+Task: Upgrade PC Components Candidate actions: ["Remove the old hard drive", "Install the hard drive", "Install laptop back cover", "Terminate" 
+
+22 ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response 
+
+]Note: Logged "action" is the final executed robot action. If a proposed action’s preconditions are not met, it becomes "Wait / None" and the reason is appended with "| prereq_not_met". 
+
+Planning Output (GPT-4o) 
+
+{"action": "Wait / None", "reason": "This action follows directly after ’Remove the old hard drive’, which is in the HUMAN_IMMEDIATE_NEXT, allowing continuous progress without interruption. | prereq_not_met", "confidence": 0.9 }(raw proposed action: "Install the hard drive") 
+
+Planning Output (Gemini-2.5-Flash) 
+
+{"action": "Wait / None", "reason": "The human is about to", "confidence": null }
+
+Planning Output (Qwen3-Max) 
+
+{"action": "Wait / None", "reason": "The human is currently focused on removing the old hard drive (HUMAN_IMMEDIATE_NEXT), so I should avoid that step. Installing the new hard drive is a valid candidate action not in HUMAN_IMMEDIATE_NEXT, and it unlocks the next human steps while reducing thread switching. | prereq_not_met", "confidence": 0.95 }(raw proposed action: "Install the hard drive") 
+
+Planning Output (DeepSeek-v3.2) 
+
+{"action": "Wait / None", "reason": "All candidate actions are in HUMAN_IMMEDIATE_NEXT (Remove the old hard drive) or would violate constraint #3. According to hard constraint #5, I must choose ’Wait / None’ when every candidate action is in HUMAN_IMMEDIATE_NEXT or the 
+
+23 ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response 
+
+list is effectively empty for the robot to act upon.", "confidence": 1.0 }
+
+Proactive response Stage-1 Prompt (Trigger + Task) 
+
+System: You are a precise vision-language model for video task detection. From the given frames (oldest->latest), decide CURRENT high-level task. Return strict JSON only: {"is_trigger": <true_or_false>, "task": "< one_of_list_or_others>"}. IMPORTANT: - If the person needs help with ANY task from the list, set is_trigger=true and output that task; otherwise set is_trigger=false. - Avoid false negatives: do NOT output {"is_trigger": false, "task": "others"} unless none matches. User: Frames: <frame_descs joined by comma> Candidate tasks: <comma-joined task list> If no task fits, use ’others’ and set is_trigger=false. 
+
+Proactive response Stage-2 Prompt (Step + Future Steps + Scores) 
+
+System: You are a precise vision-language model for fine-grained procedural understanding. From the frames and the current task, decide CURRENT step and the NEXT 5 likely future steps. All steps MUST be chosen from the provided list. Scores must be integers 1..3 and priority = max(urgency, value). Return strict JSON only: {"current_step": "<one_step_from_list_or_empty>", "future_steps": ["<step1>","<step2>","<step3>","<step4>","<step5>"], "scores": { "urgency": <int>, "value": <int>, "priority": <int> }}
+
+Proactive response Example Input (EGO\_EXO4D\_...\_cam02) 
+
+Frame window: ["[idx=0 t=0.00s]", "[idx=32 t=1.28s]", "[idx=51 t=2.04s]", "[idx=67 t=2.68s]" ]
+
+24 ProAct: A Benchmark and Multimodal Framework for Structure-Aware Proactive Response 
+
+GT: task = "Covid-19 Rapid Antigen Test" step = "Read the instructions" is_trigger = true 
+
+Proactive response Output (GPT-4o) 
+
+{"pred_is_trigger": false, "pred_task": "others", "pred_step": "", "pred_future_steps": [], "scores": {} }
+
+Proactive response Output (Gemini-2.5-Flash) 
+
+{"pred_is_trigger": false, "pred_task": "others", "pred_step": "", "pred_future_steps": [], "scores": {} }
+
+Proactive response Output (Qwen3-VL-Plus) 
+
+{"pred_is_trigger": true, "pred_task": "Organize Desk", "pred_step": "Take the cloth", "pred_future_steps": ["Wipe the desk with a tissue", "Place the item in a dry area", "Support book upright", "Discard tissue", "Place the book in a dry area" ], "scores": { "urgency": 1, "value": 1, "priority": 1 }}
+
+Figure 11. Prompts and example outputs for ProAct-75. Each card is rendered as a web-style panel (full-width title bar) and may span pages automatically. 
+
+25

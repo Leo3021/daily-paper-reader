@@ -1,0 +1,1146 @@
+Title: UDVideoQA: A Traffic Video Question Answering Dataset for Multi-Object Spatio-Temporal Reasoning in Urban Dynamics
+
+URL Source: https://arxiv.org/pdf/2602.21137v1
+
+Published Time: Wed, 25 Feb 2026 02:18:11 GMT
+
+Number of Pages: 32
+
+Markdown Content:
+This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. 
+
+# UDVideoQA : A Traffic Video Question Answering Dataset for Multi-Object Spatio-Temporal Reasoning in Urban Dynamics 
+
+Joseph Raj Vishal Nagasiri Poluri Katha Naik Rutuja Patil Kashyap Hegde Kota Krishna Vinod Prithvi Jai Ramesh Mohammad Farhadi Yezhou Yang Bharatesh Chakravarthi Arizona State University 
+
+{jnolas77, mfarhadi, yz.yang, bshettah }@asu.edu 15
+
+4 3
+
+2    
+
+> Q
+> AYes, there are at least two manhole covers
+> visible in the intersection.
+> Are there any manhole covers visible?
+> Q
+> AThey step off the curb and begin to walk
+> What does the group of pedestrians on the
+> right do starting at 0:07?
+> Q
+> AThe car waiting on the left is silver or grey.
+> What is the color of the car behind the crosswalk
+> on the left?
+> Q
+> ANo. The silver car remains stationary
+> Is the silver car on the left turn
+> at the intersection?
+> Q
+> AThey were likely on the sidewalk at left corner
+> Where did the pedestrian start their journey
+> from at the start?
+
+1. 7M
+
+Frames 
+
+> 16H
+> Raw
+> Data
+> 28K
+> QA
+> Pairs
+> 10
+> SOTA
+> VLMs
+
+Figure 1. The UDVideoQA benchmark challenges a VideoQA model to analyze a busy intersection using question-answer pairs across di-verse urban traffic conditions. The model’s capabilities are demonstrated across five reasoning categories: attribution, basic understanding, event reasoning, reverse reasoning, and counterfactual inference. 
+
+Abstract 
+
+Understanding the complex, multi-agent dynamics of urban traffic remains a fundamental challenge for video-language models (VideoLMs). This paper introduces Urban 
+
+Dynamics VideoQA (UDVideoQA), a benchmark dataset that captures the unscripted real-world behavior of dynamic urban scenes. UDVideoQA is curated from 16 hours ( 1.7Mframes) of traffic footage recorded at multiple city inter-sections under diverse traffic, weather, and lighting con-ditions. It employs an event-driven dynamic blur tech-nique to ensure privacy preservation without compromis-ing scene fidelity. Using a unified annotation pipeline, the dataset contains ∼ 28 , 000 question–answer pairs gen-erated across 8 hours of densely annotated video, aver-aging one question per second. Its taxonomy follows a hierarchical reasoning level, spanning basic understand-ing and attribution to event reasoning, reverse reasoning, and counterfactual inference, enabling systematic evalua-tion of both visual grounding and causal reasoning. Com-prehensive experiments benchmark 10 state-of-the-art Vide-oLMs on UDVideoQA and 8 models on a complementary video question generation (VideoQGen) benchmark. Re-sults reveal a persistent perception-reasoning gap, show-ing models that excel in abstract inference often fail with fundamental visual grounding. While models like Gemini Pro achieve the highest zero-shot accuracy, fine-tuning the smaller Qwen 2.5-VL 7B model on UDVideoQA bridges this gap, achieving performance comparable to proprietary sys-tems. In VideoQGen, Gemini 2.5 Pro, and Qwen3 Max gen-erate the most relevant and complex questions, though all models exhibit limited linguistic diversity, underscoring the need for human-centric evaluation. The UDVideoQA suite, including the dataset, annotation tools, and benchmarks for both VideoQA and VideoQGen, provides a foundation for advancing robust, privacy-aware, and real-world mul-timodal reasoning. UDVideoQA is available at https: //ud- videoqa.github.io/UD- VideoQA/UD-VideoQA/ .
+
+> arXiv:2602.21137v1 [cs.CV] 24 Feb 2026
+
+This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. 
+
+1. Introduction 
+
+Urban traffic scenes are inherently dynamic, characterized by simultaneous interactions among multiple agents, in-cluding vehicles, pedestrians, micro-mobility, and their sur-roundings. This complexity results in unpredictable mo-tion patterns and dense visual dependencies, posing ma-jor challenges for robust visual-language reasoning, partic-ularly in domains such as automated surveillance and intel-ligent transportation systems. With the rise of edge-based AI systems and continuous visual monitoring, there is a growing demand for VideoLMs that can understand long-term, untrimmed video streams. Achieving such under-standing requires spatio-temporally dense datasets that re-flect real-world conditions rather than short, curated clips. Despite the proliferation of urban surveillance infrastruc-ture recording thousands of streams daily, the data remains largely unexploited and uncurated. As a result, a critical gap persists between the abundance of data and the needs of VideoLM benchmarking, as most existing datasets rely on web-sourced or simulation-based videos that lack tem-poral continuity and scene realism [48]. To bridge this gap, UDVideoQA is introduced as a large-scale, open-source Urban Dynamics Video Question 
+
+Answering benchmark for evaluating multimodal reasoning in complex urban scenes. UDVideoQA provides an end-to-end solution for data curation, annotation, and bench-marking, encompassing 16 hours of surveillance footage (1.7M frames) and 28 , 800 question-answer ( QA ) pairs over 
+
+8 hours of densely annotated video as summarized in Fig-ure 1. The dataset spans a hierarchy of reasoning skills, from basic perception and attribute recognition to causal and counterfactual inference, which remain challenging even for state-of-the-art ( SOTA ) models. 
+
+UDVideoQA introduces key contributions that set it apart from existing VideoQA datasets. First, a unified annotation framework integrates a novel event-driven dynamic blur-ring mechanism that generates object-level motion masks for privacy-preserving processes. This approach main-tains contextual integrity while safeguarding individual pri-vacy, advancing beyond traditional detector-based redac-tion. Second, a semi-automated annotation tool supports scalable generation and validation of free-form QA pairs, moving beyond the constrained, template-based formats common in prior benchmarks [23, 49]. Finally, to com-plement standard VideoQA evaluation, UDVideoQA intro-duces the first-of-its-kind benchmark for video question generation ( VideoQGen ) in the urban traffic domain, de-signed to evaluate linguistic diversity, contextual ground-ing, and reasoning generalization. All resources, includ-ing the dataset, annotation toolkit, and both VideoQA and 
+
+VideoQGen benchmarks, are released as part of an open, in-stitutional reviewer board (IRB) approved work to promote ethically aligned research in real-world multimodal reason-ing. The key contributions of this work are summarized as follows. • A highly dense, large-scale dataset: 16 hours of urban traffic videos ( ∼ 1.7M frames) with 28 , 800 QA pairs at a density of 3.6K QA/hour across diverse weather, lighting, and traffic conditions. • A scalable and ethical annotation toolkit: A privacy-preserving event-driven framework compatible with any traffic dataset [29, 44], incorporating motion-based blur-ring, human validation, and model-ready templates. • Comprehensive benchmarking: Evaluation of 10 SOTA VideoLMs for VideoQA and 8 models for VideoQGen , re-vealing consistent perception–reasoning misalignment. • Empirical insight: Smaller models demonstrated supe-rior performance in low-level visual tasks (e.g., color and 
+
+attribute recognition ) compared to larger models, high-lighting challenges in large-scale reasoning architectures. The remainder of this paper is organized as follows. Section 2 reviews related work in traffic VideoQA and multimodal reasoning, Section 3 presents the UDVideoQA 
+
+dataset, including data collection, privacy methods, and QA 
+
+taxonomy, Section 4 details the experimental setup and benchmarking results, and Section 5 concludes with key findings and future directions. 
+
+2. Related Work 
+
+Recent progress in video-language understanding has in-spired the development of several benchmarks and models targeting complex reasoning across visual and temporal di-mensions. This section positions UDVideoQA within the urban traffic landscape by reviewing prior efforts in traffic-focused VideoQA , examining advances in VideoLMs , and highlighting how existing datasets and evaluation practices fall short in capturing the continuous, multi-agent nature of real-world urban traffic scenes. 
+
+2.1. Traffic VideoQA and Urban Reasoning 
+
+Recent traffic VideoQA benchmarks have advanced domain-specific reasoning in areas such as causality [44], risk local-ization [22], and text-aware scene understanding [23]. Ef-forts to scale data collection have similarly expanded, lever-aging social media videos and multi-sensor data from au-tonomous driving platforms [29, 30]. However, as summarized in Table 1, existing bench-marks face key limitations. Most are curated and event-centric, capturing discrete driving incidents from a single, vehicle-mounted perspective. While useful for structured perception tasks, this setup sparsely represents the con-tinuous multi-agent (pedestrians and vehicles) interactions found in dense real-world urban intersections. Furthermore, many current datasets do not adequately test for hallucina-tion robustness by asking negative QA pairs on objects not This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026.                                                                                                             
+
+> Dataset Year Domain Video Frames QA density Curated/Internet Sourced Hallucination Robustness Multi-Events Annotation Tool
+> BDD-OIA [31] 2019 Driving 0.02M -Curated ×××BDD-X [16] 2020 Driving 8.4M 0.79 QA/h Curated ×××MM-AU [7] 2021 Driving 2.2M 2.9k QA/h Internet Sourced ×××ROAD [34] 2021 Driving 0.02M 15 QA/h Curated ×××SUTD-TrafficQA [44] 2021 Wild Traffic 10M 560 QAs/h Internet Sourced ×××DRAMA [22] 2023 Driving 0.02M 10k QAs/h Curated ×××Rank2Tell [33] 2023 Driving 0.02M 181k QA/h Curated ×××Drive-LM [42] 2024 Driving 0.03M -Curated ×××NuScenes-QA [30] 2024 Driving 34K 13.5 QAs/h Curated ×××LingoQA [23] 2024 Driving 0.1M 13k QAs/h Curated ×××TUMTraffic-VideoQA [49] 2024 Roadside 8.9K 85 QAs/h Curated ×××RoadSocial [29] 2025 Wild Traffic 14M 1.98k QAs/h Internet Sourced ××
+> UDVideoQA (Ours) 2026 Roadside 1.7M 3.6k QAs/h Curated
+
+Table 1. Comparison of UDVideoQA with existing traffic VideoQA datasets. It highlights the key features of various datasets, showcasing 
+
+UDVideoQA ’s advancements in data scale, annotation density, and its unique focus on hallucination robustness and multi-event scenarios from a roadside perspective. 
+
+present in the scene. This gap highlights the need for bench-marks that capture the true spatio-temporal density and so-cial complexity of traffic environments to support more ro-bust multimodal reasoning. 
+
+2.2. Video-Language Models and Benchmarking 
+
+Recent surveys on VideoLMs [39] have outlined the evo-lution of multimodal reasoning architectures, highlighting both scaling success and persistent grounding limitations. In this study, the benchmarking framework includes a di-verse mix of proprietary and open-source models to pro-vide a comprehensive evaluation of video-language under-standing capabilities. The proprietary set includes Gem-ini series [9, 10] and GPT series [26, 27], While the open-source models cover Qwen2.5VL [36], VideoLLaMA 3 [46], InternVL3 [50], NVILA [20], and LLaVA-NeXT-Video [21]. This selection spans multiple architectures, pa-rameter scales, and training paradigms, offering a balanced assessment of the current VideoLM landscape. Despite im-pressive reasoning capabilities, these models often strug-gle with fine-grained perception, temporal consistency, and contextual grounding when applied to real-world traffic in-teractions. 
+
+2.3. Positioning of UDVideoQA 
+
+In response to these limitations, UDVideoQA introduces a continuous, surveillance-based dataset designed to capture multi-agent dynamics across varied urban conditions. The accompanying annotation framework supports ethical and scalable data handling through motion-based dynamic blur-ring and facilitates QA generation (see Figure 2), surpass-ing the rigid, template structures of earlier datasets [23]. As summarized in Table 1, UDVideoQA uniquely incorporates dense multi-event interactions, adverse weather, and night-time scenarios, while introducing a VideoQGen benchmark for assessing linguistic diversity and reasoning robustness. Together, this establishes UDVideoQA as a comprehensive platform for advancing multimodal reasoning in complex, real-world urban traffic scenes. 
+
+3. UDVideoQA Dataset 
+
+3.1. Data Collection and Composition 
+
+The UDVideoQA dataset comprises 16 hours of varied traf-fic footage with over 1.7 million frames, collected from multiple metropolitan intersections using deployed smart traffic camera systems (details in Supplementary). The cameras captured video at 30 fps, providing sufficient spatio-temporal resolution to observe complex pedestrian-pedestrian, vehicle-vehicle, and vehicle-pedestrian interac-tions, as well as their evolving spatial relationships within the scene. To reflect the diversity of real-world conditions, recordings span different times of day, morning rush hours (7-9 AM), midday ( 11 AM-1 PM), evening rush hours ( 5-
+
+7 PM), and nighttime ( 8 PM-midnight), and encompass a wide range of weather variations, including clear, rainy, and dust-storm conditions. Together, these recordings form a dataset that captures the full temporal, environmental, and behavioral variability inherent to urban traffic dynamics. 
+
+3.2. Data Preprocessing and Anonymity 
+
+Video Segmentation. The raw footage was segmented into 10 s clips, following prior studies that identify this du-ration as sufficient to capture complete human and vehicu-lar actions within a coherent temporal context [2]. Longer clips tend to introduce redundancy and increase modeling complexity, while shorter clips, less than 10 s, often miss key temporal dependencies [19, 40]. For VideoQA , adopting 
+
+10 s intervals aligns with the “less is more” principle [18], enabling denser annotations ( 1s of frame, there is 1 QA 
+
+pair) and maintaining sufficient temporal information for complex reasoning tasks. This design choice ensures that models focus on concise, context-rich segments that sup-port fine-grained spatio-temporal understanding. This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. UDVideoQA 
+
+> Dataset
+> Quality Control &
+> Refinement
+> Categorical Verification
+> Hallucination Removal
+> Timestamp Annotation
+> Ground Truth Validation
+> Traffic Video Recording and Processing
+> Dynamic Anonymity Blurring
+> QA Taxonomy & Generation
+> Human in the loop
+> Raw Video
+> Clip Pool
+> Temporal Clipping (10 -second clips)
+> Long -sequence video segmentation
+> Frame -event Alignment
+> Easy
+> Medium
+> Hard
+> VLMs Generated QA Pool
+> Prompt Engineering Video QA Template
+> Annotation
+> Tool
+> Raw Frames
+> Event -
+> based
+> Masks
+> Blurred
+> Frames
+
+Figure 2. Illustrates the pipeline for creating the UDVideoQA dataset. The process begins with traffic video recording, which is segmented and temporally clipped into 10 s clips. These clips undergo dynamic anonymity blurring. The QA taxonomy and generation module then uses model based on VideoQGen benchmark and prompt engineering to create a question pool, which undergoes rigorous human in the loop quality control and refinement. 
+
+Ethics and Dynamic Blurring. Ethical data handling was prioritized during dataset curation as it possessed person-ally identifiable information. The project received approval from the university IRB under protocol STUDY00018234 .To preserve privacy, UDVideoQA employs an event-driven dynamic blurring technique that generates motion-based masks for anonymization [6, 24]. This method operates on the principle of event-based vision [4], applying local-ized, time-dependent blurring that protects identities while retaining contextual integrity within each frame. For bench-marking, it was compared against a detector–segmenter baseline that combines YOLOv11 for object detection [14] with SAM2 for segmentation [17]. Quantitative and qualita-tive results (details in Supplementary) demonstrate that the event-driven method provides superior robustness and tem-poral consistency under low-light or cluttered conditions. 
+
+3.3. QA Taxonomy and Generation Benchmark 
+
+QA Taxonomy. To systematically evaluate model reason-ing in traffic scenarios, UDVideoQA defines a hierarchical taxonomy of questions that spans both perceptual and infer-ential skills [44]. This taxonomy enables structured assess-ment of model performance across diverse reasoning types, reflecting the layered complexity of urban traffic percep-tion. Each model is evaluated on its ability to: (1) inter-pret environmental context such as lighting, weather, and background conditions, (2) recognize relevant objects and their attributes to establish spatial grounding, (3) reason over temporal interactions among multiple agents, and (4) 
+
+enable higher-order inference via causal and counterfactual reasoning while adding out-of-context questions to reduce hallucination. The taxonomy consists of five primary rea-soning categories: • Attribution: Focuses on basic perception and recogni-tion of objects, attributes, and text. Example: “Is the crosswalk signal visible and displaying a ‘walk’ icon for pedestrians?” 
+
+• Basic Understanding: Evaluates global scene compre-hension, such as identifying ongoing activities or sum-marizing environmental context. Example: “What is the lighting condition in the background?” 
+
+• Event Reasoning: Captures cause-and-effect reasoning over temporal sequences. Example: “Why did the white sedan brake after the blue truck changed lanes?” 
+
+• Reverse Reasoning: Requires inference of prior states that explain the observed event. Example: “Given the pedestrian is halfway across the street, what was the likely state of the traffic light just before?” 
+
+• Counterfactual Inference: Tests model robustness to hallucination through hypothetical scenarios. Example: “If the traffic light had been green, would the motorcycle have cleared the intersection before the pedestrian?” 
+
+Each question is further labeled by difficulty (easy, medium, hard) and interaction-focused (pedestrian-centric or vehicular-centric), resulting in 30 taxonomic tags. Astructured annotation template ensures consistency across annotators, standardizing question format, difficulty cali-bration, and coverage across reasoning types (details in Supplementary). This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026.                                                                                                                                                                                                                                                                                                                                  
+
+> Model Name Relevance Answerability Diversity Pedestrian Centric Vehicle Centric Specific (Grounded) Generic BU Atr ER RR CI BU Atr ER RR CI BU Atr ER RR CI BU Atr ER RR CI BU Atr ER RR CI BU Atr ER RR CI BU Atr ER RR CI Gemini 2.5 Pro 92 84 82 86 80 90 80 80 84 82 64 62 66 64 60 35 30 45 40 50 55 60 50 55 45 70 80 65 60 55 30 20 35 40 45
+> Qwen3 Max 82 84 84 85 85 92 88 88 88 88 50 50 48 50 50 33 41 49 46 43 67 59 51 54 57 38 45 56 57 49 62 55 44 43 51
+> Gemini Flash 78 84 82 84 80 77 81 80 83 82 64 43 50 47 41 36 43 50 47 41 64 57 50 53 59 39 45 58 56 50 61 55 42 44 51
+> Qwen3-VL-235B 70 76 79 81 74 76 80 80 82 77 56 59 62 63 58 31 44 49 46 42 69 48 55 58 50 42 48 55 58 50 58 52 45 42 50
+> Gemini 2.5 Flash 74 70 72 68 72 86 85 84 83 85 34 34 34 33 33 38 44 49 46 42 62 56 51 54 58 41 47 55 57 46 59 53 45 43 54
+> Qwen3-VL-30B 72 78 77 79 74 76 80 79 81 78 47 48 50 50 50 34 43 51 48 45 66 57 49 52 55 39 46 56 58 50 61 54 44 42 50
+> GPT-5 71 73 75 77 72 77 79 80 82 78 53 55 57 59 55 34 42 47 46 43 66 58 53 54 57 38 44 56 58 48 62 58 44 42 52
+> GPT-4o 39 41 38 34 35 52 58 53 60 51 710 811 919 13 45 38 50 51 85 53 61 40 0117 56 77 100 98 82 43 23 “‘
+
+Table 2. The VideoQGen Benchmark. Evaluating multimodal models across reasoning types, including basic understanding ( BU ), at-tribution ( Atr ), event reasoning ( ER ), reverse reasoning ( RR ), and counterfactual inference ( CI ). Gemini 2.5 Pro leads overall across relevance, answerability, and diversity dimensions, showing strong consistency across all reasoning categories. 
+
+VideoQGen Benchmark. To complement the VideoQA 
+
+task, UDVideoQA introduces the first-of-its-kind VideoQ-Gen benchmark for the traffic domain. This benchmark as-sesses a model’s ability to generate meaningful, diverse, and contextually grounded questions directly from untrimmed urban videos. A total of 2, 000 questions were generated from a diverse subset of videos covering variations in traffic density, lighting, and weather conditions. Using the stan-dardized question template, these samples were evaluated across 8 SOTA VideoQGen models (see Table 2), follow-ing human-assessed metrics adapted from established video reasoning studies [41]. Human evaluators rated each gener-ated question on a scoring policy scaled from 1 to 5 across three key criteria: • Relevance: Whether the generated question aligns with visible content in the video. • Answerability: Whether the question can be answered us-ing only the visual context. • Diversity: The variety and novelty of generated questions for a given clip. To ensure the reliability of these human judgments, inter-annotator agreement was measured using the Pearson cor-relation coefficient. All QA pairs and associated metadata (video file paths and annotations) were stored in a structured 
+
+CSV format and integrated into the annotation tool for scal-able validation. As shown in Table 2, Gemini 2.5 Pro [10] achieved the highest overall scores, followed closely by the 
+
+Qwen 3 [37] series. These models demonstrate strong ca-pability for generating contextually grounded and semanti-cally rich questions. In contrast, GPT -based models [26] performed less effectively in this domain-specific setting, highlighting the challenges of general-purpose models in structured, real-world traffic environments (details in Sup-plementary). 
+
+3.4. Dataset Statistics 
+
+The UDVideoQA dataset comprises 16 hours of traffic footage recorded at 30 fps , resulting in approximately 1.7
+
+million frames. Of this, 8 hours of footage were densely annotated, yielding 28 , 800 QA pairs, corresponding to an average of one question per second of video. While 8 hours may seem limited in scope, the dataset’s focus on high-density traffic intersections ensures that the footage is re-plete with complex multi-agent interactions. This high fre-quency of events provides a rich and concentrated source of data, making this highly efficient for VideoQA analysis (details in Supplementary). The dataset maintains a bal-anced coverage across the five reasoning categories, with approximately 5, 700 –5, 800 QA pairs per category. Ap-proximately 70 % of questions are pedestrian or vehicle-centric, while the remaining 30 % focus on road infrastruc-ture, signage, and environmental context. Linguistically, question forms containing ‘Is’ , ‘What’ , and ‘How’ domi-nate at roughly 95 %, 85 %, and 23 % within their respective reasoning groups, reflecting structured and consistent lan-guage usage. To specifically assess temporal understanding, the dataset includes two key categories. The first, event rea-soning , accounts for cause-and-effect reasoning over time. Its prevalence of ‘Is’ based questions (e.g., “Focusing on the final three seconds.., is there any observable instance of a vehicle moving closer..?” ) requires models to perform a two-step verification: confirming the target object appeared within the specified interval and validating that the de-scribed action occurred. The second category, reverse rea-soning , tests the model’s ability to compare multiple events and infer their temporal order (e.g., “..which one entered the foreground... first..?” ). These questions require models to reason over the evolution of actions, distinguishing gen-uine video understanding from static, frame-based recogni-tion (details in Supplementary). To further analyze dataset composition, we examined the underlying real-world pri-ors across reasoning categories. The statistics, illustrated in Figure 3, reveal notable patterns. Figure 3(b) details the dis-tribution of question categories, showing that event reason-ing is dominated by vehicle-related interactions, highlight-ing their role as primary causal agents. It also shows that 
+
+basic understanding questions often reference weather and illumination, reflecting perception of the broader environ-mental context. This contextual spread is further illustrated in Figure 3(c), which maps the focus of each reasoning set across dimensions like ‘pedestrian’ , ‘vehicle’ , and ‘event’ .This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. (c)   
+
+> (b) (a)
+> (d)
+> Figure 3. UDVideoQA dataset statistics. (a) Word frequency distribution by question type, (b) Distribution of question categories across semantic domains, including pedestrians, vehicles, and environmental signage. (c) Plot illustrating the spread of question sets across six contextual dimensions: pedestrian, temporal, vehicle, event, and signage, and (d) Frequency of questions containing key interrogative terms (“what”, “where”, and “is” ) across reasoning categories.
+
+Furthermore, Figure 3(a) and Figure 3(d) provide insight into the linguistic structure, showing the word frequency distribution and the prevalence of key interrogative terms, respectively. This distribution mirrors real-world traffic dy-namics and encourages models to develop domain-aware reasoning that integrates perception, context, and causality (details in Supplementary). 
+
+3.5. QA Validation and Evaluation 
+
+QA Validation. To ensure the accuracy and clarity of anno-tations, a rigorous validation protocol was implemented. A team of ten trained annotators underwent domain-specific instruction on task requirements and the use of the annota-tion interface. For each video segment, annotators reviewed its corresponding QA pair and made a binary decision-accept or reject-based on three criteria: (1) question clar-ity, (2) contextual relevance, and (3) answerability using only the given video frames. This structured workflow sub-stantially improved efficiency, reducing manual validation time by an order of magnitude compared to earlier itera-tions. The validation tool is publicly released to facilitate transparency, reproducibility, and further research, as well as compatibility with other existing datasets [29, 44]. 
+
+QA Evaluation. Model performance on the UDVideoQA 
+
+benchmark is measured using VideoQA accuracy metric, de-fined as the percentage of predictions that exactly match the corresponding ground-truth answers. For questions with multiple valid responses, a prediction is considered correct if it matches any of the annotated ground truths. This eval-uation protocol ensures fair comparison across models with varying answer generation strategies. 
+
+Model Compatibility. The public release of this dataset is offered in JSONL format, ensuring compatibil-ity with leading multimodal frameworks of LLaVA [21] and 
+
+Qwen [36, 37]. This curated version establishes a reliable baseline for future work in large-scale VideoQA and visual reasoning-based dataset development. 
+
+4. Experiments and Analysis 
+
+To evaluate the effectiveness of UDVideoQA as a bench-mark for multimodal reasoning, a series of experiments was conducted to benchmark 10 SOTA VideoLMs . The anal-ysis examines both zero-shot and fine-tuned performance, emphasizing the impact of domain adaptation on reasoning accuracy and visual grounding. 
+
+4.1. Experimental Setup 
+
+Dataset and Infrastructure. The UDVideoQA dataset was partitioned into training, validation, and test sets, with 
+
+5, 000 QA pairs reserved for validation. The training and validation videos were taken from one group of intersec-tions. The test set videos were taken from a completely different intersection, which was not used for training. All experiments were conducted on the university’s high-performance computing cluster equipped with NVIDIA A100 GPUs [5, 38]. Model checkpoints and logs were au-tomatically stored for reproducibility. 
+
+Model Configuration. Both open-source and proprietary 
+
+VideoLMs were evaluated, including Gemini [9,10], GPT-4o [26], GPT-5 , Qwen-2.5-VL [1], InternVL3 [35], VideoL-LaMA 3 [46], and NVILA [20] and LLava-NexT-Video [21]. For fine-tuning, the models were trained using low-rank adaptation (LoRA) [11] on parameter scales ranging from 
+
+7B to 32 B. All experiments employed a four-GPU setup with consistent optimization and batch configurations. This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026.                                                                                                                                                                                                          
+
+> Morning Afternoon Evening Model Type Model Name BU Atr ER RR CI Overall BU Atr ER RR CI Overall BU Atr ER RR CI Overall Proprietary Gemini 2.5 Pro 90.00 22.22 88.89 86.10 91.70 75.78 78.27 65.44 75.42 73.81 72.56 73.10 87.39 50.00 62.09 76.37 79.80 71.13
+> Gemini 2.5 Flash 80.00 22.22 77.78 77.78 89.88 69.53 82.87 75.61 74.91 75.65 65.85 74.98 50.00 50.00 68.68 72.53 61.60 60.56
+> GPT-5 80.00 25.00 50.00 63.89 82.22 60.22 74.83 69.96 70.68 70.13 68.90 70.90 58.79 50.00 47.80 54.94 58.50 54.01
+> GPT-4o 75.00 25.00 69.44 47.22 85.88 60.51 58.74 19.68 35.32 22.56 45.61 36.38 50.00 8.24 56.59 58.79 76.38 50.00
+> Open Source Qwen 2.5 32B 75.66 36.11 66.67 25.00 77.78 56.24 64.37 48.59 53.66 44.17 51.83 52.52 72.07 40.78 45.96 78.03 53.16 58.00
+> Qwen 2.5 7B (Fine Tune) 74.80 16.67 75.56 50.00 77.78 58.96 63.22 53.11 54.27 39.88 53.66 52.83 66.07 71.30 56.59 58.79 54.17 61.38
+> VideoLLama3 65.60 22.22 58.33 58.33 69.34 54.76 59.77 36.72 49.39 28.83 48.78 44.70 66.21 50.00 53.84 58.79 49.87 55.74
+> NVILA 8B 55.32 22.22 72.22 47.22 53.33 50.06 64.37 33.90 54.88 30.06 52.44 47.13 52.31 49.82 49.19 45.47 50 49.44
+> InternVL3 38B 70.00 36.11 47.22 66.67 67.22 57.44 61.49 36.72 46.95 26.99 59.15 46.26 38.33 47.22 53.33 65.00 40.02 48.78
+> Llava-NeXT Video 7B 44.80 2.78 63.89 33.33 22.22 33.40 45.40 16.95 23.78 16.56 25.61 25.66 30.10 1.10 54.40 23.63 5.49 22.94
+
+Table 3. The VideoQA Benchmark. It presents comparative performance across proprietary and open-source video reasoning models evaluated under varying illumination conditions: high intensity (afternoon), medium intensity (morning), and low intensity (evening). Overall results show that Gemini 2.5 Pro achieved the highest accuracy in the Morning (75.78%) and Evening (71.13%) conditions, while Gemini 2.5 Flash scored the highest in the Afternoon(74.98%). Llava-NeXT-Video exhibited the weakest overall performance. 
+
+4.2. Evaluation Methodology 
+
+The evaluation framework integrates quantitative metrics and qualitative assessment through a two-stage process: 1. Zero-shot evaluation: All models are evaluated on the test set without additional training to assess generaliza-tion ability. 2. Fine-tuning: Selected open-source models are fine-tuned on the UDVideoQA training set to measure adapt-ability and domain transfer performance. 
+
+Semantic-Semantic Scoring via LLM Judge. Traditional 
+
+VideoQA evaluation relies on lexical similarity metrics (BLEU , ROUGE ) [8, 28, 45] that penalize semantically cor-rect but lexically different answers. To address this limita-tion, we introduce a semantic-semantic matching approach using an external LLM Judge [23]. Specifically, Gemini 2.5 Pro [23] was employed as a text-only evaluator. To mit-igate bias, we employed a human annotator to provide un-biased assessments of answer correctness after the model’s assessment. Each response was assigned a binary score, 
+
+SLLM ∈ 0, 1, indicating whether the predicted answer se-mantically aligns with the ground truth. 
+
+Weighted Complexity-based Scoring. To capture the varying cognitive difficulty of reasoning categories, we in-troduce a weighted scoring formulation that prioritizes suc-cess in higher-order reasoning tasks. Weights were assigned based on increasing inferential complexity: 1.0 (BU), 1.2
+
+(Atr), 1.3 (ER and RR), and 1.5 (CI). The final model score 
+
+W is computed as: 
+
+W = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+SLLM i · Wci , (1) where SLLM i is the correctness score of the i-th response, and Wci is the weight assigned to its reasoning category ci.This formulation rewards success in cognitively demanding categories, especially counterfactual inference, which tar-gets hallucination reduction and deeper causal understand-ing. (details in Supplementary) 
+
+Figure 4. Cross-model performance comparison on the UD-VideoQA benchmark. Each bar shows the range from worst to best performance of VideoLMs used in this study. 
+
+Human Validation for Bias Reduction. To ensure relia-bility and minimize potential bias in LLM -based evaluation, a human-in-the-loop validation process was implemented. A “ standard subset ” of 1k predictions was randomly sam-pled across models and reasoning categories and indepen-dently annotated by domain experts. The Pearson correla-tion agreement (PCA) metric was computed between hu-man and LLM evaluations, and the prompts were iteratively refined until a high level of consistency was achieved. 
+
+4.3. Quantitative Evaluation 
+
+The VideoQA benchmarking results, presented in Table 3 and visualized in Figure 4, reveal substantial performance variations and highlight key model-specific strengths and weaknesses. Proprietary models, led by Gemini 2.5 Pro , set the baseline with the highest overall scores across all con-ditions ( 75 .78 % in “morning” ). This model excels in high-level reasoning, scoring 91 .70 % in CI and 86 .10 % in RR .However, the table exposes a critical weakness: this reason-ing capability does not imply perceptual robustness. Gemini 2.5 Pro ’s Atr score in the same “morning” condition is only 
+
+22 .22 %, a trend of poor visual grounding seen across most proprietary models. This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. 
+
+Dataset Overall Score across QA Pairs Baseline Fine Tuned 
+
+RoadSocial [29] 52.75 60 SUTDTraffic [44] 59.05 62.7      
+
+> Table 4. Cross-dataset generalization results of Qwen2.5-VL-7B
+> evaluated on RoadSocial and SUTDTrafficQA. The table reports the overall QA accuracy (in %) for the baseline model and after fine-tuning on UDVideoQA .
+
+In contrast, open-source models show wider variance. Some, like LLaVA-NeXT-Video 7B , struggle significantly, with performance bottoming out in the “evening” condi-tion, where its attribution accuracy drops to just 1.10 %. However, the results also highlight a key opportunity: com-pact, fine-tuned open-source models can be highly compet-itive. The Qwen-2.5-VL 7B (fine-tuned) model achieved the highest open-source score in the “evening” condition (61 .38 %). This performance not only leads its peers but also significantly outperforms larger proprietary systems like GPT-5 (54 .01 %) and GPT-4o (50 .0%) in the same low-light scenario as in Table 3. The figure shows the overall comparison of all models 4. 
+
+4.4. Ablation Study 
+
+Multi-Agent behavior Analysis. This study analyzed traf-fic footage using an object detection and interaction frame-work to justify the dynamics of multi-agent behaviors in a traffic setting. This study employed the YOLOv11 model to perform per-frame object detection, identifying and local-izing a set of traffic-related classes, including person , bicy-cle , car , motorcycle , bus , and truck , and all traffic-related entities. For each frame, the system generated a count of detected objects and then computed the Euclidean distances between the centroids of relevant agent pairs. To charac-terize potential interaction events, we extracted the mini-mum distance for three interaction types: vehicle-vehicle, pedestrian-pedestrian, and vehicle-pedestrian. (details in Supplementary) 
+
+Generalizability. To test cross-domain generalization by training models on the custom UDVideoQA dataset and test-ing them on the RoadSocial [29] and SUTDTrafficQA [44] benchmarks. When it was evaluated across 500 QA pairs each in their respective QA groups, the fine-tuned model demonstrated notable gains, achieving a 7.3% improvement on RoadSocial and a 4.3% improvement on SUTDTraf-ficQA as shown in Table 4. This enhanced performance is attributed to the model’s improved ability to perceive ob-jects in complex surroundings, developed from its train-ing on the high-density traffic scenarios unique to the UD-VideoQA dataset (details in Supplementary). 
+
+4.5. Qualitative Insights 
+
+Qualitative analysis reveals several recurring patterns in model behavior regarding visual grounding and reliance on commonsense priors. • Semantic vs. Contextual Grounding. Models often gen-erate semantically correct answers (e.g., “collision” ) that lack proper contextual grounding . For instance, a model might hallucinate a pedestrian when only vehicles were present, highlighting the limitations of text-based evalua-tion. • Attribution and Commonsense Discrepancy. A recur-ring discrepancy was observed: models often excelled at higher-order CI (which relies on commonsense priors) but failed at basic Atr tasks demanding precise pixel-level recognition. We attribute this failure to the high spatio-temporal density of agents in our data, which complicates precise visual grounding. • Causal and Temporal Challenges. Higher-order causal ,
+
+event , and reverse reasoning remain difficult, as current models struggle to model the interdependent, temporal cause-and-effect chains that these tasks require. The data in Table 3 substantiates this claim, showing a recurring and significant performance gap where models’ scores for 
+
+event reasoning and reverse reasoning are dramatically lower than for basic understanding , confirming that com-plex temporal reasoning remains a key difficulty. 
+
+5. Conclusion 
+
+This paper presents UDVideoQA , a large-scale benchmark for multimodal reasoning in urban environments, integrat-ing 16 hours of real-world video, a privacy-preserving framework, and 28 , 800 QA-pairs to evaluate perception and causality in multi-agent contexts. Experiments revealed a fundamental limitation in current VLMs , highlighting a significant gap between abstract reasoning and concrete per-ception, where models excel at complex counterfactual in-ference but fail at basic visual perception. On a promising note, domain-specific fine-tuning enables compact, open-source models like Qwen-2.5-VL 7B to achieve performance comparable to proprietary systems, improving low-level at-tribution and demonstrating cross-domain generalization. These findings are reinforced by the UDVideoQA dataset fo-cuses on controlled, high-fidelity traffic scenes that empha-size consistency and causal clarity over uncontrolled scale. By releasing the dataset, annotation tools, and benchmarks, 
+
+UDVideoQA establishes a robust and ethically grounded foundation for advancing real-world multimodal reasoning and developing the next generation of perception–reasoning aligned VLMs .This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. 
+
+6. Acknowledgment 
+
+This research is supported by the NSF through the Part-nerships for Innovation Program under Grant (#2329780). The authors gratefully thank ARGOS Vision for providing the data and acknowledge Research Computing at Arizona State University for providing the research computing and storage resources that contributed to the results reported in this paper [13]. 
+
+References 
+
+[1] Jinze Bai, Shuai Bai, Shusheng Yang, Shijie Wang, Sinan Tan, Peng Wang, Junyang Lin, Chang Zhou, and Jingren Zhou. Qwen-vl: A versatile vision-language model for un-derstanding, localization, text reading, and image generation. 
+
+arXiv preprint arXiv:2308.12966 , 2023. [2] Joao Carreira and Andrew Zisserman. Quo vadis, action recognition? A new model and the kinetics dataset. In Pro-ceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) , pages 6299–6308, 2017. [3] Bharatesh Chakravarthi, M Manoj Kumar, and BN Pa-van Kumar. Event-based sensing for improved traffic detec-tion and tracking in intelligent transport systems toward sus-tainable mobility. In International Conference on Interdis-ciplinary Approaches in Civil Engineering for Sustainable Development , pages 83–95. Springer, 2023. [4] Bharatesh Chakravarthi, Aayush Atul Verma, Kostas Dani-ilidis, Cornelia Fermuller, and Yezhou Yang. Recent event camera innovations: A survey. In European Conference on Computer Vision , pages 342–376. Springer, 2024. [5] Jack Choquette, Wishwesh Gandhi, Olivier Giroux, Nick Stam, and Ronny Krashinsky. Nvidia a100 tensor core gpu: Performance and innovation. IEEE Micro , 2021. [6] F. Crete-Roffet, T. Dolmiere, P. Ladret, and M. Nicolas. The blur effect: perception and estimation with a new no-reference perceptual blur metric. In Human Vision and Elec-tronic Imaging XII , page 64920I, 2007. [7] Jianwu Fang, Lei lei Li, Junfei Zhou, Junbin Xiao, Hongkai Yu, Chen Lv, Jianru Xue, and Tat-Seng Chua. Abductive ego-view accident video understanding for safe driving per-ception, 2024. [8] Kavita Ganesan. Rouge 2.0: Updated and improved mea-sures for evaluation of summarization tasks. arXiv preprint arXiv:1803.01937 , 2018. [9] Google Gemini Team. Gemini 1.5: Unlocking multimodal understanding across millions of tokens of context. arXiv preprint arXiv:2402.10170 , 2024. [10] Google Gemini Team. Gemini 2.5: Pushing the fron-tier with advanced reasoning, multimodality, long context, and next generation agentic capabilities. arXiv preprint arXiv:2507.06261 , 2025. [11] Edward J. Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Lu Wang, and Weizhu Chen. Lora: Low-rank adaptation of large language models. arXiv preprint arXiv:2106.09685 , 2021. [12] Yuhuang Hu, Elia Tsur, Andrea Vianello, Daniel San, and Tobi Delbruck. v2e: From video frames to realistic dvs events. In 2021 IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPRW) , pages 1801– 1809, 2021. [13] Douglas M. Jennewein, Johnathan Lee, Chris Kurtz, William Dizon, Ian Shaeffer, Alan Chapman, Alejandro Chiquete, Josh Burks, Amber Carlson, Natalie Mason, et al. The sol supercomputer at arizona state university. In Practice and Experience in Advanced Research Computing 2023: Com-puting for the Common Good (PEARC ’23) , pages 296–301, 2023. [14] Glenn Jocher, Ayush Chaurasia, and Li Jing. Yolo by ul-tralytics. https://github.com/ultralytics/ ultralytics , 2023. [15] Rahima Khanam and Muhammad Hussain. Yolov11: An overview of the key architectural enhancements. arXiv preprint arXiv:2410.17725 , 2024. [16] Jinkyu Kim, Suhong Moon, Anna Rohrbach, Trevor Darrell, and John Canny. Advisable learning for self-driving vehicles by internalizing observation-to-action rules. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pat-tern Recognition (CVPR) , pages 9661–9670, 2020. [17] Alexander Kirillov and et al. Segment anything model 2. 
+
+arXiv preprint arXiv:2407.03991 , 2024. [18] Jie Lei, Linjie Li, Luowei Zhou, Zhe Gan, Tamara L. Berg, Mohit Bansal, and Jingjing Liu. Less is more: Clipbert for video-and-language learning via sparse sampling. In Pro-ceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , pages 7331–7341, 2021. [19] Yanwei Li, Chengyao Wang, and Jiaya Jia. LLaMA-VID: An image is worth 2 tokens in large language models. arXiv preprint arXiv:2311.17043 , 2024. [20] Ji Lin, Hongxu Yin, Wei Ping, Yao Lu, Pavlo Molchanov, Andrew Tao, Huizi Mao, Jan Kautz, Mohammad Shoeybi, and Song Han. Vila: On pre-training for visual language models. arXiv preprint arXiv:2312.07533 , 2024. [21] Haotian Liu, Chunyuan Li, Yuanhan Li, Bo Li, and Yong Jae Lee. LLaVA-NeXT: Improved reasoning, ocr, and world knowledge. arXiv preprint arXiv:2402.16694 , 2024. [22] Srikanth Malla, Chiho Choi, Isht Dwivedi, Joon Hee Choi, and Jiachen Li. Drama: Joint risk localization and captioning in driving. In WACV , 2023. [23] Ana-Maria Marcu, Long Chen, Jan H¨ unermann, Alice Karn-sund, Benoit Hanotte, Prajwal Chidananda, Saurabh Nair, Vijay Badrinarayanan, Alex Kendall, Jamie Shotton, Elahe Arani, and Oleg Sinavski. Lingoqa: Visual question answer-ing for autonomous driving. In ECCV , 2024. [24] Pina Marziliano, Frederic Dufaux, Stefan Winkler, and Touradj Ebrahimi. A no-reference perceptual blur metric. In 
+
+Proceedings of the International Conference on Image Pro-cessing (ICIP) , pages 57–60, 2002. [25] neuromorphicsystems. IEBCS: ICNS Event Based Camera Simulator. https : / / github . com / neuromorphicsystems / IEBCS , 2025. Accessed: 2025-11-04. [26] OpenAI. Gpt-4 technical report. arXiv preprint arXiv:2303.08774 , 2024. This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. 
+
+[27] OpenAI. Introducing gpt-5. https://openai.com/ index/introducing- gpt- 5/ , 2025. [Online; ac-cessed 11-Nov-2025]. [28] Kishore Papineni, Salim Roukos, Todd Ward, and Wei-Jing Zhu. Bleu: a method for automatic evaluation of machine translation. ACL ’02: Proceedings of the 40th Annual Meet-ing on Association for Computational Linguistics , 2002. [29] Chirag Parikh, Deepti Rawat, Rakshitha R. T., Tathagata Ghosh, and Ravi Kiran Sarvadevabhatla. Roadsocial: A di-verse videoqa dataset and benchmark for road event under-standing from social video narratives, 2025. [30] Tianwen Qian, Jingjing Chen, Linhai Zhuo, Yang Jiao, and Yu-Gang Jiang. Nuscenes-qa: A multi-modal visual question answering benchmark for autonomous driving scenario. In 
+
+AAAI , 2024. [31] Amir Rasouli, Iuliia Kotseruba, T. Kunic, and John K. Tsot-sos. A multimodal dataset for pedestrian action anticipation. In 2019 IEEE/CVF International Conference on Computer Vision Workshop (ICCVW) , pages 3602–3611, 2019. [32] Henri Rebecq, Daniel Gehrig, and Davide Scaramuzza. ESIM: An open event camera simulator. In Conference on Robot Learning (CoRL) , 2018. [33] Enna Sachdeva, Nakul Agarwal, Suhas Chundi, Sean Roelofs, Jiachen Li, Mykel Kochenderfer, Chiho Choi, and Behzad Dariush. Rank2tell: A multimodal driving dataset for joint importance ranking and reasoning. In Proceed-ings of the IEEE/CVF Winter Conference on Applications of Computer Vision (WACV) , pages 7513–7522, 2024. [34] Gurkirt Singh, Stephen Akrigg, Manuele Di Maio, Valentina Fontana, Reza Javanmard Alitappeh, and Salman Khan. ROAD: The Road event awareness dataset for autonomous driving. In Proceedings of the IEEE/CVF International Con-ference on Computer Vision (ICCV) , pages 13327–13336, 2021. [35] InternVL Team. Expanding performance boundaries of open-source multimodal models with model, data, and test-time scaling. arXiv preprint arXiv:2412.05271 , 2024. [36] Qwen Team. Qwen2 technical report. arXiv preprint arXiv:2407.10671 , 2024. [37] Qwen Team. Qwen3 technical report. arXiv preprint arXiv:2505.09388 , 2025. [38] Yuhsiang Mike Tsai, Terry Cojean, and Hartwig Anzt. Evaluating the performance of nvidia’s a100 ampere gpu for sparse linear algebra computations. arXiv preprint arXiv:2008.08478 , 2020. [39] Joseph Raj Vishal, Divesh Basina, Aarya Choudhary, and Bharatesh Chakravarthi. Eyes on the road: State-of-the-art video question answering models assessment for traffic mon-itoring tasks. arXiv preprint arXiv:2412.01132 , 2024. [40] Chao-Yuan Wu, Christoph Feichtenhofer, Haoqi Fan, Kaim-ing He, Philipp Krahenbuhl, and Ross Girshick. Long-term feature banks for detailed video understanding. In Proceed-ings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) , pages 284–293, 2019. [41] Junbin Xiao, Xindi Shang, Angela Yao, and Tat-Seng Chua. Next-qa: Next phase of question-answering to explaining temporal actions. In Proceedings of the IEEE/CVF Confer-ence on Computer Vision and Pattern Recognition (CVPR) ,pages 4937–4947, 2021. [42] Shuo Xing, Chengyuan Qian, Yuping Wang, Hongyuan Hua, Kexin Tian, Yang Zhou, and Zhengzhong Tu. OpenEMMA: Open-source multimodal model for end-to-end autonomous driving. arXiv preprint arXiv:2412.15208 , 2024. [43] Xinyu Xiong, Zihuang Wu, Shuangyi Tan, Wenxue Li, Fei-long Tang, Ying Chen, Siying Li, Jie Ma, and Guanbin Li. Sam2-unet: Segment anything 2 makes strong encoder for natural and medical image segmentation. arXiv preprint arXiv:2408.08870 , 2024. [44] Li Xu, He Huang, and Jun Liu. Sutd-trafficqa: A question answering benchmark and an efficient network for video rea-soning over traffic events. In CVPR , pages 9878–9888, 2021. [45] An Yang, Kai Liu, Jing Liu, Yajuan Lyu, and Sujian Li. Adaptations of rouge and bleu to better evaluate machine reading comprehension task. arXiv:1806.03578 , 2018. [46] Boqiang Zhang, Kehan Li, Zesen Cheng, Zhiqiang Hu, Yuqian Yuan, Guanzheng Chen, Sicong Leng, Yuming Jiang, Hang Zhang, Xin Li, Peng Jin, Wenqi Zhang, Fan Wang, Li-dong Bing, and Deli Zhao. Videollama 3: Frontier multi-modal foundation models for image and video understand-ing, 2025. [47] Yifu Zhang, Peize Sun, Yi Jiang, Dongdong Yu, Fucheng Weng, Zehuan Yuan, Ping Luo, Wenyu Liu, and Xinggang Wang. Bytetrack: Multi-object tracking by associating every detection box, 2022. [48] Hang Zhao, Antonio Torralba, Lorenzo Torresani, and Zhicheng Yan. Hacs: Human action clips and segments dataset for recognition and temporal localization. In Pro-ceedings of the IEEE/CVF International Conference on Computer Vision (ICCV) , pages 8668–8678, 2019. [49] Xingcheng Zhou, Konstantinos Larintzakis, Hao Guo, Wal-ter Zimmer, Mingyu Liu, Hu Cao, Jiajie Zhang, Venkat-narayanan Lakshminarasimhan, Leah Strand, and Alois C Knoll. Tumtraffic-videoqa: A benchmark for unified spatio-temporal video understanding in traffic scenes. arXiv preprint arXiv:2502.02449 , 2025. [50] Jinguo Zhu, Weiyun Wang, Zhe Chen, Zhaoyang Liu, Shen-glong Ye, Lixin Gu, Hao Tian, Yuchen Duan, Weijie Su, Jie Shao, Zhangwei Gao, Erfei Cui, Xuehui Wang, Yue Cao, Yangzhou Liu, Xingguang Wei, Hongjie Zhang, Haomin Wang, Weiye Xu, Hao Li, Jiahao Wang, Nianchen Deng, Songze Li, Yinan He, Tan Jiang, Jiapeng Luo, Yi Wang, Con-ghui He, Botian Shi, Xingcheng Zhang, Wenqi Shao, Junjun He, Yingtong Xiong, Wenwen Qu, Peng Sun, Penglong Jiao, Han Lv, Lijun Wu, Kaipeng Zhang, Huipeng Deng, Jiaye Ge, Kai Chen, Limin Wang, Min Dou, Lewei Lu, Xizhou Zhu, Tong Lu, Dahua Lin, Yu Qiao, Jifeng Dai, and Wenhai Wang. Internvl3: Exploring advanced training and test-time recipes for open-source multimodal models, 2025. This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. 
+
+# UDVideoQA : A Traffic Video Question Answering Dataset for Multi-Object Spatio-Temporal Reasoning in Urban Dynamics Supplementary Material 
+
+0. Preliminary 
+
+Ethical Disclaimer and Dataset Scope. All human sub-jects, vehicles, and entities containing potential person-ally identifiable information have been anonymized in full compliance with institutional ethical standards. The UD-VideoQA dataset employs an event-driven, motion-based blurring technique to ensure privacy preservation while maintaining scene fidelity. 
+
+Dataset Scope and Representativeness. 
+
+• The UDVideoQA dataset comprises 16 hours of urban traffic footage , providing a focused yet robust baseline for studying multimodal reasoning in dynamic environments. • Data were collected from metropolitan regions under di-verse traffic, weather, and lighting conditions, ensuring consistent quality and controlled variability. • While geographically specific, this design promotes re-producibility and establishes a solid foundation for future community-driven multi-city extensions. 
+
+Community Expansion and Open Collaboration. The UD-VideoQA benchmark is an open and evolving resource , de-signed to grow through community participation. Contribu-tions are encouraged via: • Dataset Extension: Adding new recordings from varied regions and conditions. (https://huggingface. co/UDVideoQA )
+
+• Tool Enhancement: Improving the open-source annota-tion and validation toolkit. (https://github.com/ UDVideoQA/UDVideoQA-Annotation_Tools )
+
+• Benchmark Expansion: Evaluating emerging VLMs 
+
+on the public leaderboard to advance multimodal rea-soning. (https : / / github . com / UDVideoQA / UDVideoQA-finetune )
+
+Together, these efforts position UDVideoQA as a collabora-tive, ethically grounded benchmark that fosters transparent and reproducible research in real-world multimodal reason-ing. 
+
+A. Data Collection and Setup 
+
+Camera Deployment and Configuration. The data col-lection infrastructure comprised camera units strategically deployed across major urban intersections as part of an on-going traffic study conducted jointly between a university research group and the metropolitan city authority. Each unit was designed for long-term, real-world deployment and integrated a low-power computational module based on 
+
+Figure 5. Deployment sites of traffic cameras used for data col-lection. The selected intersections capture diverse lighting and weather conditions, providing representative coverage of real-world urban traffic environments. 
+
+the NVIDIA Jetson platform. This edge-computing con-figuration enabled on-board AI processing for object detec-tion and classification directly at the point of capture, sub-stantially reducing the need for continuous high-bandwidth video transmission. The deployed cameras, shown in Fig-ure 5, formed a distributed sensing network optimized for high-fidelity visual data acquisition under real-world urban conditions. The system architecture was tailored for single-modality, high-resolution visual recording to ensure consistent frame quality across deployment sites. Each camera captured video at a resolution of 1920 × 1080 pixels (Full HD) and a frame rate of 30 fps , preserving fine-grained spatial de-tails such as vehicle markings, pedestrian trajectories, and traffic signal states. This configuration minimizes motion blur and maintains temporal fidelity, both of which are es-sential for reasoning-oriented VideoQA tasks that depend on precise spatio-temporal understanding. 
+
+Environmental Diversity and Recording Conditions. To capture the full variability of urban traffic dynamics, record-ings were collected under diverse environmental conditions. The dataset spans multiple times of day including morning (7–9 AM), midday ( 11 AM– 1 PM), evening ( 5–7 PM), and nighttime ( 8 PM– 12 AM), and encompasses a wide range This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. 
+
+> Figure 6. Strategic placement of traffic-monitoring cameras show-ing varied intersection types, traffic densities, and environmental conditions.
+
+of weather scenarios such as clear, overcast, rainy, and dust-storm conditions. This diversity ensures that the dataset re-flects realistic illumination changes and environmental vari-ations encountered in daily traffic scenes, enabling the study of model robustness under challenging lighting, occlusion, and reflection conditions commonly observed in outdoor video data. 
+
+Urban Traffic Site Selection. The cameras were installed at multiple intersections that were deliberately selected to represent distinct intersection types and traffic configura-tions. Site selection prioritized locations with complex and dynamic agent interactions such as pedestrian crossings, turning vehicles, and micro-mobility activity, capturing the diverse behavioral patterns that emerge in dense urban en-vironments. Each intersection exhibited high-frequency events involving multiple agents, providing rich contexts for evaluating causal reasoning and temporal understanding in 
+
+VideoQA models. Figure 6 shows traffic sites, highlighting the variety of traffic scenes covered in the dataset. In to-tal, 16 hours of traffic footage were collected, capturing a broad spectrum of real-world traffic participants and inter-actions that are critical for studying visual reasoning and multimodal understanding in complex urban scenes. The 
+
+UDVideoQA dataset is designed to form a robust foundation for benchmarking next-generation vision–language models under realistic conditions. 
+
+B. Data Anonymity Pipeline 
+
+Ensuring ethical data handling and privacy preservation was central to the design of the UDVideoQA dataset. Since the collected traffic footage inherently contains pedestrians and vehicles that may reveal identifiable features, a dedicated anonymization pipeline was implemented to safeguard pri-vacy without compromising visual fidelity. This section de-scribes the ethical foundation, the transition from seman-tic to motion-based anonymization, the development of the event-driven dynamic blurring framework, and its empirical evaluation. 
+
+B.1. Ethical Framework and IRB Compliance 
+
+The university institutional review board (IRB) de-termined that the proposed work, conducting general traffic and pedestrian video collection under protocol STUDY00018234, does not constitute “research involving human subjects” under DHHS and FDA regulations. There-fore, a formal review was not required. Nevertheless, be-cause the data were captured in public spaces containing dy-namic human and vehicular activity, the project adhered to stringent ethical guidelines to ensure complete anonymiza-tion of any potentially identifiable entities prior to dataset release. All processing and validation steps were performed under this compliance framework to balance ethical respon-sibility with the need for high-quality, research-grade data. 
+
+B.2. Semantic vs. Motion-based Anonymization 
+
+Our initial anonymization experiments employed asemantic pipeline that combined an object detector (YOLOv11 [15]) with a segmentation model ( SAM2 [17]) to generate per-object blurring masks. To enhance temporal consistency and manage occlusions, a multi-object tracking (MOT) framework, ByteTrack [47], was integrated to maintain identity associations across frames. While this detector–segmenter pipeline achieved accurate anonymiza-tion in controlled conditions, it showed critical weaknesses in real-world traffic scenes. Detection accuracy degraded under occlusion, low illumination, or rapid motion, which the MOT framework could not correct due to unreliable initial detections. Furthermore, semantic segmentation occasionally misidentified static background objects (e.g., signage, advertisements), leading to unnecessary blurring and loss of contextual integrity. To overcome these limitations, we adopted a motion-based anonymization approach inspired by the sensing prin-ciples of event cameras [3, 4]. Leveraging event-driven vision simulators, this framework detects motion directly through pixel-intensity changes rather than relying on se-mantic object cues. Unlike semantic methods that rely on object category predictions, these simulators operate di-rectly on pixel intensity changes, detecting motion at the signal level. This allows for context-aware blurring of only moving entities while preserving static environmental de-tails such as road markings or infrastructure. Figure 7 qual-itatively compares the semantic baseline and event-driven anonymization methods, illustrating improved consistency and precision in dynamic scenes. This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. (a)    
+
+> (b) (c)
+> (d) (e)
+> Figure 7. Qualitative comparison of semantic and motion-based anonymization methods. (a) Original frame, (b) YOLOv11 + SAM2 semantic baseline, (c) IEBCS, (d) ESIM, and (e) V2E. The semantic approach (b) fails to blur the pedestrian high-lighted in purple, whereas the event-based methods (c–e) accu-rately anonymize moving agents while preserving static back-ground details.
+
+B.3. Motion-based Dynamic Blurring 
+
+Experimental Setup. A comparative analysis was con-ducted to identify the most effective event-based blurring technique for the annotation framework. The evaluation compared IEBCS [25] against two other event simulators, 
+
+ESIM [32] and V2E [12], as well as a semantic baseline combining YOLOv11 [15] with SAM2 [43]. Experiments were performed on video clips recorded under both high-and low-intensity lighting to assess robustness across var-ied illumination conditions. To ensure fair comparison, all event simulators were normalized to apply a standardized blur operation derived from their generated motion masks. 
+
+Evaluation Metrics. Four quantitative metrics were used to assess blur quality: • Fraction Blurred (F): Proportion of successfully anonymized objects, F = B/N .• Mean Edge Reduction ( ¯r): Average reduction in edge strength per video. • Mean SSIM Reduction: Average change in structural similarity index measure (SSIM) between original and blurred regions, where higher (1 - SSIM) indicates stronger structural alteration. • Processing Time (s): Wall-clock time required to process one video clip. 
+
+Edge-Strength Metric. Blur effectiveness was evaluated per detected object using an edge-strength reduction metric computed via the Canny filter. Let ‘ Iorig ’ and ‘ Iblur ’ repre-sent the grayscale image patches before and after blurring, respectively. Define ‘ C(·)’ as the binary edge detector op-erator (Canny), producing an edge map ‘ E(I) = C(I) ∈{0, 1}H×W ’, where ‘ E(I)i,j = 1 ’ if an edge is detected at pixel (i, j ), and ‘ 0’ otherwise. The total edge strength is defined as: 
+
+S(I) = ∥E(I)∥0 = X
+
+> i,j
+
+E(I)i,j .
+
+Per-Object Reduction. For each detected object (region of interest), the fractional edge reduction is given by: 
+
+r = 1 − Sblur 
+
+Sorig 
+
+, clipped to 0 ≤ r ≤ 1,
+
+where ‘ Sorig = S(Iorig )’ and ‘ Sblur = S(Iblur )’. Objects with low edge counts ( Sorig < ϵ , default ϵ = 8 pixels) are excluded from evaluation. A blur is considered successful if r ≥ τ , where the blur threshold ‘ τ ’ is set to 0.45. 
+
+Aggregate Metrics. For a frame ‘ f ’ with evaluated ob-jects ‘ Of ’, let ‘ Nf = |O f |’ denote the number of objects, ‘Bf = P 
+
+> o∈O f
+
+1{ro ≥ τ }’ the number of blurred objects, and ‘ ¯rf = 1
+
+> Nf
+
+P 
+
+> o∈O f
+
+ro’ the mean reduction. Aggregated over the video, the following quantities are reported: • Total evaluated objects: N = P 
+
+> f
+
+Nf ,• Total blurred objects: B = P 
+
+> f
+
+Bf ,• Per-video fraction blurred: F = B/N ,• Mean per-video reduction: ¯r = (1 /N ) P
+
+> f
+
+P 
+
+> o∈O f
+
+ro.
+
+Edge Filter Parameters. The Canny edge detector was ap-plied with thresholds (Tlow , T high ) = (100 , 200) . Default constants include an edge-count minimum ‘ ϵ = 8 ’ and a blur-acceptance threshold ‘ τ = 0 .45 ’. 
+
+B.4. Motion-based Anonymization Evaluation 
+
+The quantitative results of the semantic vs. motion-based anonymization comparative study are summarized in Ta-ble 5. The analysis highlights distinct trade-offs between processing speed, sensitivity, and selective anonymization across simulators. 
+
+ESIM achieved some of the highest per-object reductions (mean edge reduction = 2 .2, SSIM reduction = 0 .70 under bright lighting), but it successfully anonymized only 2.5% 
+
+of detected objects (Fraction Blurred = 0 .025 ), indicating poor sensitivity. Conversely, V2E exhibited the opposite behavior, achieving very high motion response (Fraction Blurred > 0.94 ) but excessive frame-wide blurring due to its over-sensitivity to global motion. Although the semantic 
+
+YOLOv11+SAM2 baseline was computationally efficient, it suffered from semantic misdetections failing to blur fast-moving agents while incorrectly redacting static elements such as billboards. In contrast, IEBCS demonstrated the most balanced per-formance, combining robust anonymization of dynamic en-tities with high temporal consistency and minimal loss of This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026.                                   
+
+> High Intensity Light Low Intensity Light Event Simulator Fraction Blurred Mean Edge Detection Mean SSIM Reduction CPU Processing time(s) Fraction Blurred Mean Edge Detection Mean SSIM Reduction CPU Processing Time(s) Yolo + SAM2 0.28 0.36 0.22 1500 0.51 0.49 0.17 1500
+> IEBCS 0.24 0.30 0.15 105.3 0.37 0.39 0.13 104.6
+> ESIM 0.025 2.2 0.70 79.8 0.09 0.24 0.68 80 V2E 0.94 0.87 0.64 132 0.96 0.91 0.56 132
+
+Table 5. Comparative evaluation of event-based simulators against the YOLOv11 + SAM2 semantic baseline for dynamic, privacy-preserving blurring. The selected method, IEBCS, achieves the best trade-off between targeted anonymization and preservation of scene detail, particularly under low-light conditions. 
+
+scene context. While its processing time is moderately higher than the fastest simulators, this computational cost is justified by superior reliability under challenging lighting conditions and by its ability to preserve fine-grained visual cues essential for downstream VideoQA tasks. Accordingly, 
+
+IEBCS was selected as the core anonymization component in the UDVideoQA annotation pipeline. 
+
+C. The Question-Answer Taxonomy 
+
+The UDVideoQA benchmark employs a hierarchical taxon-omy designed to systematically evaluate the reasoning ca-pabilities of VLMs across multiple cognitive levels. This taxonomy organizes all question–answer (QA) pairs into five primary reasoning categories attribution (Atr) , basic understanding (BU) , event reasoning (ER) , reverse reason-ing (RR) , and counterfactual inference (CI) correspond-ing to progressively higher tiers of perceptual and inferen-tial complexity. The design follows a human–interpretable structure that captures both perceptual grounding and causal reasoning in dynamic urban scenes. 
+
+Hierarchical Reasoning Structure. Each QA pair in UD-VideoQA is annotated with three hierarchical attributes: • Reasoning Category: One of the five core categories -
+
+Atr, BU, ER, RR, and CI 
+
+• Difficulty Level: Each textitQA instance is labeled as 
+
+easy , medium , or complex , based on the temporal span, contextual ambiguity, and the number of entities involved. • Agent Focus: Questions are further categorized as 
+
+pedestrian-centric or vehicular-centric , reflecting the pri-mary interacting agents in the scene. This combination of reasoning type ( 5), difficulty tier (3), and agent focus ( 2) results in a total of 30 distinct tax-onomic tags , providing fine-grained control over QA gen-eration and evaluation. The taxonomy enables consistent benchmarking of both perceptual understanding (e.g., ob-ject attributes) and higher-order causal reasoning. The ex-amples (see Figure 8) demonstrate how the taxonomy man-ifests in annotated data. Each QA pair is stored in a struc-tured JSON schema with explicit reasoning labels and sub-categories, ensuring consistency across annotation and vali-
+
+Representative QA Examples from the UDVideoQA Taxonomy                                                                                                     
+
+> {"category": "Attribution", "difficulty": "Medium", "sub-category": "Pedestrian", "question": "What is the pedestrian in the red jacket doing while waiting for the light?", "answer": "They are looking down at their phone." }, {"category": "Event Reasoning", "difficulty": "Complex", "sub-category": "Pedestrian", "question": "A silver car is turning right on ared light. Why does it suddenly stop before crossing the crosswalk ?", "answer": "Because apedestrian, who had the ’Walk’ signal, stepped off the curb, and the car had to yield the right-of-way." }, {"category": "Counterfactual Inference", "difficulty": "Complex", "sub-category": "Vehicular", "question": "If the white van had not turned left so slowly, what would the approaching black car have most likely done?", "answer": "The black car would likely have continued straight through the intersection without needing to brake ,as its path would have been clear." }
+
+Figure 8. Representative examples from the UDVideoQA ques-tion–answer taxonomy. 
+
+dation pipelines. All QA pairs were generated and validated using the UDVideoQA annotation tool (see Section E). Dur-ing validation, annotators confirmed question clarity, con-textual relevance, and answerability based solely on video This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. 
+
+frames. This structured taxonomy ensures uniform cover-age across reasoning categories and facilitates balanced per-formance assessment of multimodal models across percep-tion, temporality, and causality. 
+
+D. VideoQGen Benchmark 
+
+Beyond evaluating model answers, an equally important capability for multimodal systems is the ability to formu-late meaningful, grounded questions about a visual scene. The VideoQGen benchmark measures this generative abil-ity by asking models to produce diverse, answerable ques-tions that span our five reasoning categories (see Section C). In doing so, VideoQGen probes whether models understand which aspects of a scene are informative, temporally rele-vant, and useful for downstream VideoQA evaluation. 
+
+D.1. Methodology 
+
+Task Formulation and Prompting. The study standard-izes the generation task with a structured system prompt (see Figure 9) that instructs the model to act as a VideoQA 
+
+data-creation assistant for the UDVideoQA benchmark. For each 10 -second clip, the model must generate exactly 10 
+
+question–answer pairs: two for each of the five reasoning categories (BU, Atr, ER, RR, and CI) . Prompts require ques-tions to be (i) answerable from the clip alone, (ii) succinct and unambiguous, and (iii) returned as a markdown table to enforce a consistent output format. We applied a two-stage user prompt template (see Figure 10) to a curated subset of 
+
+100 video clips and evaluated outputs from eight leading multimodal models. 
+
+Human Evaluation Protocol. Three human annotators scored each generated question across several capabilities (see Table 6): • Relevance: “Is the question pertinent to the visual con-tent of the clip?” 
+
+• Answerability: “Can the question be answered using only the clip (no external knowledge)?” 
+
+• Diversity: “Does the set of 10 questions for a clip demon-strate linguistic and conceptual variety (penalizes repeti-tion)?” 
+
+• Semantic focus: “Each question was labeled as pedes-trian or vehicular centric to measure agent attention?” 
+
+• Query complexity: “Questions were classified as specific (grounded) or generic?” 
+
+In alignment with the dataset workflow illustrated in the main paper, this evaluation was embedded within a human-in-the-loop quality control process. Annotators not only provided numerical ratings but also flagged questions ex-hibiting ambiguity, hallucination, or poor grounding for re-finement. These flagged cases were reviewed during the 
+
+categorical verification and ground-truth validation stages shown in the pipeline. The iterative review ensured that only semantically valid and contextually grounded QA pairs were retained in the final benchmark. To ensure annotation reliability, we computed Cronbach’s α, yielding coefficients of 0.73 (Relevance), 0.74 (Answerability), and 0.79 (Diver-sity). A generated question was retained only if all annota-tor pairs demonstrated positive correlation ( r ≥ 0) on this dimension. This consensus-based filtering discarded incon-sistent items, resulting in an 89% retention rate for the final benchmark. 
+
+D.2. Results and Analysis 
+
+Overall Performance. Gemini 2.5 Pro and Qwen3 Max 
+
+emerge as the top-performing models, achieving the highest scores in relevance and answerability , frequently exceeding 
+
+80 % across reasoning categories as depicted in Figure 11. These results indicate a strong capacity to generate ques-tions that are both faithful to the video content and con-sistent with the prompt’s structural constraints. The Qwen 
+
+family demonstrates remarkable stability across scales, with the lighter 30 B variant achieving near-parity with its larger counterpart. 
+
+The Diversity Challenge Across all models, diversity lags behind other metrics. Even the leading Gemini 2.5 Pro 
+
+attains only low ( 60 %) diversity scores, a significant gap compared to its ( 80 %+) relevance and answerability. Other models exhibit sharper declines, with GPT-4o averaging as low as 7–11 % (see Figure 11). This pattern suggests that while current models follow structured prompts effectively, they often resort to formulaic phrasing or repetitive seman-tics, limiting linguistic and conceptual variation. 
+
+Specificity and Grounding. Encouragingly, the best-performing models generate a high proportion of specific (grounded) questions, demonstrating a clear understanding of fine-grained spatio-temporal cues. As shown in Fig-ure 12, Gemini 2.5 Pro exhibits strong performance in rel-evance and grounding , while Qwen3 Max dominates in an-swerability . These findings confirm that structured prompt-ing enables modern VLMs to produce contextually rich, non-trivial questions that extend beyond surface-level ob-ject descriptions. 
+
+Failure modes. The GPT series, particularly GPT-4o , per-forms inconsistently on this task. Despite robust general multimodal capabilities, it underperforms in structured gen-eration, yielding low diversity and relevance alongside a higher share of generic questions. This behavior highlights a mismatch between general reasoning proficiency and the disciplined reasoning required to produce grounded, logi-cally coherent video-based questions. This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. 
+
+System Prompt for VideoQGen 
+
+Role: You are a video questionnaire assistant for creating high-quality VideoQA data for the UDVideoQA bench-mark. Your sole task is to watch a provided video clip and generate exactly 10 high-quality, diverse question– answer ( QA ) pairs based only on its content. 
+
+Core Principles (Anti-Hallucination & Forgetting): 
+
+1. Video-Only Grounding: All questions and answers must be derived solely from the visual and audio content within the provided clip. No external knowledge is allowed. 2. No Ambiguity or Inference: Do not infer or invent unobserved details. Each QA pair must be unambiguous and verifiable directly from the video. 3. Resist Hallucination: Counterfactual questions intentionally include false premises to test hallucination resis-tance. All other categories must remain strictly factual. 
+
+QA Generation Categories (2 QAs each): 
+
+1. Basic Understanding: This category focuses on the static, high-level context of the scene. For a given video, questions should be answerable by observing the overall setting, environment, and the presence of salient, non-dynamic objects. • Tags: environment , lighting , weather , time of day , location type , road conditions , salient object presence 
+
+• Difficulty: Easy 
+
+• Example: “Is it raining in the video?” - “No” • Vehicular Example: “What is the weather condition shown in the clip?” - “It is a clear, sunny day.” 2. Attribution: This category targets the specific, static attributes of objects (pedestrians or vehicles) in the scene. For a given video, questions involve counting, identifying colors, makes, models, or text found on signage. • Tags: color , make/model of car , vehicular attributes , pedestrian attributes ,
+
+signage text , counting (static agents) , object identification 
+
+• Difficulty: Easy-Medium 
+
+• Example: “How many people are wearing hats?” - “Two” • Vehicular Example: “What color is the lead car stopped at the traffic light?” - “It is a red sedan.” 3. Event Reasoning: This category assesses the understanding of dynamic actions, agent interactions, and the temporal (forward) order of events. For a given video, questions focus on what pedestrians or vehicles *do* and in what sequence. • Tags: actions , temporal order , agent interaction , pedestrian movement , vehicle movement , causality , event start/end 
+
+• Difficulty: Medium 
+
+• Example: “Which person walks onto the screen first?” - “The woman in the red coat” • Vehicular Example: “Does the white sedan signal before turning left?” - “Yes, it uses its left turn signal.” 4. Reverse Reasoning: This is a complex form of temporal reasoning. For a given video, questions require the model to recall the state of the scene or an agent *before* a specific key event occurred, testing memory of reverse temporal order. • Tags: reverse temporal , agent state (prior) , scene state (prior) , pre-event context , agent memory , complex interaction chain 
+
+• Difficulty: Complex 
+
+• Example: “Just before the dog barked, what was the man holding?” - “A newspaper” • Vehicular Example: “What was the pedestrian doing just before the traffic light turned green?” - “The pedes-trian was waiting on the sidewalk.” 5. CounterFactual Inference: This category tests the model’s ability to resist hallucination by rejecting false premises. For a given video, the question introduces a hypothetical or factually incorrect scenario. The correct answer must first identify the premise as false and then state the correct fact. • Tags: hypothetical , negation of fact , false premise , hallucination test ,
+
+robustness , logical reasoning , factual verification 
+
+• Difficulty: Complex 
+
+• Example: “After the motorcycle ran the red light, did the police car follow it?” - “This is a hypothetical question. The motorcycle did not run the red light; it stopped and waited for the green light.” This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. 
+
+Continued System Prompt... 
+
+Task and Output Format: 
+
+1. Analyze the Clip: Perform a comprehensive, frame-by-frame analysis of the entire video clip. 2. Strict QA Quota: Generate exactly 10 QA pairs. These must be distributed as exactly 2 pairs for each of the 5
+
+categories defined above. 3. Answer Fidelity: Answers must be concise, direct, and factually grounded in the video. Avoid conversational padding (e.g., use “Yes” or “No” instead of “Yes, the car does...” or “No, it is not...” ). For counterfactual questions, the answer must follow the example format: first identify the premise as false/hypothetical, then state the correct fact. 4. No Speculation: If an attribute is ambiguous or not visible (e.g., a license plate number, a distant car’s make, the number of people in a far-away bus ), you must not invent an answer. Instead, formulate a question where the ambiguity is the answer (e.g., Q: “Is the license plate on the blue car readable?” A: “No, it is too blurry to be read.” )5. Output Format: Construct a single Markdown table with the following exact columns: Index , Video File Path , Question , Category , and Answer .• Index must be a number from 1 to 10 , Video File Path must be the literal file path of the video clip being analyzed, and Category must exactly match one of the 5 category titles. 
+
+Figure 9. Structured system prompt used for generating grounded and diverse question–answer pairs in the UDVideoQA benchmark. 
+
+Two-Step “Analyze-then-Generate” Prompting Strategy 
+
+Step 1: Factual Analysis Prompt (Chain-of-Thought Extraction) 
+
+User Prompt: 
+
+You are a visual analysis model tasked with describing the provided video clip. 
+
+Instructions: 
+
+1. Observe carefully and describe only what is directly visible. 2. Summarize the scene context: environment, lighting, and weather conditions. 3. Identify static elements (vehicles, pedestrians, signs, buildings) with key attributes such as color, size, or type. 4. List up to five key dynamic events in chronological order with timestamps. 
+
+Constraints: Use only direct observations. Do not infer off-screen events. End with: [End of Step 1]. 
+
+Step 2: Grounded QA Generation Prompt (Controlled Synthesis) 
+
+User Prompt: 
+
+Using the Step 1 factual analysis, generate exactly 10 question–answer (QA) pairs grounded exclusively in those observations. 
+
+Rules: 
+
+1. Produce 2 QA pairs from each of 5 categories: 2. Each QA must be directly verifiable from Step 1. 3. Counterfactuals must explicitly correct false premises using factual details. 4. Answers must be concise, literal, and non-redundant. 
+
+Output Format: Present results in a Markdown table. End with: [End of Step 2]. Figure 10. Two-stage prompting pipeline used to generate structured and visually grounded QA pairs for the UDVideoQA dataset. This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. 
+
+Figure 11. Overall performance of VideoQGen models across core metrics - relevance , answerability , and diversity . Gemini 2.5 Pro and 
+
+Qwen3 Max achieve the highest scores, while GPT-4o performs consistently lower and generates less diverse questions.                       
+
+> Model Questions Low Intensity Light Medium Intensity Light High Intensity Light Gemini 2.5 Pro Are there any discernible architectural features on the buildings flanking the street? What was the pedestrian doing as the dark car was approaching the crosswalk to make its turn? Before the pedestrian in the dark shirt begins crossing the street at 0:07, what is the state of the intersection?
+> Qwen3 Max Are there any temporary construction barriers or signs present on the sidewalk near the right edge of the frame? If the traffic light for the horizontal street had remained red, would the black sedan have entered the intersection at 0.6seconds? If the white van had begun to turn right at 0 : 02 , which pedestrian group would it have encountered?
+> Gemini Flash Counting all visible vehicles, both moving and stationary, how many are white? Is it true that a cyclist uses the green-painted bike lane at any point in the video? A person in a white shirt and dark pants enters from the bottom left. What path do they take?
+> Qwen3-VL-23B Was there any person standing on the sidewalk near the orange traffic signs on the bottom right? If the silver sedan had not entered the intersection at 0.3s, would the white autonomous vehicle have been blocked from turning left? If the traffic light for the crosswalk had turned red at 5seconds, would the pedestrians have been in the middle of the street?
+> Gemini 2.5 Flash Is it true that any pedestrian attempted to cross the street without using a designated crosswalk? If the pedestrian at the bottom right had decided to cross at 0:03 , would they have entered the silver car’s path? How many silver/grey passenger cars are moving away from the camera in the upper lanes?
+> Qwen3-VL-30B Is the traffic light for the main road green? What is the color of the traffic light for vehicles going straight through the intersection? Would the silver car have been able to pass the white van if the van had not stopped?
+> GPT-5 How many vehicles are visible between 0 and 2 s? If the signal had stayed red for the entire clip, would any vehicle have entered the intersection? Is the weather condition clear and dry?
+> GPT-4o Is the scene recorded during daylight or nighttime? Would the vehicle have proceeded if the pedestrian hadn’t entered the crosswalk? How many pedestrians are visible during the clip?
+
+Table 6. Representative examples of generated questions across lighting conditions (low, medium, and high intensity). Gemini 2.5 Pro 
+
+achieves the highest reasoning quality, while GPT-4o produces repetitive, low-diversity questions. 
+
+Qualitative Insights. Table 6 presents qualitative samples across models and lighting conditions, illustrating clear dif-ferences in reasoning depth. High-performing models such as Gemini 2.5 Pro and Qwen3 Max (green cells) consis-tently formulate multi-step reasoning questions, e.g., “Be-fore the pedestrian begins crossing, what was the state of the intersection?” (reverse reasoning) or “If the traffic light had remained red, would the black sedan have entered?” (counterfactual reasoning). They also generate temporally anchored queries such as “What was the pedestrian doing as the dark car approached the crosswalk?” , capturing fine-grained agent interactions even under low-light conditions. In contrast, weaker models like GPT-4o and GPT-5 
+
+(red cells) default to simplistic or generic queries, such as weather descriptions or basic counting ( “Is the weather clear and dry?” ), and ( “How many pedestrians are visi-ble?” ). These outputs reflect a failure to engage with com-plex, multi-agent dynamics, precisely the reasoning dimen-sion the benchmark is designed to evaluate. Together, these findings confirm that VideoQGen effectively differentiates between models that exhibit deep spatio-temporal reason-ing and those limited to surface-level perception. Struc-tured prompting enables models to produce semantically rich, logically grounded questions, but genuine linguistic diversity remains a bottleneck. The results underscore that while modern VLMs are capable of generating high-quality questions when guided precisely. The figures presented be-low show a few examples of VideoQGen (see Figure 20a and Figure 20b for night and day, respectively). 
+
+E. The UDVideoQA Annotation Tool 
+
+The UDVideoQA is a comprehensive, semi-automated ap-plication designed to streamline the end-to-end creation of the VideoQA dataset. It consolidates the entire workflow from raw video ingestion and anonymization to QA valida-tion and model-ready export within a single, unified frame-work (as in Figure 13). Developed in Python using the 
+
+Tkinter framework and the ttkbootstrap library, the tool features a modern, responsive interface optimized for long annotation sessions and cross-platform deployment. The architecture ensures efficient dataset curation while This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026.              
+
+> Figure 12. Distinct performance profiles of VideoQGen mod-els across evaluation metrics. Gemini 2.5 Pro excels in specific (grounded) and relevance , while Qwen3 Max leads in answerabil-ity . The focus mean serves as a baseline for comparison.
+
+maintaining strict ethical and quality-control standards, as it follows a tri-panel design philosophy for intuitive workflow management: (1) the data navigation panel manages input sources, (2) the primary annotation workspace provides in-teractive playback and QA validation, and (3) the processing and export panel handles anonymization, batch processing, and data serialization. This logical structure guides annota-tors through clearly defined stages of data ingestion, valida-tion, and export. 
+
+E.1. Data Ingestion and Pre-processing 
+
+Handling raw, long-form surveillance footage poses sig-nificant challenges for annotation scalability. To address this, the tool integrates an automated video segmentation utility that converts source videos into standardized 10 sclips. The user specifies input and output directories, and the tool processes all major video formats (e.g., .mp4 ,
+
+.avi , .mov , .mkv ), preserving resolution and codec fi-delity. Each clip is automatically named sequentially (e.g., 
+
+clip 001.mp4 ) to maintain dataset organization. Once segmented, clips can be loaded directly into the 
+
+primary annotation workspace , which supports two anal-ysis modes: video playback mode for temporal reasoning and causal interpretation, and frame analysis mode for fine-grained spatial inspection. Playback controls (play/pause, stop, frame-step, and fps-aware 10 s skips) ensure efficient navigation. To enforce contextual awareness, the tool auto-matically locks the QA validation list until the entire clip is reviewed, prompting annotators to observe the full temporal context before annotation. The initial workflow stage addresses the challenge of handling raw, long-form surveillance footage. The tool in-(a)      
+
+> (b)
+> (c)
+> Figure 13. User interface of the UDVideoQA Annotation Tool showing (top) the primary manual annotation workspace, (middle) real-time statistics for QA pairs, and (bottom) fine-grained blur tagging using YOLOv11 and SAM2.
+
+tegrates an automated segmentation utility that allows an annotator to select a source directory and an output direc-tory. The system then processes all supported video for-mats (e.g., .mp4 , .avi , .mov , .mkv ) and segments them This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. 
+
+into standardized 10-second clips, preserving the original resolution and codec while sequentially naming the output (e.g., clip 001.mp4 ). Once segmented, clips are loaded into the primary annotation workspace. This module sup-ports two distinct analysis modes: a video playback mode for assessing temporal context and causal reasoning, and a 
+
+frame analysis mode for fine-grained, frame-by-frame spa-tial inspection. Standard media controls (play/pause, stop, and FPS-aware 10 -second skips) are provided. A crucial quality control gate is implemented: upon loading a new video, the QA validation list remains locked, and a status message indicates “Auto-playing video”, guaranteeing that the annotator reviews the entire visual context at least once before beginning annotation. 
+
+E.2. Human-in-the-Loop Anonymization Workflow 
+
+A key innovation of UDVideoQA tool is its two-stage hy-brid anonymization pipeline , which integrates automated motion-based blurring with AI-assisted manual refinement to ensure both efficiency and ethics are maintained. 
+
+Stage 1: Automated Motion-Based Blurring. In the first stage, the IEBCS -based motion-blur module anonymizes all dynamic agents in a single operation. Operating on pixel-intensity changes, this event-driven method effectively pro-tects moving subjects while avoiding the semantic misclas-sifications typical of detector-based approaches. It serves as a high-recall, low-latency first pass for anonymization. 
+
+Stage 2: Manual AI-Assisted Track-and-Blur. For fine-grained correction, the Manual Track-and-Blur feature combines YOLOv11 for detection and the SAM2 for pixel-accurate masking. Annotators can draw a simple region of interest around a target object, prompting the system to generate an initial SAM mask and predict its motion tra-jectory using velocity vectors. A “predict–update” cycle then maintains smooth tracking: the predicted position is updated each frame via YOLO detections, with masks re-generated only when object shape or trajectory deviates sig-nificantly. This approach maintains high temporal precision while minimizing computational overhead, even in cases of occlusion or low light. 
+
+E.3. QA Validation and Refinement Module 
+
+Beyond anonymization, UDVideoQA tool facilitates rig-orous manual validation and refinement of the QA pairs generated by large language models. QA pairs are im-ported from CSV format and displayed in an interactive 
+
+ttk.Treeview table with columns for category, ques-tion, answer, and validation status (none , accepted , re-jected ). The validation interface supports keyboard short-cuts ( Enter to accept, Backspace to reject) for rapid an-notation throughput. Rejected questions are not discarded 
+
+VideoQA Prompt                                                                         
+
+> You are atraffic video analyst. Answer the question using only the visual evidence present in the provided video. Observe carefully and pay attention to subtle details, timing, misleading cues ,and missing elements. Describe strictly what is visible. Do not infer, speculate, or use external knowledge. If the answer cannot be verified directly from the video, state: ‘‘Cannot be determined from the video.’’ If the question contains an incorrect assumption, explicitly correct it using observable facts. Provide clear, concise, and factual answers grounded solely in visual evidence.
+> Figure 14. Prompt template used for VideoQA model evaluation, instructing models to generate factual, visually grounded answers based solely on the provided video content.
+
+outright. Instead, a double-click opens an editable dialog where annotators can modify the question, answer, or cate-gory. Upon correction, the record automatically updates to 
+
+“accepted” , turning the validation stage into an active re-finement loop. Annotators may save incremental progress for batches of videos before export, ensuring recovery and continuity. 
+
+E.4. Integrated Analytics Dashboard 
+
+To aid quality monitoring, UDVideoQA tool features an in-tegrated analytics dashboard that provides live statistics on annotation progress, QA category distribution, and valida-tion ratios. The dashboard supports categorical verification, hallucination detection, and timestamp consistency checks, aligning with the human-in-the-loop refinement shown in the main pipeline (see Figure 13). This feedback loop en-sures annotation consistency and enables transparent report-ing of validation coverage during dataset curation. 
+
+E.5. Model-Ready Benchmark Export 
+
+The final stage of the workflow serializes validated QA 
+
+data into standardized, model-compatible formats. Only entries marked as accepted are exported, while rejected or pending items remain archived for traceability. The export module automatically generates JSONL chat templates op-timized for major VideoLM frameworks, including VideoL-LaMA , LLaVA-NeXT-Video , and Qwen-VL . Built-in profiles This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. 
+
+Scoring Policy for the LLM Judge as Prompt for Evaluation 
+
+Role: You are an impartial, strict grader for VideoQA focused on semantic-semantic understanding. 
+
+Input Format: 
+
+• CSV columns: index , video file path , question , category , answer , model answer .• Read the CSV • Normalize Unicode and smart quotes so text compares correctly. 
+
+Derived Fields (per row): 
+
+• clip id: video file path without extension. • q idx: Question index within each clip id , in pasted order, starting at 1. • subtype: Determined from the lowercased question text: 
+
+– pedestrian: if mentions pedestrian, pedestrians, person, people, man, woman, child, cyclist, bicyclist, walker .
+
+– vehicular: if mentions car, cars, vehicle, vehicles, truck, bus, van, sedan, suv, motorcycle, lane, traffic, driving, overtake, approach, foreground .
+
+– otherwise, background .• category: Use given text (trim whitespace). Canonicalize close variants (e.g., CounterFActual Inference ) to one of: Basic Understanding, Attribution, Event Reasoning, Reverse Reasoning, Coun-terfactual Inference. 
+
+• ground truth: Complete answer • model answer: Trimmed text (empty if blank or NA). 
+
+Grading Logic: 
+
+• correct ∈ { 1, 0} (no partial credit). • Binary/categorical: accept exact or unambiguous semantic equivalence (case-insensitive; e.g., “yes.” =“yes”). • short textual: accept meaning-identical paraphrases; if missing key info or contradicts ground truth → 0. • If model answer is blank, “i don’t know,” “unsure,” or contradictory → 0. • Do not infer beyond what is written in the ground truth. 
+
+Weights by Category: 
+
+Category Weight 
+
+Basic Understanding 1.0 Attribution 1.2 Event Reasoning 1.3 Reverse Reasoning 1.3 Counterfactual Inference 1.5 
+
+Scoring: 
+
+points = correct × weight   
+
+> Figure 15. Grading prompt used for VideoQA benchmark evaluation. The LLM-based grader enforces strict, non-inferential cor-rectness through canonicalized categories, subtype detection, and category-weighted scoring.
+
+ensure proper formatting of conversation turns and meta-data fields (e.g., timestamps, reasoning type ). The export process includes robust quality checks for missing values and generates timestamped CSV backups to preserve anno-tation states before serialization. This standardized export pipeline allows seamless benchmarking and reproducibility across different multimodal architectures. 
+
+F. Experiments 
+
+This section describes our experimental protocol, evalua-tion methodology, quantitative benchmark results, and qual-itative error analysis on the UDVideoQA dataset. Our goals This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. (a)  (b)  (c)   
+
+> Figure 16. Average VideoQA performance of proprietary and open-source models across five reasoning categories under different lighting conditions: (a) day, (b) afternoon, and (c) nighttime scenarios.
+
+are (i) to measure zero-shot reasoning capabilities of SOTA multimodal models, (ii) to evaluate gains achievable via parameter-efficient fine-tuning, and (iii) to diagnose sys-tematic failure modes that limit current VideoQA perfor-mance. 
+
+F.1. Experimental Setup 
+
+Zero-shot Evaluation. All candidate models are first tested directly on the UDVideoQA test set to measure out-of-the-box generalization and reasoning capabilities with-out any domain-specific tuning. Each model was given the same VideoQA prompt (see Figure 14) to ensure consistency 
+
+Fine-tuning (parameter-efficient). Selected open-source models were fine-tuned on the UDVideoQA training split to quantify adaptation benefits. Fine-tuning configurations include: • InternVL-38B: LoRA adapters with rank r = 16 and 
+
+α = 32 were applied. The core LLM, vision back-bone, and MLP layers were frozen ( --freeze llm ,
+
+--freeze backbone , and --freeze mlp ) so only adapter parameters were trained. Jobs were run via SLURM ( srun ) or torchrun on multi-GPU nodes. • Qwen-VL (32B): LoRA with rank r = 64 , main com-ponents frozen and only LoRA adapters trained for effi-ciency. • Qwen-VL (7B): The vision tower was unfrozen and trained (no LoRA) to better adapt the small model’s vi-sual encoder. Training used 4×A100 GPUs. All fine-tuning runs used standard data augmentation and early stopping tuned on a held-out validation subset. Hy-perparameter sweeps and compute budgets were kept con-sistent across models to ensure fair comparisons. 
+
+F.2. Evaluation Methodology 
+
+To avoid brittle lexical matches and better assess seman-tic correctness and reasoning complexity, we adopt a multi-stage, hybrid evaluation: 
+
+LLM-based Semantic Scoring (LLM Judge). We use an external LLM judge (Gemini 2.5 Pro) driven by the Strict Grading System Prompt (see Figure 15) to perform se-mantic–semantic matching. The judge assigns a binary score (correct ∈ { 0, 1}) after normalizing text, canonical-izing categories, and assessing semantic equivalence rather than raw string overlap. The grader rejects blank, non-committal, or contradictory responses [23]. 
+
+Weighted Complexity-based Scoring. To reflect varying cognitive load across question types, we weight categories by difficulty: basic understanding (1.0), attribution (1.2), 
+
+event reasoning (1.3), reverse reasoning (1.3), and counter-factual inference (1.5). The final per-question points equal the binary correctness times the category weight, and model scores are aggregated over the evaluation set. 
+
+Human validation. To calibrate and control for potential 
+
+LLM judge biases, we randomly sample a “gold-standard” 
+
+subset ( 1K predictions) that is independently annotated by domain experts. An agreement between the human labels and the LLM judge is reported. Disagreement cases were inspected and used to refine the grading prompt and nor-malization heuristics. 
+
+F.3. Quantitative Results 
+
+Table 7 and Figure 16 summarize results across models, rea-soning categories, and day/night splits. Figure 17 shows performance across the top 4 performing models. Some key observations are: 
+
+Proprietary vs. Open-source. Proprietary models achieve the strongest zero-shot performance. Notably, Gemini This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. 
+
+Figure 17. Comparison of four leading multimodal models ( Gemini 2.5 Pro , Gemini 2.5 Flash , GPT-4o , and Qwen 2.5 7B ) across five 
+
+VideoQA reasoning dimensions, highlighting variations in perceptual and causal understanding.                                                                                                                                       
+
+> Model Type Model Name Pedestrian-centric Vehicular-centric BU Atr ER RR CI Overall BU Atr ER RR CI Overall Proprietary Gemini 2.5 Pro 93.43 83.03 73.32 76.39 92.81 87.90 66.67 33.84 69.96 77.10 84.72 68.59
+> Gemini 2.5 Flash 68.93 87.27 72.12 78.12 94.77 80.21 71.11 38.62 72.46 73.68 78.60 67.93
+> GPT-5 68.93 80.61 72.12 76.39 92.16 78.01 71.11 39.49 55.13 59.75 82.10 60.21
+> GPT-4o 59.42 25.45 56.49 28.91 83.01 55.29 42.22 7.32 47.25 44.58 71.53 44.56
+> Open Source Qwen 2.5 32B 87.90 81.82 59.38 41.38 86.93 80.07 53.33 63.48 47.95 54.49 65.07 56.74
+> Qwen 2.5 7B 78.10 79.39 65.63 46.55 90.85 77.85 53.33 65.65 53.63 50.46 48.91 53.87
+> VideoLLaMA3 86.74 16.97 64.06 37.93 86.27 65.86 46.67 59.13 50.16 47.37 71.62 55.85
+> NVILA 8B 83.57 16.97 60.94 29.31 86.19 63.68 57.78 56.81 64.01 52.06 46.72 55.18
+> Llava-NeXT-Video 7B 69.45 7.88 37.50 20.69 24.84 38.62 37.78 8.70 43.22 21.67 9.61 22.93
+> InternVL 38B 87.83 28.66 62.14 39.66 89.47 69.47 37.78 50.58 47.62 50.47 77.09 55.42
+
+Table 7. Comparison of model performance across pedestrian-centric and vehicular-centric scenarios. Color intensity indicates relative accuracy within each reasoning subcategory. 
+
+2.5 Pro attains the top scores across multiple time win-dows (morning: 75 .78 %, evening: 71 .13 %) and leads in pedestrian-centric ( 87 .90 %) and vehicular-centric ( 68 .59 %) settings. Gemini 2.5 Flash performs best in the afternoon (74 .98 %). 
+
+Fine-tuned Models Competitiveness. Parameter-efficient fine-tuning yields substantial gains. The fine-tuned Qwen 2.5 VL-7B and Qwen 2.5 VL-32B show meaningful im-provements in evening conditions (e.g., Qwen-7B : 61 .38 %), closing the gap to proprietary models on several categories. Some architectures (e.g., Llava-NeXT-Video 7B ) still strug-gle at fine-grained perception (very low attribution in some lighting conditions), indicating architecture- or training-data-induced limits. 
+
+Failure of Fine-grained Attribute Localization. Across models, we observe systematic attribution errors on fine-grained visual items (e.g., road markings). Example: when asked, “What large marking is painted in the central lane near the camera?” ground truth: “A white ‘X’ road mark-ing” , model predictions ranged widely ( “diamond”, “bicy-cle symbol” , “white arrow” ), evidencing a decoupling be-tween scene-level reasoning and low-level visual recogni-tion. 
+
+F.4. Qualitative Insights and Error analysis 
+
+Qualitative study of model outputs reveals consistent pat-terns that quantitative metrics alone do not capture(see Ta-ble 8, Table 9 and Table 10). Two recurring phenomena stand out: (1) an inference–attribution scores , where mod-els succeed at high-level inference but fail at low-level vi-sual grounding, and (2) systematic temporal and premise reasoning failures . Below, we summarize these failure modes, illustrate them with examples from our test splits, and discuss their implications. 
+
+Inference–Attribution Scores Models frequently demon-strate strong inferential ability, correctly proposing plausi-ble outcomes or causal links while simultaneously failing to ground those inferences in the visual evidence. This pro-duces seemingly good counterfactual or event-reasoning 
+
+scores even as the underlying visual attribution is incorrect. 
+
+Example (Counterfactual / Hallucination): This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. 
+
+Model Gemini 2.5 Pro Gemini 2.5 Flash GPT-4o GPT-5 Qwen 2.5 VL -7B (Fine Tuned) Qwen 2.5 VL - 7B InternVL3-38B Qwen 2.5 VL 32B VideoLlama3 NVILA 8B Llava-NeXT-Video Question Is there any overtaking observed? 
+
+Ground Truth No 
+
+Best Answer 
+
+No overtaking is observed as there are no moving vehicles No No No No overtaking is observed in the image. No, there is no overtaking observed [...]. The road appears to be empty with no vehicles in motion [...] No, there is no overtaking observed. No, there is no overtaking observed [...]. The scene shows an empty road with no vehicles or pedestrians present. [...] The video does not show any overtaking. No overtaking is observed in the image. Based on the image provided, it appears that there is no over-taking place. [...] 
+
+Question How many cars exited the foreground? 
+
+Ground Truth Four 
+
+Worst Answer 
+
+Zero cars exited the foreground as the car moved away from the camera. One car exited the fore-ground Two 0One car exited the fore-ground in the image. [...] there is one car that appears to have just exited the foreground on the right side [...] One car exited the foreground [...] there is one car that exits the foreground. It can be seen moving from the right side [...] eventually exiting the frame. [...] it appears that one car has exited the foreground. The road is mostly empty [...] There is one car that exited the foreground. There are three cars in the foreground of the image. 
+
+Table 8. Representative examples of best and worst model-generated answers under the daytime scenario. 
+
+Model Gemini 2.5 Pro Gemini 2.5 Flash GPT-4o GPT-5 Qwen 2.5 VL -7B (Fine Tuned) Qwen 2.5 VL - 7B InternVL3-38B Qwen 2.5 VL 32B VideoLlama3 NVILA 8B Llava-NeXT-Video Question Is the road surface wet from rain? 
+
+Ground Truth No the road looks dry 
+
+Best Answer 
+
+No, the road surface is not wet from rain; it appears completely dry. No, the road surface appears dry, not wet from rain. No No No, the road surfaceis not wet from rain. The road appears dry and clear of any water. No, there is no wetness from rain observed [...]. The road appears to be dry with no visible signs of water [...] No, the road surface appears dry. No, there is no wetness from rain observed [...]. The road surface appears to be dry with no visible signs of water or reflections [...] The road surface appears dry, with no visible signs of rain or wetness. No, the road surface is not wet from rain. No, there is no wetness from rain observed [...]. The road surface appears to be dry and clear with it not raining at the time [...] 
+
+Question What large marking is painted in the central lane near the camera? 
+
+Ground Truth A white ‘X’ road marking 
+
+Worst Answer A white bicycle symbol. A large diamond shape (?) is painted in the central lane. Straight white arrow A large white marking is painted in the central lane. The large marking painted in the central lane near the camera is a white arrow pointing to the right The large marking appears to be a white arrow pointing to the right with it indicating a turn lane [...] The large marking painted in the central lane near the camera is a ’no parking’ sign The large marking appears to be a ”Bus Only” or ”HOV” lane marking with this being indicated by the red color [...] The large marking appears to be a white arrow pointing to the right with it indicating a lane change or turn direction [...] The large marking painted in the central lane near the camera is a white arrow. The large marking painted in the central lane near the camera is a ”No Parking” sign. 
+
+Table 9. Representative examples of best and worst model-generated answers under the afternoon scenario. 
+
+• Question: “If the van had not yielded, what might have occurred?” 
+
+• Ground Truth: “It might have collided with the oncom-ing car.” 
+
+• Prediction: “The impact could have resulted in severe injuries for both the pedestrian and the van’s occupants.” 
+
+Analysis. The model correctly predicts a collision (match-ing the ground truth’s high-level outcome) but hallucinates an absent pedestrian and invents injury details. In many cases, the model relies on a generic “traffic accident” script learned from language priors rather than verifying whether a pedestrian is actually present in the clip. This behavior inflates performance on inference-style tasks while under-mining factual fidelity. 
+
+Temporal and Premise Reasoning Failures. A second common failure mode concerns temporal localization and premise validation. Models often fail to respect explicit temporal windows or to check the truth of the question’s premise against the video evidence. 
+
+Example (Temporal / Premise Error on Evening Set): 
+
+• Question: “Which happened first: the first car entering the foreground or the second one?” 
+
+• Ground Truth: “No car enters the foreground.” 
+
+• Prediction (multiple models): “The first car...” 
+
+Analysis. Here, models assert an order of events despite the correct answer indicating that no such event occurred within the queried interval. This indicates failures in (a) isolating the exact temporal window referenced by the question, and 
+
+(b) verifying whether the question’s premise holds before attempting a comparative judgment. 
+
+Fine-grained Perception Failure. Notably, attribution-style questions that require precise localization or recogni-tion of small, high-frequency visual primitives (e.g., road markings, signage, small symbols ) are among the weakest for all evaluated models. 
+
+Example (Attribution Failure on Morning Set): 
+
+• Question: “What large marking is painted in the central lane near the camera?” 
+
+• Ground Truth: “A white ‘X’ road marking.” 
+
+• Prediction: Qwen-7B: “A white arrow pointing to the right.” VideoLLaMA 3: “A yellow diamond shape.” , and 
+
+Gemini 2.5 Pro: “A white bicycle symbol.” 
+
+Analysis. Despite being a visually local and ostensibly sim-ple task, models produce a variety of incorrect but plau-sible labels. This demonstrates a persistent gap between 
+
+(i) scene-level, multi-agent reasoning and (ii) reliable low-level visual recognition. In practice, this gap means that models may reach correct conclusions for the wrong per-ceptual reasons or fail important downstream decisions be-cause they cannot consistently perceive simple visual cues. This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026.                  
+
+> Model Gemini 2.5 Pro Gemini 2.5 Flash GPT-4o GPT-5 Qwen 2.5 VL -7B (Fine Tuned) Qwen 2.5 VL - 7B InternVL3-38B Qwen 2.5 VL 32B VideoLlama3 NVILA 8B Llava-NeXT-Video Question Is the road surface wet from rain?
+> Ground Truth No the road looks dry
+> Best Answer
+> No, the road surface is not wet from rain; it appears completely dry. No, the road surface appears dry, not wet from rain. No No No, the road surfaceis not wet from rain. The road appears dry and clear of any water. No, there is no wetness from rain observed [...]. The road appears to be dry with no visible signs of water [...] No, the road surface appears dry. No, there is no wetness from rain observed [...]. The road surface appears to be dry with no visible signs of water or reflections [...] The road surface appears dry, with no visible signs of rain or wetness. No, the road surface is not wet from rain. No, there is no wetness from rain observed [...]. The road surface appears to be dry and clear with it not raining at the time [...]
+> Question What large marking is painted in the central lane near the camera?
+> Ground Truth A white ‘X’ road marking
+> Worst Answer A white bicycle symbol. A large diamond shape (?) is painted in the central lane. Straight white arrow A large white marking is painted in the central lane. The large marking painted in the central lane near the camera is a white arrow pointing to the right The large marking appears to be a white arrow pointing to the right with it indicating a turn lane [...] The large marking painted in the central lane near the camera is a ’no parking’ sign The large marking appears to be a ”Bus Only” or ”HOV” lane marking with this being indicated by the red color [...] The large marking appears to be a white arrow pointing to the right with it indicating a lane change or turn direction [...] The large marking painted in the central lane near the camera is a white arrow. The large marking painted in the central lane near the camera is a ”No Parking” sign.
+
+Table 10. Representative examples of best and worst model-generated answers under the evening scenario (a)  (b)  (c) 
+
+Figure 18. Analysis of multi-agent dynamics: (a) most frequent multi-agent scenario observed in the dataset, (b) temporal stability of pedes-trian activity across video segments, and (c) proximity density plots highlighting frequent close interactions between vehicle–pedestrian and pedestrian–pedestrian pairs. 
+
+Implications and Directions. Together, these qualitative failure modes suggest two complementary research priori-ties for VideoQA and multimodal reasoning: • Tighter Visual–Verbal Grounding: Improve models’ ability to verify perceptual premises ( “is X present?” ), and to condition any inference on an explicit check of vi-sual evidence rather than on language priors alone. • Temporal Precision and Localized Perception: En-hance temporal alignment and small-object recognition through either improved video encoders, targeted super-vision (e.g., contrastive/object-centric objectives ), or hy-brid symbolic checks that force premise validation before inference. Addressing these issues will reduce hallucination, im-prove the fidelity of counterfactual and event-reasoning evaluations, and close the gap between “reasoning” and 
+
+“seeing” that we observe across current SOTA models. Ex-amples for RR are shown in Figure 21, ER in Figure 22, RR 
+
+in Figure 23, ER in Figure 24, and CF in Figure 25, respec-tively. 
+
+F.5. Multi-Agent Behavioral Analysis 
+
+Traffic intersections represent highly dynamic environ-ments where diverse agents-vehicles, pedestrians, and micro-mobility users-share limited space and interact un-der varying contextual constraints. We hypothesize that such intersections naturally promote frequent, observable multi-agent interactions that make them ideal for studying spatio-temporal reasoning. Our empirical analysis of the 
+
+UDVideoQA dataset supports this hypothesis through three key observations: (1) strong agent co-occurrence, (2) tem-poral consistency of activity, and (3) measurable proximity-based interaction potential. 
+
+Agent Co-occurrence A fundamental prerequisite for studying interactions is the concurrent presence of multi-ple agents within the same frame. Figure 18(a) shows a density heatmap of vehicle and pedestrian counts across all annotated frames. The highest-density region (brightest yel-low) lies not near the origin, representing empty or single-agent scenes, but around 2-5 vehicles and 2–4 pedestrians .This distribution confirms that the majority of footage cap-tures scenes with concurrent multi-agent activity rather than sparse or unoccupied intersections. Such consistent co-This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026.   
+
+> Figure 19. Example frame illustrating the model’s use of visual evidence, specifically the “AP” license plate prefix-to support its prediction in the RoadSocial dataset.
+
+occurrence validates the choice of intersections as natural laboratories for multi-agent reasoning, where spatial depen-dencies and interaction opportunities emerge continuously. 
+
+Temporal Consistency of Activity To verify that these in-teractions are temporally stable rather than transient, we an-alyzed pedestrian counts across three temporal segments of each 10 s clip beginning , middle , and end . The violin plots in Figure 18(b) reveal near-identical distributions across these intervals: the median counts (white dots), interquar-tile ranges (black bars), and overall distribution shapes re-main remarkably consistent. This indicates that the level of pedestrian activity and, by extension, the overall scene dynamics remain stable throughout the clips. The dataset, therefore, provides a balanced temporal sampling of ur-ban traffic behavior rather than isolated or event-biased mo-ments. 
+
+Quantifying Proximity and Interaction Potential Be-yond co-occurrence, we measure physical proximity to es-timate interaction potential. Figure 18 (c) shows pedes-trian–pedestrian distances peaking near 50 –75 units, while vehicle–pedestrian distances peak around 150 units, with a significant tail of low-distance events. These high-interaction zones confirm that intersections force multi-agent co-location via traffic constraints like lights and cross-walks. This proximity generates rich behaviors like yield-ing and conflict, demonstrating that intersections are opti-mal real-world settings for the complex, causally entangled reasoning UDVideoQA aims to benchmark. 
+
+F.6. Generalization Tests on available Datasets 
+
+To evaluate cross-domain transferability, we tested the fine-tuned Qwen 2.5-VL-7B model on 500 QA pairs each from the validation splits of RoadSocial [29] and SUTDTraf-ficQA [44]. These datasets were chosen for their struc-tural similarity to UDVideoQA in terms of question format                                               
+
+> QA-Group Training Configuration Factual Complex Imaginative Adversarial Overall Score Fine Tuned Model 68.2 41.8 74.4 55 60 Baseline 66.2 383.7 58.1 52.75
+> Table 11. Evaluation of the UDVideoQA fine-tuned model’s gen-eralization performance on the RoadSocial dataset across four QA
+> categories -factual ,complex ,imaginative , and adversarial .
+> QA-Group Training Configuration BU Att CI ER Overall Score Fine Tuned Model 54.5 73.3 75 48 62.7 Baseline 48.9 69.6 73.4 44 59.05
+> Table 12. Evaluation of the UDVideoQA fine-tuned model’s gener-alization performance on the SUTDTraffic dataset across four QA
+> categories factual ,complex ,imaginative , and adversarial .
+
+and reasoning taxonomy, allowing for a controlled assess-ment of generalization across different video sources and annotation protocols. The evaluation produced a few note-worthy observations (see Table 11 and Table 12). On the 
+
+RoadSocial benchmark, which includes deliberately adver-sarial questions targeting perception robustness, the model demonstrated strong visual grounding even when its predic-tion diverged from the labeled ground truth. For example: • Question: “In which Indian state did this road event likely occur?” 
+
+• Ground Truth: “The incident likely occurred in Telan-gana, India.” 
+
+• Model Prediction: “The bus in the video has a li-cense plate that starts with ‘AP,’ which stands for Andhra Pradesh. . . therefore, it is likely that this road event oc-curred in Andhra Pradesh.” 
+
+While the prediction ( “Andhra Pradesh” ) does not match the ground-truth label ( “Telangana” ), visual inspec-tion confirmed that the bus’s license plate indeed displayed the prefix “AP” . This outcome highlights the model’s ca-pacity for visual evidence-based reasoning , deriving log-ically coherent answers grounded in observed cues. Fig-ure 19 illustrates the corresponding frame used in this rea-soning process. Beyond individual examples, the fine-tuned 
+
+Qwen model achieved consistent quantitative improvements across both benchmarks. Under the weighted semantic-scoring framework introduced in Section F.2, it recorded a 7.3% gain on RoadSocial and a 3.61 % gain on SUTD-TrafficQA over its baseline. These improvements demon-strate that exposure to high-density, multi-agent intersec-tion data in UDVideoQA enhances a model’s ability to gen-eralize causal and perceptual reasoning across unseen traf-fic domains. In summary, fine-tuning on UDVideoQA not only boosts in-domain accuracy but also strengthens cross-domain robustness, particularly in tasks requiring grounded visual interpretation and resistance to hallucination. This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. Prompt : You are a video questionnaire assistant for creating high -quality VideoQA data for the InterAct VideoQA 
+
+benchmark . Your sole task is to watch a provided video clip and generate exactly 10 high -quality, diverse question –
+
+answer (QA) pairs based only on its content ...... 
+
+Question : In a hypothetical scenario where the white sedan did not proceed into the intersection at 0.3s, 
+
+would the white autonomous vehicle's path have been unobstructed, allowing it to complete its left turn? 
+
+Question : Please describe the status of the white car on the left (e .g., was it stationary, creeping forward) 
+
+during the moments immediately prior to it initiating its turn at the 0:06 mark? 
+
+Question : Observing the traffic signal, do the vehicles in the lane begin to accelerate before the light 
+
+visibly changes, or do they only start moving after the signal change occurs? 
+
+(a) Night-time clips Prompt : You are a video questionnaire assistant for creating high -quality VideoQA data for the InterAct VideoQA 
+
+benchmark . Your sole task is to watch a provided video clip and generate exactly 10 high -quality, diverse question –
+
+answer (QA) pairs based only on its content ...... 
+
+Question : Regarding the area of the road directly beside the painted pedestrian crossing, could you 
+
+please identify and describe the specific type of pavement marking that is visible within that traffic lane? 
+
+Question : Based on the movements of the dark -colored SUV as it proceeded to make a left turn, was it 
+
+legally required at any point to stop and yield to any pedestrians who were in or approaching the 
+
+crosswalk? 
+
+Question : By closely observing the traffic light governing the vehicles' direction of travel, can you 
+
+determine whether the vehicles in the queue initiate their forward movement prior to the signal visually 
+
+changing, or do they only begin to accelerate after the signal change has already occurred? 
+
+(b) Early-hours clips 
+
+Figure 20. Example VideoQGen outputs across lighting conditions. This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. Prompt : You are a Video Traffic Analyst . Answer the question using only the video provided . Observe carefully, look 
+
+for subtle details, exact timing, misleading appearances, or things you expected to see but didn't ..... 
+
+Question : When comparing the two vehicles mentioned, which one completed the action of entering the foreground 
+
+area of the video frame first in the sequence of events? 
+
+Ground Truth Answer : The car identified as the first one is observed to enter the foreground space 
+
+before the car identified as the second one does .. 
+
+Answer : The vehicle designated as the first car was observed to have entered the foreground before the 
+
+second vehicle did .
+
+Answer : The first car, which is white, enters the foreground (around the 0:07 –0:08 mark) . A second car is 
+
+not observed to fully enter the foreground area during the clip .
+
+Answer : Based on the timeline, the first car arrives and enters the foreground area prior to the second 
+
+car making its entrance ..
+
+Answer : In terms of timing, the first car made its appearance in the foreground earlier than the second car 
+
+did ..
+
+Answer : The vehicle identified as the "first car" entering the foreground actually appears to be the second 
+
+one to do so, because the car referred to as the "second car" is already present on the road and visible in 
+
+the background earlier .
+
+Answer : Observing the sequence, the first car clearly entered the foreground ahead of the second car .
+
+Figure 21. Example of a reverse reasoning question evaluating fine-grained temporal understanding. Models must track two distinct objects and determine their correct sequential order. Gemini 2.5 Pro provides the most accurate response by focusing on the temporal relationships within the sequence. This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. Prompt : You are a Video Traffic Analyst . Answer the question using only the video provided . Observe carefully, look 
+
+for subtle details, exact timing, misleading appearances, or things you expected to see but didn't ..... 
+
+Question : Focusing specifically on the final three seconds of the video footage, is there any observable instance of 
+
+a vehicle moving closer toward the camera's position? 
+
+Ground Truth Answer : During the last three seconds of the observation period, no vehicle is seen to be 
+
+moving in the direction of the camera .
+
+Answer : No, a vehicle does not manage to reach the immediate foreground area before the clip finishes .
+
+The vehicles depicted in the image are located further down the road and are not advancing toward the 
+
+camera or the scene's immediate foreground .
+
+Answer : No, within the concluding three seconds of this particular clip , no vehicle can be observed 
+
+approaching the camera .
+
+Answer : Yes, there is one vehicle that is seen getting closer to the camera's viewpoint near the end of the 
+
+footage .
+
+Answer : No, it appears that there are no vehicles moving toward the camera's location in the last three 
+
+seconds of the clip .
+
+Answer : Yes, there is a car visible that is clearly moving toward the camera during the final three -second 
+
+segment of the clip .
+
+Answer : The concluding three seconds of the video clip do not depict any vehicle that is traveling in the 
+
+direction of the camera .
+
+Figure 22. . Example of an event reasoning challenge illustrating model failures in temporal grounding. Although the ground truth indicates that no vehicle approaches the camera during the final three seconds, several models (e.g., GPT and LLaVA-NeXT-Video ) incorrectly respond “Yes”, revealing hallucinated motion and poor temporal localization. This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. Prompt : You are a Video Traffic Analyst . Answer the question using only the video provided . Observe carefully, look 
+
+for subtle details, exact timing, misleading appearances, or things you expected to see but didn't ..... 
+
+Question : At the precise beginning of the video clip, what is the total number of vehicles that are stationary or halted 
+
+within the intersection area? 
+
+Ground Truth Answer : There are zero vehicles stopped at that location when the clip begins .
+
+Answer : The visual evidence shows an empty intersection that contains no visible vehicles, either stopped 
+
+or in motion . The roadway seems to be clear, and there are no indications of any traffic activity .
+
+Consequently, the number of vehicles stopped at the intersection at the start is zero .
+
+Answer : At the intersection, there is a total count of zero vehicles that are stopped .
+
+Answer : The count of stopped vehicles is 0
+
+Answer : There are two distinct vehicles that are already stopped at the intersection right at the start .
+
+Answer : There are two vehicles that can be seen stopped within the intersection area when the video clip 
+
+commences .
+
+Answer : The video clip depicts a city intersection that has no vehicles stopped within it at the beginning .
+
+The road is visibly empty, and there are no cars apparent in the scene .
+
+Figure 23. Example of an attribution question assessing a specific visual attribute, the number of stopped vehicles at the start of the clip. Most models correctly identify zero vehicles, consistent with the ground truth. This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. Prompt : You are a Video Traffic Analyst . Answer the question using only the video provided . Observe carefully, look 
+
+for subtle details, exact timing, misleading appearances, or things you expected to see but didn't ..... 
+
+Question : Based on the visual evidence in the clip, does the surface of the road show any indications of being wet, 
+
+for example, as a result of recent rainfall? 
+
+Ground Truth Answer : No, the road has an appearance that indicates it is dry .
+
+Answer : : No, the road surface does not appear to be wet from rain . The road looks dry, and there are no 
+
+visible signs of water on the surface or in the surrounding area . The sky is clear with a few clouds, 
+
+suggesting that it has not recently rained .
+
+Answer : No, based on observation, the surface of the road appears to be quite dry .
+
+Answer : No, the road is not wet .
+
+Answer : No, the road's surface appears to be in a dry condition .
+
+Answer : : No, the road surface as seen in the image does not appear to be wet from any rain . It looks 
+
+both dry and clear, suggesting that it is not currently raining at the time the photo was captured 
+
+Answer : The road surface appears to be dry and clear, and it is noticeably reflecting the bright sunlight .
+
+There are no visible indications of wetness or any trace of rain on the asphalt .
+
+Figure 24. Example of a basic understanding question evaluating simple environmental perception, specifically, road surface wetness. All models correctly identify the road as dry, demonstrating high accuracy on this foundational reasoning task. This paper has been accepted for publication at the IEEE Conference on Computer Vision and Pattern Recognition (CVPR) Findings, Denver, 2026. Prompt : You are a Video Traffic Analyst . Answer the question using only the video provided . Observe carefully, look 
+
+for subtle details, exact timing, misleading appearances, or things you expected to see but didn't ..... 
+
+Question : Is the statement accurate that, at any single moment, precisely five cars are simultaneously present in the 
+
+traffic lane directly beneath the camera? 
+
+Ground Truth Answer : That statement is false ; at no point during the entire clip does that specific 
+
+situation (exactly five cars) ever happen .
+
+Answer : This nighttime image uses a long exposure, which turns cars into light streaks and makes an 
+
+accurate count impossible . While the streaks indicate motion from multiple vehicles, the exact number is 
+
+uncertain . Therefore, it is incorrect to state that exactly five cars are in the lane under the camera .
+
+Answer : No, that statement is incorrect .
+
+Answer : No, it is not the case that there are precisely five cars situated under the camera at any single 
+
+point in time .
+
+Answer : No, that assertion is incorrect .
+
+Answer : Yes, judging from the visual information in the image provided, it does appear to be the case that 
+
+precisely five cars are occupying the lane directly under the camera at the same time .
+
+Answer : No, the statement claiming that exactly five cars are occupying the lane under the camera 
+
+simultaneously is not accurate .
+
+Figure 25. Example of a counterfactual inference question evaluating a model’s ability to reject a false premise. While most models correctly classify the statement as false, LLaVA-NeXT incorrectly confirms the non-existent event, revealing a failure in precise factual verification.
