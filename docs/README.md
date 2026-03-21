@@ -6,73 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-20
-- 运行时间：2026-03-20 20:13:35 UTC
+- 最新运行日期：2026-03-21
+- 运行时间：2026-03-21 20:03:50 UTC
 - 运行状态：成功
 - 本次总论文数：17
 - 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-今日聚焦多智能体协同进化，深度解析长视频推理与复杂环境导航的满分突破。
-重点关注“感知-行动联盟”带来的视频理解效率飞跃，以及 VLM 驱动的多机目标导航新方案。
-建议从多智能体记忆自演化与强化学习训练框架入手，探索智能体技能自动化的落地可能。
-- 详情：[/202603/20/README](/202603/20/README)
+今日精选 17 篇前沿论文，重点聚焦多智能体协作在气候分析与人机交互中的深度应用。
+推荐关注 ClimateAgents 如何利用多智能体模拟社会气候动态，以及 MERGE 框架在复杂人机协作场景下的多角色推理突破。
+建议深入了解智能体在垂直领域的落地实践，并同步关注生成式架构中的语言偏见与记忆治理问题。
+- 详情：[/202603/21/README](/202603/21/README)
 
 ### 精读区论文标签
-1. [A Multi-Agent Perception-Action Alliance for Efficient Long Video Reasoning](/202603/20/2603.14052v2-a-multi-agent-perception-action-alliance-for-efficient-long-video-reasoning)  
-   标签：评分：10.0/10、query:mm-mas
-   evidence：用于多模态视频推理的多智能体联盟
-2. [GoalVLM: VLM-driven Object Goal Navigation for Multi-Agent System](/202603/20/2603.18210v1-goalvlm-vlm-driven-object-goal-navigation-for-multi-agent-system)  
-   标签：评分：10.0/10、query:mm-mas
-   evidence：基于视觉语言模型的多智能体协作框架
-3. [Adaptive Vision-Language Model Routing for Computer Use Agents](/202603/20/2603.12823v1-adaptive-vision-language-model-routing-for-computer-use-agents)  
-   标签：评分：8.0/10、query:mm-mas
-   evidence：多模态计算机使用智能体的自适应VLM路由
-4. [$τ$-Voice: Benchmarking Full-Duplex Voice Agents on Real-World Domains](/202603/20/2603.13686v1--voice-benchmarking-full-duplex-voice-agents-on-real-world-domains)  
-   标签：评分：8.0/10、query:mm-mas
-   evidence：在落地任务上评估全双工语音智能体的基准测试
-5. [When Only the Final Text Survives: Implicit Execution Tracing for Multi-Agent Attribution](/202603/20/2603.17445v2-when-only-the-final-text-survives-implicit-execution-tracing-for-multi-agent-attribution)  
+1. [ClimateAgents: A Multi-Agent Research Assistant for Social-Climate Dynamics Analysis](/202603/21/2603.13840v1-climateagents-a-multi-agent-research-assistant-for-social-climate-dynamics-analysis)  
+   标签：评分：9.0/10、query:mm-mas
+   evidence：集成多模态数据检索的多智能体助手
+2. [MERGE: Guided Vision-Language Models for Multi-Actor Event Reasoning and Grounding in Human-Robot Interaction](/202603/21/2603.18988v1-merge-guided-vision-language-models-for-multi-actor-event-reasoning-and-grounding-in-human-robot-interaction)  
+   标签：评分：9.0/10、query:mm-mas
+   evidence：用于人机交互中多角色事件推理的视觉语言模型
+3. [Why Do LLM-based Web Agents Fail? A Hierarchical Planning Perspective](/202603/21/2603.14248v1-why-do-llm-based-web-agents-fail-a-hierarchical-planning-perspective)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：多智能体归因与交互拓扑重建
-6. [Sensi: Learn One Thing at a Time -- Curriculum-Based Test-Time Learning for LLM Game Agents](/202603/20/2603.17683v1-sensi-learn-one-thing-at-a-time----curriculum-based-test-time-learning-for-llm-game-agents)  
+   evidence：基于大模型的Web智能体分层规划框架
+4. [ResearchPilot: A Local-First Multi-Agent System for Literature Synthesis and Related Work Drafting](/202603/21/2603.14629v1-researchpilot-a-local-first-multi-agent-system-for-literature-synthesis-and-related-work-drafting)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：将感知与动作分离的大模型智能体双角色架构
+   evidence：用于文献综述和研究辅助的多智能体系统
+5. [Gym-V: A Unified Vision Environment System for Agentic Vision Research](/202603/21/2603.15432v2-gym-v-a-unified-vision-environment-system-for-agentic-vision-research)  
+   标签：评分：8.0/10、query:mm-mas
+   evidence：智能体视觉研究的统一视觉环境
+6. [PaAgent: Portrait-Aware Image Restoration Agent via Subjective-Objective Reinforcement Learning](/202603/21/2603.17055v1-paagent-portrait-aware-image-restoration-agent-via-subjective-objective-reinforcement-learning)  
+   标签：评分：8.0/10、query:mm-mas
+   evidence：利用多模态大模型的图像修复智能体
 
 ### 速读区论文标签
-1. [SLEA-RL: Step-Level Experience Augmented Reinforcement Learning for Multi-Turn Agentic Training](/202603/20/2603.18079v1-slea-rl-step-level-experience-augmented-reinforcement-learning-for-multi-turn-agentic-training)  
+1. [AgentVLN: Towards Agentic Vision-and-Language Navigation](/202603/21/2603.17670v1-agentvln-towards-agentic-vision-and-language-navigation)  
+   标签：评分：8.0/10、query:mm-mas
+   evidence：具身导航智能体的VLM大脑范式
+2. [MemArchitect: A Policy Driven Memory Governance Layer](/202603/21/2603.18330v1-memarchitect-a-policy-driven-memory-governance-layer)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：多轮智能体训练的强化学习
-2. [MemMA: Coordinating the Memory Cycle through Multi-Agent Reasoning and In-Situ Self-Evolution](/202603/20/2603.18718v1-memma-coordinating-the-memory-cycle-through-multi-agent-reasoning-and-in-situ-self-evolution)  
+   evidence：持久化大语言模型智能体的记忆治理层
+3. [Analysis Of Linguistic Stereotypes in Single and Multi-Agent Generative AI Architectures](/202603/21/2603.18729v1-analysis-of-linguistic-stereotypes-in-single-and-multi-agent-generative-ai-architectures)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：协调记忆周期的多智能体框架
-3. [Automating Skill Acquisition through Large-Scale Mining of Open-Source Agentic Repositories: A Framework for Multi-Agent Procedural Knowledge Extraction](/202603/20/2603.11808v2-automating-skill-acquisition-through-large-scale-mining-of-open-source-agentic-repositories-a-framework-for-multi-agent-procedural-knowledge-extraction)  
-   标签：评分：7.0/10、query:llm-ma
-   evidence：多智能体程序性知识提取框架
-4. [HATS: Hardness-Aware Trajectory Synthesis for GUI Agents](/202603/20/2603.12138v1-hats-hardness-aware-trajectory-synthesis-for-gui-agents)  
+   evidence：用于偏差缓解的多智能体架构
+4. [MultihopSpatial: Multi-hop Compositional Spatial Reasoning Benchmark for Vision-Language Model](/202603/21/2603.18892v1-multihopspatial-multi-hop-compositional-spatial-reasoning-benchmark-for-vision-language-model)  
+   标签：评分：8.0/10、query:mm-mas
+   evidence：视觉语言模型智能体的空间推理基准
+5. [Directional Embedding Smoothing for Robust Vision Language Models](/202603/21/2603.15259v1-directional-embedding-smoothing-for-robust-vision-language-models)  
    标签：评分：7.0/10、query:mm-mas
-   evidence：多模态 GUI 智能体的轨迹合成
-5. [ToolTree: Efficient LLM Agent Tool Planning via Dual-Feedback Monte Carlo Tree Search and Bidirectional Pruning](/202603/20/2603.12740v1-tooltree-efficient-llm-agent-tool-planning-via-dual-feedback-monte-carlo-tree-search-and-bidirectional-pruning)  
-   标签：评分：7.0/10、query:llm-ma
-   evidence：LLM智能体工具规划与多步任务交互
-6. [Semantic Invariance in Agentic AI](/202603/20/2603.13173v2-semantic-invariance-in-agentic-ai)  
-   标签：评分：7.0/10、query:llm-ma
-   evidence：评估多智能体协作系统中LLM推理智能体的鲁棒性
-7. [CAMD: Coverage-Aware Multimodal Decoding for Efficient Reasoning of Multimodal Large Language Models](/202603/20/2603.14745v1-camd-coverage-aware-multimodal-decoding-for-efficient-reasoning-of-multimodal-large-language-models)  
+   evidence：保障智能体系统中的视觉语言模型安全
+6. [Trajectory-Diversity-Driven Robust Vision-and-Language Navigation](/202603/21/2603.15370v1-trajectory-diversity-driven-robust-vision-and-language-navigation)  
    标签：评分：7.0/10、query:mm-mas
-   evidence：多模态大语言模型的解码优化
-8. [Beam Prediction Based on Multimodal Large Language Models](/202603/20/2603.15093v1-beam-prediction-based-on-multimodal-large-language-models)  
-   标签：评分：7.0/10、query:mm-mas
-   evidence：用于传感器数据融合的多模态大语言模型
-9. [MIBench: Evaluating LMMs on Multimodal Interaction](/202603/20/2603.13427v1-mibench-evaluating-lmms-on-multimodal-interaction)  
-   标签：评分：6.0/10、query:mm-mas
-   evidence：评估大语言多模态模型的多模态交互能力
-10. [Shopping Companion: A Memory-Augmented LLM Agent for Real-World E-Commerce Tasks](/202603/20/2603.14864v1-shopping-companion-a-memory-augmented-llm-agent-for-real-world-e-commerce-tasks)  
+   evidence：真实环境中的视觉语言导航智能体
+7. [CLAG: Adaptive Memory Organization via Agent-Driven Clustering for Small Language Model Agents](/202603/21/2603.15421v1-clag-adaptive-memory-organization-via-agent-driven-clustering-for-small-language-model-agents)  
+   标签：评分：7.0/10、query:llm-ma
+   evidence：小语言模型智能体的代理记忆框架
+8. [Efficient LLM Serving for Agentic Workflows: A Data Systems Perspective](/202603/21/2603.16104v1-efficient-llm-serving-for-agentic-workflows-a-data-systems-perspective)  
+   标签：评分：7.0/10、query:llm-ma
+   evidence：智能体工作流与大模型调用的推理框架
+9. [Compute Allocation for Reasoning-Intensive Retrieval Agents](/202603/21/2603.14635v1-compute-allocation-for-reasoning-intensive-retrieval-agents)  
    标签：评分：6.0/10、query:llm-ma
-   evidence：大模型智能体框架及电子商务任务基准
-11. [Beyond Benchmark Islands: Toward Representative Trustworthiness Evaluation for Agentic AI](/202603/20/2603.14987v1-beyond-benchmark-islands-toward-representative-trustworthiness-evaluation-for-agentic-ai)  
+   evidence：使用大模型的推理密集型检索智能体
+10. [Talk, Evaluate, Diagnose: User-aware Agent Evaluation with Automated Error Analysis](/202603/21/2603.15483v1-talk-evaluate-diagnose-user-aware-agent-evaluation-with-automated-error-analysis)  
    标签：评分：6.0/10、query:llm-ma
-   evidence：智能体AI的可信度评估
+   evidence：统一的智能体评估方法与错误分析
+11. [Graph-of-Constraints Model Predictive Control for Reactive Multi-agent Task and Motion Planning](/202603/21/2603.18400v1-graph-of-constraints-model-predictive-control-for-reactive-multi-agent-task-and-motion-planning)  
+   标签：评分：6.0/10、query:llm-ma
+   evidence：反应式多智能体任务与运动规划
 
 
 <div class="dpr-home-promo-card">

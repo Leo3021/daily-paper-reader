@@ -1,0 +1,675 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-03-21T20:01:58.434535+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 10,
+    "deep_cap": 6,
+    "deep_selected": 6,
+    "quick_candidates": 21,
+    "quick_skim_target": 11,
+    "quick_selected": 11
+  },
+  "deep_dive": [
+    {
+      "id": "2603.13840v1",
+      "title": "ClimateAgents: A Multi-Agent Research Assistant for Social-Climate Dynamics Analysis",
+      "abstract": "The complex interaction between social behaviors and climate change requires more than traditional data-driven prediction; it demands interpretable and adaptive analytical frameworks capable of integrating heterogeneous sources of knowledge. This study introduces ClimateAgents, a multi-agent research assistant designed to support social-climate analysis through coordinated AI agents. Rather than focusing solely on predictive modeling, the framework assists researchers in exploring socio-environmental dynamics by integrating multimodal data retrieval, statistical modeling, textual analysis, and automated reasoning. Traditional approaches to climate analysis often address narrowly defined indicators and lack the flexibility to incorporate cross-domain socio-economic knowledge or adapt to evolving research questions. To address these limitations, ClimateAgents employs a set of collaborative, domain-specialized agents that collectively perform key stages of the research workflow, including hypothesis generation, data analysis, evidence retrieval, and structured reporting. The framework supports exploratory analysis and scenario investigation using datasets from sources such as the United Nations and the World Bank. By combining agent-based reasoning with quantitative analysis of socio-economic behavioral dynamics, ClimateAgents enables adaptive and interpretable exploration of relationships between climate indicators, social variables, and environmental outcomes. The results illustrate how multi-agent AI systems can augment analytical reasoning and facilitate interdisciplinary, data-driven investigation of complex socio-environmental systems.",
+      "authors": [
+        "Shan Shan"
+      ],
+      "primary_category": "cs.MA",
+      "categories": [
+        "cs.MA"
+      ],
+      "published": "2026-03-14T08:48:05+00:00",
+      "link": "https://arxiv.org/pdf/2603.13840v1",
+      "tags": [
+        "keyword:MM MAS",
+        "query:MM MAS"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "multi-agent assistant integrating multimodal data retrieval",
+      "llm_evidence_cn": "集成多模态数据检索的多智能体助手",
+      "llm_evidence": "集成多模态数据检索的多智能体助手",
+      "canonical_evidence": "集成多模态数据检索的多智能体助手",
+      "llm_tldr_en": "ClimateAgents is a multi-agent system for social-climate analysis using multimodal data and reasoning.",
+      "llm_tldr_cn": "ClimateAgents是一个利用多模态数据和自动化推理进行社会气候分析的多智能体系统。",
+      "llm_tldr": "ClimateAgents是一个利用多模态数据和自动化推理进行社会气候分析的多智能体系统。",
+      "llm_tags": [
+        "query:mm-mas:composite"
+      ],
+      "matched_query_tag": "query:mm-mas:composite",
+      "matched_query_text": "Papers central to 多模态多智能体系统相关论文检索, especially work that connects or combines: l; multimodal; m; multimodal multi agent; recent advances in multimodal multi agent systems; multimodal large language models for multi agent cooperation; benchmarks for evaluating multimodal multi agent performance.",
+      "matched_requirement_id": "req-composite-mm-mas",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.18988v1",
+      "title": "MERGE: Guided Vision-Language Models for Multi-Actor Event Reasoning and Grounding in Human-Robot Interaction",
+      "abstract": "We introduce MERGE, a system for situational grounding of actors, objects, and events in dynamic human-robot group interactions. Effective collaboration in such settings requires consistent situational awareness, built on persistent representations of people and objects and an episodic abstraction of events. MERGE achieves this by uniquely identifying physical instances of actors (humans or robots) and objects and structuring them into actor-action-object relations, ensuring temporal consistency across interactions. Central to MERGE is the integration of Vision-Language Models (VLMs) guided with a perception pipeline: a lightweight streaming module continuously processes visual input to detect changes and selectively invokes the VLM only when necessary. This decoupled design preserves the reasoning power and zero-shot generalization of VLMs while improving efficiency, avoiding both the high monetary cost and the latency of frame-by-frame captioning that leads to fragmented and delayed outputs. To address the absence of suitable benchmarks for multi-actor collaboration, we introduce the GROUND dataset, which offers fine-grained situational annotations of multi-person and human-robot interactions. On this dataset, our approach improves the average grounding score by a factor of 2 compared to the performance of VLM-only baselines - including GPT-4o, GPT-5 and Gemini 2.5 Flash - while also reducing run-time by a factor of 4. The code and data are available at www.github.com/HRI-EU/merge.",
+      "authors": [
+        "Joerg Deigmoeller",
+        "Nakul Agarwal",
+        "Stephan Hasler",
+        "Daniel Tanneberg",
+        "Anna Belardinelli",
+        "Reza Ghoddoosian",
+        "Chao Wang",
+        "Felix Ocker",
+        "Fan Zhang",
+        "Behzad Dariush",
+        "Michael Gienger"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-03-19T14:57:03+00:00",
+      "link": "https://arxiv.org/pdf/2603.18988v1",
+      "tags": [
+        "query:MM MAS"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Vision-Language Models for multi-actor event reasoning in human-robot interaction",
+      "llm_evidence_cn": "用于人机交互中多角色事件推理的视觉语言模型",
+      "llm_evidence": "用于人机交互中多角色事件推理的视觉语言模型",
+      "canonical_evidence": "用于人机交互中多角色事件推理的视觉语言模型",
+      "llm_tldr_en": "MERGE uses VLMs for situational grounding and temporal consistency in dynamic multi-actor group interactions.",
+      "llm_tldr_cn": "MERGE 利用视觉语言模型在动态多角色交互中实现情境锚定和时序一致性。",
+      "llm_tldr": "MERGE 利用视觉语言模型在动态多角色交互中实现情境锚定和时序一致性。",
+      "llm_tags": [
+        "query:mm-mas:composite"
+      ],
+      "matched_query_tag": "query:mm-mas:composite",
+      "matched_query_text": "Papers central to 多模态多智能体系统相关论文检索, especially work that connects or combines: l; multimodal; m; multimodal multi agent; recent advances in multimodal multi agent systems; multimodal large language models for multi agent cooperation; benchmarks for evaluating multimodal multi agent performance.",
+      "matched_requirement_id": "req-composite-mm-mas",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.14248v1",
+      "title": "Why Do LLM-based Web Agents Fail? A Hierarchical Planning Perspective",
+      "abstract": "Large language model (LLM) web agents are increasingly used for web navigation but remain far from human reliability on realistic, long-horizon tasks. Existing evaluations focus primarily on end-to-end success, offering limited insight into where failures arise. We propose a hierarchical planning framework to analyze web agents across three layers (i.e., high-level planning, low-level execution, and replanning), enabling process-based evaluation of reasoning, grounding, and recovery. Our experiments show that structured Planning Domain Definition Language (PDDL) plans produce more concise and goal-directed strategies than natural language (NL) plans, but low-level execution remains the dominant bottleneck. These results indicate that improving perceptual grounding and adaptive control, not only high-level reasoning, is critical for achieving human-level reliability. This hierarchical perspective provides a principled foundation for diagnosing and advancing LLM web agents.",
+      "authors": [
+        "Mohamed Aghzal",
+        "Gregory J. Stein",
+        "Ziyu Yao"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.CL"
+      ],
+      "published": "2026-03-15T06:52:06+00:00",
+      "link": "https://arxiv.org/pdf/2603.14248v1",
+      "tags": [
+        "keyword:MM MAS",
+        "query:MM MAS"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Hierarchical planning framework for LLM-based web agents",
+      "llm_evidence_cn": "基于大模型的Web智能体分层规划框架",
+      "llm_evidence": "基于大模型的Web智能体分层规划框架",
+      "canonical_evidence": "基于大模型的Web智能体分层规划框架",
+      "llm_tldr_en": "Analyzes failures in LLM web agents using a hierarchical planning framework to improve reasoning and grounding.",
+      "llm_tldr_cn": "通过分层规划框架分析大模型Web智能体的失败原因，以提升其推理与环境感知能力。",
+      "llm_tldr": "通过分层规划框架分析大模型Web智能体的失败原因，以提升其推理与环境感知能力。",
+      "llm_tags": [
+        "query:llm-ma:composite"
+      ],
+      "matched_query_tag": "query:llm-ma:composite",
+      "matched_query_text": "Papers central to 大模型多智能体系统相关论文检索, especially work that connects or combines: d; a; m; Frameworks for building multi agent systems with LLMs; Emergent behavior in multi agent large language models; Collaborative problem solving in LLM multi agent environments; Multi agent reinforcement learning with large language models.",
+      "matched_requirement_id": "req-composite-llm-ma",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.15432v2",
+      "title": "Gym-V: A Unified Vision Environment System for Agentic Vision Research",
+      "abstract": "As agentic systems increasingly rely on reinforcement learning from verifiable rewards, standardized ``gym'' infrastructure has become essential for rapid iteration, reproducibility, and fair comparison. Vision agents lack such infrastructure, limiting systematic study of what drives their learning and where current models fall short. We introduce \\textbf{Gym-V}, a unified platform of 179 procedurally generated visual environments across 10 domains with controllable difficulty, enabling controlled experiments that were previously infeasible across fragmented toolkits. Using it, we find that observation scaffolding is more decisive for training success than the choice of RL algorithm, with captions and game rules determining whether learning succeeds at all. Cross-domain transfer experiments further show that training on diverse task categories generalizes broadly while narrow training can cause negative transfer, with multi-turn interaction amplifying all of these effects. Gym-V is released as a convenient foundation for training environments and evaluation toolkits, aiming to accelerate future research on agentic VLMs.",
+      "authors": [
+        "Fanqing Meng",
+        "Lingxiao Du",
+        "Jiawei Gu",
+        "Jiaqi Liao",
+        "Linjie Li",
+        "Zijian Wu",
+        "Xiangyan Liu",
+        "Ziqi Zhao",
+        "Mengkang Hu",
+        "Yue Zhang",
+        "Zichen Liu",
+        "Jiaheng Zhang",
+        "Michael Qizhe Shieh"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-16T15:37:07+00:00",
+      "link": "https://arxiv.org/pdf/2603.15432v2",
+      "tags": [
+        "keyword:MM MAS",
+        "query:MM MAS"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "unified vision environment for agentic research",
+      "llm_evidence_cn": "智能体视觉研究的统一视觉环境",
+      "llm_evidence": "智能体视觉研究的统一视觉环境",
+      "canonical_evidence": "智能体视觉研究的统一视觉环境",
+      "llm_tldr_en": "Gym-V provides a unified platform of 179 visual environments for standardized vision agent evaluation.",
+      "llm_tldr_cn": "Gym-V为视觉智能体研究提供了包含179个环境的统一平台，支持标准化评估。",
+      "llm_tldr": "Gym-V为视觉智能体研究提供了包含179个环境的统一平台，支持标准化评估。",
+      "llm_tags": [
+        "query:mm-mas"
+      ],
+      "matched_query_tag": "query:mm-mas",
+      "matched_query_text": "benchmarks for evaluating multimodal multi agent performance",
+      "matched_requirement_id": "req-7",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.14629v1",
+      "title": "ResearchPilot: A Local-First Multi-Agent System for Literature Synthesis and Related Work Drafting",
+      "abstract": "ResearchPilot is an open-source, self-hostable multi-agent system for literature-review assistance. Given a natural-language research question, it retrieves papers from Semantic Scholar and arXiv, extracts structured findings from paper abstracts, synthesizes cross-paper patterns, and drafts a citation-aware related-work section. The system combines FastAPI, Next.js, DSPy, SQLite, and Qdrant in a local-first architecture that supports bring-your-own-key model access and remote-or-local embeddings. This paper describes the system design, typed agent interfaces, persistence and history-search mechanisms, and the engineering tradeoffs involved in building a transparent research assistant. Rather than claiming algorithmic novelty, we present ResearchPilot as a systems contribution and evaluate it through automated tests and end-to-end local runs. We discuss limitations including external API rate limits, abstract-only extraction, incomplete corpus coverage, and the lack of citation verification.",
+      "authors": [
+        "Peng Zhang"
+      ],
+      "primary_category": "cs.IR",
+      "categories": [
+        "cs.IR",
+        "cs.AI"
+      ],
+      "published": "2026-03-15T22:02:59+00:00",
+      "link": "https://arxiv.org/pdf/2603.14629v1",
+      "tags": [
+        "keyword:MM MAS",
+        "query:MM MAS"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "multi-agent system for literature synthesis and research assistance",
+      "llm_evidence_cn": "用于文献综述和研究辅助的多智能体系统",
+      "llm_evidence": "用于文献综述和研究辅助的多智能体系统",
+      "canonical_evidence": "用于文献综述和研究辅助的多智能体系统",
+      "llm_tldr_en": "Presents ResearchPilot, a local-first multi-agent system for automated literature review and drafting.",
+      "llm_tldr_cn": "介绍ResearchPilot，一个用于自动化文献综述和草拟的本地优先多智能体系统。",
+      "llm_tldr": "介绍ResearchPilot，一个用于自动化文献综述和草拟的本地优先多智能体系统。",
+      "llm_tags": [
+        "query:llm-ma:composite"
+      ],
+      "matched_query_tag": "query:llm-ma:composite",
+      "matched_query_text": "Papers central to 大模型多智能体系统相关论文检索, especially work that connects or combines: d; a; m; Frameworks for building multi agent systems with LLMs; Emergent behavior in multi agent large language models; Collaborative problem solving in LLM multi agent environments; Multi agent reinforcement learning with large language models.",
+      "matched_requirement_id": "req-composite-llm-ma",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.17055v1",
+      "title": "PaAgent: Portrait-Aware Image Restoration Agent via Subjective-Objective Reinforcement Learning",
+      "abstract": "Image Restoration (IR) agents, leveraging multimodal large language models to perceive degradation and invoke restoration tools, have shown promise in automating IR tasks. However, existing IR agents typically lack an insight summarization mechanism for past interactions, which results in an exhaustive search for the optimal IR tool. To address this limitation, we propose a portrait-aware IR agent, dubbed PaAgent, which incorporates a self-evolving portrait bank for IR tools and Retrieval-Augmented Generation (RAG) to select a suitable IR tool for input. Specifically, to construct and evolve the portrait bank, the PaAgent continuously enriches it by summarizing the characteristics of various IR tools with restored images, selected IR tools, and degraded images. In addition, the RAG is employed to select the optimal IR tool for the input image by retrieving relevant insights from the portrait bank. Furthermore, to enhance PaAgent's ability to perceive degradation in complex scenes, we propose a subjective-objective reinforcement learning strategy that considers both image quality scores and semantic insights in reward generation, which accurately provides the degradation information even under partial and non-uniform degradation. Extensive experiments across 8 IR benchmarks, covering six single-degradation and eight mixed-degradation scenarios, validate PaAgent's superiority in addressing complex IR tasks. Our project page is \\href{https://wyjgr.github.io/PaAgent.html}{PaAgent}.",
+      "authors": [
+        "Yijian Wang",
+        "Qingsen Yan",
+        "Jiantao Zhou",
+        "Duwei Dai",
+        "Wei Dong"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-17T18:41:36+00:00",
+      "link": "https://arxiv.org/pdf/2603.17055v1",
+      "tags": [
+        "keyword:MM MAS",
+        "query:MM MAS"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Image restoration agent leveraging multimodal large language models",
+      "llm_evidence_cn": "利用多模态大模型的图像修复智能体",
+      "llm_evidence": "利用多模态大模型的图像修复智能体",
+      "canonical_evidence": "利用多模态大模型的图像修复智能体",
+      "llm_tldr_en": "An image restoration agent that uses multimodal LLMs and reinforcement learning to select optimal tools.",
+      "llm_tldr_cn": "一种利用多模态大模型和强化学习来选择最佳工具的图像修复智能体。",
+      "llm_tldr": "一种利用多模态大模型和强化学习来选择最佳工具的图像修复智能体。",
+      "llm_tags": [
+        "query:mm-mas:composite"
+      ],
+      "matched_query_tag": "query:mm-mas:composite",
+      "matched_query_text": "Papers central to 多模态多智能体系统相关论文检索, especially work that connects or combines: l; multimodal; m; multimodal multi agent; recent advances in multimodal multi agent systems; multimodal large language models for multi agent cooperation; benchmarks for evaluating multimodal multi agent performance.",
+      "matched_requirement_id": "req-composite-mm-mas",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.17670v1",
+      "title": "AgentVLN: Towards Agentic Vision-and-Language Navigation",
+      "abstract": "Vision-and-Language Navigation (VLN) requires an embodied agent to ground complex natural-language instructions into long-horizon navigation in unseen environments. While Vision-Language Models (VLMs) offer strong 2D semantic understanding, current VLN systems remain constrained by limited spatial perception, 2D-3D representation mismatch, and monocular scale ambiguity. In this paper, we propose AgentVLN, a novel and efficient embodied navigation framework that can be deployed on edge computing platforms. We formulate VLN as a Partially Observable Semi-Markov Decision Process (POSMDP) and introduce a VLM-as-Brain paradigm that decouples high-level semantic reasoning from perception and planning via a plug-and-play skill library. To resolve multi-level representation inconsistency, we design a cross-space representation mapping that projects perception-layer 3D topological waypoints into the image plane, yielding pixel-aligned visual prompts for the VLM. Building on this bridge, we integrate a context-aware self-correction and active exploration strategy to recover from occlusions and suppress error accumulation over long trajectories. To further address the spatial ambiguity of instructions in unstructured environments, we propose a Query-Driven Perceptual Chain-of-Thought (QD-PCoT) scheme, enabling the agent with the metacognitive ability to actively seek geometric depth information. Finally, we construct AgentVLN-Instruct, a large-scale instruction-tuning dataset with dynamic stage routing conditioned on target visibility. Extensive experiments show that AgentVLN consistently outperforms prior state-of-the-art methods (SOTA) on long-horizon VLN benchmarks, offering a practical paradigm for lightweight deployment of next-generation embodied navigation models. Code: https://github.com/Allenxinn/AgentVLN.",
+      "authors": [
+        "Zihao Xin",
+        "Wentong Li",
+        "Yixuan Jiang",
+        "Ziyuan Huang",
+        "Bin Wang",
+        "Piji Li",
+        "Jianke Zhu",
+        "Jie Qin",
+        "Shengjun Huang"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-03-18T12:43:47+00:00",
+      "link": "https://arxiv.org/pdf/2603.17670v1",
+      "tags": [
+        "keyword:MM MAS",
+        "query:MM MAS"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "VLM-as-Brain paradigm for embodied navigation agents",
+      "llm_evidence_cn": "具身导航智能体的VLM大脑范式",
+      "llm_evidence": "具身导航智能体的VLM大脑范式",
+      "canonical_evidence": "具身导航智能体的VLM大脑范式",
+      "llm_tldr_en": "Proposes AgentVLN, a framework using VLMs for high-level reasoning in vision-and-language navigation.",
+      "llm_tldr_cn": "提出AgentVLN框架，利用多模态大模型进行视觉语言导航中的高级推理。",
+      "llm_tldr": "提出AgentVLN框架，利用多模态大模型进行视觉语言导航中的高级推理。",
+      "llm_tags": [
+        "query:mm-mas:composite"
+      ],
+      "matched_query_tag": "query:mm-mas:composite",
+      "matched_query_text": "Papers central to 多模态多智能体系统相关论文检索, especially work that connects or combines: l; multimodal; m; multimodal multi agent; recent advances in multimodal multi agent systems; multimodal large language models for multi agent cooperation; benchmarks for evaluating multimodal multi agent performance.",
+      "matched_requirement_id": "req-composite-mm-mas",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.15259v1",
+      "title": "Directional Embedding Smoothing for Robust Vision Language Models",
+      "abstract": "The safety and reliability of vision-language models (VLMs) are a crucial part of deploying trustworthy agentic AI systems. However, VLMs remain vulnerable to jailbreaking attacks that undermine their safety alignment to yield harmful outputs. In this work, we extend the Randomized Embedding Smoothing and Token Aggregation (RESTA) defense to VLMs and evaluate its performance against the JailBreakV-28K benchmark of multi-modal jailbreaking attacks. We find that RESTA is effective in reducing attack success rate over this diverse corpus of attacks, in particular, when employing directional embedding noise, where the injected noise is aligned with the original token embedding vectors. Our results demonstrate that RESTA can contribute to securing VLMs within agentic systems, as a lightweight, inference-time defense layer of an overall security framework.",
+      "authors": [
+        "Ye Wang",
+        "Jing Liu",
+        "Toshiaki Koike-Akino"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CL",
+        "cs.CR"
+      ],
+      "published": "2026-03-16T13:25:29+00:00",
+      "link": "https://arxiv.org/pdf/2603.15259v1",
+      "tags": [
+        "keyword:MM MAS",
+        "query:MM MAS"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "securing vision-language models within agentic systems",
+      "llm_evidence_cn": "保障智能体系统中的视觉语言模型安全",
+      "llm_evidence": "保障智能体系统中的视觉语言模型安全",
+      "canonical_evidence": "保障智能体系统中的视觉语言模型安全",
+      "llm_tldr_en": "Develops a defense mechanism to improve the robustness and safety of vision-language models in agentic AI.",
+      "llm_tldr_cn": "开发了一种防御机制，以提高智能体 AI 中视觉语言模型的鲁棒性和安全性。",
+      "llm_tldr": "开发了一种防御机制，以提高智能体 AI 中视觉语言模型的鲁棒性和安全性。",
+      "llm_tags": [
+        "query:mm-mas:composite"
+      ],
+      "matched_query_tag": "query:mm-mas:composite",
+      "matched_query_text": "Papers central to 多模态多智能体系统相关论文检索, especially work that connects or combines: l; multimodal; m; multimodal multi agent; recent advances in multimodal multi agent systems; multimodal large language models for multi agent cooperation; benchmarks for evaluating multimodal multi agent performance.",
+      "matched_requirement_id": "req-composite-mm-mas",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.14635v1",
+      "title": "Compute Allocation for Reasoning-Intensive Retrieval Agents",
+      "abstract": "As agents operate over long horizons, their memory stores grow continuously, making retrieval critical to accessing relevant information. Many agent queries require reasoning-intensive retrieval, where the connection between query and relevant documents is implicit and requires inference to bridge. LLM-augmented pipelines address this through query expansion and candidate re-ranking, but introduce significant inference costs. We study computation allocation in reasoning-intensive retrieval pipelines using the BRIGHT benchmark and Gemini 2.5 model family. We vary model capacity, inference-time thinking, and re-ranking depth across query expansion and re-ranking stages. We find that re-ranking benefits substantially from stronger models (+7.5 NDCG@10) and deeper candidate pools (+21% from $k$=10 to 100), while query expansion shows diminishing returns beyond lightweight models (+1.1 NDCG@10 from weak to strong). Inference-time thinking provides minimal improvement at either stage. These results suggest that compute should be concentrated on re-ranking rather than distributed uniformly across pipeline stages.",
+      "authors": [
+        "Sreeja Apparaju",
+        "Nilesh Gupta"
+      ],
+      "primary_category": "cs.IR",
+      "categories": [
+        "cs.IR",
+        "cs.AI"
+      ],
+      "published": "2026-03-15T22:12:17+00:00",
+      "link": "https://arxiv.org/pdf/2603.14635v1",
+      "tags": [
+        "keyword:MM MAS",
+        "query:MM MAS"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Reasoning-intensive retrieval agents using LLMs",
+      "llm_evidence_cn": "使用大模型的推理密集型检索智能体",
+      "llm_evidence": "使用大模型的推理密集型检索智能体",
+      "canonical_evidence": "使用大模型的推理密集型检索智能体",
+      "llm_tldr_en": "Studies compute allocation strategies for LLM-augmented retrieval agents to balance cost and performance.",
+      "llm_tldr_cn": "研究大模型增强检索智能体的计算分配策略，以平衡推理成本与性能。",
+      "llm_tldr": "研究大模型增强检索智能体的计算分配策略，以平衡推理成本与性能。",
+      "llm_tags": [
+        "query:llm-ma:composite"
+      ],
+      "matched_query_tag": "query:llm-ma:composite",
+      "matched_query_text": "Papers central to 大模型多智能体系统相关论文检索, especially work that connects or combines: d; a; m; Frameworks for building multi agent systems with LLMs; Emergent behavior in multi agent large language models; Collaborative problem solving in LLM multi agent environments; Multi agent reinforcement learning with large language models.",
+      "matched_requirement_id": "req-composite-llm-ma",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.18330v1",
+      "title": "MemArchitect: A Policy Driven Memory Governance Layer",
+      "abstract": "Persistent Large Language Model (LLM) agents expose a critical governance gap in memory management. Standard Retrieval-Augmented Generation (RAG) frameworks treat memory as passive storage, lacking mechanisms to resolve contradictions, enforce privacy, or prevent outdated information (\"zombie memories\") from contaminating the context window.   We introduce MemArchitect, a governance layer that decouples memory lifecycle management from model weights. MemArchitect enforces explicit, rule-based policies, including memory decay, conflict resolution, and privacy controls.   We demonstrate that governed memory consistently outperforms unmanaged memory in agentic settings, highlighting the necessity of structured memory governance for reliable and safe autonomous systems.",
+      "authors": [
+        "Lingavasan Suresh Kumar",
+        "Yang Ba",
+        "Rong Pan"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI",
+        "cs.HC",
+        "cs.LG",
+        "cs.MA"
+      ],
+      "published": "2026-03-18T22:37:05+00:00",
+      "link": "https://arxiv.org/pdf/2603.18330v1",
+      "tags": [
+        "keyword:MM MAS",
+        "query:MM MAS"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Memory governance layer for persistent LLM agents",
+      "llm_evidence_cn": "持久化大语言模型智能体的记忆治理层",
+      "llm_evidence": "持久化大语言模型智能体的记忆治理层",
+      "canonical_evidence": "持久化大语言模型智能体的记忆治理层",
+      "llm_tldr_en": "Proposes MemArchitect to manage memory lifecycles, resolving contradictions and enforcing policies for LLM agents.",
+      "llm_tldr_cn": "提出 MemArchitect 来管理记忆生命周期，解决 LLM 智能体的矛盾并执行策略。",
+      "llm_tldr": "提出 MemArchitect 来管理记忆生命周期，解决 LLM 智能体的矛盾并执行策略。",
+      "llm_tags": [
+        "query:llm-ma:composite"
+      ],
+      "matched_query_tag": "query:llm-ma:composite",
+      "matched_query_text": "Papers central to 大模型多智能体系统相关论文检索, especially work that connects or combines: d; a; m; Frameworks for building multi agent systems with LLMs; Emergent behavior in multi agent large language models; Collaborative problem solving in LLM multi agent environments; Multi agent reinforcement learning with large language models.",
+      "matched_requirement_id": "req-composite-llm-ma",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.15370v1",
+      "title": "Trajectory-Diversity-Driven Robust Vision-and-Language Navigation",
+      "abstract": "Vision-and-Language Navigation (VLN) requires agents to navigate photo-realistic environments following natural language instructions. Current methods predominantly rely on imitation learning, which suffers from limited generalization and poor robustness to execution perturbations. We present NavGRPO, a reinforcement learning framework that learns goal-directed navigation policies through Group Relative Policy Optimization. By exploring diverse trajectories and optimizing via within-group performance comparisons, our method enables agents to distinguish effective strategies beyond expert paths without requiring additional value networks. Built on ScaleVLN, NavGRPO achieves superior robustness on R2R and REVERIE benchmarks with +3.0% and +1.71% SPL improvements in unseen environments. Under extreme early-stage perturbations, we demonstrate +14.89% SPL gain over the baseline, confirming that goal-directed RL training builds substantially more robust navigation policies. Code and models will be released.",
+      "authors": [
+        "Jiangyang Li",
+        "Cong Wan",
+        "SongLin Dong",
+        "Chenhao Ding",
+        "Qiang Wang",
+        "Zhiheng Ma",
+        "Yihong Gong"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-16T14:46:54+00:00",
+      "link": "https://arxiv.org/pdf/2603.15370v1",
+      "tags": [
+        "query:MM MAS"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Vision-and-language navigation for agents in photo-realistic environments",
+      "llm_evidence_cn": "真实环境中的视觉语言导航智能体",
+      "llm_evidence": "真实环境中的视觉语言导航智能体",
+      "canonical_evidence": "真实环境中的视觉语言导航智能体",
+      "llm_tldr_en": "Proposes NavGRPO, an RL framework for robust vision-and-language navigation through trajectory diversity.",
+      "llm_tldr_cn": "提出 NavGRPO，通过轨迹多样性实现鲁棒视觉语言导航的强化学习框架。",
+      "llm_tldr": "提出 NavGRPO，通过轨迹多样性实现鲁棒视觉语言导航的强化学习框架。",
+      "llm_tags": [
+        "query:mm-mas:composite"
+      ],
+      "matched_query_tag": "query:mm-mas:composite",
+      "matched_query_text": "Papers central to 多模态多智能体系统相关论文检索, especially work that connects or combines: l; multimodal; m; multimodal multi agent; recent advances in multimodal multi agent systems; multimodal large language models for multi agent cooperation; benchmarks for evaluating multimodal multi agent performance.",
+      "matched_requirement_id": "req-composite-mm-mas",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.15483v1",
+      "title": "Talk, Evaluate, Diagnose: User-aware Agent Evaluation with Automated Error Analysis",
+      "abstract": "Agent applications are increasingly adopted to automate workflows across diverse tasks. However, due to the heterogeneous domains they operate in, it is challenging to create a scalable evaluation framework. Prior works each employ their own methods to determine task success, such as database lookups, regex match, etc., adding complexity to the development of a unified agent evaluation approach. Moreover, they do not systematically account for the user's role nor expertise in the interaction, providing incomplete insights into the agent's performance. We argue that effective agent evaluation goes beyond correctness alone, incorporating conversation quality, efficiency and systematic diagnosis of agent errors. To address this, we introduce the TED framework (Talk, Evaluate, Diagnose). (1) Talk: We leverage reusable, generic expert and non-expert user persona templates for user-agent interaction. (2) Evaluate: We adapt existing datasets by representing subgoals-such as tool signatures, and responses-as natural language grading notes, evaluated automatically with LLM-as-a-judge. We propose new metrics that capture both turn efficiency and intermediate progress of the agent complementing the user-aware setup. (3) Diagnose: We introduce an automated error analysis tool that analyzes the inconsistencies of the judge and agents, uncovering common errors, and providing actionable feedback for agent improvement. We show that our TED framework reveals new insights regarding agent performance across models and user expertise levels. We also demonstrate potential gains in agent performance with peaks of 8-10% on our proposed metrics after incorporating the identified error remedies into the agent's design.",
+      "authors": [
+        "Penny Chong",
+        "Harshavardhan Abichandani",
+        "Jiyuan Shen",
+        "Atin Ghosh",
+        "Min Pyae Moe",
+        "Yifan Mai",
+        "Daniel Dahlmeier"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-16T16:14:28+00:00",
+      "link": "https://arxiv.org/pdf/2603.15483v1",
+      "tags": [
+        "keyword:MM MAS",
+        "query:MM MAS"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "unified agent evaluation approach and error analysis",
+      "llm_evidence_cn": "统一的智能体评估方法与错误分析",
+      "llm_evidence": "统一的智能体评估方法与错误分析",
+      "canonical_evidence": "统一的智能体评估方法与错误分析",
+      "llm_tldr_en": "Proposes a user-aware agent evaluation framework focusing on conversation quality and systematic error diagnosis.",
+      "llm_tldr_cn": "提出一种关注对话质量和系统性错误诊断的用户感知智能体评估框架。",
+      "llm_tldr": "提出一种关注对话质量和系统性错误诊断的用户感知智能体评估框架。",
+      "llm_tags": [
+        "query:llm-ma:composite"
+      ],
+      "matched_query_tag": "query:llm-ma:composite",
+      "matched_query_text": "Papers central to 大模型多智能体系统相关论文检索, especially work that connects or combines: d; a; m; Frameworks for building multi agent systems with LLMs; Emergent behavior in multi agent large language models; Collaborative problem solving in LLM multi agent environments; Multi agent reinforcement learning with large language models.",
+      "matched_requirement_id": "req-composite-llm-ma",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.18729v1",
+      "title": "Analysis Of Linguistic Stereotypes in Single and Multi-Agent Generative AI Architectures",
+      "abstract": "Many works in the literature show that LLM outputs exhibit discriminatory behaviour, triggering stereotype-based inferences based on the dialect in which the inputs are written. This bias has been shown to be particularly pronounced when the same inputs are provided to LLMs in Standard American English (SAE) and African-American English (AAE). In this paper, we replicate existing analyses of dialect-sensitive stereotype generation in LLM outputs and investigate the effects of mitigation strategies, including prompt engineering (role-based and Chain-Of-Thought prompting) and multi-agent architectures composed of generate-critique-revise models. We define eight prompt templates to analyse different ways in which dialect bias can manifest, such as suggested names, jobs, and adjectives for SAE or AAE speakers. We use an LLM-as-judge approach to evaluate the bias in the results. Our results show that stereotype-bearing differences emerge between SAE- and AAE-related outputs across all template categories, with the strongest effects observed in adjective and job attribution. Baseline disparities vary substantially by model, with the largest SAE-AAE differential observed in Claude Haiku and the smallest in Phi-4 Mini. Chain-Of-Thought prompting proved to be an effective mitigation strategy for Claude Haiku, whereas the use of a multi-agent architecture ensured consistent mitigation across all the models. These findings suggest that for intersectionality-informed software engineering, fairness evaluation should include model-specific validation of mitigation strategies, and workflow-level controls (e.g., agentic architectures involving critique models) in high-impact LLM deployments. The current results are exploratory in nature and limited in scope, but can lead to extensions and replications by increasing the dataset size and applying the procedure to different languages or dialects.",
+      "authors": [
+        "Martina Ullasci",
+        "Marco Rondina",
+        "Riccardo Coppola",
+        "Flavio Giobergia",
+        "Riccardo Bellanca",
+        "Gabriele Mancari Pasi",
+        "Luca Prato",
+        "Federico Spinoso",
+        "Silvia Tagliente"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-19T10:24:51+00:00",
+      "link": "https://arxiv.org/pdf/2603.18729v1",
+      "tags": [
+        "keyword:MM MAS",
+        "query:MM MAS"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "multi-agent architectures for bias mitigation",
+      "llm_evidence_cn": "用于偏差缓解的多智能体架构",
+      "llm_evidence": "用于偏差缓解的多智能体架构",
+      "canonical_evidence": "用于偏差缓解的多智能体架构",
+      "llm_tldr_en": "Investigates multi-agent generate-critique-revise architectures to mitigate linguistic stereotypes in LLMs.",
+      "llm_tldr_cn": "研究了生成-批判-修正的多智能体架构在缓解大模型语言刻板印象方面的效果。",
+      "llm_tldr": "研究了生成-批判-修正的多智能体架构在缓解大模型语言刻板印象方面的效果。",
+      "llm_tags": [
+        "query:llm-ma:composite"
+      ],
+      "matched_query_tag": "query:llm-ma:composite",
+      "matched_query_text": "Papers central to 大模型多智能体系统相关论文检索, especially work that connects or combines: d; a; m; Frameworks for building multi agent systems with LLMs; Emergent behavior in multi agent large language models; Collaborative problem solving in LLM multi agent environments; Multi agent reinforcement learning with large language models.",
+      "matched_requirement_id": "req-composite-llm-ma",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.15421v1",
+      "title": "CLAG: Adaptive Memory Organization via Agent-Driven Clustering for Small Language Model Agents",
+      "abstract": "Large language model agents heavily rely on external memory to support knowledge reuse and complex reasoning tasks. Yet most memory systems store experiences in a single global retrieval pool which can gradually dilute or corrupt stored knowledge. This problem is especially pronounced for small language models (SLMs), which are highly vulnerable to irrelevant context. We introduce CLAG, a CLustering-based AGentic memory framework where an SLM agent actively organizes memory by clustering. CLAG employs an SLM-driven router to assign incoming memories to semantically coherent clusters and autonomously generates cluster-specific profiles, including topic summaries and descriptive tags, to establish each cluster as a self-contained functional unit. By performing localized evolution within these structured neighborhoods, CLAG effectively reduces cross-topic interference and enhances internal memory density. During retrieval, the framework utilizes a two-stage process that first filters relevant clusters via their profiles, thereby excluding distractors and reducing the search space. Experiments on multiple QA datasets with three SLM backbones show that CLAG consistently improves answer quality and robustness over prior memory systems for agents, remaining lightweight and efficient.",
+      "authors": [
+        "Taeyun Roh",
+        "Wonjune Jang",
+        "Junha Jung",
+        "Jaewoo Kang"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-03-16T15:30:20+00:00",
+      "link": "https://arxiv.org/pdf/2603.15421v1",
+      "tags": [
+        "keyword:MM MAS",
+        "query:MM MAS"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Agentic memory framework for small language model agents",
+      "llm_evidence_cn": "小语言模型智能体的代理记忆框架",
+      "llm_evidence": "小语言模型智能体的代理记忆框架",
+      "canonical_evidence": "小语言模型智能体的代理记忆框架",
+      "llm_tldr_en": "Introduces CLAG, a clustering-based memory organization framework to improve knowledge reuse for SLM agents.",
+      "llm_tldr_cn": "引入 CLAG，一种基于聚类的记忆组织框架，旨在提高小模型智能体的知识重用率。",
+      "llm_tldr": "引入 CLAG，一种基于聚类的记忆组织框架，旨在提高小模型智能体的知识重用率。",
+      "llm_tags": [
+        "query:llm-ma:composite"
+      ],
+      "matched_query_tag": "query:llm-ma:composite",
+      "matched_query_text": "Papers central to 大模型多智能体系统相关论文检索, especially work that connects or combines: d; a; m; Frameworks for building multi agent systems with LLMs; Emergent behavior in multi agent large language models; Collaborative problem solving in LLM multi agent environments; Multi agent reinforcement learning with large language models.",
+      "matched_requirement_id": "req-composite-llm-ma",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.18400v1",
+      "title": "Graph-of-Constraints Model Predictive Control for Reactive Multi-agent Task and Motion Planning",
+      "abstract": "Sequences of interdependent geometric constraints are central to many multi-agent Task and Motion Planning (TAMP) problems. However, existing methods for handling such constraint sequences struggle with partially ordered tasks and dynamic agent assignments. They typically assume static assignments and cannot adapt when disturbances alter task allocations. To overcome these limitations, we introduce Graph-of-Constraints Model Predictive Control (GoC-MPC), a generalized sequence-of-constraints framework integrated with MPC. GoC-MPC naturally supports partially ordered tasks, dynamic agent coordination, and disturbance recovery. By defining constraints over tracked 3D keypoints, our method robustly solves diverse multi-agent manipulation tasks-coordinating agents and adapting online from visual observations alone, without relying on training data or environment models. Experiments demonstrate that GoC-MPC achieves higher success rates, significantly faster TAMP computation, and shorter overall paths compared to recent baselines, establishing it as an efficient and robust solution for multi-agent manipulation under real-world disturbances. Our supplementary video and code can be found at https://sites.google.com/view/goc-mpc/home .",
+      "authors": [
+        "Anastasios Manganaris",
+        "Jeremy Lu",
+        "Ahmed H. Qureshi",
+        "Suresh Jagannathan"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-03-19T01:45:14+00:00",
+      "link": "https://arxiv.org/pdf/2603.18400v1",
+      "tags": [
+        "keyword:MM MAS",
+        "query:MM MAS"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Reactive multi-agent task and motion planning",
+      "llm_evidence_cn": "反应式多智能体任务与运动规划",
+      "llm_evidence": "反应式多智能体任务与运动规划",
+      "canonical_evidence": "反应式多智能体任务与运动规划",
+      "llm_tldr_en": "A generalized framework for dynamic multi-agent coordination and task planning under disturbances.",
+      "llm_tldr_cn": "一种用于动态多智能体协作和扰动下任务规划的通用框架。",
+      "llm_tldr": "一种用于动态多智能体协作和扰动下任务规划的通用框架。",
+      "llm_tags": [
+        "query:llm-ma:composite"
+      ],
+      "matched_query_tag": "query:llm-ma:composite",
+      "matched_query_text": "Papers central to 大模型多智能体系统相关论文检索, especially work that connects or combines: d; a; m; Frameworks for building multi agent systems with LLMs; Emergent behavior in multi agent large language models; Collaborative problem solving in LLM multi agent environments; Multi agent reinforcement learning with large language models.",
+      "matched_requirement_id": "req-composite-llm-ma",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.18892v1",
+      "title": "MultihopSpatial: Multi-hop Compositional Spatial Reasoning Benchmark for Vision-Language Model",
+      "abstract": "Spatial reasoning is foundational for Vision-Language Models (VLMs), particularly when deployed as Vision-Language-Action (VLA) agents in physical environments. However, existing benchmarks predominantly focus on elementary, single-hop relations, neglecting the multi-hop compositional reasoning and precise visual grounding essential for real-world scenarios. To address this, we introduce MultihopSpatial, offering three key contributions: (1) A comprehensive benchmark designed for multi-hop and compositional spatial reasoning, featuring 1- to 3-hop complex queries across diverse spatial perspectives. (2) Acc@50IoU, a complementary metric that simultaneously evaluates reasoning and visual grounding by requiring both answer selection and precise bounding box prediction - capabilities vital for robust VLA deployment. (3) MultihopSpatial-Train, a dedicated large-scale training corpus to foster spatial intelligence. Extensive evaluation of 37 state-of-the-art VLMs yields eight key insights, revealing that compositional spatial reasoning remains a formidable challenge. Finally, we demonstrate that reinforcement learning post-training on our corpus enhances both intrinsic VLM spatial reasoning and downstream embodied manipulation performance.",
+      "authors": [
+        "Youngwan Lee",
+        "Soojin Jang",
+        "Yoorhim Cho",
+        "Seunghwan Lee",
+        "Yong-Ju Lee",
+        "Sung Ju Hwang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-03-19T13:33:26+00:00",
+      "link": "https://arxiv.org/pdf/2603.18892v1",
+      "tags": [
+        "keyword:MM MAS",
+        "query:MM MAS"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "spatial reasoning benchmark for vision-language model agents",
+      "llm_evidence_cn": "视觉语言模型智能体的空间推理基准",
+      "llm_evidence": "视觉语言模型智能体的空间推理基准",
+      "canonical_evidence": "视觉语言模型智能体的空间推理基准",
+      "llm_tldr_en": "A multi-hop compositional spatial reasoning benchmark for evaluating vision-language models in agentic settings.",
+      "llm_tldr_cn": "一种多跳组合空间推理基准，用于评估智能体场景下的视觉语言模型。",
+      "llm_tldr": "一种多跳组合空间推理基准，用于评估智能体场景下的视觉语言模型。",
+      "llm_tags": [
+        "query:mm-mas:composite"
+      ],
+      "matched_query_tag": "query:mm-mas:composite",
+      "matched_query_text": "Papers central to 多模态多智能体系统相关论文检索, especially work that connects or combines: l; multimodal; m; multimodal multi agent; recent advances in multimodal multi agent systems; multimodal large language models for multi agent cooperation; benchmarks for evaluating multimodal multi agent performance.",
+      "matched_requirement_id": "req-composite-mm-mas",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.16104v1",
+      "title": "Efficient LLM Serving for Agentic Workflows: A Data Systems Perspective",
+      "abstract": "Agentic workflows are composed of sequences of interdependent Large Language Model (LLM) calls, and they have become a dominant workload in modern AI systems. These workflows exhibit extensive redundancy from overlapping prompts and intermediate results due to speculative and parallel exploration. Existing LLM serving systems, such as vLLM, focus on optimizing individual inference calls and overlook cross-call dependencies, leading to significant inefficiencies. This paper rethinks LLM and agent serving from a data systems perspective and introduces Helium, a workflow-aware serving framework that models agentic workloads as query plans and treats LLM invocations as first-class operators. Helium integrates proactive caching and cache-aware scheduling to maximize reuse across prompts, KV states, and workflows. Through these techniques, Helium bridges classic query optimization principles with LLM serving, achieving up to 1.56x speedup over state-of-the-art agent serving systems on various workloads. Our results demonstrate that end-to-end optimization across workflows is essential for scalable and efficient LLM-based agents.",
+      "authors": [
+        "Noppanat Wadlom",
+        "Junyi Shen",
+        "Yao Lu"
+      ],
+      "primary_category": "cs.MA",
+      "categories": [
+        "cs.MA",
+        "cs.AI",
+        "cs.DB"
+      ],
+      "published": "2026-03-17T04:03:18+00:00",
+      "link": "https://arxiv.org/pdf/2603.16104v1",
+      "tags": [
+        "keyword:MM MAS",
+        "query:MM MAS"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "serving framework for agentic workflows and LLM calls",
+      "llm_evidence_cn": "智能体工作流与大模型调用的推理框架",
+      "llm_evidence": "智能体工作流与大模型调用的推理框架",
+      "canonical_evidence": "智能体工作流与大模型调用的推理框架",
+      "llm_tldr_en": "Introduces Helium, a workflow-aware serving framework to optimize interdependent LLM calls in agents.",
+      "llm_tldr_cn": "引入Helium，一个工作流感知推理框架，旨在优化智能体中相互依赖的大模型调用。",
+      "llm_tldr": "引入Helium，一个工作流感知推理框架，旨在优化智能体中相互依赖的大模型调用。",
+      "llm_tags": [
+        "query:llm-ma:composite"
+      ],
+      "matched_query_tag": "query:llm-ma:composite",
+      "matched_query_text": "Papers central to 大模型多智能体系统相关论文检索, especially work that connects or combines: d; a; m; Frameworks for building multi agent systems with LLMs; Emergent behavior in multi agent large language models; Collaborative problem solving in LLM multi agent environments; Multi agent reinforcement learning with large language models.",
+      "matched_requirement_id": "req-composite-llm-ma",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}
