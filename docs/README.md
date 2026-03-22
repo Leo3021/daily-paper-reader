@@ -6,73 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-21
-- 运行时间：2026-03-21 20:03:50 UTC
+- 最新运行日期：2026-03-22
+- 运行时间：2026-03-22 20:04:45 UTC
 - 运行状态：成功
 - 本次总论文数：17
 - 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-今日精选 17 篇前沿论文，重点聚焦多智能体协作在气候分析与人机交互中的深度应用。
-推荐关注 ClimateAgents 如何利用多智能体模拟社会气候动态，以及 MERGE 框架在复杂人机协作场景下的多角色推理突破。
-建议深入了解智能体在垂直领域的落地实践，并同步关注生成式架构中的语言偏见与记忆治理问题。
-- 详情：[/202603/21/README](/202603/21/README)
+今日聚焦智能体自我演化与系统级代码优化，深度解析 17 篇 AI 领域前沿进展。
+重点推荐“让智能体设计智能体”的 Memento-Skills 框架，以及利用多智能体推理实现软件系统全局优化的新突破。
+建议关注智能体在长程任务与复杂搜索中的规划能力，探索从局部代码到系统架构的自动化升级路径。
+- 详情：[/202603/22/README](/202603/22/README)
 
 ### 精读区论文标签
-1. [ClimateAgents: A Multi-Agent Research Assistant for Social-Climate Dynamics Analysis](/202603/21/2603.13840v1-climateagents-a-multi-agent-research-assistant-for-social-climate-dynamics-analysis)  
-   标签：评分：9.0/10、query:mm-mas
-   evidence：集成多模态数据检索的多智能体助手
-2. [MERGE: Guided Vision-Language Models for Multi-Actor Event Reasoning and Grounding in Human-Robot Interaction](/202603/21/2603.18988v1-merge-guided-vision-language-models-for-multi-actor-event-reasoning-and-grounding-in-human-robot-interaction)  
-   标签：评分：9.0/10、query:mm-mas
-   evidence：用于人机交互中多角色事件推理的视觉语言模型
-3. [Why Do LLM-based Web Agents Fail? A Hierarchical Planning Perspective](/202603/21/2603.14248v1-why-do-llm-based-web-agents-fail-a-hierarchical-planning-perspective)  
+1. [Memento-Skills: Let Agents Design Agents](/202603/22/2603.18743v1-memento-skills-let-agents-design-agents)  
+   标签：评分：9.0/10、query:llm-ma
+   evidence：构建大模型多智能体系统的框架
+2. [Beyond Local Code Optimization: Multi-Agent Reasoning for Software System Optimization](/202603/22/2603.14703v1-beyond-local-code-optimization-multi-agent-reasoning-for-software-system-optimization)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：基于大模型的Web智能体分层规划框架
-4. [ResearchPilot: A Local-First Multi-Agent System for Literature Synthesis and Related Work Drafting](/202603/21/2603.14629v1-researchpilot-a-local-first-multi-agent-system-for-literature-synthesis-and-related-work-drafting)  
+   evidence：使用大模型进行软件系统优化的多智能体推理
+3. [AsgardBench -- Evaluating Visually Grounded Interactive Planning Under Minimal Feedback](/202603/22/2603.15888v2-asgardbench----evaluating-visually-grounded-interactive-planning-under-minimal-feedback)  
+   标签：评分：8.0/10、query:mm-mas
+   evidence：评估智能体视觉落地交互式规划能力的基准测试
+4. [A Trace-Based Assurance Framework for Agentic AI Orchestration: Contracts, Testing, and Governance](/202603/22/2603.18096v1-a-trace-based-assurance-framework-for-agentic-ai-orchestration-contracts-testing-and-governance)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：用于文献综述和研究辅助的多智能体系统
-5. [Gym-V: A Unified Vision Environment System for Agentic Vision Research](/202603/21/2603.15432v2-gym-v-a-unified-vision-environment-system-for-agentic-vision-research)  
+   evidence：智能体AI编排与多智能体协作的保障框架
+5. [Act While Thinking: Accelerating LLM Agents via Pattern-Aware Speculative Tool Execution](/202603/22/2603.18897v1-act-while-thinking-accelerating-llm-agents-via-pattern-aware-speculative-tool-execution)  
+   标签：评分：8.0/10、query:llm-ma
+   evidence：通过投机性工具执行加速大模型智能体
+6. [SignAgent: Agentic LLMs for Linguistically-Grounded Sign Language Annotation and Dataset Curation](/202603/22/2603.19059v1-signagent-agentic-llms-for-linguistically-grounded-sign-language-annotation-and-dataset-curation)  
    标签：评分：8.0/10、query:mm-mas
-   evidence：智能体视觉研究的统一视觉环境
-6. [PaAgent: Portrait-Aware Image Restoration Agent via Subjective-Objective Reinforcement Learning](/202603/21/2603.17055v1-paagent-portrait-aware-image-restoration-agent-via-subjective-objective-reinforcement-learning)  
-   标签：评分：8.0/10、query:mm-mas
-   evidence：利用多模态大模型的图像修复智能体
+   evidence：利用多模态基地的手语标注智能体框架
 
 ### 速读区论文标签
-1. [AgentVLN: Towards Agentic Vision-and-Language Navigation](/202603/21/2603.17670v1-agentvln-towards-agentic-vision-and-language-navigation)  
-   标签：评分：8.0/10、query:mm-mas
-   evidence：具身导航智能体的VLM大脑范式
-2. [MemArchitect: A Policy Driven Memory Governance Layer](/202603/21/2603.18330v1-memarchitect-a-policy-driven-memory-governance-layer)  
-   标签：评分：8.0/10、query:llm-ma
-   evidence：持久化大语言模型智能体的记忆治理层
-3. [Analysis Of Linguistic Stereotypes in Single and Multi-Agent Generative AI Architectures](/202603/21/2603.18729v1-analysis-of-linguistic-stereotypes-in-single-and-multi-agent-generative-ai-architectures)  
-   标签：评分：8.0/10、query:llm-ma
-   evidence：用于偏差缓解的多智能体架构
-4. [MultihopSpatial: Multi-hop Compositional Spatial Reasoning Benchmark for Vision-Language Model](/202603/21/2603.18892v1-multihopspatial-multi-hop-compositional-spatial-reasoning-benchmark-for-vision-language-model)  
-   标签：评分：8.0/10、query:mm-mas
-   evidence：视觉语言模型智能体的空间推理基准
-5. [Directional Embedding Smoothing for Robust Vision Language Models](/202603/21/2603.15259v1-directional-embedding-smoothing-for-robust-vision-language-models)  
-   标签：评分：7.0/10、query:mm-mas
-   evidence：保障智能体系统中的视觉语言模型安全
-6. [Trajectory-Diversity-Driven Robust Vision-and-Language Navigation](/202603/21/2603.15370v1-trajectory-diversity-driven-robust-vision-and-language-navigation)  
-   标签：评分：7.0/10、query:mm-mas
-   evidence：真实环境中的视觉语言导航智能体
-7. [CLAG: Adaptive Memory Organization via Agent-Driven Clustering for Small Language Model Agents](/202603/21/2603.15421v1-clag-adaptive-memory-organization-via-agent-driven-clustering-for-small-language-model-agents)  
+1. [StatePlane: A Cognitive State Plane for Long-Horizon AI Systems Under Bounded Context](/202603/22/2603.13644v1-stateplane-a-cognitive-state-plane-for-long-horizon-ai-systems-under-bounded-context)  
    标签：评分：7.0/10、query:llm-ma
-   evidence：小语言模型智能体的代理记忆框架
-8. [Efficient LLM Serving for Agentic Workflows: A Data Systems Perspective](/202603/21/2603.16104v1-efficient-llm-serving-for-agentic-workflows-a-data-systems-perspective)  
+   evidence：长程 AI 智能体系统的认知状态管理
+2. [QTrack: Query-Driven Reasoning for Multi-modal MOT](/202603/22/2603.13759v1-qtrack-query-driven-reasoning-for-multi-modal-mot)  
+   标签：评分：7.0/10、query:mm-mas
+   evidence：多模态多目标跟踪基准与推理范式
+3. [APEX-Searcher: Augmenting LLMs' Search Capabilities through Agentic Planning and Execution](/202603/22/2603.13853v1-apex-searcher-augmenting-llms-search-capabilities-through-agentic-planning-and-execution)  
    标签：评分：7.0/10、query:llm-ma
-   evidence：智能体工作流与大模型调用的推理框架
-9. [Compute Allocation for Reasoning-Intensive Retrieval Agents](/202603/21/2603.14635v1-compute-allocation-for-reasoning-intensive-retrieval-agents)  
+   evidence：通过智能体规划与执行增强LLM搜索能力
+4. [APEX-Searcher: Augmenting LLMs' Search Capabilities through Agentic Planning and Execution](/202603/22/2603.13853v2-apex-searcher-augmenting-llms-search-capabilities-through-agentic-planning-and-execution)  
+   标签：评分：7.0/10、query:llm-ma
+   evidence：通过智能体规划与执行增强LLM搜索能力
+5. [GNNVerifier: Graph-based Verifier for LLM Task Planning](/202603/22/2603.14730v2-gnnverifier-graph-based-verifier-for-llm-task-planning)  
+   标签：评分：7.0/10、query:llm-ma
+   evidence：自主智能体中基于图的大模型任务规划验证器
+6. [From Storage to Steering: Memory Control Flow Attacks on LLM Agents](/202603/22/2603.15125v1-from-storage-to-steering-memory-control-flow-attacks-on-llm-agents)  
+   标签：评分：7.0/10、query:llm-ma
+   evidence：大模型智能体控制流与记忆的安全性分析
+7. [Gym-V: A Unified Vision Environment System for Agentic Vision Research](/202603/22/2603.15432v1-gym-v-a-unified-vision-environment-system-for-agentic-vision-research)  
+   标签：评分：7.0/10、query:mm-mas
+   evidence：用于智能体视觉研究的统一视觉环境系统
+8. [Social Simulacra in the Wild: AI Agent Communities on Moltbook](/202603/22/2603.16128v2-social-simulacra-in-the-wild-ai-agent-communities-on-moltbook)  
+   标签：评分：7.0/10、query:llm-ma
+   evidence：AI智能体社区与人类在线社区的实证对比
+9. [MMKU-Bench: A Multimodal Update Benchmark for Diverse Visual Knowledge](/202603/22/2603.15117v1-mmku-bench-a-multimodal-update-benchmark-for-diverse-visual-knowledge)  
+   标签：评分：6.0/10、query:mm-mas
+   evidence：视觉知识的多模态更新基准
+10. [Consensus in Multi-Agent Systems with Uniform and Nonuniform Communication Delays](/202603/22/2603.16523v1-consensus-in-multi-agent-systems-with-uniform-and-nonuniform-communication-delays)  
    标签：评分：6.0/10、query:llm-ma
-   evidence：使用大模型的推理密集型检索智能体
-10. [Talk, Evaluate, Diagnose: User-aware Agent Evaluation with Automated Error Analysis](/202603/21/2603.15483v1-talk-evaluate-diagnose-user-aware-agent-evaluation-with-automated-error-analysis)  
-   标签：评分：6.0/10、query:llm-ma
-   evidence：统一的智能体评估方法与错误分析
-11. [Graph-of-Constraints Model Predictive Control for Reactive Multi-agent Task and Motion Planning](/202603/21/2603.18400v1-graph-of-constraints-model-predictive-control-for-reactive-multi-agent-task-and-motion-planning)  
-   标签：评分：6.0/10、query:llm-ma
-   evidence：反应式多智能体任务与运动规划
+   evidence：多智能体系统中的共识与分布式协调
+11. [FINER: MLLMs Hallucinate under Fine-grained Negative Queries](/202603/22/2603.17662v1-finer-mllms-hallucinate-under-fine-grained-negative-queries)  
+   标签：评分：6.0/10、query:mm-mas
+   evidence：分析并缓解多模态大语言模型中的幻觉问题
 
 
 <div class="dpr-home-promo-card">
