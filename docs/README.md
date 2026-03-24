@@ -6,73 +6,97 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-23
-- 运行时间：2026-03-23 20:14:48 UTC
+- 最新运行日期：2026-03-24
+- 运行时间：2026-03-24 20:15:38 UTC
 - 运行状态：成功
-- 本次总论文数：17
-- 精读区：6
+- 本次总论文数：25
+- 精读区：14
 - 速读区：11
 
 ### 今日简报（AI）
-今日深度解析 17 篇 AI 论文，重点攻克多智能体通信拓扑生成与复杂危机响应推理。
-满分论文 GoAgent 与 EO 危机响应系统展示了协作式多智能体在结构化通信与实时决策中的巨大潜力。
-推荐关注多模态主动性评估与提示词协同进化，把握 LLM 迈向自主智能体的关键趋势。
-- 详情：[/202603/23/README](/202603/23/README)
+今日深度解析 25 篇前沿论文，重点攻克具身智能在极端通信与异构协作中的核心挑战。
+满分成果聚焦于 AgentComm-Bench 的网络压力测试及异构机器人间的“三零”协同导航技术。
+建议优先研读多智能体系统如何应对带宽崩溃等现实约束，以提升复杂任务的鲁棒性。
+- 详情：[/202603/24/README](/202603/24/README)
 
 ### 精读区论文标签
-1. [GoAgent: Group-of-Agents Communication Topology Generation for LLM-based Multi-Agent Systems](/202603/23/2603.19677v1-goagent-group-of-agents-communication-topology-generation-for-llm-based-multi-agent-systems)  
-   标签：评分：10.0/10、query:llm-ma
-   evidence：基于大语言模型的多智能体系统通信拓扑
-2. [Beyond detection: cooperative multi-agent reasoning for rapid onboard EO crisis response](/202603/23/2603.19858v1-beyond-detection-cooperative-multi-agent-reasoning-for-rapid-onboard-eo-crisis-response)  
+1. [AgentComm-Bench: Stress-Testing Cooperative Embodied AI Under Latency, Packet Loss, and Bandwidth Collapse](/202603/24/2603.20285v1-agentcomm-bench-stress-testing-cooperative-embodied-ai-under-latency-packet-loss-and-bandwidth-collapse)  
    标签：评分：10.0/10、query:mm-mas
-   evidence：利用多模态观测进行协作式多智能体推理
-3. [IndoorR2X: Indoor Robot-to-Everything Coordination with LLM-Driven Planning](/202603/23/2603.20182v1-indoorr2x-indoor-robot-to-everything-coordination-with-llm-driven-planning)  
+   evidence：评估协作式多智能体具身智能的基准
+2. [Can a Robot Walk the Robotic Dog: Triple-Zero Collaborative Navigation for Heterogeneous Multi-Agent Systems](/202603/24/2603.21723v1-can-a-robot-walk-the-robotic-dog-triple-zero-collaborative-navigation-for-heterogeneous-multi-agent-systems)  
    标签：评分：10.0/10、query:mm-mas
-   evidence：结合多模态感知的大模型驱动多机器人规划
-4. [DanceHA: A Multi-Agent Framework for Document-Level Aspect-Based Sentiment Analysis](/202603/23/2603.16546v1-danceha-a-multi-agent-framework-for-document-level-aspect-based-sentiment-analysis)  
+   evidence：多模态大语言模型用于异构多机器人协作
+3. [Bounded Coupled AI Learning Dynamics in Tri-Hierarchical Drone Swarms](/202603/24/2603.20333v1-bounded-coupled-ai-learning-dynamics-in-tri-hierarchical-drone-swarms)  
    标签：评分：9.0/10、query:llm-ma
-   evidence：文档级情感分析的多智能体框架
-5. [Cooperation and Exploitation in LLM Policy Synthesis for Sequential Social Dilemmas](/202603/23/2603.19453v1-cooperation-and-exploitation-in-llm-policy-synthesis-for-sequential-social-dilemmas)  
+   evidence：无人机群中的多智能体强化学习
+4. [Hear Both Sides: Efficient Multi-Agent Debate via Diversity-Aware Message Retention](/202603/24/2603.20640v1-hear-both-sides-efficient-multi-agent-debate-via-diversity-aware-message-retention)  
    标签：评分：9.0/10、query:llm-ma
-   evidence：多智能体环境和社会困境中的大模型策略合成
-6. [An Agentic Approach to Generating XAI-Narratives](/202603/23/2603.20003v1-an-agentic-approach-to-generating-xai-narratives)  
+   evidence：用于大模型推理的多智能体辩论框架
+5. [ScaleEdit-12M: Scaling Open-Source Image Editing Data Generation via Multi-Agent Framework](/202603/24/2603.20644v1-scaleedit-12m-scaling-open-source-image-editing-data-generation-via-multi-agent-framework)  
+   标签：评分：9.0/10、query:mm-mas
+   evidence：用于多模态图像编辑数据生成的多智能体框架
+6. [DiscoUQ: Structured Disagreement Analysis for Uncertainty Quantification in LLM Agent Ensembles](/202603/24/2603.20975v1-discouq-structured-disagreement-analysis-for-uncertainty-quantification-in-llm-agent-ensembles)  
    标签：评分：9.0/10、query:llm-ma
-   evidence：用于可解释 AI 叙述生成的多智能体框架
+   evidence：大模型智能体集成中的不确定性量化
+7. [Unified-MAS: Universally Generating Domain-Specific Nodes for Empowering Automatic Multi-Agent Systems](/202603/24/2603.21475v1-unified-mas-universally-generating-domain-specific-nodes-for-empowering-automatic-multi-agent-systems)  
+   标签：评分：9.0/10、query:llm-ma
+   evidence：用于复杂推理的自动多智能体系统生成
+8. [Agentic Automation of BT-RADS Scoring: End-to-End Multi-Agent System for Standardized Brain Tumor Follow-up Assessment](/202603/24/2603.21494v1-agentic-automation-of-bt-rads-scoring-end-to-end-multi-agent-system-for-standardized-brain-tumor-follow-up-assessment)  
+   标签：评分：9.0/10、query:mm-mas
+   evidence：结合大模型与卷积神经网络的多模态医疗评估多智能体系统
+9. [Efficient Failure Management for Multi-Agent Systems with Reasoning Trace Representation](/202603/24/2603.21522v1-efficient-failure-management-for-multi-agent-systems-with-reasoning-trace-representation)  
+   标签：评分：9.0/10、query:llm-ma
+   evidence：基于大语言模型的多智能体系统故障管理
+10. [Counterfactual Credit Policy Optimization for Multi-Agent Collaboration](/202603/24/2603.21563v1-counterfactual-credit-policy-optimization-for-multi-agent-collaboration)  
+   标签：评分：9.0/10、query:llm-ma
+   evidence：大语言模型多智能体强化学习与信用分配
+11. [Adaptive Robust Estimator for Multi-Agent Reinforcement Learning](/202603/24/2603.21574v1-adaptive-robust-estimator-for-multi-agent-reinforcement-learning)  
+   标签：评分：9.0/10、query:llm-ma
+   evidence：用于协作推理的鲁棒多智能体强化学习
+12. [A Multidisciplinary AI Board for Multimodal Dementia Characterization and Risk Assessment](/202603/24/2603.21597v1-a-multidisciplinary-ai-board-for-multimodal-dementia-characterization-and-risk-assessment)  
+   标签：评分：9.0/10、query:mm-mas
+   evidence：用于多模态临床数据分析的多智能体AI团队
+13. [LSAI: A Large Small AI Model Codesign Framework for Agentic Robot Scenarios](/202603/24/2603.21726v1-lsai-a-large-small-ai-model-codesign-framework-for-agentic-robot-scenarios)  
+   标签：评分：9.0/10、query:mm-mas
+   evidence：大小模型协同的机器人多智能体合作框架
+14. [Chimera: Latency- and Performance-Aware Multi-agent Serving for Heterogeneous LLMs](/202603/24/2603.22206v1-chimera-latency--and-performance-aware-multi-agent-serving-for-heterogeneous-llms)  
+   标签：评分：9.0/10、query:llm-ma
+   evidence：异构大语言模型的多智能体服务系统
 
 ### 速读区论文标签
-1. [ProRL Agent: Rollout-as-a-Service for RL Training of Multi-Turn LLM Agents](/202603/23/2603.18815v1-prorl-agent-rollout-as-a-service-for-rl-training-of-multi-turn-llm-agents)  
-   标签：评分：8.0/10、query:llm-ma
-   evidence：多轮LLM智能体强化学习训练基础设施
-2. [ProactiveBench: Benchmarking Proactiveness in Multimodal Large Language Models](/202603/23/2603.19466v1-proactivebench-benchmarking-proactiveness-in-multimodal-large-language-models)  
+1. [Teaching an Agent to Sketch One Part at a Time](/202603/24/2603.19500v1-teaching-an-agent-to-sketch-one-part-at-a-time)  
    标签：评分：8.0/10、query:mm-mas
-   evidence：多模态大语言模型主动性基准测试
-3. [Helix: A Dual-Helix Co-Evolutionary Multi-Agent System for Prompt Optimization and Question Reformulation](/202603/23/2603.19732v1-helix-a-dual-helix-co-evolutionary-multi-agent-system-for-prompt-optimization-and-question-reformulation)  
+   evidence：基于多模态语言模型的矢量绘图智能体
+2. [Semantic Audio-Visual Navigation in Continuous Environments](/202603/24/2603.19660v1-semantic-audio-visual-navigation-in-continuous-environments)  
+   标签：评分：8.0/10、query:mm-mas
+   evidence：连续环境中具身智能体的多模态导航
+3. [ALARA for Agents: Least-Privilege Context Engineering Through Portable Composable Multi-Agent Teams](/202603/24/2603.20380v1-alara-for-agents-least-privilege-context-engineering-through-portable-composable-multi-agent-teams)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：用于提示词优化的多智能体系统
-4. [Utility-Guided Agent Orchestration for Efficient LLM Tool Use](/202603/23/2603.19896v1-utility-guided-agent-orchestration-for-efficient-llm-tool-use)  
-   标签：评分：8.0/10、query:llm-ma
-   evidence：LLM工具使用的智能体编排
-5. [ViDscribe: Multimodal AI for Customizing Audio Description and Question Answering in Online Videos](/202603/23/2603.14662v1-vidscribe-multimodal-ai-for-customizing-audio-description-and-question-answering-in-online-videos)  
+   evidence：构建多智能体系统的框架
+4. [Towards Practical World Model-based Reinforcement Learning for Vision-Language-Action Models](/202603/24/2603.20607v1-towards-practical-world-model-based-reinforcement-learning-for-vision-language-action-models)  
+   标签：评分：8.0/10、query:mm-mas
+   evidence：使用世界模型对视觉-语言-动作模型进行强化学习
+5. [Compute Allocation for Reasoning-Intensive Retrieval Agents](/202603/24/2603.14635v2-compute-allocation-for-reasoning-intensive-retrieval-agents)  
+   标签：评分：7.0/10、query:llm-ma
+   evidence：使用大模型增强流水线的推理密集型检索智能体
+6. [Beam Prediction Based on Multimodal Large Language Models](/202603/24/2603.15093v2-beam-prediction-based-on-multimodal-large-language-models)  
    标签：评分：7.0/10、query:mm-mas
-   evidence：用于定制音频描述和问答的多模态人工智能
-6. [Social Simulacra in the Wild: AI Agent Communities on Moltbook](/202603/23/2603.16128v1-social-simulacra-in-the-wild-ai-agent-communities-on-moltbook)  
+   evidence：基于多模态大语言模型的波束预测框架，利用RGB和LiDAR数据
+7. [Chronos: Temporal-Aware Conversational Agents with Structured Event Retrieval for Long-Term Memory](/202603/24/2603.16862v1-chronos-temporal-aware-conversational-agents-with-structured-event-retrieval-for-long-term-memory)  
    标签：评分：7.0/10、query:llm-ma
-   evidence：AI智能体社区的动态研究
-7. [Communication-Aware Multi-Agent Reinforcement Learning for Decentralized Cooperative UAV Deployment](/202603/23/2603.16141v1-communication-aware-multi-agent-reinforcement-learning-for-decentralized-cooperative-uav-deployment)  
+   evidence：具有长期记忆的对话智能体
+8. [Retrieval-Augmented LLM Agents: Learning to Learn from Experience](/202603/24/2603.18272v1-retrieval-augmented-llm-agents-learning-to-learn-from-experience)  
    标签：评分：7.0/10、query:llm-ma
-   evidence：用于分布式协作无人机部署的多智能体强化学习
-8. [RetailBench: Evaluating Long-Horizon Autonomous Decision-Making and Strategy Stability of LLM Agents in Realistic Retail Environments](/202603/23/2603.16453v1-retailbench-evaluating-long-horizon-autonomous-decision-making-and-strategy-stability-of-llm-agents-in-realistic-retail-environments)  
-   标签：评分：7.0/10、query:llm-ma
-   evidence：评估大模型智能体的长程自主决策能力
-9. [AdaMem: Adaptive User-Centric Memory for Long-Horizon Dialogue Agents](/202603/23/2603.16496v1-adamem-adaptive-user-centric-memory-for-long-horizon-dialogue-agents)  
-   标签：评分：7.0/10、query:llm-ma
-   evidence：长周期对话智能体的自适应记忆框架
-10. [LLM NL2SQL Robustness: Surface Noise vs. Linguistic Variation in Traditional and Agentic Settings](/202603/23/2603.17017v1-llm-nl2sql-robustness-surface-noise-vs-linguistic-variation-in-traditional-and-agentic-settings)  
+   evidence：从经验中学习的检索增强型大模型智能体
+9. [Learning Communication Between Heterogeneous Agents in Multi-Agent Reinforcement Learning for Autonomous Cyber Defence](/202603/24/2603.20279v1-learning-communication-between-heterogeneous-agents-in-multi-agent-reinforcement-learning-for-autonomous-cyber-defence)  
    标签：评分：6.0/10、query:llm-ma
-   evidence：大模型在智能体设置下的鲁棒性评估
-11. [Diffusion-Guided Semantic Consistency for Multimodal Heterogeneity](/202603/23/2603.19337v1-diffusion-guided-semantic-consistency-for-multimodal-heterogeneity)  
+   evidence：多智能体强化学习中异构智能体间的通信
+10. [From Human Interfaces to Agent Interfaces: Rethinking Software Design in the Age of AI-Native Systems](/202603/24/2603.20300v1-from-human-interfaces-to-agent-interfaces-rethinking-software-design-in-the-age-of-ai-native-systems)  
+   标签：评分：6.0/10、query:llm-ma
+   evidence：构建面向智能体的软件系统框架
+11. [When Models Judge Themselves: Unsupervised Self-Evolution for Multimodal Reasoning](/202603/24/2603.21289v1-when-models-judge-themselves-unsupervised-self-evolution-for-multimodal-reasoning)  
    标签：评分：6.0/10、query:mm-mas
-   evidence：联邦学习中的多模态感知设置
+   evidence：大模型多模态推理的无监督自我进化
 
 
 <div class="dpr-home-promo-card">
