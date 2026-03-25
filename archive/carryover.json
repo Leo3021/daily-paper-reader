@@ -1,113 +1,48 @@
 {
-  "generated_at": "2026-03-24T20:12:09.896836+00:00",
-  "updated_date": "20260324",
+  "generated_at": "2026-03-25T19:27:50.754175+00:00",
+  "updated_date": "20260325",
   "carryover_days": 9,
   "items": [
     {
-      "id": "2603.20633v1",
-      "title": "Seed1.8 Model Card: Towards Generalized Real-World Agency",
-      "abstract": "We present Seed1.8, a foundation model aimed at generalized real-world agency: going beyond single-turn prediction to multi-turn interaction, tool use, and multi-step execution. Seed1.8 keeps strong LLM and vision-language performance while supporting a unified agentic interface-search, code generation and execution, and GUI interaction. For deployment, it offers latency- and cost-aware inference, including configurable thinking modes and optimized visual encoding for images and video. We report evaluations on standard benchmarks and application-aligned workflows spanning foundational skills, multimodal understanding, and agentic behavior. Seed1.8 is released to support further research and development on interactive, real-world use cases.",
+      "id": "2603.22435v1",
+      "title": "CaP-X: A Framework for Benchmarking and Improving Coding Agents for Robot Manipulation",
+      "abstract": "\"Code-as-Policy\" considers how executable code can complement data-intensive Vision-Language-Action (VLA) methods, yet their effectiveness as autonomous controllers for embodied manipulation remains underexplored. We present CaP-X, an open-access framework for systematically studying Code-as-Policy agents in robot manipulation. At its core is CaP-Gym, an interactive environment in which agents control robots by synthesizing and executing programs that compose perception and control primitives. Building on this foundation, CaP-Bench evaluates frontier language and vision-language models across varying levels of abstraction, interaction, and perceptual grounding. Across 12 models, CaP-Bench reveals a consistent trend: performance improves with human-crafted abstractions but degrades as these priors are removed, exposing a dependence on designer scaffolding. At the same time, we observe that this gap can be mitigated through scaling agentic test-time computation--through multi-turn interaction, structured execution feedback, visual differencing, automatic skill synthesis, and ensembled reasoning--substantially improves robustness even when agents operate over low-level primitives. These findings allow us to derive CaP-Agent0, a training-free framework that recovers human-level reliability on several manipulation tasks in simulation and on real embodiments. We further introduce CaP-RL, showing reinforcement learning with verifiable rewards improves success rates and transfers from sim2real with minimal gap. Together, CaP-X provides a principled, open-access platform for advancing embodied coding agents.",
       "authors": [
-        "Bytedance Seed"
+        "Max Fu",
+        "Justin Yu",
+        "Karim El-Refai",
+        "Ethan Kou",
+        "Haoru Xue",
+        "Huang Huang",
+        "Wenli Xiao",
+        "Guanzhi Wang",
+        "Fei-Fei Li",
+        "Guanya Shi",
+        "Jiajun Wu",
+        "Shankar Sastry",
+        "Yuke Zhu",
+        "Ken Goldberg",
+        "Linxi \"Jim\" Fan"
       ],
-      "primary_category": "cs.AI",
+      "primary_category": "cs.RO",
       "categories": [
+        "cs.RO",
         "cs.AI"
       ],
-      "published": "2026-03-21T04:03:45+00:00",
-      "link": "https://arxiv.org/pdf/2603.20633v1",
+      "published": "2026-03-23T18:08:10+00:00",
+      "link": "https://arxiv.org/pdf/2603.22435v1",
       "tags": [
         "keyword:MM MAS",
         "query:MM MAS"
       ],
       "llm_score": 8.0,
-      "llm_evidence_en": "Foundation model for multimodal agentic behavior",
-      "llm_evidence_cn": "多模态智能体行为的基础模型",
-      "llm_evidence": "多模态智能体行为的基础模型",
-      "canonical_evidence": "多模态智能体行为的基础模型",
-      "llm_tldr_en": "Presents a foundation model supporting multi-turn interaction and multimodal understanding for real-world agency.",
-      "llm_tldr_cn": "展示了一个支持多轮交互和多模态理解的真实世界代理基础模型。",
-      "llm_tldr": "展示了一个支持多轮交互和多模态理解的真实世界代理基础模型。",
-      "llm_tags": [
-        "query:mm-mas:composite"
-      ],
-      "matched_query_tag": "query:mm-mas:composite",
-      "matched_query_text": "Papers central to 多模态多智能体系统相关论文检索, especially work that connects or combines: l; multimodal; m; multimodal multi agent; recent advances in multimodal multi agent systems; multimodal large language models for multi agent cooperation; benchmarks for evaluating multimodal multi agent performance.",
-      "matched_requirement_id": "req-composite-mm-mas",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.20633v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.21686v1",
-      "title": "Is AI Ready for Multimodal Hate Speech Detection? A Comprehensive Dataset and Benchmark Evaluation",
-      "abstract": "Hate speech online targets individuals or groups based on identity attributes and spreads rapidly, posing serious social risks. Memes, which combine images and text, have emerged as a nuanced vehicle for disseminating hate speech, often relying on cultural knowledge for interpretation. However, existing multimodal hate speech datasets suffer from coarse-grained labeling and a lack of integration with surrounding discourse, leading to imprecise and incomplete assessments. To bridge this gap, we propose an agentic annotation framework that coordinates seven specialized agents to generate hierarchical labels and rationales. Based on this framework, we construct M^3 (Multi-platform, Multi-lingual, and Multimodal Meme), a dataset of 2,455 memes collected from X, 4chan, and Weibo, featuring fine-grained hate labels and human-verified rationales. Benchmarking state-of-the-art Multimodal Large Language Models reveals that these models struggle to effectively utilize surrounding post context, which often fails to improve or even degrades detection performance. Our finding highlights the challenges these models face in reasoning over memes embedded in real-world discourse and underscores the need for a context-aware multimodal architecture. Our dataset and code are available at https://github.com/mira-ai-lab/M3.",
-      "authors": [
-        "Rui Xing",
-        "Qi Chai",
-        "Jie Ma",
-        "Jing Tao",
-        "Pinghui Wang",
-        "Shuming Zhang",
-        "Xinping Wang",
-        "Hao Wang"
-      ],
-      "primary_category": "cs.MA",
-      "categories": [
-        "cs.MA"
-      ],
-      "published": "2026-03-23T08:17:29+00:00",
-      "link": "https://arxiv.org/pdf/2603.21686v1",
-      "tags": [
-        "keyword:MM MAS",
-        "query:MM MAS"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "multi-agent framework for multimodal data annotation",
-      "llm_evidence_cn": "用于多模态数据标注的多智能体框架",
-      "llm_evidence": "用于多模态数据标注的多智能体框架",
-      "canonical_evidence": "用于多模态数据标注的多智能体框架",
-      "llm_tldr_en": "A multi-agent framework coordinates specialized agents for multimodal hate speech dataset construction.",
-      "llm_tldr_cn": "一个多智能体框架协调专门的智能体来构建多模态仇恨言论数据集。",
-      "llm_tldr": "一个多智能体框架协调专门的智能体来构建多模态仇恨言论数据集。",
-      "llm_tags": [
-        "query:mm-mas:composite"
-      ],
-      "matched_query_tag": "query:mm-mas:composite",
-      "matched_query_text": "Papers central to 多模态多智能体系统相关论文检索, especially work that connects or combines: l; multimodal; m; multimodal multi agent; recent advances in multimodal multi agent systems; multimodal large language models for multi agent cooperation; benchmarks for evaluating multimodal multi agent performance.",
-      "matched_requirement_id": "req-composite-mm-mas",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.21686v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.21114v1",
-      "title": "CVT-Bench: Counterfactual Viewpoint Transformations Reveal Unstable Spatial Representations in Multimodal LLMs",
-      "abstract": "Multimodal large language models (MLLMs) achieve strong performance on single-view spatial reasoning tasks, yet it remains unclear whether they maintain stable spatial state representations under counterfactual viewpoint changes. We introduce a controlled diagnostic benchmark that evaluates relational consistency under hypothetical camera orbit transformations without re-rendering images. Across 100 synthetic scenes and 6,000 relational queries, we measure viewpoint consistency, 360° cycle agreement, and relational stability over sequential transformations. Despite high single-view accuracy, state-of-the-art MLLMs exhibit systematic degradation under counterfactual viewpoint changes, with frequent violations of cycle consistency and rapid decay in relational stability. We further evaluate multiple input representations, visual input, textual bounding boxes, and structured scene graphs, and show that increasing representational structure improves stability. Our results suggest that single-view spatial accuracy overestimates the robustness of induced spatial representations and that representation structure plays a critical role in counterfactual spatial reasoning.",
-      "authors": [
-        "Shanmukha Vellamcheti",
-        "Uday Kiran Kothapalli",
-        "Disharee Bhowmick",
-        "Sathyanarayanan N. Aakur"
-      ],
-      "primary_category": "cs.CV",
-      "categories": [
-        "cs.CV"
-      ],
-      "published": "2026-03-22T08:13:28+00:00",
-      "link": "https://arxiv.org/pdf/2603.21114v1",
-      "tags": [
-        "keyword:MM MAS",
-        "query:MM MAS"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "Diagnostic benchmark for spatial representations in Multimodal LLMs",
-      "llm_evidence_cn": "多模态大模型空间表示的诊断性基准测试",
-      "llm_evidence": "多模态大模型空间表示的诊断性基准测试",
-      "canonical_evidence": "多模态大模型空间表示的诊断性基准测试",
-      "llm_tldr_en": "Introduces CVT-Bench to evaluate the stability of spatial state representations in MLLMs under viewpoint changes.",
-      "llm_tldr_cn": "推出CVT-Bench基准，用于评估多模态大模型在视角变换下的空间状态表示稳定性。",
-      "llm_tldr": "推出CVT-Bench基准，用于评估多模态大模型在视角变换下的空间状态表示稳定性。",
+      "llm_evidence_en": "benchmarking vision-language models for robot manipulation agents",
+      "llm_evidence_cn": "针对机器人操纵智能体的视觉语言模型基准测试",
+      "llm_evidence": "针对机器人操纵智能体的视觉语言模型基准测试",
+      "canonical_evidence": "针对机器人操纵智能体的视觉语言模型基准测试",
+      "llm_tldr_en": "Presents CaP-X, a framework and benchmark for evaluating coding agents in multimodal robot manipulation tasks.",
+      "llm_tldr_cn": "提出CaP-X框架，用于系统研究和评估多模态机器人操纵任务中的代码智能体。",
+      "llm_tldr": "提出CaP-X框架，用于系统研究和评估多模态机器人操纵任务中的代码智能体。",
       "llm_tags": [
         "query:mm-mas"
       ],
@@ -115,7 +50,42 @@
       "matched_query_text": "benchmarks for evaluating multimodal multi agent performance",
       "matched_requirement_id": "req-7",
       "selection_source": "carryover_cache",
-      "paper_id": "2603.21114v1",
+      "paper_id": "2603.22435v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.22823v1",
+      "title": "Empirical Comparison of Agent Communication Protocols for Task Orchestration",
+      "abstract": "Context. Nowadays, artificial intelligence agent systems are transforming from single-tool interactions to complex multi-agent orchestrations. As a result, two competing communication protocols have emerged: a tool integration protocol that standardizes how agents invoke external tools, and an inter-agent delegation protocol that enables autonomous agents to discover and delegate tasks to one another. Despite widespread industry adoption by dozens of enterprise partners, no empirical comparison of these protocols exists in the literature. Objective. The goal of this work is to develop the first systematic benchmark comparing tool-integration-only, multi-agent delegation, and hybrid architectures across standardized queries at three complexity levels, and to quantify the trade-offs in response time, context window consumption, monetary cost, error recovery, and implementation complexity.",
+      "authors": [
+        "Ivan Dobrovolskyi"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-24T05:50:58+00:00",
+      "link": "https://arxiv.org/pdf/2603.22823v1",
+      "tags": [
+        "keyword:MM MAS",
+        "query:MM MAS"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "comparison of agent communication protocols for multi-agent orchestrations",
+      "llm_evidence_cn": "多智能体编排中智能体通信协议的比较",
+      "llm_evidence": "多智能体编排中智能体通信协议的比较",
+      "canonical_evidence": "多智能体编排中智能体通信协议的比较",
+      "llm_tldr_en": "Provides an empirical benchmark comparing tool-integration and delegation protocols in multi-agent systems.",
+      "llm_tldr_cn": "对多智能体系统中的工具集成与任务委派通信协议进行了首次系统性基准比较。",
+      "llm_tldr": "对多智能体系统中的工具集成与任务委派通信协议进行了首次系统性基准比较。",
+      "llm_tags": [
+        "query:llm-ma:composite"
+      ],
+      "matched_query_tag": "query:llm-ma:composite",
+      "matched_query_text": "Papers central to 大模型多智能体系统相关论文检索, especially work that connects or combines: d; a; m; Frameworks for building multi agent systems with LLMs; Emergent behavior in multi agent large language models; Collaborative problem solving in LLM multi agent environments; Multi agent reinforcement learning with large language models.",
+      "matched_requirement_id": "req-composite-llm-ma",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.22823v1",
       "carry_days": 1
     }
   ]
