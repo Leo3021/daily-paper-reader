@@ -1,83 +1,38 @@
 {
-  "generated_at": "2026-03-25T19:27:50.754175+00:00",
-  "updated_date": "20260325",
+  "generated_at": "2026-03-26T20:14:18.858592+00:00",
+  "updated_date": "20260326",
   "carryover_days": 9,
   "items": [
     {
-      "id": "2603.22435v1",
-      "title": "CaP-X: A Framework for Benchmarking and Improving Coding Agents for Robot Manipulation",
-      "abstract": "\"Code-as-Policy\" considers how executable code can complement data-intensive Vision-Language-Action (VLA) methods, yet their effectiveness as autonomous controllers for embodied manipulation remains underexplored. We present CaP-X, an open-access framework for systematically studying Code-as-Policy agents in robot manipulation. At its core is CaP-Gym, an interactive environment in which agents control robots by synthesizing and executing programs that compose perception and control primitives. Building on this foundation, CaP-Bench evaluates frontier language and vision-language models across varying levels of abstraction, interaction, and perceptual grounding. Across 12 models, CaP-Bench reveals a consistent trend: performance improves with human-crafted abstractions but degrades as these priors are removed, exposing a dependence on designer scaffolding. At the same time, we observe that this gap can be mitigated through scaling agentic test-time computation--through multi-turn interaction, structured execution feedback, visual differencing, automatic skill synthesis, and ensembled reasoning--substantially improves robustness even when agents operate over low-level primitives. These findings allow us to derive CaP-Agent0, a training-free framework that recovers human-level reliability on several manipulation tasks in simulation and on real embodiments. We further introduce CaP-RL, showing reinforcement learning with verifiable rewards improves success rates and transfers from sim2real with minimal gap. Together, CaP-X provides a principled, open-access platform for advancing embodied coding agents.",
+      "id": "2603.24014v1",
+      "title": "Language-Grounded Multi-Agent Planning for Personalized and Fair Participatory Urban Sensing",
+      "abstract": "Participatory urban sensing leverages human mobility for large-scale urban data collection, yet existing methods typically rely on centralized optimization and assume homogeneous participants, resulting in rigid assignments that overlook personal preferences and heterogeneous urban contexts. We propose MAPUS, an LLM-based multi-agent framework for personalized and fair participatory urban sensing. In our framework, participants are modeled as autonomous agents with individual profiles and schedules, while a coordinator agent performs fairness-aware selection and refines sensing routes through language-based negotiation. Experiments on real-world datasets show that MAPUS achieves competitive sensing coverage while substantially improving participant satisfaction and fairness, promoting more human-centric and sustainable urban sensing systems.",
       "authors": [
-        "Max Fu",
-        "Justin Yu",
-        "Karim El-Refai",
-        "Ethan Kou",
-        "Haoru Xue",
-        "Huang Huang",
-        "Wenli Xiao",
-        "Guanzhi Wang",
-        "Fei-Fei Li",
-        "Guanya Shi",
-        "Jiajun Wu",
-        "Shankar Sastry",
-        "Yuke Zhu",
-        "Ken Goldberg",
-        "Linxi \"Jim\" Fan"
-      ],
-      "primary_category": "cs.RO",
-      "categories": [
-        "cs.RO",
-        "cs.AI"
-      ],
-      "published": "2026-03-23T18:08:10+00:00",
-      "link": "https://arxiv.org/pdf/2603.22435v1",
-      "tags": [
-        "keyword:MM MAS",
-        "query:MM MAS"
-      ],
-      "llm_score": 8.0,
-      "llm_evidence_en": "benchmarking vision-language models for robot manipulation agents",
-      "llm_evidence_cn": "针对机器人操纵智能体的视觉语言模型基准测试",
-      "llm_evidence": "针对机器人操纵智能体的视觉语言模型基准测试",
-      "canonical_evidence": "针对机器人操纵智能体的视觉语言模型基准测试",
-      "llm_tldr_en": "Presents CaP-X, a framework and benchmark for evaluating coding agents in multimodal robot manipulation tasks.",
-      "llm_tldr_cn": "提出CaP-X框架，用于系统研究和评估多模态机器人操纵任务中的代码智能体。",
-      "llm_tldr": "提出CaP-X框架，用于系统研究和评估多模态机器人操纵任务中的代码智能体。",
-      "llm_tags": [
-        "query:mm-mas"
-      ],
-      "matched_query_tag": "query:mm-mas",
-      "matched_query_text": "benchmarks for evaluating multimodal multi agent performance",
-      "matched_requirement_id": "req-7",
-      "selection_source": "carryover_cache",
-      "paper_id": "2603.22435v1",
-      "carry_days": 1
-    },
-    {
-      "id": "2603.22823v1",
-      "title": "Empirical Comparison of Agent Communication Protocols for Task Orchestration",
-      "abstract": "Context. Nowadays, artificial intelligence agent systems are transforming from single-tool interactions to complex multi-agent orchestrations. As a result, two competing communication protocols have emerged: a tool integration protocol that standardizes how agents invoke external tools, and an inter-agent delegation protocol that enables autonomous agents to discover and delegate tasks to one another. Despite widespread industry adoption by dozens of enterprise partners, no empirical comparison of these protocols exists in the literature. Objective. The goal of this work is to develop the first systematic benchmark comparing tool-integration-only, multi-agent delegation, and hybrid architectures across standardized queries at three complexity levels, and to quantify the trade-offs in response time, context window consumption, monetary cost, error recovery, and implementation complexity.",
-      "authors": [
-        "Ivan Dobrovolskyi"
+        "Xusen Guo",
+        "Mingxing Peng",
+        "Hongliang Lu",
+        "Hai Yang",
+        "Jun Ma",
+        "Yuxuan Liang"
       ],
       "primary_category": "cs.AI",
       "categories": [
         "cs.AI"
       ],
-      "published": "2026-03-24T05:50:58+00:00",
-      "link": "https://arxiv.org/pdf/2603.22823v1",
+      "published": "2026-03-25T07:19:45+00:00",
+      "link": "https://arxiv.org/pdf/2603.24014v1",
       "tags": [
         "keyword:MM MAS",
         "query:MM MAS"
       ],
       "llm_score": 8.0,
-      "llm_evidence_en": "comparison of agent communication protocols for multi-agent orchestrations",
-      "llm_evidence_cn": "多智能体编排中智能体通信协议的比较",
-      "llm_evidence": "多智能体编排中智能体通信协议的比较",
-      "canonical_evidence": "多智能体编排中智能体通信协议的比较",
-      "llm_tldr_en": "Provides an empirical benchmark comparing tool-integration and delegation protocols in multi-agent systems.",
-      "llm_tldr_cn": "对多智能体系统中的工具集成与任务委派通信协议进行了首次系统性基准比较。",
-      "llm_tldr": "对多智能体系统中的工具集成与任务委派通信协议进行了首次系统性基准比较。",
+      "llm_evidence_en": "LLM-based multi-agent framework for collaborative urban sensing",
+      "llm_evidence_cn": "基于大模型的多智能体协作城市感知框架",
+      "llm_evidence": "基于大模型的多智能体协作城市感知框架",
+      "canonical_evidence": "基于大模型的多智能体协作城市感知框架",
+      "llm_tldr_en": "Presents MAPUS, an LLM-based multi-agent system for personalized and fair participatory urban sensing.",
+      "llm_tldr_cn": "提出MAPUS，一种基于大模型的多智能体框架，用于实现个性化且公平的城市感知任务。",
+      "llm_tldr": "提出MAPUS，一种基于大模型的多智能体框架，用于实现个性化且公平的城市感知任务。",
       "llm_tags": [
         "query:llm-ma:composite"
       ],
@@ -85,7 +40,7 @@
       "matched_query_text": "Papers central to 大模型多智能体系统相关论文检索, especially work that connects or combines: d; a; m; Frameworks for building multi agent systems with LLMs; Emergent behavior in multi agent large language models; Collaborative problem solving in LLM multi agent environments; Multi agent reinforcement learning with large language models.",
       "matched_requirement_id": "req-composite-llm-ma",
       "selection_source": "carryover_cache",
-      "paper_id": "2603.22823v1",
+      "paper_id": "2603.24014v1",
       "carry_days": 1
     }
   ]
