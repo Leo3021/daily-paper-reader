@@ -1,0 +1,138 @@
+Title: UniDial-EvalKit: A Unified Toolkit for Evaluating Multi-Faceted Conversational Abilities
+
+URL Source: https://arxiv.org/pdf/2603.23160v1
+
+Published Time: Wed, 25 Mar 2026 01:10:52 GMT
+
+Number of Pages: 7
+
+Markdown Content:
+# UniDial-EvalKit: A Unified Toolkit for Evaluating Multi-Faceted Conversational Abilities 
+
+Qi Jia 1 Haodong Zhao 2 Dun Pei 1 Xiujie Song 2 Shibo Wang 1
+
+Zijian Chen 1,2 Zicheng Zhang 1 Xiangyang Zhu 1 Guangtao Zhai 1,21Shanghai Artificial Intelligence Laboratory 2Shanghai Jiao Tong University  
+
+> ⋆
+
+https://github.com/UniDial/UniDial-EvalKit 
+
+Abstract 
+
+Benchmarking AI systems in multi-turn inter-active scenarios is essential for understanding their practical capabilities in real-world appli-cations. However, existing evaluation proto-cols are highly heterogeneous, differing sig-nificantly in dataset formats, model interfaces, and evaluation pipelines, which severely im-pedes systematic comparison. In this work, we present UniDial-EvalKit (UDE) , a uni-fied evaluation toolkit for assessing interac-tive AI systems. The core contribution of UDE lies in its holistic unification: it stan-dardizes heterogeneous data formats into a universal schema, streamlines complex eval-uation pipelines through a modular architec-ture, and aligns metric calculations under a consistent scoring interface. It also supports efficient large-scale evaluation through parallel generation and scoring, as well as checkpoint-based caching to eliminate redundant computa-tion. Validated across diverse multi-turn bench-marks, UDE not only guarantees high repro-ducibility through standardized workflows and transparent logging, but also significantly im-proves evaluation efficiency and extensibility. We make the complete toolkit and evaluation scripts publicly available to foster a standard-ized benchmarking ecosystem and accelerate future breakthroughs in interactive AI. 
+
+1 Introduction 
+
+In the rapidly evolving landscape of large language models (LLMs) and agent-based systems, assess-ing their performance in multi-turn interactive dia-logues has become essential for understanding their practical capabilities. However, evaluating these systems remains a complex challenge due to a lack of unified standards and frameworks for dialogue assessment. This fragmentation complicates the comparison of models’ performances and limits the ability to track improvements across different tasks and scenarios. While evaluation frameworks for single-turn sce-narios, such as OpenCompass (Contributors, 2023) and VLMEvalKit (Duan et al., 2024), are well-established, the structural unification of multi-turn evaluations remains largely underexplored. Unlike isolated single-turn interactions, assessing contin-uous multi-turn systems introduces unique com-plexities, primarily presenting the following three challenges: First, multi-turn evaluation data lacks a unified schema due to highly inconsistent assessment de-signs. To capture a system’s true capabilities in continuous interactions, different benchmarks have tailored their own evaluation scopes, such as judg-ing only the final response (Deshpande et al., 2025; Wu et al., 2024; Hu et al., 2025), assessing every in-dividual turn (Bai et al., 2024; He et al., 2024; Yan et al., 2025), or some specific turns (Kwan et al., 2024; Jiayang et al., 2026). This lack of structural consensus impedes the unification of evaluation frameworks across different setups. Second, inconsistencies in evaluators and scor-ing metrics further fragment the assessment land-scape. Many benchmarks adopt automated evalua-tors, such as LLMs-as-judges (Zheng et al., 2023; Li et al., 2025), but they rely on heterogeneous base models and scoring frameworks. For example, Fan et al. (2025) adopted GPT-4 as a judge while He et al. (2024) chose GPT-4o and Claude. The absence of unified workflow hinders the seamless application of advancing evaluation metrics across benchmarks. Third, the lack of standardized score aggregation strategies further fragments multi-turn evaluation. Benchmarks employ diverse methods to summarize turn-level metrics, such as computing the mean (He et al., 2024), minimum (Bai et al., 2024; Cao et al., 2026), or maximum across turns, resulting in over-all scores that often reflect the aggregation heuris-tic rather than the model’s true capabilities. This severely hampers direct comparisons across capa-1
+
+> arXiv:2603.23160v1 [cs.CL] 24 Mar 2026
+
+bilities reflected in different benchmarks. To address these challenges, we present UniDial-EvalKit (UDE), a unified evaluation framework for multi-turn conversational systems, including both LLMs and agent-based models. UDE is designed to systematically standardize the evaluation pro-cess by decoupling dataset management, model interaction, and metric computation into modular components, enabling flexible integration and fair comparison across diverse benchmarks. It provides a consistent dialogue evaluation schema, aligned metrics across heterogeneous judge models, and unified score aggregation. Beyond standardization, UDE also supports large-scale parallel processing and checkpoint-based resume functionality, improving both effi-ciency and scalability. The framework includes a comprehensive suite of benchmarks covering mem-ory, safety, instruction-following, and etc., offering holistic assessment of conversational capabilities. Its modular design also allows users to incorporate new models and metrics while maintaining unified evaluation standards across all tests, addressing the fragmentation and inconsistencies identified in existing multi-turn evaluation practices. UDE is publicly available under the Apache 2.0 License. The repository includes the complete source code, installation instructions, and documen-tation for configuring and running evaluations. In the following sections, we will explain the design and features of UniDial-EvalKit, analyze results from various models, and discuss future directions for extending the framework’s capabilities. 
+
+2 UniDial-EvalKit Design 
+
+UniDial-EvalKit (UDE) is conceptualized as a modular, unified framework tailored for evaluat-ing the multi-turn conversational capabilities of LLMs and Agents. To maximize extensibility and maintainability, the framework architecture decou-ples the evaluation pipeline into four sequential and independent phases: Data Loading ( DataPhase ), Model Generation ( GenerationPhase ), Metric Eval-uation ( EvaluationPhase ), and Result Aggregation (AggregationPhase ). This highly modular design enables researchers to seamlessly integrate novel datasets, custom models, or specialized evaluation metrics without modifying the core pipeline. Fur-thermore, UDE supports both a Command-Line Interface (CLI) and a comprehensive Python API (EvalPipeline ), offering flexible deployment op-tions across diverse experimental setups. 
+
+2.1 Unified Schema 
+
+To homogenize the disparate and complex formats of various multi-turn dialogue benchmarks, UDE introduces a standardized, centralized data schema anchored by the Dialog object as follows: 
+
+Dialog = { "dialog_id": ..., "dialog_raw_info": {...}, "dialog_labels": {...}, "dialog_eval_config": { "use_reference_history": ... }, "dialog_turns": [ {"turn_id": ..., "role": ..., "content": ..., "reference": ..., "reference_document": ..., "eval_config": { "do_eval": ..., "metrics": [ {"class_name": ..., "args": {...} }, ... ], }, "turn_labels": {...} }, ... ]}
+
+During the data loading stage, all raw data is parsed into a list of normalized in-stances. Each Dialog encapsulates session-level metadata (e.g., dialog_id , dialog_labels )and a chronological sequence of interactions (dialog_turns ). Each turn records its role 
+
+(system, user, or assistant), textual content, reference answers, and fine-grained evaluation con-figuration ( eval_config ). At the dialogue level, 
+
+dialog_eval_config.use_reference_history 
+
+determines whether the generation of subsequent turns follows an on-policy strategy based on previous outputs. At the turn level, eval_config 
+
+specifies whether the turn should be evaluated and which one or more metrics to apply. This 2unified schema cleanly separates dialogue-level and turn-level labels and evaluation settings, abstracting away dataset-specific structures and enabling downstream generation and evaluation modules to operate in a fully agnostic manner. 
+
+2.2 Model & Agent Integration 
+
+To support both open-source and proprietary mod-els, UDE provides a standardized BaseModel in-terface. Built-in wrappers enable seamless eval-uation of OpenAI-compatible APIs and local models deployed via inference engines such as vLLM. For stateful agent systems, the generation pipeline includes explicit lifecycle management (begin_dialog and end_dialog ), allowing agents to maintain coherent, dynamically updated con-textual memory during multi-turn sessions. This design ensures that internal states and caches are properly cleared after each dialogue, preventing cross-dialogue context contamination. 
+
+2.3 Evaluation Methodology 
+
+UDE adopts a flexible, metric-agnostic evaluation paradigm. During the evaluation phase, the frame-work dynamically loads and executes evaluation metrics based on the specific configurations de-fined within each assistant Turn . All supported metrics are managed via a centralized registry (METRIC_REGISTRY ), which currently encompasses a diverse taxonomy of evaluation protocols includ-ing LLM-as-a-Judge, Exact Match, Instruction Ad-herence Accuracy, and task-specific metrics for mathematics and coding. The evaluation module calculates scores by contextualizing the model’s prediction against reference answers and the pre-ceding dialogue history, subsequently persisting the scores and turn-level metadata as structured records to facilitate granular capability analysis. 
+
+2.4 Score Aggregation 
+
+To synthesize granular turn-level evaluations into macroscopic capability profiles, UDE implements a hierarchical aggregation strategy. During the Ag-gregationPhase , users can flexibly configure statis-tical pooling algorithms across three layers: • Turn-level: Multiple metric scores within a sin-gle interaction are combined to produce a turn-level summary, for example via mean, minimum, or maximum aggregation. • Dialog-level: Turn-level summaries are further aggregated across a session to yield a dialogue-level score. Minimum aggregation is set as the default strategy where a single failure can com-promise the entire dialogue. • Dataset-level: Dialogue-level scores are aggre-gated across the dataset to produce the final per-formance measure, either by averaging session scores or by flattening all turns globally. Additionally, the framework supports independent aggregation partitioned by specific metric names (agg_by_metric ), providing researchers with de-tailed analytical insights into distinct dimensions of model performance. 
+
+2.5 Efficiency & Acceleration 
+
+Given the substantial computational overhead and latency inherent in evaluating multi-turn interac-tions, UDE is engineered with multithreading and fault-tolerance mechanisms. During both the gen-eration and evaluation phases, the framework lever-ages ThreadPoolExecutor to facilitate efficient, dialogue-level concurrent processing. To mitigate network instability or unexpected interruptions, UDE features an automatic resumption capabil-ity. It scans the output directory to identify the latest checkpoints and processes only the pending dialogues. This checkpoint-based mechanism miti-gates redundant computation, ensuring stable and efficient large-scale evaluation. 
+
+3 Experimental Setup 
+
+3.1 Benchmarks 
+
+To provide a comprehensive and multifaceted eval-uation of multi-turn conversational capabilities, UniDial-EvalKit integrates a diverse suite of bench-marks. These benchmarks are carefully selected to cover a wide spectrum of evaluation dimen-sions, ranging from general interaction proficiency to domain-specific reasoning: • MT-Bench-101 (Bai et al., 2024) evaluates LLMs’ general chat capabilities through a hi-erarchical ability taxonomy, highlighting percep-tivity, adaptability, and interactivity in extended dialogues. • LoCoMo (Maharana et al., 2024) tests long-context memory with multi-session question-answering across single-hop, multi-hop, tempo-ral, open-domain, and adversarial reasoning cate-gories. 3#Dialog #Turn Multi-metric On-policy LoCoMo 1,986 616.09 ✓ ×MathChat 5,276 4.50 ✓ ×MemoryCode 1,512 290.06 × ×MT-Bench-101 1,388 6.06 × ×PersonaMem 589 164.90 × ×MultiIF 4,501 5.98 × ✓    
+
+> SafeDialBench 4,053 9.53 ××
+> Table 1: Dataset statistics in UniDial-EvalKit. Columns indicate total dialogues (#Dialog), average turns per dialogue (#Turn), use of multiple types of metrics per turn (Multi-metric), and whether generated outputs are fed back as dialogue context (On-policy).
+
+• PersonaMem (Jiang et al., 2025) assesses per-sonalization by evaluating LLMs’ ability to extract, retain, and apply user-specific profiles across multiple multi-turn sessions and real-world tasks. The “32k” subset was adopted in current evaluation. • MultiIF (He et al., 2024) measures instruction-following proficiency in multi-turn, multilingual dialogues using a hybrid framework combining LLM and human annotations. • SafeDialBench (Cao et al., 2026) evaluates multi-turn safety under various jailbreak attacks using a two-tier hierarchical safety taxonomy covering six dimensions in over 4000 dialogues. • MathChat (Liang et al., 2024) benchmarks multi-turn mathematical reasoning tasks such as follow-up QA, error correction, error analysis, and problem generation. • MemoryCode (Rakotonirina et al., 2025) tests 
+
+coding capabilities in multi-turn programming interactions, including tracking instructions amid irrelevant information and iterative debugging. Detailed statistics for normalized benchmarks are shown in Table 1. Certain datasets were con-verted from their original formats into a User-Assistant interaction structure. 
+
+3.2 Evaluated Models and Agents 
+
+We include a diverse set of models and agents, with the suite continuously expanding. 
+
+Models. The preliminary model set consists of DeepSeek-V3.2 (Liu et al., 2025), Qwen3-Max-Thinking, GLM-5 (Zeng et al., 2026), MiniMax-M2.5, and Kimi-K2.5 (Team et al., 2026). 
+
+Agents. We select representative agent memory systems. HippoRAG (Jimenez Gutierrez et al., 2024) exemplify structure-augmented RAG agents, while MemoryOS (Kang et al., 2025) and A-MEM (Xu et al., 2025) represent agents with ex-plicit memory management capabilities. 
+
+Evaluation Configuration. For all systems, we adopt the following aggregation strategy: turn-level scores are averaged, dialogue-level scores use the minimum aggregation, and dataset-level performance is computed at the dialogue level. To manage computational cost, each model out-put is limited to 1,024 tokens per turn, except for MemoryCode, which allows 4,096 tokens per turn. This constraint ensures that evaluation remains fair and consistent across models, while the reported scores also reflect model efficiency. Models that require longer generation or “thinking” time may negatively impact user experience, highlighting the trade-off between performance and responsiveness in multi-turn interactions. 
+
+4 Results 
+
+Based on our evaluation framework, we present the performance of the tested LLMs and agents below in this section. 
+
+4.1 Performance of LLMs 
+
+Among the five evaluated models, Qwen3-Max-Thinking demonstrates the most robust overall per-formance. A fine-grained analysis reveals dis-tinct model-specific strengths. GLM-5 excels in memory retention and coding proficiency, while Qwen3-Max-Thinking exhibits superior safety alignment. Additionally, DeepSeek-V3.2 shows a marginal advantage in interactive mathematical reasoning, whereas MiniMax-M2.5 demonstrates slightly weaker personalization capabilities com-pared to its counterparts. Furthermore, by calculat-ing the Discriminability Score for each benchmark as proposed by (Qian et al., 2026), we observe that a number of multi-turn benchmarks exhibit lim-ited ability to effectively distinguish among current state-of-the-art models. This finding highlights an urgent need for future research to address data con-tamination and redundancy in multi-turn datasets. Tackling these issues is also crucial for reducing evaluation costs and improving the efficiency of the evaluation-driven model development cycle. 4Qwen3-Max-Thinking DeepSeek-V3.2 GLM-5 MiniMax-M2.5 Kimi-K2.5 Discriminability LoCoMo 62.11 59.25 69.26 66.04 42.91 0.15 MathChat 77.43 77.87 67.65 69.58 61.41 0.09 MemoryCode 34.06 25.99 44.91 34.13 31.88 0.18 MT-Bench-101 93.62 91.17 85.47 89.98 90.77 0.03 PersonaMem 65.20 64.52 63.16 42.78 55.35 0.15 MultiIF 68.93 64.23 26.25 31.76 26.94 0.43 SafeDialBench 61.33 53.95 34.02 46.85 49.86 0.18 Average 65.11 61.34 55.30 53.70 51.27 -
+
+Table 2: Performance of LLMs on normalized benchmarks. Results may differ from original papers due to multi-turn formatting, stricter score aggregation, and different evaluation setups.                      
+
+> DeepSeek-V3.2 w. HippoRAG w. A-Mem w. MemoryOS PersonaMem 64.52 64.34 -0.18 74.87 +10.35 58.91 -5.61
+> MathChat 77.87 55.23 -22.64 76.15 -1.72 71.10 -6.77
+> MT-Bench-101 91.17 60.20 -30.97 76.09 -15.08 91.29 +0.12
+> MultiIF 64.23 52.97 -11.29 62.09 -2.14 64.55 +0.32
+
+Table 3: Performance of memory agents on normalized benchmarks. Results may differ from original papers due to multi-turn formatting and stricter score aggregation. The simplified A-mem is evaluated on PersonaMem due to its slow processing of long dialogues. 
+
+4.2 Performance of Memory Agents 
+
+In our agent evaluation, each user-assistant turn is treated as a single memory unit for processing by the memory mechanism. For benchmarks with fewer than 10 turns, the top-3 memories are re-trieved, whereas for longer dialogues exceeding 10 turns, the top-10 memories are retrieved. The re-sults indicate that these three memory mechanisms struggle to maintain consistent effectiveness across different dialogue datasets. Performance degrada-tion is particularly pronounced in short dialogues, highlighting instability during the initial conversa-tion turns in practical usage. This decline may be attributed to potential information loss introduced by memory segmentation and evolution mecha-nisms. MemoryOS, which explicitly distinguishes between short-term and long-term memory, mit-igates this issue and demonstrates comparatively robust performance on MT-Bench-101 and MultiIF. A more detailed analysis of these mechanisms will be provided in future work. 
+
+5 Discussion 
+
+We have released UniDial-EvalKit (UDE), an open-source toolkit for systematic evaluation of large language models in multi-turn interactions. UDE integrates diverse benchmarks spanning memory, understanding, safety, mathematics, and code, pro-viding a unified and modular framework that facili-tates the inclusion of new models or datasets. Looking forward, we plan to extend UDE along several directions: incorporating a User Simulator to generate flexible and realistic dialogues for eval-uation, expanding multi-modal benchmarks beyond text, and performing deeper data analysis and visu-alization to uncover fine-grained model behaviors. We believe that these developments, together with the released code and datasets, will support repro-ducible research and promote systematic improve-ments in LLMs’ conversational abilities across do-mains and modalities. 
+
+References 
+
+Ge Bai, Jie Liu, Xingyuan Bu, Yancheng He, Jia-heng Liu, Zhanhui Zhou, Zhuoran Lin, Wenbo Su, Tiezheng Ge, Bo Zheng, and 1 others. 2024. Mt-bench-101: A fine-grained benchmark for evaluating large language models in multi-turn dialogues. In 
+
+Proceedings of the 62nd Annual Meeting of the As-sociation for Computational Linguistics (Volume 1: Long Papers) , pages 7421–7454. Hongye Cao, Sijia Jing, Yanming Wang, Ziyue Peng, Zhixin Bai, Zhe Cao, Meng Fang, Fan Feng, Jiaheng Liu, Boyan Wang, Tianpei Yang, Jing Huo, Yang Gao, Fanyu Meng, Xi Yang, Chao Deng, and Junlan Feng. 2026. Safedialbench: A fine-grained safety evaluation benchmark for large language models in multi-turn dialogues with diverse jailbreak attacks. In 
+
+The Fourteenth International Conference on Learn-ing Representations .OpenCompass Contributors. 2023. Opencompass: A universal evaluation platform for foundation 
+
+5models. https://github.com/open-compass/ opencompass .Kaustubh Deshpande, Ved Sirdeshmukh, Johannes Bap-tist Mols, Lifeng Jin, Ed-Yeremai Hernandez-Cardona, Dean Lee, Jeremy Kritz, Willow E. Pri-mack, Summer Yue, and Chen Xing. 2025. Multi-Challenge: A realistic multi-turn conversation eval-uation benchmark challenging to frontier LLMs. In 
+
+Findings of the Association for Computational Lin-guistics: ACL 2025 , pages 18632–18702. Haodong Duan, Junming Yang, Yuxuan Qiao, Xinyu Fang, Lin Chen, Yuan Liu, Xiaoyi Dong, Yuhang Zang, Pan Zhang, Jiaqi Wang, and 1 others. 2024. Vlmevalkit: An open-source toolkit for evaluating large multi-modality models. In Proceedings of the 32nd ACM International Conference on Multimedia ,pages 11198–11201. Zhiting Fan, Ruizhe Chen, Tianxiang Hu, and Zuozhu Liu. 2025. FairMT-bench: Benchmarking fairness for multi-turn dialogue in conversational LLMs. In 
+
+The Thirteenth International Conference on Learning Representations .Yun He, Di Jin, Chaoqi Wang, Chloe Bi, Karishma Mandyam, Hejia Zhang, Chen Zhu, Ning Li, Tengyu Xu, Hongjiang Lv, and 1 others. 2024. Multi-if: Benchmarking llms on multi-turn and mul-tilingual instructions following. arXiv preprint arXiv:2410.15553 .Yuanzhe Hu, Yu Wang, and Julian McAuley. 2025. Eval-uating memory in llm agents via incremental multi-turn interactions. arXiv preprint arXiv:2507.05257 .Bowen Jiang, Zhuoqun Hao, Young Min Cho, Bryan Li, Yuan Yuan, Sihao Chen, Lyle Ungar, Camillo Jose Taylor, and Dan Roth. 2025. Know me, respond to me: Benchmarking LLMs for dynamic user profil-ing and personalized responses at scale. In Second Conference on Language Modeling .Cheng Jiayang, Dongyu Ru, Lin Qiu, Yiyang Li, Xuezhi Cao, Yangqiu Song, and Xunliang Cai. 2026. AMem-gym: Interactive memory benchmarking for assis-tants in long-horizon conversations. In The Four-teenth International Conference on Learning Repre-sentations .Bernal Jimenez Gutierrez, Yiheng Shu, Yu Gu, Michi-hiro Yasunaga, and Yu Su. 2024. Hipporag: Neu-robiologically inspired long-term memory for large language models. Advances in Neural Information Processing Systems , 37:59532–59569. Jiazheng Kang, Mingming Ji, Zhe Zhao, and Ting Bai. 2025. Memory os of ai agent. In Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing , pages 25972–25981. Wai-Chung Kwan, Xingshan Zeng, Yuxin Jiang, Yufei Wang, Liangyou Li, Lifeng Shang, Xin Jiang, Qun Liu, and Kam-Fai Wong. 2024. Mt-eval: A multi-turn capabilities evaluation benchmark for large lan-guage models. In Proceedings of the 2024 Confer-ence on Empirical Methods in Natural Language Processing , pages 20153–20177. Dawei Li, Bohan Jiang, Liangjie Huang, Alimohammad Beigi, Chengshuai Zhao, Zhen Tan, Amrita Bhat-tacharjee, Yuxuan Jiang, Canyu Chen, Tianhao Wu, Kai Shu, Lu Cheng, and Huan Liu. 2025. From gen-eration to judgment: Opportunities and challenges of LLM-as-a-judge. In Proceedings of the 2025 Con-ference on Empirical Methods in Natural Language Processing , pages 2757–2791. Association for Com-putational Linguistics. Zhenwen Liang, Dian Yu, Wenhao Yu, Wenlin Yao, Zhi-han Zhang, Xiangliang Zhang, and Dong Yu. 2024. Mathchat: Benchmarking mathematical reasoning and instruction following in multi-turn interactions. 
+
+arXiv preprint arXiv:2405.19444 .Aixin Liu, Aoxue Mei, Bangcai Lin, Bing Xue, Bingx-uan Wang, Bingzheng Xu, Bochao Wu, Bowei Zhang, Chaofan Lin, Chen Dong, and 1 others. 2025. Deepseek-v3. 2: Pushing the frontier of open large language models. arXiv preprint arXiv:2512.02556 .Adyasha Maharana, Dong-Ho Lee, Sergey Tulyakov, Mohit Bansal, Francesco Barbieri, and Yuwei Fang. 2024. Evaluating very long-term conversational memory of llm agents. In Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers) , pages 13851– 13870. Qi Qian, Chengsong Huang, Jingwen Xu, Changze Lv, Muling Wu, Wenhao Liu, Xiaohua Wang, Zhenghua Wang, Zisu Huang, Muzhao Tian, and 1 others. 2026. Benchmarkˆ 2: Systematic evaluation of llm bench-marks. arXiv preprint arXiv:2601.03986 .Nathanaël Carraz Rakotonirina, Mohammed Hamdy, Jon Ander Campos, Lucas Weber, Alberto Testoni, Marzieh Fadaee, Sandro Pezzelle, and Marco Del Tredici. 2025. From tools to teammates: Evalu-ating LLMs in multi-session coding interactions. In 
+
+Proceedings of the 63rd Annual Meeting of the As-sociation for Computational Linguistics (Volume 1: Long Papers) , pages 19609–19642. Kimi Team, Tongtong Bai, Yifan Bai, Yiping Bao, SH Cai, Yuan Cao, Y Charles, HS Che, Cheng Chen, Guanduo Chen, and 1 others. 2026. Kimi k2. 5: Visual agentic intelligence. arXiv preprint arXiv:2602.02276 .Di Wu, Hongwei Wang, Wenhao Yu, Yuwei Zhang, Kai-Wei Chang, and Dong Yu. 2024. Longmemeval: Benchmarking chat assistants on long-term interac-tive memory. Wujiang Xu, Zujie Liang, Kai Mei, Hang Gao, Juntao Tan, and Yongfeng Zhang. 2025. A-mem: Agentic memory for LLM agents. In The Thirty-ninth An-nual Conference on Neural Information Processing Systems .
+
+6Kaiwen Yan, Hongcheng Guo, Xuanqing Shi, Shaosheng Cao, Donglin Di, and Zhoujun Li. 2025. CodeIF: Benchmarking the instruction-following ca-pabilities of large language models for code genera-tion. In Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (Vol-ume 6: Industry Track) , pages 1272–1286. Aohan Zeng, Xin Lv, Zhenyu Hou, Zhengxiao Du, Qinkai Zheng, Bin Chen, Da Yin, Chendi Ge, Chengxing Xie, Cunxiang Wang, and 1 others. 2026. Glm-5: from vibe coding to agentic engineering. 
+
+arXiv preprint arXiv:2602.15763 .Lianmin Zheng, Wei-Lin Chiang, Ying Sheng, Siyuan Zhuang, Zhanghao Wu, Yonghao Zhuang, Zi Lin, Zhuohan Li, Dacheng Li, Eric Xing, Hao Zhang, Joseph E. Gonzalez, and Ion Stoica. 2023. Judging LLM-as-a-judge with MT-bench and chatbot arena. In Thirty-seventh Conference on Neural Information Processing Systems Datasets and Benchmarks Track .
+
+7

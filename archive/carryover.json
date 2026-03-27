@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-03-26T20:14:18.858592+00:00",
-  "updated_date": "20260326",
+  "generated_at": "2026-03-27T19:53:46.505007+00:00",
+  "updated_date": "20260327",
   "carryover_days": 9,
   "items": [
     {
@@ -26,13 +26,13 @@
         "query:MM MAS"
       ],
       "llm_score": 8.0,
-      "llm_evidence_en": "LLM-based multi-agent framework for collaborative urban sensing",
-      "llm_evidence_cn": "基于大模型的多智能体协作城市感知框架",
-      "llm_evidence": "基于大模型的多智能体协作城市感知框架",
-      "canonical_evidence": "基于大模型的多智能体协作城市感知框架",
-      "llm_tldr_en": "Presents MAPUS, an LLM-based multi-agent system for personalized and fair participatory urban sensing.",
-      "llm_tldr_cn": "提出MAPUS，一种基于大模型的多智能体框架，用于实现个性化且公平的城市感知任务。",
-      "llm_tldr": "提出MAPUS，一种基于大模型的多智能体框架，用于实现个性化且公平的城市感知任务。",
+      "llm_evidence_en": "LLM-based multi-agent framework for urban sensing",
+      "llm_evidence_cn": "基于大模型的城市感知多智能体框架",
+      "llm_evidence": "基于大模型的城市感知多智能体框架",
+      "canonical_evidence": "基于大模型的城市感知多智能体框架",
+      "llm_tldr_en": "A multi-agent framework using LLMs for personalized and fair coordination in urban sensing tasks.",
+      "llm_tldr_cn": "一种利用大模型在城市感知任务中进行个性化和公平协调的多智能体框架。",
+      "llm_tldr": "一种利用大模型在城市感知任务中进行个性化和公平协调的多智能体框架。",
       "llm_tags": [
         "query:llm-ma:composite"
       ],
@@ -41,6 +41,220 @@
       "matched_requirement_id": "req-composite-llm-ma",
       "selection_source": "carryover_cache",
       "paper_id": "2603.24014v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.25001v1",
+      "title": "Rethinking Failure Attribution in Multi-Agent Systems: A Multi-Perspective Benchmark and Evaluation",
+      "abstract": "Failure attribution is essential for diagnosing and improving multi-agent systems (MAS), yet existing benchmarks and methods largely assume a single deterministic root cause for each failure. In practice, MAS failures often admit multiple plausible attributions due to complex inter-agent dependencies and ambiguous execution trajectories. We revisit MAS failure attribution from a multi-perspective standpoint and propose multi-perspective failure attribution, a practical paradigm that explicitly accounts for attribution ambiguity. To support this setting, we introduce MP-Bench, the first benchmark designed for multi-perspective failure attribution in MAS, along with a new evaluation protocol tailored to this paradigm. Through extensive experiments, we find that prior conclusions suggesting LLMs struggle with failure attribution are largely driven by limitations in existing benchmark designs. Our results highlight the necessity of multi-perspective benchmarks and evaluation protocols for realistic and reliable MAS debugging.",
+      "authors": [
+        "Yeonjun In",
+        "Mehrab Tanjim",
+        "Jayakumar Subramanian",
+        "Sungchul Kim",
+        "Uttaran Bhattacharya",
+        "Wonjoong Kim",
+        "Sangwu Park",
+        "Somdeb Sarkhel",
+        "Chanyoung Park"
+      ],
+      "primary_category": "cs.AI",
+      "categories": [
+        "cs.AI"
+      ],
+      "published": "2026-03-26T04:02:23+00:00",
+      "link": "https://arxiv.org/pdf/2603.25001v1",
+      "tags": [
+        "keyword:MM MAS",
+        "query:MM MAS"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Benchmark for failure attribution in multi-agent systems",
+      "llm_evidence_cn": "多智能体系统故障归因基准",
+      "llm_evidence": "多智能体系统故障归因基准",
+      "canonical_evidence": "多智能体系统故障归因基准",
+      "llm_tldr_en": "MP-Bench is a benchmark for diagnosing complex failures and inter-agent dependencies in multi-agent systems.",
+      "llm_tldr_cn": "MP-Bench是一个用于诊断多智能体系统中复杂故障和智能体间依赖关系的基准。",
+      "llm_tldr": "MP-Bench是一个用于诊断多智能体系统中复杂故障和智能体间依赖关系的基准。",
+      "llm_tags": [
+        "query:llm-ma:composite"
+      ],
+      "matched_query_tag": "query:llm-ma:composite",
+      "matched_query_text": "Papers central to 大模型多智能体系统相关论文检索, especially work that connects or combines: d; a; m; Frameworks for building multi agent systems with LLMs; Emergent behavior in multi agent large language models; Collaborative problem solving in LLM multi agent environments; Multi agent reinforcement learning with large language models.",
+      "matched_requirement_id": "req-composite-llm-ma",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.25001v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.25423v1",
+      "title": "From Manipulation to Mistrust: Explaining Diverse Micro-Video Misinformation for Robust Debunking in the Wild",
+      "abstract": "The rise of micro-videos has reshaped how misinformation spreads, amplifying its speed, reach, and impact on public trust. Existing benchmarks typically focus on a single deception type, overlooking the diversity of real-world cases that involve multimodal manipulation, AI-generated content, cognitive bias, and out-of-context reuse. Meanwhile, most detection models lack fine-grained attribution, limiting interpretability and practical utility. To address these gaps, we introduce WildFakeBench, a large-scale benchmark of over 10,000 real-world micro-videos covering diverse misinformation types and sources, each annotated with expert-defined attribution labels. Building on this foundation, we develop FakeAgent, a Delphi-inspired multi-agent reasoning framework that integrates multimodal understanding with external evidence for attribution-grounded analysis. FakeAgent jointly analyzes content and retrieved evidence to identify manipulation, recognize cognitive and AI-generated patterns, and detect out-of-context misinformation. Extensive experiments show that FakeAgent consistently outperforms existing MLLMs across all misinformation types, while WildFakeBench provides a realistic and challenging testbed for advancing explainable micro-video misinformation detection. Data and code are available at: https://github.com/Aiyistan/FakeAgent.",
+      "authors": [
+        "Zhi Zeng",
+        "Yifei Yang",
+        "Jiaying Wu",
+        "Xulang Zhang",
+        "Xiangzheng Kong",
+        "Herun Wan",
+        "Zihan Ma",
+        "Minnan Luo"
+      ],
+      "primary_category": "cs.SI",
+      "categories": [
+        "cs.SI",
+        "cs.AI"
+      ],
+      "published": "2026-03-26T13:15:33+00:00",
+      "link": "https://arxiv.org/pdf/2603.25423v1",
+      "tags": [
+        "keyword:MM MAS",
+        "query:MM MAS"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Multimodal multi-agent benchmark for misinformation detection",
+      "llm_evidence_cn": "用于误导信息检测的多模态多智能体基准",
+      "llm_evidence": "用于误导信息检测的多模态多智能体基准",
+      "canonical_evidence": "用于误导信息检测的多模态多智能体基准",
+      "llm_tldr_en": "Introduces WildFakeBench and FakeAgent for multimodal misinformation detection and fine-grained attribution.",
+      "llm_tldr_cn": "引入了WildFakeBench和FakeAgent，用于多模态误导信息的检测与细粒度归因。",
+      "llm_tldr": "引入了WildFakeBench和FakeAgent，用于多模态误导信息的检测与细粒度归因。",
+      "llm_tags": [
+        "query:mm-mas:composite"
+      ],
+      "matched_query_tag": "query:mm-mas:composite",
+      "matched_query_text": "Papers central to 多模态多智能体系统相关论文检索, especially work that connects or combines: l; multimodal; m; multimodal multi agent; recent advances in multimodal multi agent systems; multimodal large language models for multi agent cooperation; benchmarks for evaluating multimodal multi agent performance.",
+      "matched_requirement_id": "req-composite-mm-mas",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.25423v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.24858v1",
+      "title": "Context-Mediated Domain Adaptation in Multi-Agent Sensemaking Systems",
+      "abstract": "Domain experts possess tacit knowledge that they cannot easily articulate through explicit specifications. When experts modify AI-generated artifacts by correcting terminology, restructuring arguments, and adjusting emphasis, these edits reveal domain understanding that remains latent in traditional prompt-based interactions. Current systems treat such modifications as endpoint corrections rather than as implicit specifications that could reshape subsequent reasoning. We propose context-mediated domain adaptation, a paradigm where user modifications to system-generated artifacts serve as implicit domain specification that reshapes LLM-powered multi-agent reasoning behavior. Through our system Seedentia, a web-based multi-agent framework for sense-making, we demonstrate bidirectional semantic links between generated artifacts and system reasoning. Our approach enables specification bootstrapping where vague initial prompts evolve into precise domain specifications through iterative human-AI collaboration, implicit knowledge transfer through reverse-engineered user edits, and in-context learning where agent behavior adapts based on observed correction patterns. We present results from an evaluation with domain experts who generated and modified research questions from academic papers. Our system extracted 46 domain knowledge entries from user modifications, demonstrating the feasibility of capturing implicit expertise through edit patterns, though the limited sample size constrains conclusions about systematic quality improvements.",
+      "authors": [
+        "Anton Wolter",
+        "Leon Haag",
+        "Vaishali Dhanoa",
+        "Niklas Elmqvist"
+      ],
+      "primary_category": "cs.HC",
+      "categories": [
+        "cs.HC",
+        "cs.MA"
+      ],
+      "published": "2026-03-25T22:57:05+00:00",
+      "link": "https://arxiv.org/pdf/2603.24858v1",
+      "tags": [
+        "keyword:MM MAS",
+        "query:MM MAS"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "LLM-powered multi-agent reasoning behavior reshaped by user modifications",
+      "llm_evidence_cn": "用户修改重塑大模型驱动的多智能体推理行为",
+      "llm_evidence": "用户修改重塑大模型驱动的多智能体推理行为",
+      "canonical_evidence": "用户修改重塑大模型驱动的多智能体推理行为",
+      "llm_tldr_en": "Seedentia uses user edits as implicit specifications to adapt LLM-powered multi-agent reasoning behavior.",
+      "llm_tldr_cn": "Seedentia框架通过用户对生成内容的修改来隐式调整大模型多智能体的推理行为。",
+      "llm_tldr": "Seedentia框架通过用户对生成内容的修改来隐式调整大模型多智能体的推理行为。",
+      "llm_tags": [
+        "query:llm-ma:composite"
+      ],
+      "matched_query_tag": "query:llm-ma:composite",
+      "matched_query_text": "Papers central to 大模型多智能体系统相关论文检索, especially work that connects or combines: d; a; m; Frameworks for building multi agent systems with LLMs; Emergent behavior in multi agent large language models; Collaborative problem solving in LLM multi agent environments; Multi agent reinforcement learning with large language models.",
+      "matched_requirement_id": "req-composite-llm-ma",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.24858v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.24533v1",
+      "title": "UI-Voyager: A Self-Evolving GUI Agent Learning via Failed Experience",
+      "abstract": "Autonomous mobile GUI agents have attracted increasing attention along with the advancement of Multimodal Large Language Models (MLLMs). However, existing methods still suffer from inefficient learning from failed trajectories and ambiguous credit assignment under sparse rewards for long-horizon GUI tasks. To that end, we propose UI-Voyager, a novel two-stage self-evolving mobile GUI agent. In the first stage, we employ Rejection Fine-Tuning (RFT), which enables the continuous co-evolution of data and models in a fully autonomous loop. The second stage introduces Group Relative Self-Distillation (GRSD), which identifies critical fork points in group rollouts and constructs dense step-level supervision from successful trajectories to correct failed ones. Extensive experiments on AndroidWorld show that our 4B model achieves an 81.0% Pass@1 success rate, outperforming numerous recent baselines and exceeding human-level performance. Ablation and case studies further verify the effectiveness of GRSD. Our method represents a significant leap toward efficient, self-evolving, and high-performance mobile GUI automation without expensive manual data annotation.",
+      "authors": [
+        "Zichuan Lin",
+        "Feiyu Liu",
+        "Yijun Yang",
+        "Jiafei Lyu",
+        "Yiming Gao",
+        "Yicheng Liu",
+        "Zhicong Lu",
+        "Yangbin Yu",
+        "Mingyu Yang",
+        "Junyou Li",
+        "Deheng Ye",
+        "Jie Jiang"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "cs.AI",
+        "cs.CV"
+      ],
+      "published": "2026-03-25T17:10:29+00:00",
+      "link": "https://arxiv.org/pdf/2603.24533v1",
+      "tags": [
+        "keyword:MM MAS",
+        "query:MM MAS"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Multimodal Large Language Models for autonomous GUI agents",
+      "llm_evidence_cn": "用于自主GUI智能体的多模态大语言模型",
+      "llm_evidence": "用于自主GUI智能体的多模态大语言模型",
+      "canonical_evidence": "用于自主GUI智能体的多模态大语言模型",
+      "llm_tldr_en": "A self-evolving multimodal agent that learns to navigate mobile GUIs through failed experiences.",
+      "llm_tldr_cn": "一种通过失败经验学习移动端GUI操作的自进化多模态智能体。",
+      "llm_tldr": "一种通过失败经验学习移动端GUI操作的自进化多模态智能体。",
+      "llm_tags": [
+        "query:mm-mas:composite"
+      ],
+      "matched_query_tag": "query:mm-mas:composite",
+      "matched_query_text": "Papers central to 多模态多智能体系统相关论文检索, especially work that connects or combines: l; multimodal; m; multimodal multi agent; recent advances in multimodal multi agent systems; multimodal large language models for multi agent cooperation; benchmarks for evaluating multimodal multi agent performance.",
+      "matched_requirement_id": "req-composite-mm-mas",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.24533v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.24931v1",
+      "title": "COIN: Collaborative Interaction-Aware Multi-Agent Reinforcement Learning for Self-Driving Systems",
+      "abstract": "Multi-Agent Self-Driving (MASD) systems provide an effective solution for coordinating autonomous vehicles to reduce congestion and enhance both safety and operational efficiency in future intelligent transportation systems. Multi-Agent Reinforcement Learning (MARL) has emerged as a promising approach for developing advanced end-to-end MASD systems. However, achieving efficient and safe collaboration in dynamic MASD systems remains a significant challenge in dense scenarios with complex agent interactions. To address this challenge, we propose a novel collaborative(CO-) interaction-aware(-IN) MARL framework, named COIN. Specifically, we develop a new counterfactual individual-global twin delayed deep deterministic policy gradient (CIG-TD3) algorithm, crafted in a \"centralized training, decentralized execution\" (CTDE) manner, which aims to jointly optimize the individual objectives (navigation) and the global objectives (collaboration) of agents. We further introduce a dual-level interaction-aware centralized critic architecture that captures both local pairwise interactions and global system-level dependencies, enabling more accurate global value estimation and improved credit assignment for collaborative policy learning. We conduct extensive simulation experiments in dense urban traffic environments, which demonstrate that COIN consistently outperforms other advanced baseline methods in both safety and efficiency across various system sizes. These results highlight its superiority in complex and dynamic MASD scenarios, as further validated through real-world robot demonstrations. Supplementary videos are available at https://marmotlab.github.io/COIN/",
+      "authors": [
+        "Yifeng Zhang",
+        "Jieming Chen",
+        "Tingguang Zhou",
+        "Tanishq Duhan",
+        "Jianghong Dong",
+        "Yuhong Cao",
+        "Guillaume Sartoretti"
+      ],
+      "primary_category": "cs.RO",
+      "categories": [
+        "cs.RO"
+      ],
+      "published": "2026-03-26T01:48:25+00:00",
+      "link": "https://arxiv.org/pdf/2603.24931v1",
+      "tags": [
+        "keyword:MM MAS",
+        "query:MM MAS"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Multi-agent reinforcement learning for autonomous vehicles",
+      "llm_evidence_cn": "用于自动驾驶的多智能体强化学习",
+      "llm_evidence": "用于自动驾驶的多智能体强化学习",
+      "canonical_evidence": "用于自动驾驶的多智能体强化学习",
+      "llm_tldr_en": "Introduces COIN, a MARL framework for collaborative interaction and coordination in self-driving systems.",
+      "llm_tldr_cn": "引入 COIN 框架，利用多智能体强化学习实现自动驾驶系统中的协作交互与协调。",
+      "llm_tldr": "引入 COIN 框架，利用多智能体强化学习实现自动驾驶系统中的协作交互与协调。",
+      "llm_tags": [
+        "query:llm-ma:composite"
+      ],
+      "matched_query_tag": "query:llm-ma:composite",
+      "matched_query_text": "Papers central to 大模型多智能体系统相关论文检索, especially work that connects or combines: d; a; m; Frameworks for building multi agent systems with LLMs; Emergent behavior in multi agent large language models; Collaborative problem solving in LLM multi agent environments; Multi agent reinforcement learning with large language models.",
+      "matched_requirement_id": "req-composite-llm-ma",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.24931v1",
       "carry_days": 1
     }
   ]

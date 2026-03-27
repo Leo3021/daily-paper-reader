@@ -6,73 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-26
-- 运行时间：2026-03-26 20:16:41 UTC
+- 最新运行日期：2026-03-27
+- 运行时间：2026-03-27 19:56:33 UTC
 - 运行状态：成功
 - 本次总论文数：17
 - 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-今日聚焦 17 篇前沿进展，重点攻克医疗长程任务自动化与 3D 虚拟智能体的复杂决策理解。
-满分论文 CarePilot 与 GameplayQA 展现了多智能体在专业医疗实操与多视角视频推理中的巨大潜力。
-建议关注 AI 智能体如何从“纸上谈兵”转向医疗、机器人操控等高复杂度、高专业性的实战场景。
-- 详情：[/202603/26/README](/202603/26/README)
+今日深度复盘 17 篇前沿成果，聚焦多智能体在复杂环境下的协同机制与软件工程 Agent 的异步演进。
+重点推荐 CRAFT 框架对部分信息协同的突破，以及从单工具调用向多工具编排进化的 Agent 架构。
+建议开发者关注 vLLM 推理优化与异步执行策略，以应对日益复杂的长流程智能体任务。
+- 详情：[/202603/27/README](/202603/27/README)
 
 ### 精读区论文标签
-1. [CarePilot: A Multi-Agent Framework for Long-Horizon Computer Task Automation in Healthcare](/202603/26/2603.24157v1-carepilot-a-multi-agent-framework-for-long-horizon-computer-task-automation-in-healthcare)  
+1. [CRAFT: Grounded Multi-Agent Coordination Under Partial Information](/202603/27/2603.25268v1-craft-grounded-multi-agent-coordination-under-partial-information)  
    标签：评分：10.0/10、query:mm-mas
-   evidence：用于长程任务的多模态智能体基准测试
-2. [GameplayQA: A Benchmarking Framework for Decision-Dense POV-Synced Multi-Video Understanding of 3D Virtual Agents](/202603/26/2603.24329v1-gameplayqa-a-benchmarking-framework-for-decision-dense-pov-synced-multi-video-understanding-of-3d-virtual-agents)  
-   标签：评分：10.0/10、query:mm-mas
-   evidence：3D环境下多智能体行为评估基准
-3. [Agentic Automation of BT-RADS Scoring: End-to-End Multi-Agent System for Standardized Brain Tumor Follow-up Assessment](/202603/26/2603.21494v2-agentic-automation-of-bt-rads-scoring-end-to-end-multi-agent-system-for-standardized-brain-tumor-follow-up-assessment)  
-   标签：评分：9.0/10、query:mm-mas
-   evidence：结合大模型和卷积神经网络的多模态医疗评估多智能体系统
-4. [Self-Evolving Multi-Agent Framework for Efficient Decision Making in Real-Time Strategy Scenarios](/202603/26/2603.23875v1-self-evolving-multi-agent-framework-for-efficient-decision-making-in-real-time-strategy-scenarios)  
+   evidence：评估多模态多智能体协作的基准
+2. [Effective Strategies for Asynchronous Software Engineering Agents](/202603/27/2603.21489v1-effective-strategies-for-asynchronous-software-engineering-agents)  
    标签：评分：9.0/10、query:llm-ma
-   evidence：用于大模型决策的自我进化多智能体框架
-5. [Large Language Model Guided Incentive Aware Reward Design for Cooperative Multi-Agent Reinforcement Learning](/202603/26/2603.24324v1-large-language-model-guided-incentive-aware-reward-design-for-cooperative-multi-agent-reinforcement-learning)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：大模型引导的协作式多智能体强化学习奖励设计
-6. [Towards Semantic-based Agent Communication Networks: Vision, Technologies, and Challenges](/202603/26/2603.24328v1-towards-semantic-based-agent-communication-networks-vision-technologies-and-challenges)  
+   evidence：大模型多智能体环境中的协作问题解决
+3. [EVA: Efficient Reinforcement Learning for End-to-End Video Agent](/202603/27/2603.22918v1-eva-efficient-reinforcement-learning-for-end-to-end-video-agent)  
    标签：评分：9.0/10、query:mm-mas
-   evidence：具有多模态感知和复杂任务协调能力的智能体AI
+   evidence：多模态视频智能体的强化学习
+4. [When Is Collective Intelligence a Lottery? Multi-Agent Scaling Laws for Memetic Drift in LLMs](/202603/27/2603.24676v1-when-is-collective-intelligence-a-lottery-multi-agent-scaling-laws-for-memetic-drift-in-llms)  
+   标签：评分：9.0/10、query:llm-ma
+   evidence：大语言模型中的多智能体缩放定律与集体推理
+5. [Belief-Driven Multi-Agent Collaboration via Approximate Perfect Bayesian Equilibrium for Social Simulation](/202603/27/2603.24973v1-belief-driven-multi-agent-collaboration-via-approximate-perfect-bayesian-equilibrium-for-social-simulation)  
+   标签：评分：9.0/10、query:llm-ma
+   evidence：基于大模型的社会模拟多智能体框架
+6. [Colon-Bench: An Agentic Workflow for Scalable Dense Lesion Annotation in Full-Procedure Colonoscopy Videos](/202603/27/2603.25645v1-colon-bench-an-agentic-workflow-for-scalable-dense-lesion-annotation-in-full-procedure-colonoscopy-videos)  
+   标签：评分：9.0/10、query:mm-mas
+   evidence：用于多模态视频标注基准的智能体工作流
 
 ### 速读区论文标签
-1. [Is AI Ready for Multimodal Hate Speech Detection? A Comprehensive Dataset and Benchmark Evaluation](/202603/26/2603.21686v2-is-ai-ready-for-multimodal-hate-speech-detection-a-comprehensive-dataset-and-benchmark-evaluation)  
+1. [The Workload-Router-Pool Architecture for LLM Inference Optimization: A Vision Paper from the vLLM Semantic Router Project](/202603/27/2603.21354v1-the-workload-router-pool-architecture-for-llm-inference-optimization-a-vision-paper-from-the-vllm-semantic-router-project)  
    标签：评分：8.0/10、query:mm-mas
-   evidence：用于多模态表情包数据集的智能体标注框架
-2. [CaP-X: A Framework for Benchmarking and Improving Coding Agents for Robot Manipulation](/202603/26/2603.22435v1-cap-x-a-framework-for-benchmarking-and-improving-coding-agents-for-robot-manipulation)  
-   标签：评分：8.0/10、query:mm-mas
-   evidence：机器人操纵智能体的视觉语言模型基准测试
-3. [Empirical Comparison of Agent Communication Protocols for Task Orchestration](/202603/26/2603.22823v1-empirical-comparison-of-agent-communication-protocols-for-task-orchestration)  
+   evidence：多模态智能体路由与推理优化
+2. [Partial Attention in Deep Reinforcement Learning for Safe Multi-Agent Control](/202603/27/2603.21810v1-partial-attention-in-deep-reinforcement-learning-for-safe-multi-agent-control)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：多智能体任务编排协议基准
-4. [VLGOR: Visual-Language Knowledge Guided Offline Reinforcement Learning for Generalizable Agents](/202603/26/2603.22892v1-vlgor-visual-language-knowledge-guided-offline-reinforcement-learning-for-generalizable-agents)  
-   标签：评分：8.0/10、query:mm-mas
-   evidence：整合视觉和语言知识以进行离线强化学习
-5. [Beyond Forced Modality Balance: Intrinsic Information Budgets for Multimodal Learning](/202603/26/2603.17347v1-beyond-forced-modality-balance-intrinsic-information-budgets-for-multimodal-learning)  
+   evidence：用于安全控制的多智能体强化学习
+3. [The Evolution of Tool Use in LLM Agents: From Single-Tool Call to Multi-Tool Orchestration](/202603/27/2603.22862v1-the-evolution-of-tool-use-in-llm-agents-from-single-tool-call-to-multi-tool-orchestration)  
+   标签：评分：8.0/10、query:llm-ma
+   evidence：大语言模型多工具智能体与编排综述
+4. [Efficient Benchmarking of AI Agents](/202603/27/2603.23749v1-efficient-benchmarking-of-ai-agents)  
+   标签：评分：8.0/10、query:llm-ma
+   evidence：AI智能体架构的基准测试与评估
+5. [RoboAlign: Learning Test-Time Reasoning for Language-Action Alignment in Vision-Language-Action Models](/202603/27/2603.21341v1-roboalign-learning-test-time-reasoning-for-language-action-alignment-in-vision-language-action-models)  
    标签：评分：7.0/10、query:mm-mas
-   evidence：用于模态平衡的多模态学习框架
-6. [Governance-Aware Vector Subscriptions for Multi-Agent Knowledge Ecosystems](/202603/26/2603.20833v1-governance-aware-vector-subscriptions-for-multi-agent-knowledge-ecosystems)  
+   evidence：提升多模态大语言模型的具身推理能力
+6. [Demystifying Reinforcement Learning for Long-Horizon Tool-Using Agents: A Comprehensive Recipe](/202603/27/2603.21972v1-demystifying-reinforcement-learning-for-long-horizon-tool-using-agents-a-comprehensive-recipe)  
    标签：评分：7.0/10、query:llm-ma
-   evidence：多智能体生态系统中的治理与知识监控
-7. [User Preference Modeling for Conversational LLM Agents: Weak Rewards from Retrieval-Augmented Interaction](/202603/26/2603.20939v1-user-preference-modeling-for-conversational-llm-agents-weak-rewards-from-retrieval-augmented-interaction)  
+   evidence：自主智能体的强化学习与工具编排
+7. [Reasoner-Executor-Synthesizer: Scalable Agentic Architecture with Static O(1) Context Window](/202603/27/2603.22367v1-reasoner-executor-synthesizer-scalable-agentic-architecture-with-static-o1-context-window)  
    标签：评分：7.0/10、query:llm-ma
-   evidence：对话式大模型智能体的多会话协作基准
-8. [When Models Judge Themselves: Unsupervised Self-Evolution for Multimodal Reasoning](/202603/26/2603.21289v2-when-models-judge-themselves-unsupervised-self-evolution-for-multimodal-reasoning)  
+   evidence：大语言模型自主智能体的可扩展架构
+8. [Task-Aware Positioning for Improvisational Tasks in Mobile Construction Robots via an AI Agent with Multi-LMM Modules](/202603/27/2603.22903v1-task-aware-positioning-for-improvisational-tasks-in-mobile-construction-robots-via-an-ai-agent-with-multi-lmm-modules)  
    标签：评分：7.0/10、query:mm-mas
-   evidence：多模态大模型推理的无监督自我进化
-9. [Coding Agents are Effective Long-Context Processors](/202603/26/2603.20432v1-coding-agents-are-effective-long-context-processors)  
-   标签：评分：6.0/10、query:llm-ma
-   evidence：大模型环境中用于长文本处理的代码智能体
-10. [CoVFT: Context-aware Visual Fine-tuning for Multimodal Large Language Models](/202603/26/2603.21077v1-covft-context-aware-visual-fine-tuning-for-multimodal-large-language-models)  
+   evidence：使用多个 LMM 模块进行任务解析和导航的智能体
+9. [SSAM: Singular Subspace Alignment for Merging Multimodal Large Language Models](/202603/27/2603.21584v1-ssam-singular-subspace-alignment-for-merging-multimodal-large-language-models)  
    标签：评分：6.0/10、query:mm-mas
-   evidence：多模态大语言模型的视觉微调
-11. [Future-Interactions-Aware Trajectory Prediction via Braid Theory](/202603/26/2603.22035v1-future-interactions-aware-trajectory-prediction-via-braid-theory)  
-   标签：评分：6.0/10、query:llm-ma
-   evidence：多智能体轨迹预测与协作建模
+   evidence：跨不同模态合并多模态大语言模型
+10. [PhotoAgent: A Robotic Photographer with Spatial and Aesthetic Understanding](/202603/27/2603.22796v1-photoagent-a-robotic-photographer-with-spatial-and-aesthetic-understanding)  
+   标签：评分：6.0/10、query:mm-mas
+   evidence：集成 LMM 推理与视觉反思的具身智能体
+11. [UniDial-EvalKit: A Unified Toolkit for Evaluating Multi-Faceted Conversational Abilities](/202603/27/2603.23160v1-unidial-evalkit-a-unified-toolkit-for-evaluating-multi-faceted-conversational-abilities)  
+   标签：评分：6.0/10、query:mm-mas
+   evidence：评估交互式AI系统的统一工具包
 
 
 <div class="dpr-home-promo-card">
