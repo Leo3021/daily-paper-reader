@@ -6,73 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-27
-- 运行时间：2026-03-27 19:56:33 UTC
+- 最新运行日期：2026-03-28
+- 运行时间：2026-03-28 19:40:41 UTC
 - 运行状态：成功
 - 本次总论文数：17
 - 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-今日深度复盘 17 篇前沿成果，聚焦多智能体在复杂环境下的协同机制与软件工程 Agent 的异步演进。
-重点推荐 CRAFT 框架对部分信息协同的突破，以及从单工具调用向多工具编排进化的 Agent 架构。
-建议开发者关注 vLLM 推理优化与异步执行策略，以应对日益复杂的长流程智能体任务。
-- 详情：[/202603/27/README](/202603/27/README)
+今日精选 17 篇论文，深度解析心脏诊疗多模态模型 MARCUS 与能从失败中进化的 GUI 智能体 UI-Voyager。
+核心突破在于 AI 已能实现专业的医疗辅助决策，并证明了智能体通过复盘失败经验可显著提升复杂界面的交互成功率。
+建议关注智能体如何将操作轨迹蒸馏为通用技能，这是未来实现高阶任务自动化的关键路径。
+- 详情：[/202603/28/README](/202603/28/README)
 
 ### 精读区论文标签
-1. [CRAFT: Grounded Multi-Agent Coordination Under Partial Information](/202603/27/2603.25268v1-craft-grounded-multi-agent-coordination-under-partial-information)  
-   标签：评分：10.0/10、query:mm-mas
-   evidence：评估多模态多智能体协作的基准
-2. [Effective Strategies for Asynchronous Software Engineering Agents](/202603/27/2603.21489v1-effective-strategies-for-asynchronous-software-engineering-agents)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：大模型多智能体环境中的协作问题解决
-3. [EVA: Efficient Reinforcement Learning for End-to-End Video Agent](/202603/27/2603.22918v1-eva-efficient-reinforcement-learning-for-end-to-end-video-agent)  
+1. [MARCUS: An agentic, multimodal vision-language model for cardiac diagnosis and management](/202603/28/2603.22179v1-marcus-an-agentic-multimodal-vision-language-model-for-cardiac-diagnosis-and-management)  
    标签：评分：9.0/10、query:mm-mas
-   evidence：多模态视频智能体的强化学习
-4. [When Is Collective Intelligence a Lottery? Multi-Agent Scaling Laws for Memetic Drift in LLMs](/202603/27/2603.24676v1-when-is-collective-intelligence-a-lottery-multi-agent-scaling-laws-for-memetic-drift-in-llms)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：大语言模型中的多智能体缩放定律与集体推理
-5. [Belief-Driven Multi-Agent Collaboration via Approximate Perfect Bayesian Equilibrium for Social Simulation](/202603/27/2603.24973v1-belief-driven-multi-agent-collaboration-via-approximate-perfect-bayesian-equilibrium-for-social-simulation)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：基于大模型的社会模拟多智能体框架
-6. [Colon-Bench: An Agentic Workflow for Scalable Dense Lesion Annotation in Full-Procedure Colonoscopy Videos](/202603/27/2603.25645v1-colon-bench-an-agentic-workflow-for-scalable-dense-lesion-annotation-in-full-procedure-colonoscopy-videos)  
+   evidence：具有分层架构的多模态视觉语言智能体系统
+2. [UI-Voyager: A Self-Evolving GUI Agent Learning via Failed Experience](/202603/28/2603.24533v1-ui-voyager-a-self-evolving-gui-agent-learning-via-failed-experience)  
    标签：评分：9.0/10、query:mm-mas
-   evidence：用于多模态视频标注基准的智能体工作流
+   evidence：用于GUI智能体学习的多模态大语言模型
+3. [Rethinking Failure Attribution in Multi-Agent Systems: A Multi-Perspective Benchmark and Evaluation](/202603/28/2603.25001v1-rethinking-failure-attribution-in-multi-agent-systems-a-multi-perspective-benchmark-and-evaluation)  
+   标签：评分：9.0/10、query:llm-ma
+   evidence：多智能体系统故障归因基准
+4. [Language-Grounded Multi-Agent Planning for Personalized and Fair Participatory Urban Sensing](/202603/28/2603.24014v1-language-grounded-multi-agent-planning-for-personalized-and-fair-participatory-urban-sensing)  
+   标签：评分：8.0/10、query:llm-ma
+   evidence：基于LLM的协作规划多智能体框架
+5. [Context-Mediated Domain Adaptation in Multi-Agent Sensemaking Systems](/202603/28/2603.24858v1-context-mediated-domain-adaptation-in-multi-agent-sensemaking-systems)  
+   标签：评分：8.0/10、query:llm-ma
+   evidence：基于大语言模型的多智能体感知框架
+6. [From Manipulation to Mistrust: Explaining Diverse Micro-Video Misinformation for Robust Debunking in the Wild](/202603/28/2603.25423v1-from-manipulation-to-mistrust-explaining-diverse-micro-video-misinformation-for-robust-debunking-in-the-wild)  
+   标签：评分：8.0/10、query:mm-mas
+   evidence：用于误导信息检测的多模态多智能体基准
 
 ### 速读区论文标签
-1. [The Workload-Router-Pool Architecture for LLM Inference Optimization: A Vision Paper from the vLLM Semantic Router Project](/202603/27/2603.21354v1-the-workload-router-pool-architecture-for-llm-inference-optimization-a-vision-paper-from-the-vllm-semantic-router-project)  
-   标签：评分：8.0/10、query:mm-mas
-   evidence：多模态智能体路由与推理优化
-2. [Partial Attention in Deep Reinforcement Learning for Safe Multi-Agent Control](/202603/27/2603.21810v1-partial-attention-in-deep-reinforcement-learning-for-safe-multi-agent-control)  
+1. [COIN: Collaborative Interaction-Aware Multi-Agent Reinforcement Learning for Self-Driving Systems](/202603/28/2603.24931v1-coin-collaborative-interaction-aware-multi-agent-reinforcement-learning-for-self-driving-systems)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：用于安全控制的多智能体强化学习
-3. [The Evolution of Tool Use in LLM Agents: From Single-Tool Call to Multi-Tool Orchestration](/202603/27/2603.22862v1-the-evolution-of-tool-use-in-llm-agents-from-single-tool-call-to-multi-tool-orchestration)  
+   evidence：用于协作系统的多智能体强化学习
+2. [CTS-PLL: A Robust and Anytime Framework for Collaborative Task Sequencing and Multi-Agent Path Finding](/202603/28/2603.25121v1-cts-pll-a-robust-and-anytime-framework-for-collaborative-task-sequencing-and-multi-agent-path-finding)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：大语言模型多工具智能体与编排综述
-4. [Efficient Benchmarking of AI Agents](/202603/27/2603.23749v1-efficient-benchmarking-of-ai-agents)  
+   evidence：协作任务排序与多智能体路径规划
+3. [Trace2Skill: Distill Trajectory-Local Lessons into Transferable Agent Skills](/202603/28/2603.25158v1-trace2skill-distill-trajectory-local-lessons-into-transferable-agent-skills)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：AI智能体架构的基准测试与评估
-5. [RoboAlign: Learning Test-Time Reasoning for Language-Action Alignment in Vision-Language-Action Models](/202603/27/2603.21341v1-roboalign-learning-test-time-reasoning-for-language-action-alignment-in-vision-language-action-models)  
-   标签：评分：7.0/10、query:mm-mas
-   evidence：提升多模态大语言模型的具身推理能力
-6. [Demystifying Reinforcement Learning for Long-Horizon Tool-Using Agents: A Comprehensive Recipe](/202603/27/2603.21972v1-demystifying-reinforcement-learning-for-long-horizon-tool-using-agents-a-comprehensive-recipe)  
+   evidence：并行子智能体集群分析执行过程并提取可迁移技能
+4. [Can AI Agents Answer Your Data Questions? A Benchmark for Data Agents](/202603/28/2603.20576v1-can-ai-agents-answer-your-data-questions-a-benchmark-for-data-agents)  
    标签：评分：7.0/10、query:llm-ma
-   evidence：自主智能体的强化学习与工具编排
-7. [Reasoner-Executor-Synthesizer: Scalable Agentic Architecture with Static O(1) Context Window](/202603/27/2603.22367v1-reasoner-executor-synthesizer-scalable-agentic-architecture-with-static-o1-context-window)  
+   evidence：评估多数据库系统中数据智能体的基准
+5. [SoK: The Attack Surface of Agentic AI -- Tools, and Autonomy](/202603/28/2603.22928v1-sok-the-attack-surface-of-agentic-ai----tools-and-autonomy)  
    标签：评分：7.0/10、query:llm-ma
-   evidence：大语言模型自主智能体的可扩展架构
-8. [Task-Aware Positioning for Improvisational Tasks in Mobile Construction Robots via an AI Agent with Multi-LMM Modules](/202603/27/2603.22903v1-task-aware-positioning-for-improvisational-tasks-in-mobile-construction-robots-via-an-ai-agent-with-multi-lmm-modules)  
+   evidence：智能体AI中多智能体涌现威胁的安全风险
+6. [PERMA: Benchmarking Personalized Memory Agents via Event-Driven Preference and Realistic Task Environments](/202603/28/2603.23231v1-perma-benchmarking-personalized-memory-agents-via-event-driven-preference-and-realistic-task-environments)  
+   标签：评分：7.0/10、query:llm-ma
+   evidence：使用大语言模型评估个性化记忆智能体
+7. [Environment Maps: Structured Environmental Representations for Long-Horizon Agents](/202603/28/2603.23610v2-environment-maps-structured-environmental-representations-for-long-horizon-agents)  
    标签：评分：7.0/10、query:mm-mas
-   evidence：使用多个 LMM 模块进行任务解析和导航的智能体
-9. [SSAM: Singular Subspace Alignment for Merging Multimodal Large Language Models](/202603/27/2603.21584v1-ssam-singular-subspace-alignment-for-merging-multimodal-large-language-models)  
-   标签：评分：6.0/10、query:mm-mas
-   evidence：跨不同模态合并多模态大语言模型
-10. [PhotoAgent: A Robotic Photographer with Spatial and Aesthetic Understanding](/202603/27/2603.22796v1-photoagent-a-robotic-photographer-with-spatial-and-aesthetic-understanding)  
-   标签：评分：6.0/10、query:mm-mas
-   evidence：集成 LMM 推理与视觉反思的具身智能体
-11. [UniDial-EvalKit: A Unified Toolkit for Evaluating Multi-Faceted Conversational Abilities](/202603/27/2603.23160v1-unidial-evalkit-a-unified-toolkit-for-evaluating-multi-faceted-conversational-abilities)  
-   标签：评分：6.0/10、query:mm-mas
-   evidence：评估交互式AI系统的统一工具包
+   evidence：将屏幕录像等异构证据整合到智能体的结构化图中
+8. [VehicleMemBench: An Executable Benchmark for Multi-User Long-Term Memory in In-Vehicle Agents](/202603/28/2603.23840v1-vehiclemembench-an-executable-benchmark-for-multi-user-long-term-memory-in-in-vehicle-agents)  
+   标签：评分：7.0/10、query:llm-ma
+   evidence：工具交互智能体环境中的多用户长期记忆基准
+9. [From Pixels to Digital Agents: An Empirical Study on the Taxonomy and Technological Trends of Reinforcement Learning Environments](/202603/28/2603.23964v1-from-pixels-to-digital-agents-an-empirical-study-on-the-taxonomy-and-technological-trends-of-reinforcement-learning-environments)  
+   标签：评分：7.0/10、query:llm-ma
+   evidence：语言驱动基础智能体强化学习环境的分类研究
+10. [A Theory of LLM Information Susceptibility](/202603/28/2603.23626v1-a-theory-of-llm-information-susceptibility)  
+   标签：评分：6.0/10、query:llm-ma
+   evidence：智能体系统中大语言模型敏感性理论
+11. [Multi-LLM Query Optimization](/202603/28/2603.24617v1-multi-llm-query-optimization)  
+   标签：评分：6.0/10、query:llm-ma
+   evidence：跨多个大语言模型的查询优化
 
 
 <div class="dpr-home-promo-card">
