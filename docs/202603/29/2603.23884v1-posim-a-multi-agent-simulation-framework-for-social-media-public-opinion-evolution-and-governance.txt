@@ -1,0 +1,1172 @@
+Title: POSIM: A Multi-Agent Simulation Framework for Social Media Public Opinion Evolution and Governance
+
+URL Source: https://arxiv.org/pdf/2603.23884v1
+
+Published Time: Thu, 26 Mar 2026 00:30:08 GMT
+
+Number of Pages: 23
+
+Markdown Content:
+# POSIM: A Multi-Agent Simulation Framework for Social Media Public Opinion Evolution and Governance 
+
+Yongmao Zhang Kai Qiao Zhengyan Wang Ningning Liang Dekui Ma Wenyao Sun Jian Chen Bin Yan *
+
+Henan Key Laboratory of Imaging and Intelligent Processing, Information Engineering University, Zhengzhou 450001, PR China 
+
+> *
+
+Corresponding author. 
+
+Abstract. Modeling social media public opinion evolution is essential for governance decision-making. Traditional epidemic models and rule-based agent-based models (ABMs) fail to capture the cognitive processes and adaptive behaviors of real users. Recent large language model (LLM)-based social simulations can reproduce group-level phenomena like polarization and confor-mity, yet remain unable to recreate the irrational interactions and multi-phase dynamics of real public opinion events. We present POSIM ( Public Opinion Sim ulator), a multi-agent simulation framework for social media public opinion evolution and governance. POSIM integrates LLM-driven agents with a Belief–Desire–Intention (BDI) cognitive architecture that accounts for irrational fac-tors, places them in a virtual social media environment with social networks and recommendation mechanisms, and drives temporal dynamics through a Hawkes point process engine that captures the co-evolution of agents and the environment across event phases. To validate the framework, we collect real-world public opinion datasets from the Weibo platform covering the full interaction chain of users. Experiments show that POSIM successfully reproduces key characteristics of public opinion evolution from individual mechanisms to collective phenomena, and its effectiveness is further supported by multiple statistical metrics. Building on POSIM, governance-oriented guidance and intervention experiments uncover a counterintuitive empathy paradox : empathetic guidance deepens negative sentiment instead of easing it under certain conditions, offering new insights for governance strategy design. These results demonstrate that the proposed framework can fully serve as a computational experimentation platform for proactive strategy evaluation and evidence-based governance. All source code is available at https://github.com/DeepCogLab/posim/ .
+
+Keywords: Multi-agent systems · Public opinion simulation · Large language models · Agent-based modeling · Hawkes point process 
+
+# 1 Introduction 
+
+Social media has become the primary arena where public opin-ion forms, spreads, and evolves. A single breaking event can trigger mass participation within hours, accompanied by col-lective emotional arousal [González-Bailón et al., 2010] and information cascades [Goel et al., 2012]. Understanding and anticipating such dynamics is therefore critical for social gov-ernance [Wu et al., 2025]. Yet real-world social experiments are constrained by ethical concerns, irreproducibility, and un-controllable variables, making it impractical to repeatedly test mechanisms and intervention strategies in live settings. Com-putational simulation has thus become a key methodology for studying public opinion evolution and informing governance decisions [Bonabeau, 2002]. Building a simulation that faithfully recreates real public opinion dynamics poses several challenges. Social media users do not make purely rational decisions; their behaviors are shaped by the interplay of emotions, beliefs, and cogni-tive biases [Buckels et al., 2014], and a credible simulation must capture this cognitive complexity. Moreover, public opinion evolution shows pronounced temporal dynamics, as events can rapidly shift through outbreak, decay, and resur-gence phases [Zhou et al., 2024], placing strict demands on temporal modeling [Zhao et al., 2015]. Beyond behavioral fidelity, any simulation must address the question of why its results should be trusted: it should not only match real data at the aggregate level but also demonstrate that its un-derlying mechanisms are plausible and interpretable [McCul-loch et al., 2022]. Traditional epidemic models [Daley and Kendall, 1965] and threshold cascade models [Granovetter, 1978] reduce individuals to a few discrete states, unable to express rich semantics, interaction strategies, or user hetero-geneity. Agent-based modeling (ABM) offers a bottom-up paradigm [Bonabeau, 2002] often combined with opinion dy-namics rules [Castellano et al., 2009], yet its rule-driven agents 1
+
+> arXiv:2603.23884v1 [cs.GL] 25 Mar 2026
+
+still cannot capture the cognitive processes, nuanced interac-tions, and environment coupling of real users. Large language model (LLM)-driven social simulation of-fers a promising alternative [Wang et al., 2024]. Genera-tive Agent-Based Modeling (GABM) [Park et al., 2023] has shown that LLM-powered agents can produce human-like so-cial behaviors and give rise to emergent phenomena such as polarization, conformity, and echo chambers [Gao et al., 2023, Chuang et al., 2024]. However, existing GABM frameworks face three key limitations when applied to real public opinion evolution. First, most treat the LLM as an end-to-end behavior generator without explicitly modeling the cognitive pipeline from belief formation through motivation to decision-making, leaving them unable to represent how irrational factors such as emotional arousal and cognitive biases shape user deci-sions. Second, existing work largely targets abstract opinion scenarios and has not effectively captured the co-evolutionary dynamics linking environmental triggers, user responses, and propagation amplification. Third, validation efforts lack sys-tematic rigor, leaving the credibility of simulation outputs poorly established. A framework that targets real public opin-ion evolution while ensuring result credibility therefore re-mains absent. To address these limitations, we propose POSIM ( Public 
+
+Opinion Sim ulator), a multi-agent simulation framework for social media public opinion evolution and governance. POSIM constructs LLM-powered agents grounded in Belief– Desire–Intention (BDI) cognitive theory [Bratman, 1987, Rao and Georgeff, 1995], incorporating emotional arousal and cog-nitive biases into the BDI architecture to equip agents with explicit cognitive states and human-like irrational behaviors. These agents operate within a virtual social media environ-ment with social networks and recommendation mechanisms, supporting realistic opinion behaviors such as browsing, ex-pression, and reposting. A temporal dynamics engine based on the Hawkes self-exciting point process [Hawkes, 1971] uni-fies exogenous event shocks and endogenous user interactions to drive multi-phase opinion evolution. Validating the effectiveness of a public opinion simula-tion system requires more than statistical consistency with real data; the internal mechanisms must also be plausible and interpretable, avoiding what we term superficial agree-ment , where outputs match but processes remain opaque. To credibly validate POSIM’s simulation fidelity, we establish a three-tier progressive validation framework spanning mech-anism, phenomenon, and statistics, respectively addressing: (1) Are the internal mechanisms sound? (2) Are the emergent group phenomena plausible? (3) Are the statistical outputs reliable? We collect three real-world public opinion datasets from the Weibo platform covering the full interaction chain of original posts, reposts, and comments, and conduct sys-tematic experiments. Results confirm that POSIM exhibits sound agent behavioral logic at the mechanism tier, repro-duces group phenomena consistent with social science theory at the phenomenon tier, and achieves close alignment with real opinion data at the statistical tier. Moreover, governance-oriented experiments reveal that seemingly positive strategies can produce counterproductive effects in complex opinion interactions, providing important empirical evidence for gov-ernance strategy design. The main contributions are: 
+
+• We propose POSIM, a multi-agent simulation framework for social media public opinion evolution and governance, advancing the modeling objective from abstract opinion scenarios to credible simulation of real public opinion events. 
+
+• We collect three real-world public opinion datasets from Weibo spanning the full interaction chain, and estab-lish a mechanism–phenomenon–statistics three-tier pro-gressive validation framework that calibrates from agent decision quality through emergent group phenomena to multi-dimensional statistical metrics, providing a repro-ducible credibility evaluation paradigm for LLM-driven social simulation. 
+
+• Governance-oriented experiments on POSIM reveal an 
+
+empathy paradox : empathetic guidance intended to ease group antagonism instead amplifies negative sentiment in complex multi-agent interactions, providing critical em-pirical evidence and risk insights for cognitive-level gov-ernance strategy design. 
+
+# 2 Related Work 
+
+2.1 Public Opinion Propagation Modeling 
+
+Public opinion propagation modeling studies how information spreads and evolves in social networks. Early work borrowed from epidemiology: the stochastic rumor model [Daley and Kendall, 1965] classifies individuals into ignorant, spreader, and stifler states. Later studies incorporated complex net-work topologies [Watts and Strogatz, 1998, Barabási and Albert, 1999] and multi-stage transition mechanisms [Jiang et al., 2020] to examine how network structure shapes cas-cade scale, and threshold cascade models [Granovetter, 1978, Watts, 2002] explain collective behavior as emerging from in-dividual decision thresholds. System dynamics methods take a different approach, modeling causal relationships among ac-tors through stock-flow diagrams and feedback loops [Chen et al., 2019, Liu et al., 2024, Cheng et al., 2026]. These meth-ods capture macroscopic opinion trajectories but treat popu-lations as continuous aggregate flows, overlooking individual heterogeneity. Self-exciting point processes [Hawkes, 1971] and their variants offer continuous-time tools for modeling so-cial media cascades and have been widely used for popularity prediction, yet they too focus on population-level statistical regularities rather than individual cognition. In summary, these approaches each have strengths in modeling collective 2trends, but none explicitly addresses individual cognitive pro-cesses, motivating the shift toward agent-based paradigms. 
+
+2.2 Agent-Based Modeling and Opinion Dy-namics 
+
+Agent-based modeling (ABM) provides a bottom-up paradigm for studying social systems: heterogeneous individ-uals follow local behavioral rules, and collective phenomena emerge from their interactions [Bonabeau, 2002]. Parameter calibration methods [McCulloch et al., 2022] further enable systematic validation. ABM has produced a rich body of work in opinion dynamics. The DeGroot model [DeGroot, 1974] describes consensus through weighted averaging; the Deffuant–Weisbuch model [Deffuant et al., 2000] introduces pairwise bounded interactions; and the Hegselmann–Krause model [Hegselmann and Krause, 2002] explains group frag-mentation through selective exposure. Together, these mod-els reproduce phase transitions from consensus to polariza-tion [Castellano et al., 2009, Bernardo et al., 2024]. More re-cent work has built multi-type opinion simulation systems on social networks [Chen et al., 2025, Wu and Liu, 2023, Li et al., 2026] to study polarization and echo chambers [Liu and Wen, 2024]. However, traditional ABM agents rely on predefined numerical rules: opinions are reduced to low-dimensional continuous variables and interactions are limited to weighted averages or threshold functions. Such rule-driven agents can-not perceive the rich information in real opinion environments, nor can they simulate cognitive processes such as emotional evolution, motivational reasoning, and autonomous decision-making. 
+
+2.3 LLM-Driven Social Simulation 
+
+Large language models (LLMs), with their capacity for se-mantic understanding, contextual reasoning, and autonomous decision-making, have opened new possibilities for social sim-ulation beyond rule-based paradigms [Wang et al., 2024, Wu et al., 2026]. Generative Agents [Park et al., 2023] first demonstrated that LLM-powered agents can autonomously plan and engage in social interactions, establishing the GABM paradigm. GABMs have since been applied to governance-related domains [Zhang et al., 2026], though a reliable system for simulating complex public opinion evolution remains ab-sent. Research on LLM-driven opinion simulation has expanded rapidly. S3 [Gao et al., 2023] was among the first to build an LLM-based information propagation framework; GA-S3 [Zhang et al., 2025c] introduced group agents for multi-layered network interactions but lacked deep bottom-up emergence; SPARK [Zhang et al., 2025a] and LLM-AIDSim [Zhang et al., 2025b, Hu et al., 2024] explored stance evolution and information diffusion patterns; FDE-LLM [Yao et al., 2025] fused dynamical equations with language models 
+
+Table 1: Comparison of POSIM with representative public opinion simulation frameworks.                                                                              
+
+> Platform Explicit Cognitive Modeling Validation Ladder Real-Case Intervention LLM-Based Multi-Type Agents Temporal Precision Modular Design MPS
+> S3 [Gao et al., 2023] ××✓✓××⋆⋆⋆ ⋆⋆⋆
+> HiSim [Mou et al., 2024] ×××✓××⋆⋆ ⋆⋆
+> GA-S3 [Zhang et al., 2025c] ×××✓×✓⋆⋆⋆ ⋆⋆
+> SPARK [Zhang et al., 2025a] ××✓××✓⋆⋆ ⋆⋆
+> FDE-LLM [Yao et al., 2025] ×××✓××⋆⋆ ⋆⋆
+> TrendSim [Zhang et al., 2025d] ×✓×××✓⋆⋆⋆⋆ ⋆⋆⋆
+> OASIS [Yang et al., 2025] ××✓✓××⋆⋆⋆⋆ ⋆⋆⋆⋆
+> LMAgent [Liu et al., 2026] ×××✓×✓⋆⋆ ⋆⋆
+> POSIM (Ours) ✓✓✓✓✓✓⋆⋆⋆⋆⋆ ⋆⋆⋆⋆⋆
+> Note :⋆denotes capability level (1–5); M, P, and S denote mechanism, phenomenon, and statistical validation; real-case intervention denotes governance-oriented intervention experiments conducted on real public opinion events, beyond merely using real data for validation.
+
+to impose mathematical constraints on opinion trajectories. On the scalability front, OASIS [Yang et al., 2025] scaled to the million-node level; LMAgent [Liu et al., 2026] built a multi-modal social simulation system with limited cross-scenario transferability; HiSim [Mou et al., 2024] adopted a hybrid strategy balancing efficiency and fidelity but could not reproduce multi-phase hotness evolution; TrendSim [Zhang et al., 2025d] simulated trending topic interactions but lacked systematic validation. As summarized in Table 1, exist-ing frameworks generally treat LLMs as end-to-end behav-ior generators without explicitly modeling the cognitive path-way from belief formation through motivational reasoning to behavioral output. They also lack integration of environ-mental dynamics and temporal precision, and their validation remains fragmented, making them insufficient for credible governance-oriented evaluation. To address these gaps, POSIM introduces a systematic de-sign spanning agents, environment, and strategy evaluation, providing an integrated solution for credible public opinion simulation and governance decision support. 
+
+# 3 Method 
+
+3.1 Framework Overview 
+
+As shown in Figure 1, POSIM comprises three core compo-nents addressing who participates, in what environment they interact, and how simulation supports decision-making. Af-ter initialization (Figure 1(1)), agents and environment form a continuous interaction loop that strategy evaluation leverages for counterfactual governance assessment. At the agent level (Figure 1(2); Section 3.2), the Social-BDI architecture decomposes cognition into three LLM-powered subsystems: belief update maintains four hierarchical cogni-tive layers (role identity, psychological cognition, event opin-ion, and emotional arousal); desire generation maps beliefs to behavioral motivations; and intention planning translates mo-tivations into concrete actions via multi-level chain-of-thought reasoning. Four agent types (ordinary users, opinion leaders, 3Evaluator 
+
+> Trend
+> Curve
+> Emotional
+> Proportion
+> Opinion
+> Distribution
+> Topic
+> Shift
+> LLM API Pool
+> Agent Init
+> Ordinary Users
+> Opinion Leaders
+> Media Accounts
+> Governments
+> Users Data Pool
+
+Perception Module 
+
+Brief 
+
+System 
+
+Role ldentity Belief 
+
+Psychological Belief 
+
+Event Opinion Belief 
+
+Emotion Belief 
+
+Stable 
+
+Desire 
+
+System 
+
+Express Opinion 
+
+Seek Recognition 
+
+Spread Information 
+
+Intent 
+
+System 
+
+Step 1: 
+
+Action Type 
+
+Step 2: 
+
+Expression 
+
+Stategy 
+
+Emotion/Stance/ 
+
+Style/Narrative 
+
+Step 3: 
+
+Content 
+
+Generate  
+
+> #good day# Today ，I feel
+> very nice ，so I decide ……
+
+Memory 
+
+Bank 
+
+> Public Opinion
+> Awareness
+> Initiation
+> Content Pool
+
+Intervenor 
+
+……    
+
+> lEvent Que ue
+> lPlatform Policy
+> lNode Control
+
+Simulator 
+
+> S1
+> S2
+> S3
+> S4
+> S4
+> Checkpoint
+> Callback
+
+Activated 
+
+Unactivated             
+
+> Time (minutes ）
+> 𝐀 𝐀 =𝐀 +
+> 𝐀 𝐀 <𝐀
+> 𝐀 𝐀 −𝐀 𝐀
+> 𝐀 ext : External event stimulus
+> : Internal active stimulus 𝐀 int
+> 𝐀 𝐀 =𝐀 𝐀 −𝐀 𝐀
+> time decay
+> 𝐀  𝐀 Activity intensity
+> User Behavior Feedback
+
+（1）Initialization     
+
+> Critic Lao Li
+> 12:20 PM . Jun 1,2026
+> This is not the first time! We need stricter
+> regulations!! @Daily News: Breaking…
+> The company must be held accountable!
+> Citizen_Wang
+> 4minute ago
+> What happened today?
+> Social
+> Platforms
+> Daily News
+> 12:00 PM . Jun 1,2026
+> #FoodSafety# Breaking: Multiple reports of food
+> poisoning linked to [Brand X] ! This event has …
+> Like (5.6k) Repost (1.5k) Commet (2.8k)
+> …
+> Repost
+> Whistleblower
+> 1minute ago
+> My family got sick too! Scared.
+> 45 16 76
+
+（2）Simulation Agent 
+
+（3） Simulation Environment 
+
+（4）Strategic Simulation 
+
+> Memory Update
+
+retrieval 
+
+Dynamic 
+
+Simulation loop  
+
+> - Environmental Information
+> - Personal Memory
+> Social Media
+> Post Data
+
+①
+
+②
+
+Agent Social Network 
+
+Simulator Evaluator 
+
+> Environment
+> Init
+> Agent Activation Sampling
+
+𝐀 𝐀 , 𝐀𰠀𝐀𝐀𝐀𝐀𝐀𝐀𝐀 ∝ 𝐀𬀀𝐀𳰀𝐀𝐀𬀀𰠀𝐀 𝐀 
+
+> Action
+
+Time Engine Figure 1: Overall architecture of POSIM. (1) The initialization module maps real user data and post data to agent profiles and environment initial states. (2) The Social-BDI agent architecture implements the cognitive pipeline: Perception → Belief → Desire → Intention → Action. (3) The simulation environment consists of a virtual social media platform and a temporal engine. The platform provides personalized content recommendations, and the temporal engine governs agent activation rhythms based on the Hawkes self-exciting point process. Agent behavioral outputs feed back into the environment to drive subsequent activations, forming a continuous interaction loop. (4) Strategy evaluation uses this loop as its simulator core, with an intervenor for injecting governance strategies and an evaluator for quantitative analysis, supporting counterfactual assessment. 
+
+media accounts, and governments) share this pipeline but pro-duce differentiated behaviors through role-specific prompts. At the environment level (Figure 1(3); Section 3.3), the Hawkes-based temporal engine enables minute-level resolu-tion and naturally reproduces multi-phase evolution patterns. Agent outputs feed back as endogenous excitation, forming a bidirectional interaction loop with the platform (Section 3.4). At the strategy evaluation level (Figure 1(4); Section 3.5), checkpoint callback enables counterfactual comparison by branching from identical states under different interventions. The following sections detail the design of each component. 
+
+3.2 Social-BDI Agent Architecture 
+
+Traditional reactive agents follow a simple perception-to-action mapping and cannot capture the cognitive mechanisms behind social media user decisions. In practice, users’ de-cisions are shaped by the interplay of emotions, cognitive biases, and social influence, and the coupling of emotion and intention is a key driver of crisis event evolution [Myint et al., 2024]. Building on the classic BDI architecture [Brat-man, 1987, Rao and Georgeff, 1995], we propose Social-BDI, which integrates emotional arousal and cognitive biases into the cognitive framework to better capture the irrational char-acteristics of real social media users. Social-BDI has two distinguishing features. First, agents maintain explicit cogni-tive states, with every decision grounded in observable state changes. Second, the cognitive process forms an auditable multi-stage decision chain [Wei et al., 2022] rather than a single black-box call. The pipeline is formalized as: 
+
+𝑃 𝑡 
+
+Perception 
+
+−→ 𝐵 𝑡 
+
+Belief 
+
+−→ 𝐷 𝑡 
+
+Desire 
+
+−→ 𝐼 𝑡 
+
+Intention 
+
+−→ 𝐴 𝑡 
+
+Action 
+
+(1) The architecture uses an LLM as its reasoning engine and comprises three modules: belief, desire, and intention. These 4subsystems execute sequentially in each decision cycle, with each receiving upstream output as input, forming a traceable pipeline from perception to action. 
+
+3.2.1 Belief Subsystem 
+
+Beliefs represent an agent’s cognitive model of the external world and its internal state, forming the basis for all reason-ing and decisions. Different cognitive layers vary in stability: core personality traits remain stable in the short term, while event-specific opinions and emotions shift rapidly with new information. Based on this stratification, we design a hier-archical belief system 𝐵 = ⟨𝐵 𝑖𝑑 , 𝐵 𝑝𝑠𝑦 , 𝐵 𝑒𝑣𝑡 , 𝐵 𝑒𝑚𝑜 ⟩, ordered from most stable to most volatile. 
+
+Role identity belief 𝐵 𝑖𝑑 encodes an agent’s foundational attributes, including demographics (gender, region), social properties (follower count, verification type), and identity traits (description, interest tags). During initialization, user information and historical posts from the real platform are processed by an LLM to generate a first-person role identity description. This belief remains fixed throughout simulation, anchoring personality consistency. 
+
+Psychological cognition belief 𝐵 𝑝𝑠𝑦 captures the psycho-logical characteristics and cognitive tendencies an agent ex-hibits in public opinion participation. Users display typical patterns such as conformity, prejudice, impulsiveness, and obstinacy when engaging with online events [Buckels et al., 2014]. Based on behavioral analysis of real events, we de-fine representative psychological types: self-actualization, curiosity-seeking, cathartic venting, anti-authority resent-ment, and bandwagon conformity. Each type carries pre-defined cognitive entries; for example, curiosity-seeking in-cludes “there must be undisclosed details behind this event” and “the more information is suppressed, the more it deserves investigation,” while cathartic venting includes “real-life frus-trations can be vented online” and “the harsher the words, the more satisfying it feels.” During initialization, an LLM samples the best-fitting profile from a predefined trait pool based on each user’s historical behavior. These beliefs remain highly stable throughout simulation, reflecting the persistence of deep psychological traits. 
+
+Event opinion belief 𝐵 𝑒𝑣𝑡 represents an agent’s factual un-derstanding, contextual awareness, and stance toward specific actors in an event. Unlike the preceding layers, event opin-ions evolve dynamically as new information or viewpoints trigger revision or reinforcement. Each opinion is stored as a structured quadruple ⟨𝑡, subject , opinion , reason ⟩. Initial stances are extracted through LLM-driven structured inter-views based on the user’s pre-event posts. For example, the LLM is prompted with questions such as “What is your stance toward the involved party in event X” to elicit structured stance descriptions from historical behavior. 
+
+Emotional arousal belief 𝐵 𝑒𝑚𝑜 draws on the ABC model of cognitive behavioral theory [Ellis, 1962], which highlights cognitive appraisal as a mediator of emotional responses. We adopt Ekman’s six basic emotions [Ekman, 1992], represent-ing emotional states as: 
+
+e = [𝑒 hap , 𝑒 sad , 𝑒 ang , 𝑒 fear , 𝑒 sur , 𝑒 dis ]⊤ ∈ [ 0, 1]6 (2) Emotions are updated by three mechanisms. Temporal decay 
+
+reduces intensity exponentially: 
+
+e𝑖 (𝑡 ) = e𝑖 (𝑡 0) · 𝑒 −𝜆 𝑒 (𝑡 −𝑡 0 ) (3) 
+
+Content stimulation adds the impact of recommended con-tent: e𝑖 ← e𝑖 + 𝜂 · s𝑐𝑜𝑛𝑡𝑒𝑛𝑡 , where 𝜂 is the stimulation coeffi-cient and s𝑐𝑜𝑛𝑡𝑒𝑛𝑡 is the stimulus vector from LLM sentiment analysis. Social contagion , based on emotional contagion theory [Hatfield et al., 1994], propagates neighboring emo-tions: 
+
+e𝑖 ← ( 1 − 𝜌 ) · e𝑖 + 𝜌 · ¯eneighbor (4) where 𝜌 is the contagion coefficient and ¯eneighbor is the weighted average of neighbors’ emotions. 
+
+Belief update mechanism. At each time step, the LLM updates beliefs based on two inputs: environmental perception 
+
+𝑃 𝑡 and historical memory 𝑀 𝑡 . Memories are stored in a streaming memory bank and retrieved by a scoring function that balances recency and semantic relevance: 
+
+𝑅 (𝑚, 𝑡 ) = 𝛼 rec 𝑒 −𝛾 (𝑡 −𝑡 𝑚 ) + ( 1 − 𝛼 rec ) sim (𝑞, 𝑚 ), (5) where sim (· , ·) is cosine similarity from a pretrained encoder and 𝛼 rec ∈ [ 0, 1] controls the recency–relevance trade-off. In practice, users’ belief updates are far from rational; they are systematically shaped by cognitive biases [Tversky and Kah-neman, 1974]. Users selectively accept information consistent with existing views ( confirmation bias ) and under high arousal make emotion-driven judgments bypassing rational analysis (affect-driven reasoning ). For ordinary users, we therefore introduce explicit cognitive bias guidance into the LLM rea-soning via prompts (Appendix A). The overall update is: 
+
+𝐵 𝑡 = 𝑓 LLM (𝐵 𝑡 −1, 𝑃 𝑡 , 𝑀 𝑡 , Φ) (6) where Φ denotes cognitive bias guidance embedded in prompts. Here 𝐵 𝑡 −1 is the belief state carried over from the previous step. The update primarily affects the fast-changing layers 𝐵 𝑒𝑣𝑡 and 𝐵 𝑒𝑚𝑜 , while 𝐵 𝑝𝑠𝑦 evolves slowly; 𝐵 𝑖𝑑 remains fixed as the identity anchor. 
+
+3.2.2 Desire Subsystem 
+
+The desire subsystem bridges cognitive states and behav-ioral motivations, connecting “how the agent understands the world” with “what the agent wants to do.” In classi-cal BDI theory, desires are goal states the agent wishes to achieve [Bratman, 1987]; in social media, we operationalize them as intrinsic motivations for participating in opinion dis-course. Motivations are highly diverse: the same news may 5trigger a sense of justice in one user and curiosity in another. This heterogeneity cannot be captured by fixed rules, so we use the LLM’s commonsense reasoning to infer motivations from belief states. At each time step, the desire subsystem receives the updated beliefs 𝐵 𝑡 and current perception 𝑃 𝑡 , outputting motivation descriptions with intensity labels: 
+
+𝐷 𝑡 = {( 𝑑 1, 𝑙 1), (𝑑 2, 𝑙 2), . . . , (𝑑 𝑛 , 𝑙 𝑛 )} ,𝑙 𝑖 ∈ { very low , low , medium , high , very high } (7) where 𝑑 𝑖 is a natural-language motivation and 𝑙 𝑖 is a five-level intensity label. Uses and Gratifications theory [Katz et al., 1973] posits that audiences actively select media to fulfill psychological needs. Inspired by this, we predefine candi-date motivation sets per agent type, from which the LLM dy-namically selects and weights based on belief state. Ordinary users’ candidates include emotional venting, justice advocacy, social connection, etc.; opinion leaders additionally include self-expression, influencing others, etc. The combination and intensity are context-dependent: high anger in 𝐵 𝑒𝑚𝑜 with a strong negative stance in 𝐵 𝑒𝑣𝑡 elevates emotional venting; a curiosity-dominated 𝐵 𝑝𝑠𝑦 foregrounds information acquisi-tion. The motivation list produced here will be passed to the downstream intention subsystem (described next), where high-weight motivations constrain the selection of action types and expression strategies. For instance, dominant emo-tional venting tends to result in short, emotionally charged comments, while dominant self-expression tends to result in lengthy original posts with rational analysis. The desire gen-eration function is: 
+
+𝐷 𝑡 = 𝑔 LLM (𝐵 𝑡 , 𝑃 𝑡 ) (8) The key contribution is an explicit motivational layer be-tween beliefs and actions: beliefs first produce structured mo-tivations, which the intention subsystem then translates into concrete behaviors. The effect of this design on generating re-alistic discourse is validated in the ablation study (Section 5). 
+
+3.2.3 Intention Subsystem 
+
+The intention subsystem serves as the final decision stage, functioning as a hierarchical behavior planner. Following social media interaction conventions, we define atomic be-havioral categories: like, direct repost, repost with comment, short comment, long comment, short original post, and long original post. The subsystem employs a multi-level chain-of-thought mechanism that decomposes decisions into three progressive levels. 
+
+Level 1: Action type and target selection. The LLM selects an action type based on belief state and desire intensity, and determines the interaction target. This level decides what to do and to whom. 
+
+Level 2: Expression strategy planning. When generat-ing text, the system plans strategies along four dimensions: emotion (type and intensity), stance (support, opposition, or neutrality), style (e.g., rational analysis, sarcasm, emotional aggression), and narrative (e.g., factual enumeration, labeling, call to action). The LLM selects the most fitting combination. This level decides how to express. 
+
+Level 3: Content generation. Constrained by prior deci-sions, the system generates concrete text matching the agent’s role, including body text, hashtags, and mentions. This level decides what exactly to say. This three-level decomposition provides explicit constraints that prevent the LLM from producing bland, averaged text. Every decision is logged for full traceability. The intention generation is: 
+
+𝐼 𝑡 = ℎLLM (𝐵 𝑡 , 𝐷 𝑡 , 𝑃 𝑡 ) (9) where 𝐼 𝑡 = {( 𝑎 𝑗 , 𝑜 𝑗 , 𝑠 𝑗 , 𝑐 𝑗 )} 𝑚 𝑗 =1 is the action sequence, each element comprising action type 𝑎 𝑗 , target 𝑜 𝑗 , strategy vector 
+
+𝑠 𝑗 = (emotion , stance , style , narrative ), and content 𝑐 𝑗 .
+
+3.2.4 Heterogeneous Agents 
+
+Real-world public opinion evolution involves interactions among ordinary users, opinion leaders, media accounts, and governments [Chen et al., 2025, Wu and Liu, 2023]. All four types share the unified Social-BDI architecture. Behav-ioral differences arise solely from type-specific role-guiding prompts that inject distinct role characteristics (identity, speak-ing style, focal concerns), enabling the same architecture to produce differentiated behaviors. This ensures that hetero-geneity stems from role differences rather than architectural modifications, preserving both unity and interpretability. 
+
+Ordinary users form the majority of participants, with behaviors primarily shaped by personal beliefs and immediate emotions. Their language is colloquial and fragmented, and high arousal readily produces impulsive expression. 
+
+Opinion leaders serve as critical information intermedi-aries according to two-step flow theory [ ?? ], with large fol-lower bases and significant social influence. Their outputs tend toward independence and agenda-setting, guiding down-stream users’ belief updates and decisions. 
+
+Media accounts prioritize timeliness, accuracy, and au-thoritativeness. Their language is formal and restrained, par-ticipating primarily through news reports, updates, and in-depth commentary, serving to confirm information and frame agendas at key junctures. 
+
+Governments represent official positions and governance perspectives, posting infrequently but with high authority, typ-ically issuing statements after events reach sufficient scale, exerting pivotal influence on opinion trajectories. All four types generate their behavioral patterns through the Social-BDI pipeline, constrained by their respective role-guiding prompts. 6Algorithm 1 Social-BDI Cognitive Decision Pipeline                                                                     
+
+> Require: Agent 𝑢 , perception 𝑃 𝑡 , event context E𝑐𝑡 𝑥
+> Ensure: Action sequence 𝐼 𝑡
+> 1: Phase 1: Belief Update
+> 2: 𝑀 𝑡 ←Memory.get (𝑃 𝑡 , 𝑘 )
+> 3: 𝐵 𝑡 ←𝑓 LLM (𝐵 𝑡 −1, 𝑃 𝑡 , 𝑀 𝑡 ,Φ)
+> 4: 𝐵 𝑡 .emo ←𝐵 𝑡 .emo ⊙𝑒 −𝜆𝑒 Δ𝑡
+> 5: Phase 2: Desire Generation
+> 6: 𝐷 𝑡 ←𝑔 LLM (𝐵 𝑡 , 𝑃 𝑡 )
+> 7: Phase 3: Intention Planning
+> 8: 𝐿 1←SelectAction (𝐵 𝑡 , 𝐷 𝑡 , 𝑃 𝑡 )
+> 9: 𝐿 2←PlanStrategy (𝐿 1, 𝐵 𝑡 )
+> 10: 𝐿 3←GenContent (𝐿 1, 𝐿 2, 𝐵 𝑡 )
+> 11: 𝐼 𝑡 ← ( 𝐿 1, 𝐿 2, 𝐿 3)
+> 12: Phase 4: Memory Update
+> 13: Memory.store (𝐼 𝑡 , 𝑡 )
+> 14: return 𝐵 𝑡 , 𝐷 𝑡 , 𝐼 𝑡
+
+Complete cognitive pipeline examples appear in Ap-pendix A. Pseudocode for the Social-BDI pipeline is given in Algorithm 1. 
+
+3.3 Simulation Environment 
+
+The simulation environment provides a virtual space for agent perception and interaction, designed to reproduce the infor-mation flow and temporal dynamics of social media while remaining computationally tractable. As shown in Figure 1, it comprises two components: the virtual social media plat-form , which determines what agents see, and the temporal engine , which determines when and which agents are ac-tivated. Together they drive continuous agent–environment interaction. 
+
+3.3.1 Virtual Social Media Platform 
+
+The platform constructs a personalized information environ-ment for each activated agent, determining what content they see and with whom they interact. 
+
+Agent social network. POSIM maintains three directed networks: a follower network, a repost network, and a com-ment network. The follower network records follow relation-ships and defines the scope of relationship-based recommen-dations. The repost and comment networks grow dynamically as each interaction updates the topology. 
+
+Content recommendation. The system maintains a global content pool updated in real time, with vector representa-tions from a pretrained semantic encoder (BGE-small-zh 1) for cosine-based deduplication. Content candidates come from two channels: the relationship channel retrieves posts from followed users, and the public channel retrieves from the global pool, simulating cross-circle exposure. Candidates are scored along three dimensions. Homophily 𝐻 (𝑢, 𝑝 ) mea-sures cosine similarity between user and content embedding vectors. Popularity 𝑉 ( 𝑝 ) uses normalized engagement sig-nals (likes, reposts, comments). Freshness 𝐹 ( 𝑝 ) applies ex-ponential time decay, favoring recent content. The final score 
+
+> 1https://huggingface.co/BAAI/bge-small-zh-v1.5
+
+is: 
+
+𝑆 𝑒𝑥 𝑝 (𝑢, 𝑝 ) = 𝑤 ℎ · 𝐻 (𝑢, 𝑝 ) + 𝑤 𝑝 · 𝑉 ( 𝑝 ) + 𝑤 𝑟 · 𝐹 ( 𝑝 ) (10) where 𝑤 ℎ, 𝑤 𝑝 , 𝑤 𝑟 are adjustable weights (Appendix Ta-ble 10). After ranking, 𝑟 𝑒𝑥 𝑝𝑙𝑜𝑟 𝑒 = 0.2 of slots are reserved for random exploration, and a history mechanism records each agent’s previously viewed content to prevent repeated expo-sure within a sliding window. The system also tracks hashtag popularity and periodically injects trending topics into recom-mendations, simulating the attention-focusing effect of real trending lists. 
+
+3.3.2 Temporal Engine 
+
+User activity in real public opinion events exhibits highly non-uniform temporal distributions: breaking news can trig-ger thousands of reposts within minutes, while activity drops sharply during lulls. Conventional approaches activate agents at fixed intervals independent of external stimuli, where each agent’s activation probability is identical and uncorrelated with ongoing events. Such independent uniform activation fails to reproduce these event-driven surges. POSIM adopts a temporal engine based on the Hawkes self-exciting point process as its temporal scheduler. The key insight is that collective activity is not a preset constant but a dynamic quantity driven by exogenous shocks and endoge-nous interactions. Each event briefly elevates the probability of subsequent events, much like a viral post stimulating fur-ther participation before the effect decays. The conditional intensity is: 
+
+𝜆 (𝑡 ) = 𝜇 +∑︁  
+
+> 𝑡 𝑖 <𝑡
+
+𝜙 (𝑡 − 𝑡 𝑖 ) (11) where 𝜇 is the background rate reflecting baseline activity, and 𝜙 (𝑡 ) = 𝛼𝑒 −𝛽𝑡 is the exponentially decaying excitation kernel. We decompose excitation into exogenous 𝜙 𝑒𝑥𝑡 and 
+
+endogenous 𝜙 𝑖𝑛𝑡 components (Figure 1): 
+
+𝜙 𝑒𝑥𝑡 (𝑡 ) = 𝛼 𝑒𝑥𝑡 · 𝑒 −𝛽 𝑒𝑥𝑡 𝑡 , 𝜙 𝑖𝑛𝑡 (𝑡 ) = 𝛼 𝑖𝑛𝑡 · 𝑒 −𝛽 𝑖𝑛𝑡 𝑡 (12) with 𝛼 𝑒𝑥𝑡 ≫ 𝛼 𝑖𝑛𝑡 and 𝛽 𝑒𝑥𝑡 < 𝛽 𝑖𝑛𝑡 . Exogenous excitation cor-responds to critical external stimuli (e.g., breaking news, offi-cial statements) with strong intensity and slow decay. These are triggered by an event queue , a preconfigured timeline in-jected into the Hawkes process at designated times. Endoge-nous excitation corresponds to user interactions with weaker intensity and faster decay, reflecting the self-exciting nature of social propagation. Their superposition naturally produces “outbreak–sustain–decay” patterns consistent with real public opinion events. We further incorporate a circadian rhythm modulation mechanism, scaling Hawkes intensity with a 24-hour peri-odic function. At each step Δ𝑡 , the number of activated agents is determined by Poisson sampling 
+
+𝑁 𝑡 ∼ Poisson (𝜆 (𝑡 ) · 𝑁 𝑠 · Δ𝑡 / 60 ) (13) 7Algorithm 2 POSIM Main Simulation Loop                                                                                    
+
+> Require: Agent set U, event queue E, step size Δ𝑡 , total steps 𝑇 𝑚𝑎𝑥
+> Ensure: Simulation trajectory T
+> 1: Initialize Hawkes time engine ( 𝜇, 𝜙 𝑒𝑥𝑡 , 𝜙 𝑖𝑛𝑡 ) and recommendation system 2: for 𝑡 =0,1, . . . , 𝑇 𝑚𝑎𝑥 do
+> 3: for all exogenous event 𝑒 ∈ E triggered at step 𝑡 do
+> 4: Inject 𝑒 into Hawkes process as exogenous excitation 𝜙 𝑒𝑥𝑡
+> 5: end for
+> 6: Compute intensity 𝜆 (𝑡 )(Eq. 11) 7: 𝑁 𝑡 ∼Poisson (𝜆 (𝑡 ) · 𝑁 𝑠 ·Δ𝑡 /60 )
+> 8: Sample activated set A𝑡 ⊂ U ,| A 𝑡 |=𝑁 𝑡 , weighted by historical activity 9: for all 𝑢 ∈ A 𝑡 parallel do
+> 10: Generate personalized feed for 𝑢 ; merge with exogenous events as perception
+> 𝑃 𝑡
+> 11: 𝐵 𝑡 , 𝐷 𝑡 , 𝐼 𝑡 ←Social-BDI (𝑢, 𝑃 𝑡 ){Alg. 1} 12: 𝐴 𝑡 ←Parse (𝐼 𝑡 ); execute 𝐴 𝑡 ; update content pool and social network 13: Feed 𝐴 𝑡 back to Hawkes process as endogenous excitation 𝜙 𝑖𝑛𝑡
+> 14: end for
+> 15: Perform emotion contagion among social neighbors; update 𝐵 𝑒𝑚𝑜
+> 16: T ← T ∪ { ( 𝑡 , A𝑡 ,{𝐴 𝑡 } ) }
+> 17: end for
+> 18: return T
+
+with specific agents selected via activity-weighted sampling. Full parameter configuration is in Appendix C; computational resource consumption is reported in Appendix E. 
+
+3.4 Agent–Environment Interaction 
+
+At each step, the temporal engine determines the activated agent set A𝑡 based on Hawkes intensity, and the recommen-dation system generates personalized feeds for each agent. These feeds, together with any event triggers, are merged by the perception module into environmental perception 𝑃 𝑡 ,which drives the Social-BDI pipeline to produce behaviors 
+
+𝐴 𝑡 . The resulting outputs then flow back into the environ-ment, where new content enters the global pool, interactions update network topology, and activity contributes endogenous excitation to the Hawkes process, forming a continuous bidi-rectional loop. This loop mirrors real social media information flow. Along the forward path, the recommendation system scores content by homophily, popularity, and freshness (Eq. 10), shaping each agent’s information environment. Along the reverse path, behavioral outputs introduce new content and engagement sig-nals that reshape subsequent recommendations, closing the feedback cycle of information shaping cognition, cognition driving behavior, and behavior reshaping information. The Hawkes process further amplifies this dynamic, as dense be-haviors triggered by exogenous events sustain elevated activity through endogenous excitation, producing nonlinear patterns consistent with real events. Consequently, collective phenom-ena such as opinion lifecycle, emotional polarization, and in-formation cascades emerge from individual interactions, while each agent’s behavior remains grounded in its cognitive pro-cess. Pseudocode is given in Algorithm 2. 
+
+3.5 Strategy Evaluation 
+
+Beyond simulation, POSIM also serves as a computational experimentation platform for strategy evaluation. Decision-makers often need to answer counterfactual questions such as “how would opinion trajectories change under a given intervention?” As shown in Figure 1, strategy evaluation is organized around three modules ( Intervenor , Simula-tor , and Evaluator ), with the Simulator built on the agent– environment interaction loop described above. 
+
+The Intervenor connects external governance intent with the simulation state through three injection granularities. 
+
+Event Queue broadcasts events to all agents at specified times (e.g., official statements). Node Control targets spe-cific agents (e.g., directing an opinion leader to respond to a post). Platform Policy modifies environment parameters (e.g., adjusting recommendation weights or restricting con-tent reach). These can be combined to provide intervention capability from individual to platform level. 
+
+The Simulator executes the interaction loop: agents per-ceive, decide, and act within the virtual platform, with out-puts feeding back to the temporal engine. Injected events or policies propagate through this loop to affect subsequent cognition and behavior. A key mechanism is checkpoint call-back : the system periodically saves state snapshots, allowing researchers to load any checkpoint, inject different interven-tions, and generate parallel trajectories from identical initial conditions, directly supporting counterfactual comparison. 
+
+The Evaluator is decoupled from the Simulator, reading simulation logs through standardized interfaces to perform quantitative assessment across hotness curves, sentiment dis-tributions, opinion distributions, and topic migration. Results directly inform subsequent intervention design. 
+
+LLM resource scheduling. Large-scale simulation re-quires massive LLM calls. The framework manages multi-ple endpoints through a unified API pool that maintains per-usage-type model counters (belief update, desire generation, action decision) to balance reasoning quality and cost. To prevent homogenized outputs, the system perturbs sampling parameters: 𝑇 ′ = 𝑇 + 𝜖 𝑇 (𝜖 𝑇 ∼ U (− 0.1, 0.1)), 𝑝 ′ = 𝑝 + 𝜖 𝑝 
+
+(𝜖 𝑝 ∼ U (− 0.05 , 0.05 )), with random frequency and presence penalties for diversity. The pool also provides concurrency control, round-robin load balancing, fault detection, and rate limiting. 
+
+Modular architecture. Different research scenarios de-mand different cognitive models, temporal dynamics, and evaluation dimensions. POSIM therefore follows the sepa-ration of concerns principle, encapsulating agent cognition, environment, and strategy evaluation as independent modules that communicate through structured states rather than shared implementation. Researchers can replace the cognitive archi-tecture, switch the temporal engine, or add evaluation dimen-sions without affecting other modules. This modular design positions POSIM as an extensible platform for diverse social 8simulation research. 
+
+# 4 Validation Framework 
+
+Our validation framework builds on the classical V&V (Ver-ification and Validation) principles from systems engineer-ing [Sargent, 2013], which distinguish verification (“Have we built the model correctly?”) from validation (“Are the model’s results accurate?”). Following this distinction, we design a three-tier progressive evaluation. The first two tiers, individual behavioral mechanism calibration and collective phenomenon emergence calibration, correspond to verifica-tion , examining whether the simulation’s internal mechanisms work as intended and produce plausible emergent behaviors. The third tier, statistical result consistency calibration, corre-sponds to validation , examining whether simulation outputs statistically match real data. 
+
+Individual behavioral mechanism calibration (Sec-tion 5.2) verifies whether agents make cognitively sound decisions as designed, serving as a decision quality check. This tier examines mechanism correctness along three dimen-sions. Cognitive-behavior chain consistency checks whether the pipeline from belief update to behavioral output is com-plete, coherent, and logically grounded. Personality stability assesses whether agents maintain role-consistent behavioral styles across interaction rounds. Decision robustness tests whether decisions remain stable under semantically equiva-lent input perturbations. Individual-level mechanism correct-ness is the foundation of the entire validation hierarchy: only when individual decision mechanisms are sound can collec-tive emergence be meaningfully interpreted. 
+
+Collective phenomenon emergence calibration (Sec-tion 5.3) verifies whether sound individual mechanisms give rise to emergent group phenomena consistent with social sci-ence theory. This tier treats the simulation as a computational experiment, examining whether the system spontaneously pro-duces theoretically predicted collective patterns without ex-plicit group-level programming, including multi-phase public opinion lifecycle evolution, systematic behavioral heterogene-ity across agent types, emotional arousal and polarization, and scale-free network topology with power-law cascade distribu-tions. The appearance of these phenomena provides indi-rect but strong evidence for the soundness of individual-level mechanisms. 
+
+Statistical result consistency calibration (Section 5.4) further examines, after mechanism calibration, whether sim-ulation outputs accurately reproduce real public opinion dy-namics in a statistical sense. This tier compares simulation results with real data across three dimensions: behavior layer (action type distribution and behavioral hotness curves), con-tent layer (discourse irrationality, lexical diversity, and sen-timent tendency), and topology layer (network structure and information cascades), using nine quantitative metrics to es-                     
+
+> Table 2: Descriptive statistics of three public opinion event datasets.
+> Event #Users #Posts Duration #Steps Category
+> LE 1,530 34,218 ∼46h 276 Social Controversy WL 1,843 51,647 ∼190h 1,140 Campus Incident XF 1,987 14,892 ∼71h 426 Food Safety
+> Note : LE = Luxury Earring; WL = WHU Library; XF = Xibei Prepared Food.
+
+tablish statistical credibility. 
+
+# 5 Experiments 
+
+5.1 Datasets and Experimental Setup 
+
+We collect three real-world public opinion event datasets from Sina Weibo, one of China’s largest social media platforms. Its open interaction mechanisms (posting, reposting, comment-ing, and trending topics) make it a primary arena for public opinion formation and diffusion. Each dataset covers the full interaction chain of original posts, reposts, and comments. The three events span social controversy, campus incident, and food safety categories, covering diverse opinion patterns from short-term outbreaks to long-cycle multi-phase evolu-tion. The Luxury Earring event (LE) occurred in May 2025, when jewelry worn by a public figure in a widely circulated photo was identified as a luxury item, triggering widespread public discussion. The topic repeatedly trended on Weibo, showing a typical short-term concentrated outbreak pattern. The WHU Library event (WL) originated from a reported ha-rassment incident at Wuhan University’s library in July 2023. The first-instance court verdict in July 2025 reignited exten-sive public discourse, resulting in a long-cycle multi-phase evolution from dormancy to resurgence. The Xibei Prepared Food event (XF) was triggered in September 2025 when an in-ternet personality alleged that a restaurant chain used prepared food in its dishes. The ensuing debate over food safety and consumer rights generated sustained public attention, showing a multi-party contention pattern with prolonged fermentation. We select the peak period of each event for simulation, maximizing information density under limited computational resources. Simulation start times are: LE 2025-05-16 08:00, WL 2025-07-27 08:00, XF 2025-09-14 05:00; duration and step counts are listed in Table 2. Descriptive statistics after deduplication, low-activity user filtering, and irrelevant con-tent removal are also shown in Table 2, with detailed collection and preprocessing procedures in Appendix D. The temporal resolution is 10 minutes per step. Agent beliefs are initial-ized from each user’s historical posts before the simulation start time, sequentially constructing role identity, psycholog-ical cognition, event opinion, and initial emotion vector to form a complete personalized Social-BDI belief system. 9Table 3: Micro-level behavioral mechanism validation results (mean ±std).                     
+
+> Method Cognitive-Behavior Chain Consistency (0–5) ↑
+> Personality Stability (0–1) ↑
+> Decision Robustness (0–1) ↑
+> Direct-Nothink 1.47 ±0.50 0.478 ±0.263 0.629 ±0.240 Direct-Think 1.75 ±0.43 0.448 ±0.269 0.603 ±0.299 CoT 3.09 ±0.29 0.516 ±0.272 0.541 ±0.356
+> Social-BDI (Ours) 4.64 ±0.48 0.661 ±0.215 0.695 ±0.213
+> Note : Cognitive-Behavior Chain Consistency is rated on a 0–5 scale; Personality Stability and Decision Robustness are scored on a 0–1 scale. Bold : best per metric.
+
+5.2 Individual Behavioral Mechanism Calibra-tion 
+
+5.2.1 Baselines 
+
+Individual mechanism validation focuses on single-agent de-cision quality. Baselines are compared under identical input conditions to examine how different cognitive architectures af-fect decision interpretability, personality consistency, and ro-bustness. Four methods are evaluated. Direct-Nothink uses the non-thinking model Qwen2.5-7B-Instruct 2, concatenating environment information and role description into a single prompt for direct behavior output without explicit cognitive reasoning. Direct-Think upgrades to the stronger thinking model Qwen3-8B 3, but still uses single-prompt direct output. 
+
+CoT uses the same base model as Social-BDI (Qwen2.5-7B-Instruct), completing belief inference, desire analysis, and behavior decision within a single LLM call via chain-of-thought prompting. The three stages are serialized within one context window rather than modularized independently. 
+
+Social-BDI is the proposed method, also using Qwen2.5-7B-Instruct, which decomposes the cognitive process into three independent modules (belief update, desire generation, inten-tion planning), each completed by a separate LLM call with structured intermediate state transfer. 
+
+5.2.2 Evaluation Setup and Results 
+
+We randomly sample 𝑁 = 500 users as agents and run 𝑇 = 12 
+
+rounds, with all four methods operating under identical condi-tions. Three evaluation dimensions are assessed. Cognitive-behavior chain consistency is rated on a 0 to 5 scale across four sub-dimensions: chain completeness, emotional dynam-ics rationality, motivation-behavior alignment, and informa-tion integration. Personality stability evaluates the similarity (0 to 1) between the agent’s ground-truth identity description and that reverse-inferred by an LLM from behavioral trajecto-ries alone. Decision robustness measures decision stability (0 to 1) under semantically equivalent input perturbations. All three evaluations use a fixed-hyperparameter LLM judge (prompt templates in Appendix B). Results are shown in Ta-ble 3.                 
+
+> 2https://huggingface.co/Qwen/Qwen2.5-7B-Instruct
+> 3https://huggingface.co/Qwen/Qwen3-8B Incub. Outbreak Plateau Revival 2nd Peak Decline Long Tail
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Cumulative Posts (%)
+> 050 100 150 200 250 300 350 400
+> Simulation Round
+> 0
+> 50
+> 100
+> 150
+> 200
+> 250
+> 300
+> Post Volume
+> E1E2
+> E3
+> E4E5E6
+> E7
+
+Figure 2: Simulated public opinion lifecycle, showing posting vol-ume (bars, left axis) and cumulative posting percentage S-curve (solid line, right axis). 𝐸 1–𝐸 7 mark exogenous event injection points. 
+
+Social-BDI outperforms all baselines across all three di-mensions. Its chain consistency score of 4.64 significantly exceeds CoT’s 3.09 ( 𝑝 < 0.001 ), confirming that the modular architecture produces more complete and logically grounded decision chains. Personality stability and decision robustness are likewise highest, validating the belief grounding mech-anism. Notably, despite using a stronger thinking model, Direct-Think performs worse than Direct-Nothink on person-ality stability and robustness, showing that raw reasoning ca-pability alone cannot substitute for explicit cognitive architec-ture. CoT serializes cognitive reasoning in a single call but yields the lowest robustness, suggesting that single-call seri-alization lacks stable state anchoring, whereas Social-BDI’s explicit belief states provide effective cognitive grounding. 
+
+5.3 Collective Phenomenon Emergence Cali-bration 
+
+5.3.1 Public Opinion Lifecycle 
+
+Public opinion lifecycle theory holds that online public opin-ion events do not evolve at a uniform pace but exhibit distinct phase-dependent patterns [Guo and Song, 2024, Chen et al., 2025]. A typical lifecycle includes an outbreak phase (concen-trated public attention with rapidly rising activity), a plateau phase (stabilized or mildly fluctuating hotness), possible resur-gence (secondary outbreaks from new stimuli), and a decay phase (attention shift and activity decline). Not all events fol-low the same phase sequence: short-burst events may proceed directly from outbreak to decay, while multi-party contention events may undergo multiple resurgence cycles. Taking the XF event as an illustrative example (all emer-gence phenomena use this event), Figure 2 shows that the simulation clearly exhibits a multi-phase lifecycle from out-break through plateau and resurgence to decay, with each phase transition traceable to specific exogenous events. After 
+
+𝐸 1 (kitchen video exposure), posting volume surges rapidly, entering the outbreak phase. 𝐸 2 (temporary ceasefire an-nouncement) leads to a noticeable activity decline, entering the plateau phase. 𝐸 3 (industry debate on prepared food def-10 0 100 200 300 400            
+
+> Simulation Round
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> Emotion Intensity (Mean  ± Std)  (a) Emotion Intensity
+> Citizen KOL Media Gov.
+> 0
+> 50
+> 100
+> 150
+> 200
+> Content Length (chars)
+> 43.4
+> 73.3 100.2 90.6
+> (b) Content Length
+> Activity
+> Rate
+> Influence
+> Emotion
+> Diversity
+> Content
+> Depth
+> Originality
+> 0.25 0.50 0.75 1.00
+> (c) Behavioral Profile
+> Citizen KOL Media Government
+
+Figure 3: Behavioral heterogeneity across four agent types. (a) Emo-tional intensity temporal evolution; (b) Content length distribution; (c) Multi-dimensional behavioral profile radar chart. 
+
+initions) sustains moderate discussion without triggering a large-scale outbreak. 𝐸 4 (founder’s leaked group chat screen-shot) reignites discussion, breaking the ceasefire. 𝐸 5 (media collective commentary) triggers the peak activity of the en-tire simulation, showing a classic resurgence pattern where official media framing triggers a secondary outbreak. The cumulative posting percentage follows an S-curve, consistent with diffusion theory in communication studies [Kong et al., 2020]. Crucially, this multi-phase lifecycle is not driven by pre-set rules but emerges spontaneously from two cooperating mechanisms. At the environment level , the Hawkes pro-cess self-exciting mechanism causes exogenous event injec-tion to trigger an “excitation, amplification, decay” dynamic response. Exogenous events elevate base activation inten-sity, and event-related content published by agents further amplifies collective activity through the self-exciting term 
+
+Í 𝛼𝑒 −𝛽 (𝑡 −𝑡 𝑖 ) , forming a positive feedback loop. When event stimulation fades and self-exciting effects decay, activity natu-rally subsides. At the agent level , the Social-BDI architecture produces differentiated cognitive responses to different event types. Food safety crises ( 𝐸 1) and personal attack screenshots (𝐸 4) trigger strong emotional arousal and belief conflict, driv-ing high-density participation, whereas technical industry de-bates ( 𝐸 3) produce weaker cognitive impact on ordinary users, sustaining only moderate discussion. This synergy between environment-driven and cognition-driven dynamics enables the simulation to naturally reproduce the nonlinear mapping between event types and public response intensity observed in real public opinion events. 
+
+5.3.2 Multi-Agent Behavioral Heterogeneity 
+
+Figure 3 illustrates the systematic heterogeneity across four agent types in emotional intensity, content length, and multi-dimensional behavioral profiles. For emotional intensity, or-dinary user and opinion leader agents maintain average in-tensities of 0.645 and 0.603 respectively, consistently in the high-arousal range with sharper post-event fluctuations. Me-dia accounts and governments remain in the low-arousal range, showing a “public emotionality, official neutrality” stratifi-cation consistent with real opinion observations. For con-
+
+Table 4: Emotional arousal theory validation metrics.                       
+
+> Dimension Metric Sim. Result Theoretical Expectation
+> Arousal Self-Reinforcement a
+> High-arousal trend coeff. 𝛽 3.41 ×10 −4(𝑝<. 001 )𝛽 > 0
+> High-arousal emotion ratio 73.5% Dominant High/low arousal intensity ra-tio 2.0 ×>1
+> Emotional Contagion b
+> Comment-chain emotion con-sistency 0.772 ≫random baseline Escalation/de-escalation ratio 4.78 >1(ratchet effect)
+> aBerger and Milkman [2012]; bHatfield et al. [1994]
+
+tent length, media accounts and governments produce sig-nificantly longer outputs than ordinary users, reflecting more structured content generation. The radar chart reveals four distinct profiles: ordinary users are prominent in emotion and interaction frequency, opinion leaders lead in influence and content volume, media accounts excel in content quality and neutral expression, and governments are characterized by low-frequency but high-authority contributions. These het-erogeneity patterns are not manually coded but emerge natu-rally from differentiated role beliefs and motivation weights within the Social-BDI architecture, validating its effectiveness in modeling multi-agent heterogeneity. 
+
+5.3.3 Emotional Arousal and Polarization 
+
+Emotional arousal theory posits that high-arousal states (e.g., anger, excitement) more strongly motivate social sharing and information propagation than low-arousal states (e.g., sad-ness, contentment) [Berger and Milkman, 2012]. Emotional contagion theory holds that individuals automatically mimic and synchronize others’ emotional expressions during social interaction, causing emotions to spread through groups [Hat-field et al., 1994]. These two dimensions describe the intra-individual reinforcement and inter-individual diffusion 
+
+mechanisms of emotion, jointly forming the micro-foundation of opinion sentiment evolution. We therefore validate along both dimensions (Table 4). The arousal self-reinforcement di-mension includes three metrics: (1) High-arousal trend coeffi-cient 𝛽 , obtained via linear regression on high-arousal emotion proportion, where 𝛽 > 0 indicates an upward trend; (2) High-arousal emotion ratio, the overall proportion of high-arousal emotions; (3) High/low arousal intensity ratio. The emotional contagion dimension includes: (4) Comment-chain emotion consistency, the proportion of adjacent comments sharing the same emotional polarity; (5) Escalation/de-escalation ratio, the ratio of low-to-high versus high-to-low arousal transitions, where values above 1 indicate a ratchet-like accumulation pat-tern. Results show that the high-arousal emotion proportion rises significantly over time, reaching 73.5%, validating the arousal self-reinforcement effect. Comment-chain emotion consis-tency reaches 0.772, and the escalation-to-de-escalation ratio is 4.78, indicating that emotions in interactions tend to in-tensify rather than subside. This ratchet-like accumulation 11 0 50 100 150 200 250 300 350 400  
+
+> Simulation Round
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+> 0.9
+> Polarization Index
+> Polarization Index
+> 90% CI
+> Early PI = 0.41
+> Late PI = 0.67
+> 63%
+> (p< 0.001 )
+
+Figure 4: Emotion polarization index (PI) evolution over simulation rounds. Solid line: PI mean; shading: 90% bootstrap confidence interval; dashed lines: early and late stage means. 10 0 10 1      
+
+> Degree k
+> 10 0
+> 10 1
+> 10 2
+> 10 3
+> Frequency  P(k)
+> (a) Degree Distribution
+> = 1.87
+> 10 010 1
+> Cascade Size s
+> 10 3
+> 10 2
+> 10 1
+> 10 0
+> P(X s)
+> (b) Cascade Size CCDF
+> = 3.70
+
+Figure 5: Topological properties of the interaction network. (a) De-gree distribution power-law fit 𝑃 (𝑘 ) ∼ 𝑘 −𝛾 ; (b) Cascade size CCDF 
+
+𝑃 (𝑋 ≥ 𝑠 ) ∼ 𝑠 − 𝛼 .
+
+pattern is consistent with the emotional contagion hypothe-sis [Hatfield et al., 1994]. We further define a polarization index: PI = 1 − 𝐻 𝐻 max 
+
+, 𝐻 = −∑︁ 
+
+> 𝑘
+
+𝑝 𝑘 ln 𝑝 𝑘 (14) where 𝐻 is Shannon entropy over the emotion distribution, 
+
+𝑝 𝑘 is the proportion of emotion 𝑘 , and 𝐻 max is maximum entropy under uniform distribution. As shown in Figure 4, PI rises from 0.41 in early stages to 0.67 in late stages (63% increase, 𝑝 < 0.001 ), indicating that the emotion distribution increasingly concentrates on a few dominant categories, con-sistent with theoretical expectations of emotional convergence in echo chamber environments [Cinelli et al., 2021]. 
+
+5.3.4 Scale-Free Topology and Cascade Power Law 
+
+Real social network degree distributions and informa-tion cascade sizes universally follow power-law distribu-tions [Barabási and Albert, 1999]. As shown in Figure 5(a), the interaction network’s degree distribution yields a power-law exponent 𝛾 = 1.87 , within the 1.5 < 𝛾 < 3 range com-monly reported for real social networks. This indicates a typical scale-free topology where a few opinion leader nodes form high-degree hubs while most ordinary users have only sparse connections. Figure 5(b) shows the complementary cumulative distribution function (CCDF) of cascade sizes, 
+
+𝑃 (𝑋 ≥ 𝑠 ) = 1 − 𝐹 (𝑠 ), which exhibits linearity on a log-log scale, indicating power-law behavior. The fitted exponent 
+
+𝛼 = 3.70 confirms that the vast majority of repost cascades are small, with occasional viral bursts involving large numbers of users, consistent with the “most posts go unnoticed, a few go viral” long-tail phenomenon observed on real Weibo. 
+
+5.4 Statistical Result Calibration 
+
+The core objective of public opinion simulation is to credibly reproduce real dynamics, which requires consistency across multiple dimensions. Behavior layer calibration verifies that agent participation patterns match real user activity, serving as the foundational premise of credibility. Content layer calibra-tion examines whether generated text reproduces the discourse characteristics of real events (e.g., irrational expression, sen-timent tendency), directly reflecting the simulation’s ability to capture the semantic space. Topology layer calibration checks whether emergent interaction networks and cascades exhibit realistic structural properties, reflecting the reproduction of macroscopic information diffusion patterns. The three layers correspond to “who participates,” “what is said,” and “how it propagates,” forming a complete behavioral-to-structural hierarchy. This section compares simulation outputs with three real events across behavior layer (action type distribution and be-havioral hotness curves), content layer (discourse irrational-ity, lexical diversity, and sentiment tendency), and topology layer (network structure and information cascades). 
+
+5.4.1 Baselines 
+
+Statistical calibration examines whether large-scale multi-agent interactions produce emergent group behaviors that sta-tistically align with real data, requiring end-to-end multi-step simulation in the complete environment. Three baselines are used. Rule-based ABM uses traditional rule-driven simu-lation where each agent samples behavior types from prior probability distributions based on historical behavior, with no LLM involvement; because it generates no natural-language text, content layer metrics are not applicable. POSIM w/ Di-rect LLM removes the Social-BDI architecture, correspond-ing to the Direct-Nothink setting in Section 5.2 but embedded in the full simulation environment. Agents directly gener-ate behavior and content in a single LLM step after receiv-ing recommendations, without explicit belief update or desire reasoning. POSIM w/ CoT replaces Social-BDI’s three in-dependent modules with a single chain-of-thought call that serializes cognition to behavior in one LLM invocation, cor-responding to the CoT setting in Section 5.2, retaining all other POSIM settings. 12 5.4.2 Evaluation Metrics 
+
+Evaluation compares simulation outputs with real data across behavior, content, and topology layers using nine metrics. 
+
+Behavior layer measures the consistency of agent group behavior patterns with real users, comprising three metrics. BType JSD uses Jensen–Shannon divergence to compare sim-ulated and real action type distributions: JSD (𝑃 ∥𝑄 ) = 12 𝐷 KL (𝑃 ∥𝑀 ) + 12 𝐷 KL (𝑄 ∥𝑀 ) (15) where 𝑀 = (𝑃 + 𝑄 )/ 2. Act. 𝜌 measures the Pearson corre-lation between simulated and real behavioral hotness curves. Act. RMSE measures their pointwise root mean squared error. 
+
+Content layer measures the semantic match between gen-erated and real text, comprising three metrics. Irrat. Sim. classifies discourse into irrational, rational, and neutral cat-egories via keyword matching and computes the similarity between simulated and real distributions. This directly re-flects whether the simulation reproduces the emotion-driven irrational discourse landscape that the Social-BDI belief mod-ule is designed to capture. |ΔTTR | measures the difference in lexical richness (Type-Token Ratio) between simulated and real text. |Δ ¯𝑆 | measures the overall sentiment mean devia-tion, where 𝑆 = 2𝑠 − 1 (𝑠 ∈ [ 0, 1] from SnowNLP 4) maps to 
+
+[− 1, +1].
+
+Topology layer measures the emergent network structure and propagation patterns, comprising three metrics. Net. Sim. compares simulated and real interaction network topological features. Casc. Sim. compares cascade size statistical distri-butions. Casc. PL compares cascade power-law exponents. Layer averages are computed by normalizing lower-is-better metrics via 1−𝑥 and averaging with higher-is-better metrics. 
+
+5.4.3 Calibration Results 
+
+Experiments are conducted on all three datasets, with results shown in Table 5 and Figure 6. 
+
+Behavior layer calibration. Figure 6 shows POSIM’s be-havioral hotness curves and action type distribution calibra-tion across all three events. POSIM achieves the best BType JSD on all datasets, indicating that Social-BDI produces ac-tion type proportions highly consistent with real data. WL’s JSD of only 0.073 is far superior to other methods, likely because the relatively concentrated behavioral patterns in campus discussions are well captured by Social-BDI’s belief grounding. Single-step LLM decisions produce significantly larger distribution deviations, suggesting that LLMs without layered cognitive constraints tend toward action type homog-enization. For activity correlation 𝜌 , POSIM maintains high values across all datasets, confirming that the Hawkes-driven temporal engine effectively captures temporal fluctuation pat-terns. POSIM’s Act. RMSE is slightly behind CoT on some 
+
+> 4https://github.com/isnowfy/snownlp
+
+datasets, possibly reflecting a trade-off between pointwise pre-cision and overall distributional consistency, but POSIM leads on composite metrics. Behavior layer averages reach 0.821, 0.853, and 0.804 across the three datasets, with stable cross-event performance demonstrating framework generality. 
+
+Content layer calibration. POSIM achieves the highest irrationality similarity on all datasets, indicating that Social-BDI accurately reproduces the rational-irrational discourse landscape of real public opinion events. This advantage stems from the belief subsystem’s explicit modeling of emotional arousal and cognitive biases, which enables agents to gener-ate irrational expressions consistent with their cognitive states. In contrast, POSIM w/ Direct LLM shows markedly lower ir-rationality similarity, especially on LE, because the absence of belief-driven cognition causes LLM outputs to tend to-ward neutral expression. Lexical diversity deviation |ΔTTR |
+
+is smallest on all datasets, indicating that personalized role information maintained by the belief module effectively mit-igates the LLM’s “average personality” problem, yielding in-dividually styled text across agents. Sentiment deviation |Δ ¯𝑆 |
+
+remains minimal on most datasets. On XF, CoT’s sentiment deviation is slightly lower than POSIM’s, but its irrational-ity similarity and lexical diversity are both inferior, suggest-ing this local advantage likely reflects coincidental numeri-cal proximity rather than more accurate sentiment modeling. Content layer averages are 0.910, 0.876, and 0.926. 
+
+Topology layer calibration. Using provenance chain track-ing, POSIM achieves the best topology layer averages across all datasets. For network similarity, POSIM significantly out-performs Rule-based ABM on LE and XF, indicating that Social-BDI’s multi-level intention planning enables agents to make selective interaction choices based on content quality and social affinity, producing more realistic network topol-ogy. On WL, CoT’s network similarity slightly exceeds POSIM’s, possibly because the campus-focused discussion yields a relatively simple network structure. However, CoT trails POSIM on cascade power-law and cascade size, indicat-ing its network-level advantage does not extend to propagation patterns. POSIM’s cascade power-law advantage is particu-larly pronounced, as Rule-based ABM’s random interaction decisions cannot produce the long-tail cascade distributions of real social networks. XF’s relatively lower topology averages likely reflect the event’s longer duration and more complex network structure, but POSIM still significantly outperforms all baselines. 
+
+Overall analysis. POSIM leads comprehensively across all three layers. The core advantages are rooted in Social-BDI’s layered cognitive design. The belief subsystem pro-vides personalized cognitive grounding for decisions, the desire subsystem drives accurate reproduction of irrational discourse through motivational constraints, and the intention subsystem’s structured decomposition ensures lexical diver-sity and interaction topology quality. Baseline performance differences corroborate this interpretation. Rule-based ABM 13 Table 5: Statistical calibration results across three events (LE = Luxury Earring, WL = WHU Library, XF = Xibei Prepared Food). Bold : best per dataset; —: not applicable. Green: gain of POSIM over the second-best method; gains are clipped to +.000 on metrics where POSIM does not rank first. 
+
+Data Method Behavior Layer Content Layer Topology Layer 
+
+BType JSD ↓
+
+Act. 
+
+𝜌 ↑
+
+Act. RMSE ↓
+
+Avg. 
+
+↑
+
+Irrat. Sim. ↑|ΔTTR |↓|Δ ¯𝑆 |↓
+
+Avg. 
+
+↑
+
+Net. Sim. ↑
+
+Casc. Sim. ↑
+
+Casc. PL ↑
+
+Avg. 
+
+↑
+
+LE 
+
+Rule-based ABM 0.427 0.808 0.158 0.741 — — — — 0.479 0.633 0.543 0.552 POSIM w/ Direct LLM 0.289 0.799 0.162 0.783 0.544 0.185 0.319 0.680 0.565 0.735 0.918 0.739 POSIM w/ CoT 0.394 0.806 0.151 0.754 0.584 0.141 0.123 0.774 0.755 0.777 0.756 0.763 
+
+POSIM (Ours) 0.193 0.809 0.154 0.821 0.790 0.030 0.029 0.910 0.895 0.830 0.961 0.896 
+
+Improvement +.096 +.001 +.000 +.038 +.206 +.111 +.094 +.136 +.140 +.053 +.043 +.133 
+
+WL 
+
+Rule-based ABM 0.318 0.681 0.126 0.746 — — — — 0.869 0.696 0.642 0.736 POSIM w/ Direct LLM 0.237 0.722 0.119 0.789 0.453 0.172 0.360 0.640 0.528 0.667 0.580 0.592 POSIM w/ CoT 0.229 0.744 0.116 0.800 0.474 0.091 0.365 0.673 0.941 0.740 0.673 0.784 
+
+POSIM (Ours) 0.073 0.750 0.118 0.853 0.841 0.010 0.203 0.876 0.850 0.758 0.965 0.858 
+
+Improvement +.156 +.006 +.000 +.053 +.367 +.081 +.157 +.203 +.000 +.018 +.292 +.074 
+
+XF 
+
+Rule-based ABM 0.312 0.664 0.187 0.721 — — — — 0.528 0.614 0.279 0.474 POSIM w/ Direct LLM 0.244 0.671 0.190 0.746 0.765 0.117 0.076 0.858 0.774 0.695 0.482 0.650 POSIM w/ CoT 0.293 0.699 0.181 0.742 0.774 0.134 0.014 0.875 0.767 0.696 0.460 0.641 
+
+POSIM (Ours) 0.148 0.727 0.168 0.804 0.843 0.019 0.046 0.926 0.885 0.696 0.513 0.698 
+
+Improvement +.096 +.028 +.013 +.058 +.069 +.098 +.000 +.051 +.111 +.000 +.031 +.048 0 50 100 150 200 250 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Behavioral Hotness
+
+(a) Luxury-Earring Simulation         
+
+> Real Data
+> original repost comment
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Proportion
+> 7.4%
+> 25.8%
+> 66.8%
+> 4.5% 7.2%
+> 88.3%
+> Simulation
+> Real Data
+> 0200 400 600 800 1000
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Behavioral Hotness
+
+(b) WHU-Library       
+
+> original repost comment
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> Proportion
+> 9.7%
+> 26.6%
+> 63.7%
+> 5.5%
+> 22.4%
+> 72.2%
+> 0100 200 300 400
+
+Simulation Round 
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Behavioral Hotness
+
+(c) Xibei-Food   
+
+> original repost comment
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> Proportion
+> 19.3%
+> 27.7%
+> 52.9%
+> 21.7%
+> 11.5%
+> 66.8%
+
+Figure 6: Behavioral hotness and distribution calibration results for three events. Each row corresponds to one event ((a) Luxury Earring, (b) WHU Library, (c) Xibei Prepared Food); left panels show simulated vs. real behavioral hotness curves, right panels show action type proportion comparisons. 
+
+lacks cognitive drive and performs poorly on topology in most datasets. POSIM w/ Direct LLM lacks belief grounding and shows insufficient content consistency. POSIM w/ CoT lacks inter-module independence and falls in between. 14 Table 6: Ablation study results. Underline marks cases where a variant outperforms the full model.                                               
+
+> Configuration Behavior Layer Content Layer Topology Layer
+> JSD
+> ↓
+> 𝜌
+> ↑
+> RMSE
+> ↓
+> Irrat.
+> ↑|ΔTTR |↓|Δ¯𝑆 |↓
+> Net.
+> ↑
+> Casc.
+> ↑
+> Full POSIM 0.193 0.809 0.154 0.790 0.030 0.029 0.895 0.830
+> w/o Belief 0.258 0.762 0.172 0.706 0.058 0.067 0.861 0.773 w/o Desire 0.267 0.779 0.169 0.682 0.071 0.083 0.853 0.788 w/o Intention 0.237 0.802 0.159 0.728 0.064 0.055 0.858 0.814 w/o Hawkes 0.177 0.235 0.362 0.787 0.207 0.028 0.822 0.754
+> Note :Bold : best per metric; underline: variant outperforms the full model. Casc. combines cascade size and power-law similarity.
+
+5.5 Ablation Study 
+
+To verify the necessity of each core module, we conduct ab-lation experiments on the LE dataset and compare the full framework with several variant configurations. Full POSIM 
+
+includes all modules. w/o Belief removes the belief update module. Agents maintain no explicit belief state, with desire and intention generated directly from current perception with-out historical cognitive accumulation. w/o Desire removes desire generation. Intention planning receives no motiva-tional weight constraints, and the LLM generates behavior directly from beliefs without intermediate motivational rea-soning. w/o Intention removes intention planning. Behavior is no longer decomposed through multi-level chain-of-thought (action selection, expression strategy, content generation), and the LLM generates final output directly from beliefs and de-sires. w/o Hawkes replaces the Hawkes temporal engine with fixed-step uniform activation, activating a constant number of agents per step and removing event-driven dynamic schedul-ing. Results are shown in Table 6. 
+
+w/o Hawkes. Removing the Hawkes process causes 𝜌 
+
+to plummet from 0.809 to 0.235 and RMSE to deteriorate from 0.154 to 0.362, confirming that uniform activation can-not capture temporal fluctuations. Its BType JSD (0.177) is marginally better than Full POSIM (0.193) because uniform activation keeps per-step agent counts constant, causing ac-tion type proportions to converge to their intrinsic mean under heavy sampling. This is a trivial advantage obtained at the cost of losing event-driven temporal dynamics. |ΔTTR | worsens to 0.207, indicating that temporal engine disruption indirectly causes content homogenization. |Δ ¯𝑆 | (0.028) is marginally better than Full POSIM (0.029). Uniform activation flattens event-driven sentiment peaks and troughs, causing the over-all mean to coincidentally approach the real data’s aggregate mean, but at the expense of entirely losing temporal sentiment dynamics. 
+
+w/o Belief. Removing beliefs causes broad degradation. JSD worsens to 0.258, irrationality similarity drops from 0.790 to 0.706, and |Δ ¯𝑆 | rises to 0.067. The belief module’s 
+
+𝐵 𝑒𝑣𝑡 and 𝐵 𝑒𝑚𝑜 are the core drivers of irrational discourse gen-eration. Their absence strips agents of deep cognition about contentious focal points and emotional arousal. 
+
+w/o Desire. Removing desires causes the most severe con-tent layer degradation. Irrationality similarity drops to 0.682 (lowest among all variants) and |Δ ¯𝑆 | worsens to 0.083 (high-est), indicating that motivation types are the core driver of irrational discourse expression. Without them, the LLM de-faults to neutral text. 
+
+w/o Intention. Removing intention planning causes 
+
+|ΔTTR | to worsen to 0.064 and network similarity to drop by 3.7pp, indicating that multi-level chain-of-thought decom-position substantially contributes to lexical diversity and in-teraction topology quality. 
+
+Overall analysis. The four ablation experiments demon-strate clear functional specialization. The belief subsystem provides global cognitive support, the desire subsystem drives content-layer irrational expression, the intention subsystem ensures lexical diversity and topology quality, and the Hawkes engine governs temporal consistency. Together, they validate the complementarity of Social-BDI’s layered architecture. 
+
+# 6 Discussion 
+
+This section demonstrates the application value of POSIM as a computational experimentation platform through two case studies, then summarizes key findings and discusses limita-tions. 
+
+6.1 Cognitive Priming Experiment 
+
+A central challenge in public opinion governance is how to effectively guide public cognition to mitigate negative sen-timent diffusion. However, directly testing cognitive inter-vention strategies in real environments faces dual constraints of ethics and controllability. Simulation platforms offer a risk-free computational experimentation pathway. This ex-periment evaluates the impact of different cognitive priming strategies on collective emotional evolution, providing quan-titative evidence for cognitive intervention in public opinion governance. We design a cognitive priming experiment based on the Luxury Earring event. Starting from a time step after an event burst during the simulation, we modify the psychological cog-nition beliefs ( 𝐵 𝑝𝑠𝑦 ) of a proportion (coverage) of agents to simulate and observe how populations with different cognitive orientations respond to the event, testing three coverage lev-els: 30%, 60%, and 100%. The control group maintains the no-intervention baseline. Three intervention strategies corre-spond to different cognitive regulation mechanisms. Ratio-nal Cognition (RC) guides agents toward multi-perspective rational analysis. Empathy Priming (EP) encourages under-standing the parties’ positions. Emotional Regulation (ER) guides agents to recognize and manage their own emotions. Results are shown in Table 7. The experiment reveals several key findings. First, both RC 15 Table 7: Cognitive priming experiment results. Coverage denotes the proportion of agents receiving cognitive priming.                                       
+
+> Condition Coverage Neg. Emotion Ratio ↓
+> Anger Ratio ↓
+> Emotion Intensity ↓
+> Control —0.844 0.600 0.649 30% 0.767 0.534 0.621 60% 0.753 0.506 0.595 Rational Cognition (RC) 100% 0.571 0.407 0.527
+> Empathy Priming (EP) 30% 0.794 0.523 0.609 60% 0.806 0.535 0.617 100% 0.878 0.569 0.650 Emotional Regulation (ER) 30% 0.831 0.583 0.626 60% 0.644 0.503 0.587 100% 0.572 0.481 0.573
+> Note : Control denotes the no-intervention baseline. RC = Rational Cognition; EP = Empathy Priming; ER = Emotional Regulation. Bold : best per metric. All experiments start from the same checkpoint.
+
+and ER strategies significantly reduce the Negative Emotion Ratio (NER), showing clear dose-response effects. As shown in Table 7, RC reduces NER from 0.844 to 0.571 (a 32.3% reduction), with overall emotional intensity declining sub-stantially. Beyond 60% coverage, RC’s effectiveness shows a pronounced threshold jump. ER likewise exhibits signifi-cant dose-response effects, reducing NER to 0.572 at 100% coverage (comparable to RC), revealing the complementarity of affective-level regulation and cognitive-level guidance in emotional mitigation. 
+
+The empathy paradox. The most theoretically significant finding concerns the Empathy Priming (EP) strategy. So-cial psychology research shows that empathy, while fostering understanding of others’ suffering, can simultaneously induce empathic distress in the observer, potentially intensifying neg-ative emotion diffusion under certain conditions [Batson et al., 1997, Bloom, 2016]. In our experiment, EP’s NER reaches 0.878, higher than the control group’s 0.844, and rises mono-tonically as coverage increases from 30% to 100%, showing a reverse dose-response effect opposite to RC and ER. Mecha-nistically, empathy priming modifies psychological cognition beliefs ( 𝐵 𝑝𝑠𝑦 ) to heighten agents’ sensitivity to others’ emo-tions, causing them to absorb negative affective coloring more intensely during belief updates. This then propagates through the emotional contagion mechanism across the social network in a positive feedback loop, ultimately accelerating cascad-ing diffusion of empathetic negative sentiment. Social-BDI’s cognitive architecture makes this complete causal chain, from cognitive belief modification to emotional state change to so-cial contagion amplification, fully traceable and interpretable. As shown in Figure 7, this finding demonstrates that by directly modifying agents’ cognitive belief states, the Social-BDI architecture faithfully propagates belief-level changes through the cognitive pipeline layer by layer, giving rise to complex collective dynamics consistent with social psychol-ogy theory. The quantitative reproduction of the empathy paradox shows that even well-intentioned belief adjustments 0 10 20 30         
+
+> Simulation Step
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Negative Emotion Ratio  (a)
+> Emotion Dynamics by Priming Type
+> (100% Coverage)
+> 0% 30% 60% 100%
+> Coverage Level
+> 30
+> 20
+> 10
+> 0
+> Neg. Emotion Ratio Change (%)
+> (b) Dose-Response: Coverage vs. Effect
+> Control Rational Belief Empathy Priming Emotional Regulation Control Baseline
+
+Figure 7: Empathy paradox experimental results. (a) Emotional arousal evolution under two strategies: the empathy priming group (dashed line) surpasses the control group (solid line) from mid-simulation onward; (b) Behavioral distribution comparison: the empathy group produces a higher proportion of emotion-intensive behaviors (short comments, repost with comment); (c) Discourse irrationality comparison: the empathy group exhibits a higher pro-portion of irrational discourse. 
+
+can, through multi-layer cognitive propagation and social net-work amplification, produce collective effects opposite to ex-pectations. This observation suggests that cognitive-level guidance in public opinion governance requires careful assess-ment of cascading consequences in multi-agent interaction en-vironments. Compared to heightening empathic sensitivity, directly operating on cognitive judgment (rational cognition priming) or affective experience (emotional regulation) may offer greater controllability. 
+
+6.2 Counterfactual Strategy Evaluation 
+
+Evaluating the effectiveness of corporate crisis communica-tion strategies is inherently irreversible in real settings. Once a response approach is chosen and executed, there is no going back to test alternatives. Counterfactual simulation experi-ments enable decision-makers to compare multiple options under identical initial conditions before committing, provid-ing direct practical value for crisis response planning. We design a counterfactual experiment based on the Xibei Prepared Food event, keeping external events fixed while re-placing only Xibei’s public relations response, comparing five strategies. Actual Response (AR) reproduces Xibei’s docu-mented public relations response sequence as recorded in the original data. Swift Early Apology (SEA) issues a sincere apology at the event’s onset. Proactive Transparency (PT) voluntarily discloses prepared food usage and food safety re-ports. Consumer Dialogue (CD) engages in direct interaction and communication with consumers. Strategic Silence (SS) makes no public response. Results are shown in Table 8. The experiment reveals several key findings. Proactive strategies significantly outperform passive approaches, with CD yielding the best results (NER = 0.744), followed by SEA (0.749) and PT (0.773). Strategic Silence performs worst, with NER reaching 0.831 and emotional intensity even exceeding the Actual Response, confirming that silence is not the op-16 Table 8: Counterfactual strategy evaluation results.                     
+
+> Strategy Neg. Emotion Ratio ↓
+> Anger Ratio ↓
+> Emotion Intensity ↓
+> Actual Response (AR) 0.792 0.685 0.685 Swift Early Apology (SEA) 0.749 0.621 0.612 Proactive Transparency (PT) 0.773 0.658 0.645 Consumer Dialogue (CD) 0.744 0.612 0.598
+> Strategic Silence (SS) 0.831 0.714 0.702
+> Note : AR = Actual Response; SEA = Swift Early Apology; PT = Proactive Transparency; CD = Consumer Dialogue; SS = Strategic Silence. Bold : best per metric. All strategies branch from the same pre-crisis checkpoint.
+
+timal choice in crisis communication. Strategy propagation strictly follows the causal chain of belief revision → cognitive reasoning change → behavioral output transformation, vali-dating the interpretability of the Social-BDI architecture in strategy evaluation. 
+
+6.3 Key Findings 
+
+The validation experiments support the following findings. At the individual level, the Social-BDI architecture outper-forms all baselines on cognitive-behavior chain consistency, personality stability, and decision robustness, validating the advantage of layered cognitive modeling over end-to-end gen-eration. Notably, CoT achieves the lowest decision robustness, indicating that serialized reasoning within a single call lacks stable state anchoring, whereas Social-BDI provides effec-tive cognitive grounding through independently modularized explicit belief states. At the collective level, the simulation spontaneously gives rise to public opinion lifecycle, behav-ioral heterogeneity, emotional polarization, scale-free topol-ogy, and cascade power-law distributions, all consistent with social science theory, without any explicit group-level pro-gramming. At the statistical calibration level, POSIM out-performs baselines on all three datasets, with behavior, con-tent, and topology metrics improving by 5.0% , 13.0% , and 
+
+8.5% respectively. Ablation experiments demonstrate func-tional complementarity among cognitive subsystems, with the desire subsystem contributing most to irrational discourse re-production and the belief subsystem providing indispensable cognitive grounding for personalized decisions. 
+
+6.4 Limitations 
+
+Despite overall positive results, this study has several limita-tions. First, the cognitive reasoning quality is tightly coupled with the underlying LLM’s capabilities, and the inference cost for large-scale simulation still has room for reduction. Sec-ond, follower relationships in the social network remain static during simulation, and dynamic follow/unfollow mechanisms have not yet been incorporated. Third, experimental vali-dation covers only the Weibo platform, and the framework’s transferability to different social media platforms and cultural contexts requires further investigation. Finally, LLM-based simulation generally requires substantial computational re-sources, a challenge shared by this work. Balancing token consumption and simulation performance will be a key focus of future research. 
+
+# 7 Conclusion 
+
+“All models are wrong, but some are useful. ” [Box and Draper, 1987] The key to public opinion simulation lies not in pursuing point-by-point replication of reality, but in obtaining approx-imations of opinion mechanisms and evolutionary dynamics that are sufficiently credible and actionable for decision-making . This paper presents POSIM, a social media public opinion simulation framework that embeds large language models within the Social-BDI cognitive architecture to con-struct agents with explicit cognitive states, and unifies exoge-nous event shocks and endogenous user interactions via the Hawkes self-exciting point process to achieve high-fidelity public opinion evolution simulation at minute-level temporal resolution. The three-tier progressive validation spanning mechanism, phenomenon, and statistics demonstrates that the Social-BDI architecture outperforms direct prompting and chain-of-thought methods in agent decision quality. The simulation spontaneously gives rise to public opinion lifecycle, emotional polarization, and scale-free topology, all collective behavioral patterns consistent with social science theory. Behavior, con-tent, and topology metrics improve by 5.0%, 13.0%, and 8.5% respectively over the best baselines on three real-world opin-ion datasets. Two governance-oriented case studies further reveal counterintuitive phenomena such as the empathy para-dox, demonstrating that POSIM not only credibly reproduces public opinion evolution but also serves as a practical com-putational experimentation platform for public opinion gover-nance. 
+
+# Ethical Statement 
+
+This study is conducted purely as data-driven scientific re-search aimed at advancing computational methods for public opinion simulation. All events are analyzed based entirely on publicly available data, and the authors hold no opinions, judgments, or positions regarding any events, individuals, or organizations involved. All descriptions present only publicly documented facts without expressing or implying any evalua-tive stance. The simulation framework is intended exclusively for academic research and methodological validation. 
+
+# Acknowledgments 
+
+This research was supported by the National Defense Science and Technology Key Excellent Fund Project. 17 References 
+
+Albert-László Barabási and Réka Albert. Emergence of scal-ing in random networks. Science , 286(5439):509–512, 1999. doi: 10.1126/science.286.5439.509. C Daniel Batson, Karen Sager, Eric Garst, Misook Kang, Kos-tia Rubchinsky, and Karen Dawson. Is empathy-induced helping due to self–other merging? Journal of personality and social psychology , 73(3):495, 1997. Jonah Berger and Katherine L. Milkman. What makes online content viral? Journal of Marketing Research , 49(2):192– 205, 2012. doi: 10.1509/jmr.10.0353. Carmela Bernardo, Claudio Altafini, Anton Proskurnikov, and Francesco Vasca. Bounded confidence opinion dynamics: A survey. Automatica , 159:111302, 2024. doi: 10.1016/j. automatica.2023.111302. Paul Bloom. Against Empathy: The Case for Rational Com-passion . Ecco/HarperCollins, New York, 2016. ISBN 978-0062339331. Eric Bonabeau. Agent-based modeling: Methods and techniques for simulating human systems. Proceedings of the National Academy of Sciences , 99:7280–7287, 2002. ISSN 0027-8424, 1091-6490. doi: 10.1073/pnas. 082080899. URL https://pnas.org/doi/full/10. 1073/pnas.082080899 .George E. P. Box and Norman R. Draper. Empirical Model-Building and Response Surfaces . John Wiley & Sons, New York, 1987. ISBN 978-0471810339. Michael E. Bratman. Intention, Plans, and Practical Reason .Harvard University Press, Cambridge, MA, 1987. Erin E. Buckels, Paul D. Trapnell, and Delroy L. Paulhus. Trolls just want to have fun. Personality and Individual Differences , 67:97–102, 2014. Claudio Castellano, Santo Fortunato, and Vittorio Loreto. Statistical physics of social dynamics. Reviews of Modern Physics , 81(2):591–646, 2009. doi: 10.1103/RevModPhys. 81.591. URL https://link.aps.org/doi/10.1103/ RevModPhys.81.591 .Jiadong Chen, Jie Xin, and Wan Ni. Evolution and mit-igation strategies of online public opinion: An anal-ysis using an improved replicator dynamic three-party game model. PLOS ONE , 20(7):e0325744, 2025. doi: 10.1371/journal.pone.0325744. Yong Chen, Ge Gao, Tianyong Wang, Xianrong Zheng, and Xiaobo Xu. A systems dynamics simulation study of net-work public opinion evolution mechanism. Journal of Global Information Management , 27(4):189–207, October 2019. ISSN 1062-7375. doi: 10.4018/JGIM.2019100110. URL https://doi.org/10.4018/JGIM.2019100110 .Xiaoting Cheng, Weidong Gan, Kai Zhang, Zeshui Xu, and Xunjie Gou. A dynamically updated consensus model for large-scale group decision-making driven by the evolution of public sentiment in emergencies. Information Fusion ,126:103484, 2026. ISSN 1566-2535. doi: 10.1016/j.inffus. 2025.103484. Yun-Shiuan Chuang, Agam Goyal, Nikunj Harlalka, Sid-dharth Suresh, Robert Hawkins, Sijia Yang, Dhavan Shah, Junjie Hu, and Timothy Rogers. Simulating opinion dy-namics with networks of LLM-based agents. In Find-ings of the Association for Computational Linguistics: NAACL 2024 , pages 3326–3346. Association for Com-putational Linguistics, 2024. doi: 10.18653/v1/2024. findings-naacl.211. URL https://aclanthology.org/ 2024.findings-naacl.211/ .Matteo Cinelli, Gianmarco de Francisci Morales, Alessandro Galeazzi, Walter Quattrociocchi, and Michele Starnini. The echo chamber effect on social media. Proceedings of the National Academy of Sciences , 118(9):e2023301118, 2021. doi: 10.1073/pnas.2023301118. D. J. Daley and D. G. Kendall. Stochastic rumours. IMA Journal of Applied Mathematics , 1(1):42–55, 1965. ISSN 0272-4960. doi: 10.1093/imamat/1.1.42. URL https: //doi.org/10.1093/imamat/1.1.42 .Guillaume Deffuant, David Neau, Frédéric Amblard, and Gérard Weisbuch. Mixing beliefs among interacting agents. 
+
+Advances in Complex Systems , 3(1–4):87–98, 2000. doi: 10.1142/S0219525900000078. Morris H. DeGroot. Reaching a consensus. Journal of the American Statistical Association , 69(345):118–121, 1974. ISSN 0162-1459. doi: 10.2307/2285509. URL https: //www.jstor.org/stable/2285509 .Paul Ekman. An argument for basic emotions. Cogni-tion and Emotion , 6(3–4):169–200, 1992. doi: 10.1080/ 02699939208411068. Albert Ellis. Reason and Emotion in Psychotherapy . Lyle Stuart, New York, 1962. Chen Gao, Xiaochong Lan, Zhihong Lu, Jinzhu Mao, Jinghua Piao, Huandong Wang, Depeng Jin, and Yong Li. S3: Social-network simulation system with large language model-empowered agents, 2023. URL http://arxiv. org/abs/2307.14984 .Sharad Goel, Duncan J. Watts, and Daniel G. Goldstein. The structure of online diffusion networks. In Proceedings of the 13th ACM Conference on Electronic Commerce , EC ’12, pages 623–638, New York, NY, USA, 2012. Association 18 for Computing Machinery. ISBN 9781450314152. doi: 10.1145/2229012.2229058. URL https://doi.org/10. 1145/2229012.2229058 .Sandra González-Bailón, Rafael E. Banchs, and Andreas Kaltenbrunner. Emotional reactions and the pulse of pub-lic opinion: Measuring the impact of political events on the sentiment of online discussions. arXiv preprint arXiv:1009.4019 , 2010. Mark Granovetter. Threshold models of collective behavior. 
+
+American Journal of Sociology , 83(6):1420–1443, 1978. doi: 10.1086/226707. Chen Guo and Yinghua Song. A new stochastic Petri net modeling approach for the evolution of online public opin-ion on emergencies. Systems , 12(9):333, 2024. doi: 10.3390/systems12090333. Elaine Hatfield, John T. Cacioppo, and Richard L. Rapson. 
+
+Emotional Contagion . Cambridge University Press, Cam-bridge, 1994. doi: 10.1017/CBO9781139174138. Alan G. Hawkes. Spectra of some self-exciting and mutually exciting point processes. Biometrika , 58(1):83–90, 1971. doi: 10.1093/biomet/58.1.83. Rainer Hegselmann and Ulrich Krause. Opinion dynamics and bounded confidence: models, analysis and simulation. 
+
+Journal of Artificial Societies and Social Simulation , 5(3): 2, 2002. URL https://www.jasss.org/5/3/2.html .Yuxuan Hu, Gemju Sherpa, Lan Zhang, Weihua Li, Quan Bai, Yijun Wang, and Xiaodan Wang. An LLM-enhanced agent-based simulation tool for information propagation. In 
+
+Proceedings of the Thirty-Third International Joint Con-ference on Artificial Intelligence , pages 8679–8682. IJCAI, 2024. ISBN 978-1-956792-04-1. doi: 10.24963/ijcai.2024/ 1007. URL https://www.ijcai.org/proceedings/ 2024/1007 .Guoyin Jiang, Saipeng Li, and Minglei Li. Dynamic rumor spreading of public opinion reversal on Weibo based on a two-stage SPNR model. Physica A: Statistical Mechanics and its Applications , 558:125005, 2020. doi: 10.1016/j. physa.2020.125005. Elihu Katz, Jay G Blumler, and Michael Gurevitch. Uses and gratifications research. The public opinion quarterly , 37 (4):509–523, 1973. Qingchao Kong, Wenji Mao, Guandan Chen, and Daniel Zeng. Exploring trends and patterns of popularity stage evo-lution in social media. IEEE Transactions on Systems, Man, and Cybernetics: Systems , 50(10):3817–3827, 2020. ISSN 2168-2232. doi: 10.1109/TSMC.2018.2855806. URL 
+
+https://ieeexplore.ieee.org/document/8428538 .Meng-Nan Li, Xueqing Wang, Ru-Xi Ding, Guo-Rui Yang, Bingsheng Liu, and Enrique Herrera-Viedma. Opinions and behaviors-based public opinion management consid-ering information dissemination for public-related large-scale group decision-making. Information Fusion , 128: 103965, 2026. ISSN 1566-2535. doi: 10.1016/j.inffus. 2025.103965. Jinsi Liu, Shengjiao Zhu, Zhihua Wang, and Shixiang Chen. The evolution of online public opinion on earthquakes: a system dynamics approach. Humanities and Social Sci-ences Communications , 11(1):1636, 2024. ISSN 2662-9992. doi: 10.1057/s41599-024-04162-3. URL https:// www.nature.com/articles/s41599-024-04162-3 .Shan Liu and Hao Wen. Agent-based modelling of polar-ized news and opinion dynamics in social networks: aguidance-oriented approach. Journal of Complex Net-works , 12(4):cnae028, 2024. ISSN 2051-1329. doi: 10.1093/comnet/cnae028. URL https://doi.org/10. 1093/comnet/cnae028 .Yijun Liu, Wu Liu, Xiaoyan Gu, Yong Rui, Xiaodong He, and Yongdong Zhang. Lmagent: A large-scale multimodal agents society for multi-user simulation. IEEE Transactions on Multimedia , pages 1–12, 2026. doi: 10.1109/TMM. 2026.3651078. Josie McCulloch, Jiaqi Ge, Jonathan Ward, Alison Hep-penstall, J. Gareth Polhill, and Nick Malleson. Cali-brating agent-based models using uncertainty quantifica-tion methods. Journal of Artificial Societies and So-cial Simulation , 25(2):1, 2022. ISSN 1460-7425. doi: 10.18564/jasss.4791. URL http://jasss.soc.surrey. ac.uk/25/2/1.html .Xinyi Mou, Zhongyu Wei, and Xuanjing Huang. Unveil-ing the truth and facilitating change: Towards agent-based large-scale social movement simulation. In Find-ings of the Association for Computational Linguistics: ACL 2024 , pages 4789–4809. Association for Com-putational Linguistics, 2024. doi: 10.18653/v1/2024. findings-acl.285. URL https://aclanthology.org/ 2024.findings-acl.285/ .Phyo Yi Win Myint, Siaw Ling Lo, and Yuhao Zhang. Un-veiling the dynamics of crisis events: Sentiment and emo-tion analysis via multi-task learning with attention mech-anism and subject-based intent prediction. Information Processing & Management , 61(4):103695, 2024. doi: 10.1016/j.ipm.2024.103695. Joon Sung Park, Joseph O’Brien, Carrie Jun Cai, Mered-ith Ringel Morris, Percy Liang, and Michael S. Bern-stein. Generative agents: Interactive simulacra of hu-man behavior. In Proceedings of the 36th Annual ACM Symposium on User Interface Software and Technology ,19 UIST ’23, New York, NY, USA, 2023. Association for Computing Machinery. ISBN 9798400701320. doi: 10.1145/3586183.3606763. URL https://doi.org/10. 1145/3586183.3606763 .Anand S. Rao and Michael P. Georgeff. BDI agents: From theory to practice. In Proceedings of the First International Conference on Multiagent Systems (ICMAS-95) , pages 312– 319. AAAI Press, 1995. Robert G Sargent. Verification and validation of simulation models. Journal of Simulation , 7(1):12–24, 2013. doi: 10.1057/jos.2012.20. Amos Tversky and Daniel Kahneman. Judgment under un-certainty: Heuristics and biases. Science , 185(4157): 1124–1131, 1974. doi: 10.1126/science.185.4157.1124. URL https://www.science.org/doi/abs/10.1126/ science.185.4157.1124 .Lei Wang, Chen Ma, Xueyang Feng, Zeyu Zhang, Hao Yang, Jingsen Zhang, Zhiyuan Chen, Jiakai Tang, Xu Chen, Yankai Lin, Wayne Xin Zhao, Zhewei Wei, and Jirong Wen. A survey on large language model based autonomous agents. Frontiers of Computer Sci-ence , 18(6):186345, 2024. ISSN 2095-2236. doi: 10. 1007/s11704-024-40231-1. URL https://doi.org/10. 1007/s11704-024-40231-1 .Duncan J. Watts. A simple model of global cascades on random networks. Proceedings of the National Academy of Sciences , 99(9):5766–5771, 2002. doi: 10.1073/pnas. 082090499. Duncan J. Watts and Steven H. Strogatz. Collective dynamics of ‘small-world’ networks. Nature , 393:440–442, 1998. doi: 10.1038/30918. Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Brian Ichter, Fei Xia, Ed Chi, Quoc V. Le, and Denny Zhou. Chain-of-thought prompting elicits reasoning in large lan-guage models. In Advances in Neural Information Process-ing Systems , volume 35, pages 24824–24837, 2022. Wei Wu, Yawen Yang, Tianlu Qiao, and Haipeng Peng. Recent development on online public opinion commu-nication and early warning technologies: Survey. Ex-pert Systems with Applications , 284:127823, 2025. ISSN 0957-4174. doi: https://doi.org/10.1016/j.eswa.2025. 127823. URL https://www.sciencedirect.com/ science/article/pii/S0957417425014459 .Xianwen Wu and Zixuan Liu. Research on public opinion propagation of emergency reversal based on machine learn-ing. International Journal of Computational Intelligence Systems , 16(1):75, 2023. Xiaohua Wu, Xiaohui Tao, Wenjie Wu, Jianwei Zhang, Yue-feng Li, and Lin Li. Random forest of thoughts: Reason-ing path fusion for llm inference in computational social science. Information Fusion , 127:103791, 2026. ISSN 1566-2535. doi: 10.1016/j.inffus.2025.103791. Ziyi Yang, Zaibin Zhang, Zirui Zheng, Yuxian Jiang, Ziyue Gan, Zhiyu Wang, Zijian Ling, Jinsong Chen, Martz Ma, Bowen Dong, Prateek Gupta, Shuyue Hu, Zhenfei Yin, Guohao Li, Xu Jia, Lijun Wang, Bernard Ghanem, Huchuan Lu, Chaochao Lu, Wanli Ouyang, Yu Qiao, Philip Torr, and Jing Shao. Oasis: Open agent social interaction simulations with one million agents, 2025. URL https://arxiv. org/abs/2411.11581 .Junchi Yao, Hongjie Zhang, Jie Ou, Dingyi Zuo, Zheng Yang, and Zhicheng Dong. Social opinions prediction uti-lizes fusing dynamics equation with LLM-based agents. 
+
+Scientific Reports , 15(1):15472, 2025. ISSN 2045-2322. doi: 10.1038/s41598-025-99704-3. URL https://www. nature.com/articles/s41598-025-99704-3 .Bowen Zhang, Yi Yang, Fuqiang Niu, Xianghua Fu, Genan Dai, and Hu Huang. SPARK: Simulating the co-evolution of stance and topic dynamics in online discourse with LLM-based agents. In Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing , pages 23072–23084. Association for Computational Linguistics, 2025a. ISBN 9798891763326. doi: 10.18653/v1/2025. emnlp-main.1176. URL https://aclanthology.org/ 2025.emnlp-main.1176/ .Lan Zhang, Yuxuan Hu, Weihua Li, Quan Bai, and Parma Nand. LLM-AIDSim: LLM-enhanced agent-based in-fluence diffusion simulation in social networks. Sys-tems , 13(1):29, 2025b. ISSN 2079-8954. doi: 10. 3390/systems13010029. URL https://www.mdpi.com/ 2079-8954/13/1/29 .Shuhan Zhang, Zifan Peng, and Yinwang Ren. Gplab: Agenerative agent-based framework for policy simulation and evaluation. Journal of Artificial Societies and So-cial Simulation , 29(1):6, 2026. ISSN 1460-7425. doi: 10.18564/jasss.5933. URL http://jasss.soc.surrey. ac.uk/29/1/6.html .Yunyao Zhang, Zikai Song, Hang Zhou, Wenfeng Ren, Yi-Ping Phoebe Chen, Junqing Yu, and Wei Yang. 
+
+𝑔𝑎 − 𝑠 3: Comprehensive social network simulation with group agents. In Wanxiang Che, Joyce Nabende, Eka-terina Shutova, and Mohammad Taher Pilehvar, edi-tors, Findings of the Association for Computational Lin-guistics: ACL 2025 , pages 8950–8970, Vienna, Aus-tria, July 2025c. Association for Computational Linguis-tics. ISBN 979-8-89176-256-5. doi: 10.18653/v1/2025. findings-acl.468. URL https://aclanthology.org/ 2025.findings-acl.468/ .20 Zeyu Zhang, Jianxun Lian, Chen Ma, et al. TrendSim: Simulating trending topics in social media under poi-soning attacks with LLM-based multi-agent system. In 
+
+Findings of the Association for Computational Linguis-tics: NAACL 2025 , pages 2930–2949. Association for Computational Linguistics, 2025d. ISBN 9798891761957. doi: 10.18653/v1/2025.findings-naacl.160. URL https: //aclanthology.org/2025.findings-naacl.160/ .Qingyuan Zhao, Murat A. Erdogdu, Hera Y. He, Anand Ra-jaraman, and Jure Leskovec. Seismic: A self-exciting point process model for predicting tweet popularity. In 
+
+Proceedings of the 21th ACM SIGKDD International Con-ference on Knowledge Discovery and Data Mining , pages 1513–1522. ACM, 2015. ISBN 978-1-4503-3664-2. doi: 10.1145/2783258.2783401. URL https://dl.acm.org/ doi/10.1145/2783258.2783401 .Zhipeng Zhou, Xingnan Zhou, Yudi Chen, and Hao-nan Qi. Evolution of online public opinions on major accidents: Implications for post-accident re-sponse based on social media network. Expert Sys-tems with Applications , 235:121307, 2024. ISSN 0957-4174. doi: https://doi.org/10.1016/j.eswa.2023. 121307. URL https://www.sciencedirect.com/ science/article/pii/S0957417423018092 .
+
+# A Core Prompt Templates 
+
+This appendix presents the three core prompt templates used within the Social-BDI cognitive architecture (simplified for presentation). Variables in curly braces (e.g., {agent_role} )are dynamically populated at runtime based on agent type and simulation state. Role-specific elements such as cognitive bias factors, desire type lists, behavioral characteristics, and expression style options are parameterized per agent category (Ordinary User, Opinion Leader, Media Account, Govern-ment). 
+
+A.1 Belief Update Prompt 
+
+You are currently {agent_role} on the Weibo platform, participating in a public opinion event discussion. Current event background: {event_background} 
+
+## Belief State Inference 
+
+Current time: {current_time} 
+
+Based on the following information, infer your current belief state: 
+
+### My Identity Information: {identity_text} 
+
+### My Previous Belief State: {belief_text} 
+
+### Newly Received Information: {new_info} 
+
+### My Historical Behavior Memory: {memories} 
+
+### External Events: {external_events} 
+
+Please consider the following cognitive factors: 
+
+{cognitive_factors} 
+
+// e.g., for Ordinary User: confirmation bias, anchoring effect, emotional con-tagion, herd mentality, emotion-first reasoning, simplistic attribution; for Opin-ion Leader: brand image, professional judgment, public opinion trend, self-reinforcement. 
+
+Output your current belief state in JSON format: 
+
+{"psychological_cognition": ["cognition_trait_1", ...], "event_opinions": [ {"subject": "entity_name", "opinion": "opinion_text"} ], "emotion_vector": { "happy": 0.0, "sad": 0.0, "angry": 0.0, "fear": 0.0, "surprise": 0.0, "disgust": 0.0 }}
+
+Note : Each emotion dimension ranges from 0 (absent) to 1 (extreme). 
+
+A.2 Desire Generation Prompt 
+
+You are {agent_role} on the Weibo platform. Based on your current beliefs and information you have seen, infer your current social desires. Current event background: {event_background} 
+
+## Desire Reasoning 
+
+Current time: {current_time} 
+
+### My Current Belief State: {belief_text} 
+
+### Information I Have Seen: {exposed_info} 
+
+### External Events: {external_events} 
+
+Desire Types (prioritized for {agent_role} ): 
+
+{desire_types} 
+
+// e.g., for Ordinary User: emotional venting, entertainment, self-expression, social approval, social connection, justice advocacy, information seeking; for Opinion Leader: influencing others, self-expression, social approval, justice advocacy, information seeking. 
+
+Output the desire list in JSON format: 
+
+{"desires": [ {"type": "desire_type", "description": "specific desire description", "intensity": "very_low/low/medium/high/very_high"} ]}
+
+A.3 Intention & Action Decision Prompt 
+
+You are currently {agent_role} on the Weibo platform. Combine your beliefs, desires, and breaking events to decide actions. Current event background: {event_background} 
+
+[Behavioral Characteristics] 
+
+{behavioral_characteristics} 
+
+// e.g., for Ordinary User: colloquial language, emotional expression, internet slang, exaggerated and biased allowed; for Opinion Leader: original viewpoints preferred, in-depth content, influence-oriented. 
+
+## Action–Intention Decision 
+
+Current time: {current_time} 
+
+### My Current Beliefs: {belief_text} 
+
+### My Current Desires: {desires} 
+
+### Available Posts (indexed): {exposed_posts} {hot_topics} {external_events} 
+
+[Decision Guidelines] 
+
+Determine action quantity and type based on: event heat, emotional intensity, relevance, temporal decay, exposure content, and behavioral tendency described in agent identity. 
+
+Three-level chain-of-thought reasoning: L1: Action type & target: Choose among Like , Repost , Repost w/ comment ,
+
+Short comment , Long comment , Short post , Long post ; specify target post index (0 for original). 
+
+L2: Expression strategy (skip for Like/Repost): 
+
+• Emotion type & intensity, Stance & strength, Expression style, Narrative strategy 
+
+• {expression_styles} , {narrative_strategies} 
+
+// e.g., for Ordinary User styles: sarcastic, aggressive, emotional venting, mock-ing; for Opinion Leader: rational, ironic, empathetic, questioning. 
+
+L3: Content generation (skip for Like/Repost): Generate Weibo text matching 
+
+{agent_role} voice, consistent with L1 and L2 decisions. Output the action list in JSON format: 
+
+{"actions": [ 
+
+21 {"action_type": "short_comment", "target_id": 3, "expression_strategy": { "emotion_type": "anger", "emotion_intensity": "high", "stance": "oppose_X", "stance_intensity": "high", "style": "sarcastic", "narrative": "labeling" }, "content": { "text": "Generated Weibo text...", "topics": ["#topic#"], "mentions": ["@user"] }}]}
+
+Note : Like/Repost actions omit expression strategy and content fields. Return empty action list if no action is taken. 
+
+# B Evaluation Prompt Templates 
+
+This appendix presents the three LLM-as-Judge evaluation prompt templates used in the micro-level behavioral mecha-nism validation (Section 5.2). Each template is shown in sim-plified form; the actual prompts include additional formatting instructions and output schema constraints. 
+
+B.1 Cognitive-Behavior Chain Consistency Evaluation 
+
+You are an expert in social psychology and cognitive science. Please analyze the following social media user’s cognitive-behavioral data and evaluate the ra-tionality and cognitive depth of their behavioral decision-making process from a cognitive architecture perspective. User identity: {identity} 
+
+Psychological beliefs: {beliefs} {cognitive_chain} 
+
+Please evaluate on the following four sub-dimensions, providing an integer rating from 0–5 with brief justification for each: 1. Cognitive chain completeness : Does the decision process reflect a complete, verifiable cognitive reasoning chain from perception through belief, desire, and intention to final action? 2. Emotional dynamics rationality : Do cross-round emotional changes con-form to cognitive psychology principles (e.g., gradual decay in the absence of stimuli, intensification upon exposure to provocative content)? 3. Motivation-behavior alignment : Can the observed behaviors be traced back to independently modeled cognitive motivations? Is the mapping from desire weights to action types logically consistent? 4. Information integration : Does the cognitive state exhibit an independent up-date mechanism when facing new information, rather than simply overwriting previous states? 
+
+B.2 Personality Stability Evaluation 
+
+This evaluation follows a two-step protocol: first inferring personality traits from behavioral data alone, then comparing the inferred profile against the ground-truth profile used to initialize the agent. 
+
+Step 1: Personality Inference. 
+
+You are a personality psychology expert. Based on the following social me-dia user’s complete behavioral and cognitive trajectory across {num_rounds} 
+
+simulation rounds, infer their personality traits. 
+
+Input data: 
+
+• All posts, comments, and reposts generated by the agent 
+
+• Emotional state trajectory across rounds 
+
+• Interaction patterns (reply targets, repost sources) 
+
+{user_data} 
+
+Please infer the following structured profile: 
+
+1. Identity description : A first-person narrative summarizing the user’s self-perceived social role, values, and communication style. 2. Psychological beliefs (3–5 items): Core cognitive tendencies that drive the user’s information processing and opinion formation. 3. Behavioral tendencies : Characteristic patterns in content generation, inter-
+
+action preferences, and emotional expression. 4. Emotional characteristics : Six-dimensional emotion baseline (anger, sad-ness, fear, disgust, surprise, joy) estimated from behavioral signals. 
+
+Step 2: Similarity Assessment. 
+
+Please evaluate the similarity (0–1) between the following two personality profiles. 
+
+[Original personality profile] 
+
+Identity: {original_identity} 
+
+Psychological beliefs: {original_beliefs} 
+
+Behavioral tendencies: {original_tendency} 
+
+[Behavior-inferred personality profile] 
+
+Identity: {inferred_identity} 
+
+Psychological beliefs: {inferred_beliefs} 
+
+Behavioral tendencies: {inferred_tendency} 
+
+Evaluation dimensions (each scored 0–1): 1. Identity consistency : Does the inferred self-description match the original in terms of social role, values, and communication style? 2. Psychological trait consistency : Do the inferred cognitive tendencies align with the original belief system? 3. Behavioral tendency consistency : Are the inferred behavioral patterns con-sistent with the original profile? 
+
+B.3 Decision Robustness Evaluation 
+
+You are a cognitive psychology expert evaluating the cognitive robustness of a social media user simulation system. The agent made multiple decisions under semantically equivalent but superficially perturbed variants of the same scenario. 
+
+Perturbation types: 
+
+• Reordering of recommended posts in the agent’s feed 
+
+• Addition or removal of 1–2 posts from the recommendation list 
+
+• Minor paraphrasing of peripheral context information 
+
+Agent information: 
+
+Agent identity: {identity} 
+
+Cognitive architecture type: {method_label} 
+
+Original decision (under unperturbed input): 
+
+{original_decision} 
+
+Decisions under perturbed conditions ({num_variants} variants): 
+
+{perturbed_decisions} 
+
+For each perturbed decision, note whether the core behavioral choice (action type, target, and emotional tone) changed relative to the original. 
+
+Evaluation dimensions (each scored 0–1): 1. Core decision stability : Does the core behavioral decision (action type and primary target) remain stable under minor input perturbations? A score of 1 indicates identical core decisions across all variants. 2. Cognitive anchoring strength : Does the decision exhibit anchoring effects driven by stable underlying beliefs and values, rather than being swayed by superficial input variations? 3. Adaptive rationality : When differences exist between the original and per-turbed decisions, are they reasonable cognitive adaptations to meaningful input changes, or do they appear as random noise? 
+
+# C Parameter Configuration 
+
+POSIM’s temporal dynamics and recommendation mecha-nisms rely on key parameters governing agent activation and content exposure. Table 9 presents Hawkes process param-eters controlling temporal evolution, and Table 10 lists rec-ommendation parameters balancing homophily, popularity, and freshness. These parameters were calibrated through it-erative experiments with manual validation, demonstrating robust generalizability across all three events. 22 Table 9: Hawkes point process parameters (unified across three events). 
+
+Parameter Symbol Value 
+
+Background rate 𝜇 0.01 Endogenous excitation 𝛼 𝑖𝑛𝑡 0.005 Endogenous decay 𝛽 𝑖𝑛𝑡 0.16 Exogenous excitation 𝛼 𝑒𝑥𝑡 0.08 Exogenous decay 𝛽 𝑒𝑥𝑡 0.005 Scaling factor 𝑁 𝑠 2000 Circadian amplitude 𝑠 𝑐𝑖𝑟 𝑐 0.3 
+
+Table 10: Recommendation system parameters. 
+
+Parameter Symbol Value 
+
+Homophily weight 𝑤 ℎ 0.3 Popularity weight 𝑤 𝑝 0.3 Freshness weight 𝑤 𝑟 0.4 Exploration rate 𝑟 𝑒𝑥 𝑝𝑙𝑜𝑟 𝑒 0.2 Rec. count 𝐾 10 Comment sampling 𝑁 𝑐 5Embedding model — BGE-small-zh 
+
+# D Data Collection and Preprocessing 
+
+The three public opinion event datasets used in this study are all collected from the Sina Weibo platform. For each event, the collection scope includes original posts containing event-related hashtags or keywords along with their complete repost chains and comment trees, as well as basic information of all participating users (username, gender, region, verification type, follower count, personal description, etc.). The raw data volumes are: LE comprises 426,882 users and 1,254,512 be-havioral records; WL comprises 416,235 users and 1,416,034 records; XF comprises 725,251 users and 1,851,124 records. In total, the three datasets encompass 1,568,368 users and 4,521,670 behavioral records. The raw data undergoes multi-stage cleaning: deduplica-tion based on post IDs; filtering of low-activity users with insufficient posts during the simulation period, ensuring each agent has adequate behavioral samples for belief initialization; removal of advertisements and spam via keyword blacklists; filtering of content irrelevant to the event topic; and quality filtering based on content length. After this cleaning pipeline, the retained data volumes are: 1,530 users and 34,218 posts for LE; 1,843 users and 51,647 posts for WL; 1,987 users and 14,892 posts for XF (see Table 2). Agent belief initialization proceeds as follows: role identity beliefs from users’ basic information and historical content; psychological cognition beliefs matched from a predefined trait pool; event opinion beliefs extracted through LLM-driven structured interviews; and initial emotion vectors from senti-ment analysis of recent posts. 
+
+# E Computational Resource Consump-tion 
+
+Table 11 summarizes the computational resource consump-tion for the three event simulations. All LLM inference is performed via the SiliconFlow API 5.
+
+Table 11: Computational resource consumption for three event sim-ulations. 
+
+Metric LE WL XF 
+
+No. of agents 1,530 1,843 1,987 Simulation steps 276 1,140 426 Simulated duration ∼46 h ∼190 h ∼71 h Total actions 29,146 46,140 12,261 LLM API calls 26,295 39,945 11,670 Total tokens 28.98 M 46.95 M 13.37 M Wall-clock time ∼3.5 h ∼8.3 h ∼1.9 h 
+
+> 5https://siliconflow.cn/
+
+23
