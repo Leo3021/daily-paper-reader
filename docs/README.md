@@ -6,73 +6,73 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-03-29
-- 运行时间：2026-03-29 19:42:30 UTC
+- 最新运行日期：2026-03-30
+- 运行时间：2026-03-30 19:53:47 UTC
 - 运行状态：成功
 - 本次总论文数：17
 - 精读区：6
 - 速读区：11
 
 ### 今日简报（AI）
-今日深度解析 17 篇 AI 论文，聚焦视觉导航协作与医疗大模型临床推理的重大突破。
-满分论文揭示了“同伴观察”对视觉语言导航的巨大助力，多智能体系统则在眼科与阿尔茨海默症诊断中展现出卓越的专业推理。
-推荐重点关注多智能体协作机制在复杂任务及垂直医疗领域的落地潜力。
-- 详情：[/202603/29/README](/202603/29/README)
+今日聚焦异构多智能体协作与医疗 AI，深度解析了机器人自主遛狗及皮肤病透明化诊疗等 17 篇前沿成果。
+满分论文实现了“零样本、零微调、零干预”的异构导航，并展示了 SkinGPT-X 在医疗诊断中的自我进化与高可信度。
+建议关注具身智能 VLA 模型与智能体博弈中的欺骗行为，把握 AI 从虚拟指令走向复杂现实交互的演进趋势。
+- 详情：[/202603/30/README](/202603/30/README)
 
 ### 精读区论文标签
-1. [Does Peer Observation Help? Vision-Sharing Collaboration for Vision-Language Navigation](/202603/29/2603.20804v1-does-peer-observation-help-vision-sharing-collaboration-for-vision-language-navigation)  
+1. [Can a Robot Walk the Robotic Dog: Triple-Zero Collaborative Navigation for Heterogeneous Multi-Agent Systems](/202603/30/2603.21723v2-can-a-robot-walk-the-robotic-dog-triple-zero-collaborative-navigation-for-heterogeneous-multi-agent-systems)  
    标签：评分：10.0/10、query:mm-mas
-   evidence：多智能体导航的视觉共享协作
-2. [Deliberative multi-agent large language models improve clinical reasoning in ophthalmology](/202603/29/2603.21447v1-deliberative-multi-agent-large-language-models-improve-clinical-reasoning-in-ophthalmology)  
-   标签：评分：9.0/10、query:llm-ma
-   evidence：用于临床推理的多智能体大模型审议委员会
-3. [Mind over Space: Can Multimodal Large Language Models Mentally Navigate?](/202603/29/2603.21577v1-mind-over-space-can-multimodal-large-language-models-mentally-navigate)  
+   evidence：由多模态大模型引导的异构多智能体系统
+2. [SkinGPT-X: A Self-Evolving Collaborative Multi-Agent System for Transparent and Trustworthy Dermatological Diagnosis](/202603/30/2603.26122v1-skingpt-x-a-self-evolving-collaborative-multi-agent-system-for-transparent-and-trustworthy-dermatological-diagnosis)  
+   标签：评分：10.0/10、query:mm-mas
+   evidence：用于诊断的多模态协作多智能体系统
+3. [EVA: Efficient Reinforcement Learning for End-to-End Video Agent](/202603/30/2603.22918v2-eva-efficient-reinforcement-learning-for-end-to-end-video-agent)  
    标签：评分：9.0/10、query:mm-mas
-   evidence：评估多模态大模型在具身智能体导航中能力的基准
-4. [POSIM: A Multi-Agent Simulation Framework for Social Media Public Opinion Evolution and Governance](/202603/29/2603.23884v1-posim-a-multi-agent-simulation-framework-for-social-media-public-opinion-evolution-and-governance)  
+   evidence：使用多模态大模型的端到端视频智能体强化学习
+4. [Self-Organizing Multi-Agent Systems for Continuous Software Development](/202603/30/2603.25928v1-self-organizing-multi-agent-systems-for-continuous-software-development)  
    标签：评分：9.0/10、query:llm-ma
-   evidence：基于大语言模型的多智能体仿真框架
-5. [Environment-Grounded Multi-Agent Workflow for Autonomous Penetration Testing](/202603/29/2603.24221v1-environment-grounded-multi-agent-workflow-for-autonomous-penetration-testing)  
+   evidence：基于大语言模型的软件开发多智能体系统构建框架
+5. [AgentCollab: A Self-Evaluation-Driven Collaboration Paradigm for Efficient LLM Agents](/202603/30/2603.26034v1-agentcollab-a-self-evaluation-driven-collaboration-paradigm-for-efficient-llm-agents)  
    标签：评分：8.0/10、query:llm-ma
-   evidence：使用大语言模型的自主渗透测试多智能体架构
-6. [VideoWeaver: Multimodal Multi-View Video-to-Video Transfer for Embodied Agents](/202603/29/2603.25420v1-videoweaver-multimodal-multi-view-video-to-video-transfer-for-embodied-agents)  
-   标签：评分：8.0/10、query:mm-mas
-   evidence：具身智能体的多模态多视角视频转换
+   evidence：利用自我反思的大语言模型智能体协作推理框架
+6. [Ask or Assume? Uncertainty-Aware Clarification-Seeking in Coding Agents](/202603/30/2603.26233v1-ask-or-assume-uncertainty-aware-clarification-seeking-in-coding-agents)  
+   标签：评分：8.0/10、query:llm-ma
+   evidence：用于编程智能体的多智能体支架
 
 ### 速读区论文标签
-1. [StreamingClaw Technical Report](/202603/29/2603.22120v1-streamingclaw-technical-report)  
+1. [MMaDA-VLA: Large Diffusion Vision-Language-Action Model with Unified Multi-Modal Instruction and Generation](/202603/30/2603.25406v2-mmada-vla-large-diffusion-vision-language-action-model-with-unified-multi-modal-instruction-and-generation)  
    标签：评分：8.0/10、query:mm-mas
-   evidence：多模态流式视频的统一智能体框架
-2. [StreamingClaw Technical Report](/202603/29/2603.22120v2-streamingclaw-technical-report)  
+   evidence：用于机器人控制的大型扩散视觉-语言-动作模型
+2. [Rethinking Token Pruning for Historical Screenshots in GUI Visual Agents: Semantic, Spatial, and Temporal Perspectives](/202603/30/2603.26041v1-rethinking-token-pruning-for-historical-screenshots-in-gui-visual-agents-semantic-spatial-and-temporal-perspectives)  
    标签：评分：8.0/10、query:mm-mas
-   evidence：具身智能体的多模态记忆与实时推理
-3. [AD-CARE: A Guideline-grounded, Modality-agnostic LLM Agent for Real-world Alzheimer's Disease Diagnosis with Multi-cohort Assessment, Fairness Analysis, and Reader Study](/202603/29/2603.25322v1-ad-care-a-guideline-grounded-modality-agnostic-llm-agent-for-real-world-alzheimers-disease-diagnosis-with-multi-cohort-assessment-fairness-analysis-and-reader-study)  
-   标签：评分：8.0/10、query:mm-mas
-   evidence：用于多模态医学诊断的模态无关大模型智能体
-4. [Unleashing Spatial Reasoning in Multimodal Large Language Models via Textual Representation Guided Reasoning](/202603/29/2603.23404v1-unleashing-spatial-reasoning-in-multimodal-large-language-models-via-textual-representation-guided-reasoning)  
-   标签：评分：7.0/10、query:mm-mas
-   evidence：多模态大语言模型中的空间推理
-5. [3DCity-LLM: Empowering Multi-modality Large Language Models for 3D City-scale Perception and Understanding](/202603/29/2603.23447v1-3dcity-llm-empowering-multi-modality-large-language-models-for-3d-city-scale-perception-and-understanding)  
-   标签：评分：7.0/10、query:mm-mas
-   evidence：用于城市级感知的多模态大语言模型
-6. [Experiential Reflective Learning for Self-Improving LLM Agents](/202603/29/2603.24639v1-experiential-reflective-learning-for-self-improving-llm-agents)  
+   evidence：基于多模态大语言模型的GUI视觉智能体
+3. [Deception and Communication in Autonomous Multi-Agent Systems: An Experimental Study with Among Us](/202603/30/2603.26635v1-deception-and-communication-in-autonomous-multi-agent-systems-an-experimental-study-with-among-us)  
+   标签：评分：8.0/10、query:llm-ma
+   evidence：自主多智能体系统中的通信与协作
+4. [MemoryCD: Benchmarking Long-Context User Memory of LLM Agents for Lifelong Cross-Domain Personalization](/202603/30/2603.25973v1-memorycd-benchmarking-long-context-user-memory-of-llm-agents-for-lifelong-cross-domain-personalization)  
    标签：评分：7.0/10、query:llm-ma
-   evidence：大语言模型智能体的自我改进框架
-7. [Bridging Perception and Reasoning: Token Reweighting for RLVR in Multimodal LLMs](/202603/29/2603.25077v1-bridging-perception-and-reasoning-token-reweighting-for-rlvr-in-multimodal-llms)  
+   evidence：大模型智能体长上下文用户记忆基准测试
+5. [Rethinking Recommendation Paradigms: From Pipelines to Agentic Recommender Systems](/202603/30/2603.26100v1-rethinking-recommendation-paradigms-from-pipelines-to-agentic-recommender-systems)  
+   标签：评分：7.0/10、query:llm-ma
+   evidence：将推荐系统模块重组为智能体
+6. [One Is Not Enough: How People Use Multiple AI Models in Everyday Life](/202603/30/2603.26107v1-one-is-not-enough-how-people-use-multiple-ai-models-in-everyday-life)  
+   标签：评分：7.0/10、query:mm-mas
+   evidence：人类对多个多模态大语言模型的编排使用
+7. [Beyond Where to Look: Trajectory-Guided Reinforcement Learning for Multimodal RLVR](/202603/30/2603.26126v1-beyond-where-to-look-trajectory-guided-reinforcement-learning-for-multimodal-rlvr)  
    标签：评分：7.0/10、query:mm-mas
    evidence：多模态大语言模型的强化学习
-8. [MMaDA-VLA: Large Diffusion Vision-Language-Action Model with Unified Multi-Modal Instruction and Generation](/202603/29/2603.25406v1-mmada-vla-large-diffusion-vision-language-action-model-with-unified-multi-modal-instruction-and-generation)  
+8. [Rocks, Pebbles and Sand: Modality-aware Scheduling for Multimodal Large Language Model Inference](/202603/30/2603.26498v1-rocks-pebbles-and-sand-modality-aware-scheduling-for-multimodal-large-language-model-inference)  
    标签：评分：7.0/10、query:mm-mas
-   evidence：用于机器人控制的大型扩散视觉-语言-动作模型
-9. [Environment Maps: Structured Environmental Representations for Long-Horizon Agents](/202603/29/2603.23610v1-environment-maps-structured-environmental-representations-for-long-horizon-agents)  
-   标签：评分：6.0/10、query:llm-ma
-   evidence：为长程LLM智能体提供的结构化环境表示
-10. [ARC-AGI-3: A New Challenge for Frontier Agentic Intelligence](/202603/29/2603.24621v1-arc-agi-3-a-new-challenge-for-frontier-agentic-intelligence)  
-   标签：评分：6.0/10、query:llm-ma
-   evidence：研究智能体智能的交互式基准测试
-11. [Photon: Speedup Volume Understanding with Efficient Multimodal Large Language Models](/202603/29/2603.25155v1-photon-speedup-volume-understanding-with-efficient-multimodal-large-language-models)  
+   evidence：多模态大语言模型推理的模态感知调度
+9. [Vision2Web: A Hierarchical Benchmark for Visual Website Development with Agent Verification](/202603/30/2603.26648v1-vision2web-a-hierarchical-benchmark-for-visual-website-development-with-agent-verification)  
+   标签：评分：7.0/10、query:mm-mas
+   evidence：带有智能体验证的视觉网站开发基准
+10. [Label What Matters: Modality-Balanced and Difficulty-Aware Multimodal Active Learning](/202603/30/2603.25107v1-label-what-matters-modality-balanced-and-difficulty-aware-multimodal-active-learning)  
    标签：评分：6.0/10、query:mm-mas
-   evidence：用于3D成像的高效多模态大语言模型
+   evidence：多模态主动学习的强化学习框架
+11. [Good Scores, Bad Data: A Metric for Multimodal Coherence](/202603/30/2603.25924v1-good-scores-bad-data-a-metric-for-multimodal-coherence)  
+   标签：评分：6.0/10、query:mm-mas
+   evidence：AI 系统中多模态一致性的评估指标
 
 
 <div class="dpr-home-promo-card">
