@@ -1,0 +1,1359 @@
+{
+  "mode": "standard",
+  "generated_at": "2026-04-02T19:49:44.853223+00:00",
+  "stats": {
+    "mode": "standard",
+    "tag_count": 1,
+    "deep_divecandidates": 37,
+    "deep_cap": 6,
+    "deep_selected": 22,
+    "quick_candidates": 48,
+    "quick_skim_target": 11,
+    "quick_selected": 11
+  },
+  "deep_dive": [
+    {
+      "id": "2603.23953v1",
+      "title": "VOLMO: Versatile and Open Large Models for Ophthalmology",
+      "abstract": "Vision impairment affects millions globally, and early detection is critical to preventing irreversible vision loss. Ophthalmology workflows require clinicians to integrate medical images, structured clinical data, and free-text notes to determine disease severity and management, which is time-consuming and burdensome. Recent multimodal large language models (MLLMs) show promise, but existing general and medical MLLMs perform poorly in ophthalmology, and few ophthalmology-specific MLLMs are openly available. We present VOLMO (Versatile and Open Large Models for Ophthalmology), a model-agnostic, data-open framework for developing ophthalmology-specific MLLMs. VOLMO includes three stages: ophthalmology knowledge pretraining on 86,965 image-text pairs from 26,569 articles across 82 journals; domain task fine-tuning on 26,929 annotated instances spanning 12 eye conditions for disease screening and severity classification; and multi-step clinical reasoning on 913 patient case reports for assessment, planning, and follow-up care. Using this framework, we trained a compact 2B-parameter MLLM and compared it with strong baselines, including InternVL-2B, LLaVA-Med-7B, MedGemma-4B, MedGemma-27B, and RETFound. We evaluated these models on image description generation, disease screening and staging classification, and assessment-and-management generation, with additional manual review by two healthcare professionals and external validation on three independent cohorts for age-related macular degeneration and diabetic retinopathy. Across settings, VOLMO-2B consistently outperformed baselines, achieving stronger image description performance, an average F1 of 87.4% across 12 eye conditions, and higher scores in external validation.",
+      "authors": [
+        "Zhenyue Qin",
+        "Younjoon Chung",
+        "Elijah Lee",
+        "Wanyue Feng",
+        "Xuguang Ai",
+        "Serina Applebaum",
+        "Minjie Zou",
+        "Yang Liu",
+        "Pan Xiao",
+        "Mac Singer",
+        "Amisha Dave",
+        "Aidan Gilson",
+        "Tiarnan D. L. Keenan",
+        "Emily Y. Chew",
+        "Zhiyong Lu",
+        "Yih-Chung Tham",
+        "Ron Adelman",
+        "Luciano V. Del Priore",
+        "Qingyu Chen"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.ET"
+      ],
+      "published": "2026-03-25T05:25:10+00:00",
+      "link": "https://arxiv.org/pdf/2603.23953v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Multimodal large language models for ophthalmology",
+      "llm_evidence_cn": "眼科多模态大语言模型",
+      "llm_evidence": "眼科多模态大语言模型",
+      "canonical_evidence": "眼科多模态大语言模型",
+      "llm_tldr_en": "Presents an open framework for developing ophthalmology-specific multimodal large language models.",
+      "llm_tldr_cn": "提出了一个用于开发眼科专用多模态大语言模型的开放框架。",
+      "llm_tldr": "提出了一个用于开发眼科专用多模态大语言模型的开放框架。",
+      "llm_tags": [
+        "query:med-ml:composite"
+      ],
+      "matched_query_tag": "query:med-ml:composite",
+      "matched_query_text": "Papers central to 医学多模态、多语言相关论文检索, especially work that connects or combines: l; m; multimodal learning in medical imaging and clinical data; multilingual medical language models and translation; medical visual question answering in multiple languages; Multilingual multimodal AI in healthcare and medicine; Multimodal large language models for multilingual medical tasks; Multilingual vision language models for healthcare; Cross lingual multimodal learning for medical applications.",
+      "matched_requirement_id": "req-composite-med-ml",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.23953v2",
+      "title": "VOLMO: Versatile and Open Large Models for Ophthalmology",
+      "abstract": "Vision impairment affects millions globally, and early detection is critical to preventing irreversible vision loss. Ophthalmology workflows require clinicians to integrate medical images, structured clinical data, and free-text notes to determine disease severity and management, which is time-consuming and burdensome. Recent multimodal large language models (MLLMs) show promise, but existing general and medical MLLMs perform poorly in ophthalmology, and few ophthalmology-specific MLLMs are openly available. We present VOLMO (Versatile and Open Large Models for Ophthalmology), a model-agnostic, data-open framework for developing ophthalmology-specific MLLMs. VOLMO includes three stages: ophthalmology knowledge pretraining on 86,965 image-text pairs from 26,569 articles across 82 journals; domain task fine-tuning on 26,929 annotated instances spanning 12 eye conditions for disease screening and severity classification; and multi-step clinical reasoning on 913 patient case reports for assessment, planning, and follow-up care. Using this framework, we trained a compact 2B-parameter MLLM and compared it with strong baselines, including InternVL-2B, LLaVA-Med-7B, MedGemma-4B, MedGemma-27B, and RETFound. We evaluated these models on image description generation, disease screening and staging classification, and assessment-and-management generation, with additional manual review by two healthcare professionals and external validation on three independent cohorts for age-related macular degeneration and diabetic retinopathy. Across settings, VOLMO-2B consistently outperformed baselines, achieving stronger image description performance, an average F1 of 87.4% across 12 eye conditions, and higher scores in external validation.",
+      "authors": [
+        "Zhenyue Qin",
+        "Younjoon Chung",
+        "Elijah Lee",
+        "Wanyue Feng",
+        "Xuguang Ai",
+        "Serina Applebaum",
+        "Minjie Zou",
+        "Yang Liu",
+        "Pan Xiao",
+        "Mac Singer",
+        "Amisha Dave",
+        "Aidan Gilson",
+        "Tiarnan D. L. Keenan",
+        "Emily Y. Chew",
+        "Zhiyong Lu",
+        "Yih-Chung Tham",
+        "Ron Adelman",
+        "Luciano V. Del Priore",
+        "Qingyu Chen"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.ET"
+      ],
+      "published": "2026-03-25T05:25:10+00:00",
+      "link": "https://arxiv.org/pdf/2603.23953v2",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Multimodal large language models for ophthalmology integrating images and clinical data",
+      "llm_evidence_cn": "整合图像和临床数据的眼科多模态大语言模型",
+      "llm_evidence": "整合图像和临床数据的眼科多模态大语言模型",
+      "canonical_evidence": "整合图像和临床数据的眼科多模态大语言模型",
+      "llm_tldr_en": "Develops an open framework for ophthalmology-specific MLLMs integrating medical images and clinical text.",
+      "llm_tldr_cn": "开发了一个整合医学图像和临床文本的眼科专用多模态大模型开放框架。",
+      "llm_tldr": "开发了一个整合医学图像和临床文本的眼科专用多模态大模型开放框架。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multimodal learning in medical imaging and clinical data",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.24132v1",
+      "title": "MedAidDialog: A Multilingual Multi-Turn Medical Dialogue Dataset for Accessible Healthcare",
+      "abstract": "Conversational artificial intelligence has the potential to assist users in preliminary medical consultations, particularly in settings where access to healthcare professionals is limited. However, many existing medical dialogue systems operate in a single-turn question--answering paradigm or rely on template-based datasets, limiting conversational realism and multilingual applicability. In this work, we introduce MedAidDialog, a multilingual multi-turn medical dialogue dataset designed to simulate realistic physician--patient consultations. The dataset extends the MDDial corpus by generating synthetic consultations using large language models and further expands them into a parallel multilingual corpus covering seven languages: English, Hindi, Telugu, Tamil, Bengali, Marathi, and Arabic.   Building on this dataset, we develop MedAidLM, a conversational medical model trained using parameter-efficient fine-tuning on quantized small language models, enabling deployment without high-end computational infrastructure. Our framework additionally incorporates optional patient pre-context information (e.g., age, gender, allergies) to personalize the consultation process. Experimental results demonstrate that the proposed system can effectively perform symptom elicitation through multi-turn dialogue and generate diagnostic recommendations. We further conduct medical expert evaluation to assess the plausibility and coherence of the generated consultations.",
+      "authors": [
+        "Shubham Kumar Nigam",
+        "Suparnojit Sarkar",
+        "Piyush Patel"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-03-25T09:51:44+00:00",
+      "link": "https://arxiv.org/pdf/2603.24132v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "multilingual multi-turn medical dialogue dataset",
+      "llm_evidence_cn": "多语言多轮医学对话数据集",
+      "llm_evidence": "多语言多轮医学对话数据集",
+      "canonical_evidence": "多语言多轮医学对话数据集",
+      "llm_tldr_en": "Introduces MedAidDialog, a parallel multilingual corpus for realistic physician-patient consultations in seven languages.",
+      "llm_tldr_cn": "推出 MedAidDialog，一个涵盖七种语言的并行多语言真实医患咨询对话数据集。",
+      "llm_tldr": "推出 MedAidDialog，一个涵盖七种语言的并行多语言真实医患咨询对话数据集。",
+      "llm_tags": [
+        "query:med-ml:composite"
+      ],
+      "matched_query_tag": "query:med-ml:composite",
+      "matched_query_text": "Papers central to 医学多模态、多语言相关论文检索, especially work that connects or combines: l; m; multimodal learning in medical imaging and clinical data; multilingual medical language models and translation; medical visual question answering in multiple languages; Multilingual multimodal AI in healthcare and medicine; Multimodal large language models for multilingual medical tasks; Multilingual vision language models for healthcare; Cross lingual multimodal learning for medical applications.",
+      "matched_requirement_id": "req-composite-med-ml",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.29793v1",
+      "title": "Multimodal Machine Learning for Early Prediction of Metastasis in a Swedish Multi-Cancer Cohort",
+      "abstract": "Multimodal Machine Learning offers a holistic view of a patient's status, integrating structured and unstructured data from electronic health records (EHR). We propose a framework to predict metastasis risk one month prior to diagnosis, using six months of clinical history from EHR data. Data from four cancer cohorts collected at Karolinska University Hospital (Stockholm, Sweden) were analyzed: breast (n = 743), colon (n = 387), lung (n = 870), and prostate (n = 1890). The dataset included demographics, comorbidities, laboratory results, medications, and clinical text. We compared traditional and deep learning classifiers across single modalities and multimodal combinations, using various fusion strategies and a Transparent Reporting of a multivariable prediction model for Individual Prognosis Or Diagnosis (TRIPOD) 2a design, with an 80-20 development-validation split to ensure a rigorous, repeatable evaluation. Performance was evaluated using AUROC, AUPRC, F1 score, sensitivity, and specificity. We then employed a multimodal adaptation of SHAP to analyze the classifiers' reasoning. Intermediate fusion achieved the highest F1 scores on breast (0.845), colon (0.786), and prostate cancer (0.845), demonstrating strong predictive performance. For lung cancer, the intermediate fusion achieved an F1 score of 0.819, while the text-only model achieved the highest, with an F1 score of 0.829. Deep learning classifiers consistently outperformed traditional models. Colon cancer, the smallest cohort, had the lowest performance, highlighting the importance of sufficient training data. SHAP analysis showed that the relative importance of modalities varied across cancer types. Fusion strategies offer distinct strengths and weaknesses. Intermediate fusion consistently delivered the best results, but strategy choices should align with data characteristics and organizational needs.",
+      "authors": [
+        "Franco Rugolon",
+        "Korbinian Randl",
+        "Braslav Jovanovic",
+        "Ioanna Miliou",
+        "Panagiotis Papapetrou"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG",
+        "q-bio.QM"
+      ],
+      "published": "2026-03-31T14:27:21+00:00",
+      "link": "https://arxiv.org/pdf/2603.29793v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 10.0,
+      "llm_evidence_en": "Multimodal learning integrating EHR structured data and clinical text for cancer prediction",
+      "llm_evidence_cn": "整合电子健康记录结构化数据和临床文本的多模态学习用于癌症预测",
+      "llm_evidence": "整合电子健康记录结构化数据和临床文本的多模态学习用于癌症预测",
+      "canonical_evidence": "整合电子健康记录结构化数据和临床文本的多模态学习用于癌症预测",
+      "llm_tldr_en": "Proposes a multimodal framework using EHR data and clinical text to predict metastasis risk in cancer patients.",
+      "llm_tldr_cn": "提出了一种利用电子健康记录数据和临床文本预测癌症患者转移风险的多模态框架。",
+      "llm_tldr": "提出了一种利用电子健康记录数据和临床文本预测癌症患者转移风险的多模态框架。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multimodal learning in medical imaging and clinical data",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.24539v1",
+      "title": "CliPPER: Contextual Video-Language Pretraining on Long-form Intraoperative Surgical Procedures for Event Recognition",
+      "abstract": "Video-language foundation models have proven to be highly effective in zero-shot applications across a wide range of tasks. A particularly challenging area is the intraoperative surgical procedure domain, where labeled data is scarce, and precise temporal understanding is often required for complex downstream tasks. To address this challenge, we introduce CliPPER (Contextual Video-Language Pretraining on Long-form Intraoperative Surgical Procedures for Event Recognition), a novel video-language pretraining framework trained on surgical lecture videos. Our method is designed for fine-grained temporal video-text recognition and introduces several novel pretraining strategies to improve multimodal alignment in long-form surgical videos. Specifically, we propose Contextual Video-Text Contrastive Learning (VTC_CTX) and Clip Order Prediction (COP) pretraining objectives, both of which leverage temporal and contextual dependencies to enhance local video understanding. In addition, we incorporate a Cycle-Consistency Alignment over video-text matches within the same surgical video to enforce bidirectional consistency and improve overall representation coherence. Moreover, we introduce a more refined alignment loss, Frame-Text Matching (FTM), to improve the alignment between video frames and text. As a result, our model establishes a new state-of-the-art across multiple public surgical benchmarks, including zero-shot recognition of phases, steps, instruments, and triplets. The source code and pretraining captions can be found at https://github.com/CAMMA-public/CliPPER.",
+      "authors": [
+        "Florian Stilz",
+        "Vinkle Srivastav",
+        "Nassir Navab",
+        "Nicolas Padoy"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-03-25T17:14:36+00:00",
+      "link": "https://arxiv.org/pdf/2603.24539v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Video-language pretraining for surgical procedures",
+      "llm_evidence_cn": "手术过程的视频语言预训练",
+      "llm_evidence": "手术过程的视频语言预训练",
+      "canonical_evidence": "手术过程的视频语言预训练",
+      "llm_tldr_en": "Introduces a video-language pretraining framework for event recognition in long-form surgical procedures.",
+      "llm_tldr_cn": "介绍了一种用于长时手术过程事件识别的视频语言预训练框架。",
+      "llm_tldr": "介绍了一种用于长时手术过程事件识别的视频语言预训练框架。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multimodal learning in medical imaging and clinical data",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.24649v1",
+      "title": "MedOpenClaw: Auditable Medical Imaging Agents Reasoning over Uncurated Full Studies",
+      "abstract": "Currently, evaluating vision-language models (VLMs) in medical imaging tasks oversimplifies clinical reality by relying on pre-selected 2D images that demand significant manual labor to curate. This setup misses the core challenge of realworld diagnostics: a true clinical agent must actively navigate full 3D volumes across multiple sequences or modalities to gather evidence and ultimately support a final decision. To address this, we propose MEDOPENCLAW, an auditable runtime designed to let VLMs operate dynamically within standard medical tools or viewers (e.g., 3D Slicer). On top of this runtime, we introduce MEDFLOWBENCH, a full-study medical imaging benchmark covering multi-sequence brain MRI and lung CT/PET. It systematically evaluates medical agentic capabilities across viewer-only, tool-use, and open-method tracks. Initial results reveal a critical insight: while state-of-the-art LLMs/VLMs (e.g., Gemini 3.1 Pro and GPT-5.4) can successfully navigate the viewer to solve basic study-level tasks, their performance paradoxically degrades when given access to professional support tools due to a lack of precise spatial grounding. By bridging the gap between static-image perception and interactive clinical workflows, MEDOPENCLAW and MEDFLOWBENCH establish a reproducible foundation for developing auditable, full-study medical imaging agents.",
+      "authors": [
+        "Weixiang Shen",
+        "Yanzhu Hu",
+        "Che Liu",
+        "Junde Wu",
+        "Jiayuan Zhu",
+        "Chengzhi Shen",
+        "Min Xu",
+        "Yueming Jin",
+        "Benedikt Wiestler",
+        "Daniel Rueckert",
+        "Jiazhen Pan"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-25T17:33:58+00:00",
+      "link": "https://arxiv.org/pdf/2603.24649v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "medical imaging agents reasoning over multimodal studies",
+      "llm_evidence_cn": "医学影像智能体在多模态研究中的推理",
+      "llm_evidence": "医学影像智能体在多模态研究中的推理",
+      "canonical_evidence": "医学影像智能体在多模态研究中的推理",
+      "llm_tldr_en": "Proposes MEDOPENCLAW, a runtime for vision-language agents to navigate 3D medical volumes and multi-sequence data.",
+      "llm_tldr_cn": "提出 MEDOPENCLAW 运行时，使视觉语言智能体能够处理 3D 医学影像和多序列数据。",
+      "llm_tldr": "提出 MEDOPENCLAW 运行时，使视觉语言智能体能够处理 3D 医学影像和多序列数据。",
+      "llm_tags": [
+        "query:mm-mas:composite"
+      ],
+      "matched_query_tag": "query:mm-mas:composite",
+      "matched_query_text": "Papers central to 多模态多智能体系统相关论文检索, especially work that connects or combines: l; multimodal; m; multimodal multi agent; recent advances in multimodal multi agent systems; multimodal large language models for multi agent cooperation; benchmarks for evaluating multimodal multi agent performance.",
+      "matched_requirement_id": "req-composite-mm-mas",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.24846v1",
+      "title": "NeuroVLM-Bench: Evaluation of Vision-Enabled Large Language Models for Clinical Reasoning in Neurological Disorders",
+      "abstract": "Recent advances in multimodal large language models enable new possibilities for image-based decision support. However, their reliability and operational trade-offs in neuroimaging remain insufficiently understood. We present a comprehensive benchmarking study of vision-enabled large language models for 2D neuroimaging using curated MRI and CT datasets covering multiple sclerosis, stroke, brain tumors, other abnormalities, and normal controls. Models are required to generate multiple outputs simultaneously, including diagnosis, diagnosis subtype, imaging modality, specialized sequence, and anatomical plane. Performance is evaluated across four directions: discriminative classification with abstention, calibration, structured-output validity, and computational efficiency. A multi-phase framework ensures fair comparison while controlling for selection bias. Across twenty frontier multimodal models, the results show that technical imaging attributes such as modality and plane are nearly solved, whereas diagnostic reasoning, especially subtype prediction, remains challenging. Tumor classification emerges as the most reliable task, stroke is moderately solvable, while multiple sclerosis and rare abnormalities remain difficult. Few-shot prompting improves performance for several models but increases token usage, latency, and cost. Gemini-2.5-Pro and GPT-5-Chat achieve the strongest overall diagnostic performance, while Gemini-2.5-Flash offers the best efficiency-performance trade-off. Among open-weight architectures, MedGemma-1.5-4B demonstrates the most promising results, as under few-shot prompting, it approaches the zero-shot performance of several proprietary models, while maintaining perfect structured output. These findings provide practical insights into performance, reliability, and efficiency trade-offs, supporting standardized evaluation of multimodal LLMs in neuroimaging.",
+      "authors": [
+        "Katarina Trojachanec Dineva",
+        "Stefan Andonov",
+        "Ilinka Ivanoska",
+        "Ivan Kitanovski",
+        "Sasho Gramatikov",
+        "Tamara Kostova",
+        "Monika Simjanoska Misheva",
+        "Kostadin Mishev"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-03-25T22:26:06+00:00",
+      "link": "https://arxiv.org/pdf/2603.24846v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Evaluation of vision-enabled LLMs for clinical neuroimaging",
+      "llm_evidence_cn": "评估视觉大模型在临床神经影像中的表现",
+      "llm_evidence": "评估视觉大模型在临床神经影像中的表现",
+      "canonical_evidence": "评估视觉大模型在临床神经影像中的表现",
+      "llm_tldr_en": "Benchmarks multimodal LLMs on clinical reasoning tasks using MRI and CT datasets for neurological disorders.",
+      "llm_tldr_cn": "利用 MRI 和 CT 数据集评估多模态大模型在神经系统疾病临床推理中的表现。",
+      "llm_tldr": "利用 MRI 和 CT 数据集评估多模态大模型在神经系统疾病临床推理中的表现。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multimodal learning in medical imaging and clinical data",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.24986v1",
+      "title": "Rethinking Health Agents: From Siloed AI to Collaborative Decision Mediators",
+      "abstract": "Large language model based health agents are increasingly used by health consumers and clinicians to interpret health information and guide health decisions. However, most AI systems in healthcare operate in siloed configurations, supporting individual users rather than the multi-stakeholder relationships central to healthcare. Such use can fragment understanding and exacerbate misalignment among patients, caregivers, and clinicians. We reframe AI not as a standalone assistant, but as a collaborator embedded within multi-party care interactions. Through a clinically validated fictional pediatric chronic kidney disease case study, we show that breakdowns in adherence stem from fragmented situational awareness and misaligned goals, and that siloed use of general-purpose AI tools does little to address these collaboration gaps. We propose a conceptual framework for designing AI collaborators that surface contextual information, reconcile mental models, and scaffold shared understanding while preserving human decision authority.",
+      "authors": [
+        "Ray-Yuan Chung",
+        "Xuhai Xu",
+        "Ari Pollack"
+      ],
+      "primary_category": "cs.HC",
+      "categories": [
+        "cs.HC",
+        "cs.AI"
+      ],
+      "published": "2026-03-26T03:27:13+00:00",
+      "link": "https://arxiv.org/pdf/2603.24986v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Collaborative health agents for multi-stakeholder healthcare interactions",
+      "llm_evidence_cn": "用于多方医疗交互的协作健康智能体",
+      "llm_evidence": "用于多方医疗交互的协作健康智能体",
+      "canonical_evidence": "用于多方医疗交互的协作健康智能体",
+      "llm_tldr_en": "Reframes health AI as collaborative decision mediators within multi-party care interactions rather than siloed tools.",
+      "llm_tldr_cn": "将医疗 AI 重新定义为多方护理交互中的协作决策中介，而非孤立的助手。",
+      "llm_tldr": "将医疗 AI 重新定义为多方护理交互中的协作决策中介，而非孤立的助手。",
+      "llm_tags": [
+        "query:llm-ma:composite"
+      ],
+      "matched_query_tag": "query:llm-ma:composite",
+      "matched_query_text": "Papers central to 大模型多智能体系统相关论文检索, especially work that connects or combines: d; a; m; Frameworks for building multi agent systems with LLMs; Emergent behavior in multi agent large language models; Collaborative problem solving in LLM multi agent environments; Multi agent reinforcement learning with large language models.",
+      "matched_requirement_id": "req-composite-llm-ma",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.25821v1",
+      "title": "Doctorina MedBench: End-to-End Evaluation of Agent-Based Medical AI",
+      "abstract": "We present Doctorina MedBench, a comprehensive evaluation framework for agent-based medical AI based on the simulation of realistic physician-patient interactions. Unlike traditional medical benchmarks that rely on solving standardized test questions, the proposed approach models a multi-step clinical dialogue in which either a physician or an AI system must collect medical history, analyze attached materials (including laboratory reports, images, and medical documents), formulate differential diagnoses, and provide personalized recommendations. System performance is evaluated using the D.O.T.S. metric, which consists of four components: Diagnosis, Observations/Investigations, Treatment, and Step Count, enabling assessment of both clinical correctness and dialogue efficiency.   The system also incorporates a multi-level testing and quality monitoring architecture designed to detect model degradation during both development and deployment. The framework supports safety-oriented trap cases, category-based random sampling of clinical scenarios, and full regression testing. The dataset currently contains more than 1,000 clinical cases covering over 750 diagnoses. The universality of the evaluation metrics allows the framework to be used not only to assess medical AI systems, but also to evaluate physicians and support the development of clinical reasoning skills. Our results suggest that simulation of clinical dialogue may provide a more realistic assessment of clinical competence compared to traditional examination-style benchmarks.",
+      "authors": [
+        "Anna Kozlova",
+        "Stanislau Salavei",
+        "Pavel Satalkin",
+        "Hanna Plotnitskaya",
+        "Sergey Parfenyuk"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI",
+        "cs.LG",
+        "cs.MA"
+      ],
+      "published": "2026-03-26T18:38:25+00:00",
+      "link": "https://arxiv.org/pdf/2603.25821v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "agent-based medical AI evaluation",
+      "llm_evidence_cn": "基于智能体的医学AI评估",
+      "llm_evidence": "基于智能体的医学AI评估",
+      "canonical_evidence": "基于智能体的医学AI评估",
+      "llm_tldr_en": "Presents a benchmark for evaluating multi-step clinical dialogue and reasoning in medical AI agents.",
+      "llm_tldr_cn": "提供了一个评估医学AI智能体多步临床对话和推理能力的基准框架。",
+      "llm_tldr": "提供了一个评估医学AI智能体多步临床对话和推理能力的基准框架。",
+      "llm_tags": [
+        "query:llm-ma:composite"
+      ],
+      "matched_query_tag": "query:llm-ma:composite",
+      "matched_query_text": "Papers central to 大模型多智能体系统相关论文检索, especially work that connects or combines: d; a; m; Frameworks for building multi agent systems with LLMs; Emergent behavior in multi agent large language models; Collaborative problem solving in LLM multi agent environments; Multi agent reinforcement learning with large language models.",
+      "matched_requirement_id": "req-composite-llm-ma",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.26028v1",
+      "title": "Learning to Trim: End-to-End Causal Graph Pruning with Dynamic Anatomical Feature Banks for Medical VQA",
+      "abstract": "Medical Visual Question Answering (MedVQA) models often exhibit limited generalization due to reliance on dataset-specific correlations, such as recurring anatomical patterns or question-type regularities, rather than genuine diagnostic evidence. Existing causal approaches are typically implemented as static adjustments or post-hoc corrections. To address this issue, we propose a Learnable Causal Trimming (LCT) framework that integrates causal pruning into end-to-end optimization. We introduce a Dynamic Anatomical Feature Bank (DAFB), updated via a momentum mechanism, to capture global prototypes of frequent anatomical and linguistic patterns, serving as an approximation of dataset-level regularities. We further design a differentiable trimming module that estimates the dependency between instance-level representations and the global feature bank. Features highly correlated with global prototypes are softly suppressed, while instance-specific evidence is emphasized. This learnable mechanism encourages the model to prioritize causal signals over spurious correlations adaptively. Experiments on VQA-RAD, SLAKE, SLAKE-CP and PathVQA demonstrate that LCT consistently improves robustness and generalization over existing debiasing strategies.",
+      "authors": [
+        "Zibo Xu",
+        "Qiang Li",
+        "Weizhi Nie",
+        "Yuting Su"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-27T02:57:39+00:00",
+      "link": "https://arxiv.org/pdf/2603.26028v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Causal graph pruning for medical visual question answering",
+      "llm_evidence_cn": "用于医学视觉问答的因果图剪枝",
+      "llm_evidence": "用于医学视觉问答的因果图剪枝",
+      "canonical_evidence": "用于医学视觉问答的因果图剪枝",
+      "llm_tldr_en": "LCT framework improves MedVQA generalization by integrating causal pruning and dynamic anatomical feature banks.",
+      "llm_tldr_cn": "LCT 框架通过集成因果剪枝和动态解剖特征库，提升了医学视觉问答的泛化能力。",
+      "llm_tldr": "LCT 框架通过集成因果剪枝和动态解剖特征库，提升了医学视觉问答的泛化能力。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multimodal learning in medical imaging and clinical data",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.26049v1",
+      "title": "Seeing Like Radiologists: Context- and Gaze-Guided Vision-Language Pretraining for Chest X-rays",
+      "abstract": "Despite recent advances in medical vision-language pretraining, existing models still struggle to capture the diagnostic workflow: radiographs are typically treated as context-agnostic images, while radiologists' gaze -- a crucial cue for visual reasoning -- remains largely underexplored by existing methods. These limitations hinder the modeling of disease-specific patterns and weaken cross-modal alignment. To bridge this gap, we introduce CoGaze, a Context- and Gaze-guided vision-language pretraining framework for chest X-rays. We first propose a context-infused vision encoder that models how radiologists integrate clinical context -- including patient history, symptoms, and diagnostic intent -- to guide diagnostic reasoning. We then present a multi-level supervision paradigm that (1) enforces intra- and inter-modal semantic alignment through hybrid-positive contrastive learning, (2) injects diagnostic priors via disease-aware cross-modal representation learning, and (3) leverages radiologists' gaze as probabilistic priors to guide attention toward diagnostically salient regions. Extensive experiments demonstrate that CoGaze consistently outperforms state-of-the-art methods across diverse tasks, achieving up to +2.0% CheXbertF1 and +1.2% BLEU2 for free-text and structured report generation, +23.2% AUROC for zero-shot classification, and +12.2% Precision@1 for image-text retrieval. Code is available at https://github.com/mk-runner/CoGaze.",
+      "authors": [
+        "Kang Liu",
+        "Zhuoqi Ma",
+        "Siyu Liang",
+        "Yunan Li",
+        "Xiyue Gao",
+        "Chao Liang",
+        "Kun Xie",
+        "Qiguang Miao"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-03-27T03:37:52+00:00",
+      "link": "https://arxiv.org/pdf/2603.26049v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "vision-language pretraining for chest X-rays with clinical context",
+      "llm_evidence_cn": "结合临床背景的胸部X射线视觉语言预训练",
+      "llm_evidence": "结合临床背景的胸部X射线视觉语言预训练",
+      "canonical_evidence": "结合临床背景的胸部X射线视觉语言预训练",
+      "llm_tldr_en": "Introduces CoGaze, a framework for chest X-ray analysis using context and gaze-guided pretraining.",
+      "llm_tldr_cn": "引入CoGaze，一种利用上下文和注视引导预训练进行胸部X射线分析的框架。",
+      "llm_tldr": "引入CoGaze，一种利用上下文和注视引导预训练进行胸部X射线分析的框架。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multimodal learning in medical imaging and clinical data",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.26071v1",
+      "title": "MUST: Modality-Specific Representation-Aware Transformer for Diffusion-Enhanced Survival Prediction with Missing Modality",
+      "abstract": "Accurate survival prediction from multimodal medical data is essential for precision oncology, yet clinical deployment faces a persistent challenge: modalities are frequently incomplete due to cost constraints, technical limitations, or retrospective data availability. While recent methods attempt to address missing modalities through feature alignment or joint distribution learning, they fundamentally lack explicit modeling of the unique contributions of each modality as opposed to the information derivable from other modalities. We propose MUST (Modality-Specific representation-aware Transformer), a novel framework that explicitly decomposes each modality's representation into modality-specific and cross-modal contextualized components through algebraic constraints in a learned low-rank shared subspace. This decomposition enables precise identification of what information is lost when a modality is absent. For the truly modality-specific information that cannot be inferred from available modalities, we employ conditional latent diffusion models to generate high-quality representations conditioned on recovered shared information and learned structural priors. Extensive experiments on five TCGA cancer datasets demonstrate that MUST achieves state-of-the-art performance with complete data while maintaining robust predictions in both missing pathology and missing genomics conditions, with clinically acceptable inference latency.",
+      "authors": [
+        "Kyungwon Kim",
+        "Dosik Hwang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.LG"
+      ],
+      "published": "2026-03-27T04:56:56+00:00",
+      "link": "https://arxiv.org/pdf/2603.26071v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "multimodal medical data survival prediction",
+      "llm_evidence_cn": "多模态医学数据生存预测",
+      "llm_evidence": "多模态医学数据生存预测",
+      "canonical_evidence": "多模态医学数据生存预测",
+      "llm_tldr_en": "Proposes MUST framework to handle missing modalities in multimodal medical survival prediction.",
+      "llm_tldr_cn": "提出MUST框架，旨在解决多模态医学生存预测中的模态缺失问题。",
+      "llm_tldr": "提出MUST框架，旨在解决多模态医学生存预测中的模态缺失问题。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multimodal learning in medical imaging and clinical data",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.26510v1",
+      "title": "Clinical named entity recognition in the Portuguese language: a benchmark of modern BERT models and LLMs",
+      "abstract": "Clinical notes contain valuable unstructured information. Named entity recognition (NER) enables the automatic extraction of medical concepts; however, benchmarks for Portuguese remain scarce. In this study, we aimed to evaluate BERT-based models and large language models (LLMs) for clinical NER in Portuguese and to test strategies for addressing multilabel imbalance. We compared BioBERTpt, BERTimbau, ModernBERT, and mmBERT with LLMs such as GPT-5 and Gemini-2.5, using the public SemClinBr corpus and a private breast cancer dataset. Models were trained under identical conditions and evaluated using precision, recall, and F1-score. Iterative stratification, weighted loss, and oversampling were explored to mitigate class imbalance. The mmBERT-base model achieved the best performance (micro F1 = 0.76), outperforming all other models. Iterative stratification improved class balance and overall performance. Multilingual BERT models, particularly mmBERT, perform strongly for Portuguese clinical NER and can run locally with limited computational resources. Balanced data-splitting strategies further enhance performance.",
+      "authors": [
+        "Vinicius Anjos de Almeida",
+        "Sandro Saorin da Silva",
+        "Josimar Chire",
+        "Leonardo Vicenzi",
+        "Nícolas Henrique Borges",
+        "Helena Kociolek",
+        "Sarah Miriã de Castro Rocha",
+        "Frederico Nassif Gomes",
+        "Júlia Cristina Ferreira",
+        "Oge Marques",
+        "Lucas Emanuel Silva e Oliveira"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-03-27T15:22:07+00:00",
+      "link": "https://arxiv.org/pdf/2603.26510v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Clinical named entity recognition in Portuguese using LLMs",
+      "llm_evidence_cn": "使用大语言模型进行葡萄牙语临床命名实体识别",
+      "llm_evidence": "使用大语言模型进行葡萄牙语临床命名实体识别",
+      "canonical_evidence": "使用大语言模型进行葡萄牙语临床命名实体识别",
+      "llm_tldr_en": "Evaluates BERT and LLMs for clinical NER in Portuguese, addressing data imbalance in medical notes.",
+      "llm_tldr_cn": "评估了用于葡萄牙语临床NER的BERT和LLM，解决了医疗笔记中的数据不平衡问题。",
+      "llm_tldr": "评估了用于葡萄牙语临床NER的BERT和LLM，解决了医疗笔记中的数据不平衡问题。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multilingual medical language models and translation",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.27176v1",
+      "title": "MEDIC-AD: Towards Medical Vision-Language Model's Clinical Intelligence",
+      "abstract": "Lesion detection, symptom tracking, and visual explainability are central to real-world medical image analysis, yet current medical Vision-Language Models (VLMs) still lack mechanisms that translate their broad knowledge into clinically actionable outputs. To bridge this gap, we present MEDIC-AD, a clinically oriented VLM that strengthens these three capabilities through a stage-wise framework. First, learnable anomaly-aware tokens (<Ano>) encourage the model to focus on abnormal regions and build more discriminative lesion centered representations. Second, inter image difference tokens (<Diff>) explicitly encode temporal changes between studies, allowing the model to distinguish worsening, improvement, and stability in disease burden. Finally, a dedicated explainability stage trains the model to generate heatmaps that highlight lesion-related regions, offering clear visual evidence that is consistent with the model's reasoning. Through our staged design, MEDIC-AD steadily boosts performance across anomaly detection, symptom tracking, and anomaly segmentation, achieving state-of-the-art results compared with both closed source and medical-specialized baselines. Evaluations on real longitudinal clinical data collected from real hospital workflows further show that MEDIC-AD delivers stable predictions and clinically faithful explanations in practical patient-monitoring and decision-support workflows",
+      "authors": [
+        "Woohyeon Park",
+        "Jaeik Kim",
+        "Sunghwan Steve Cho",
+        "Pa Hong",
+        "Wookyoung Jeong",
+        "Yoojin Nam",
+        "Namjoon Kim",
+        "Ginny Y. Wong",
+        "Ka Chun Cheung",
+        "Jaeyoung Do"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-28T07:26:40+00:00",
+      "link": "https://arxiv.org/pdf/2603.27176v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "medical vision-language model clinical intelligence",
+      "llm_evidence_cn": "医学视觉语言模型临床智能",
+      "llm_evidence": "医学视觉语言模型临床智能",
+      "canonical_evidence": "医学视觉语言模型临床智能",
+      "llm_tldr_en": "Introduces MEDIC-AD, a VLM designed for lesion detection and clinical reasoning in medical imaging.",
+      "llm_tldr_cn": "推出MEDIC-AD，一种专为医学影像病灶检测和临床推理设计的视觉语言模型。",
+      "llm_tldr": "推出MEDIC-AD，一种专为医学影像病灶检测和临床推理设计的视觉语言模型。",
+      "llm_tags": [
+        "query:med-ml:composite"
+      ],
+      "matched_query_tag": "query:med-ml:composite",
+      "matched_query_text": "Papers central to 医学多模态、多语言相关论文检索, especially work that connects or combines: l; m; multimodal learning in medical imaging and clinical data; multilingual medical language models and translation; medical visual question answering in multiple languages; Multilingual multimodal AI in healthcare and medicine; Multimodal large language models for multilingual medical tasks; Multilingual vision language models for healthcare; Cross lingual multimodal learning for medical applications.",
+      "matched_requirement_id": "req-composite-med-ml",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.27737v1",
+      "title": "Synergizing Discriminative Exemplars and Self-Refined Experience for MLLM-based In-Context Learning in Medical Diagnosis",
+      "abstract": "General Multimodal Large Language Models (MLLMs) often underperform in capturing domain-specific nuances in medical diagnosis, trailing behind fully supervised baselines. Although fine-tuning provides a remedy, the high costs of expert annotation and massive computational overhead limit its scalability. To bridge this gap without updating the weights of the pre-trained backbone of the MLLM, we propose a Clinician Mimetic Workflow. This is a novel In-Context Learning (ICL) framework designed to synergize Discriminative Exemplar Coreset Selection (DECS) and Self-Refined Experience Summarization (SRES). Specifically, DECS simulates a clinician's ability to reference \"anchor cases\" by selecting discriminative visual coresets from noisy data at the computational level; meanwhile, SRES mimics the cognition and reflection in clinical diagnosis by distilling diverse rollouts into a dynamic textual Experience Bank. Extensive evaluation across all 12 datasets of the MedMNIST 2D benchmark demonstrates that our method outperforms zero-shot general and medical MLLMs. Simultaneously, it achieves performance levels comparable to fully supervised vision models and domain-specific fine-tuned MLLMs, setting a new benchmark for parameter-efficient medical in-context learning. Our code is available at an anonymous repository: https://anonymous.4open.science/r/Synergizing-Discriminative-Exemplars-and-Self-Refined-Experience-ED74.",
+      "authors": [
+        "Wenkai Zhao",
+        "Zipei Wang",
+        "Mengjie Fang",
+        "Di Dong",
+        "Jie Tian",
+        "Lingwei Zhang"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-29T15:29:59+00:00",
+      "link": "https://arxiv.org/pdf/2603.27737v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "MLLM-based in-context learning for medical diagnosis",
+      "llm_evidence_cn": "基于多模态大模型的医学诊断上下文学习",
+      "llm_evidence": "基于多模态大模型的医学诊断上下文学习",
+      "canonical_evidence": "基于多模态大模型的医学诊断上下文学习",
+      "llm_tldr_en": "Proposes a Clinician Mimetic Workflow for MLLM-based medical diagnosis using exemplar selection and experience refinement.",
+      "llm_tldr_cn": "提出一种模拟临床医生工作流的框架，通过示例选择和经验总结提升多模态大模型的医学诊断能力。",
+      "llm_tldr": "提出一种模拟临床医生工作流的框架，通过示例选择和经验总结提升多模态大模型的医学诊断能力。",
+      "llm_tags": [
+        "query:med-ml:composite"
+      ],
+      "matched_query_tag": "query:med-ml:composite",
+      "matched_query_text": "Papers central to 医学多模态、多语言相关论文检索, especially work that connects or combines: l; m; multimodal learning in medical imaging and clinical data; multilingual medical language models and translation; medical visual question answering in multiple languages; Multilingual multimodal AI in healthcare and medicine; Multimodal large language models for multilingual medical tasks; Multilingual vision language models for healthcare; Cross lingual multimodal learning for medical applications.",
+      "matched_requirement_id": "req-composite-med-ml",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.29376v1",
+      "title": "Assessing Multimodal Chronic Wound Embeddings with Expert Triplet Agreement",
+      "abstract": "Recessive dystrophic epidermolysis bullosa (RDEB) is a rare genetic skin disorder for which clinicians greatly benefit from finding similar cases using images and clinical text. However, off-the-shelf foundation models do not reliably capture clinically meaningful features for this heterogeneous, long-tail disease, and structured measurement of agreement with experts is challenging. To address these gaps, we propose evaluating embedding spaces with expert ordinal comparisons (triplet judgments), which are fast to collect and encode implicit clinical similarity knowledge. We further introduce TriDerm, a multimodal framework that learns interpretable wound representations from small cohorts by integrating wound imagery, boundary masks, and expert reports. On the vision side, TriDerm adapts visual foundation models to RDEB using wound-level attention pooling and non-contrastive representation learning. For text, we prompt large language models with comparison queries and recover medically meaningful representations via soft ordinal embeddings (SOE). We show that visual and textual modalities capture complementary aspects of wound phenotype, and that fusing both modalities yields 73.5% agreement with experts, outperforming the best off-the-shelf single-modality foundation model by over 5.6 percentage points. We make the expert annotation tool, model code and representative dataset samples publicly available.",
+      "authors": [
+        "Fabian Kabus",
+        "Julia Hindel",
+        "Jelena Bratulić",
+        "Meropi Karakioulaki",
+        "Ayush Gupta",
+        "Cristina Has",
+        "Thomas Brox",
+        "Abhinav Valada",
+        "Harald Binder"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-31T07:46:02+00:00",
+      "link": "https://arxiv.org/pdf/2603.29376v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "multimodal framework integrating wound imagery and clinical text",
+      "llm_evidence_cn": "整合伤口图像和临床文本的多模态框架",
+      "llm_evidence": "整合伤口图像和临床文本的多模态框架",
+      "canonical_evidence": "整合伤口图像和临床文本的多模态框架",
+      "llm_tldr_en": "Introduces TriDerm, a multimodal framework for learning interpretable medical wound representations.",
+      "llm_tldr_cn": "引入TriDerm，一个用于学习可解释医学伤口表征的多模态框架。",
+      "llm_tldr": "引入TriDerm，一个用于学习可解释医学伤口表征的多模态框架。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multimodal learning in medical imaging and clinical data",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.29492v1",
+      "title": "Calibrated Confidence Expression for Radiology Report Generation",
+      "abstract": "Safe deployment of Large Vision-Language Models (LVLMs) in radiology report generation requires not only accurate predictions but also clinically interpretable indicators of when outputs should be thoroughly reviewed, enabling selective radiologist verification and reducing the risk of hallucinated findings influencing clinical decisions. One intuitive approach to this is verbalized confidence, where the model explicitly states its certainty. However, current state-of-the-art language models are often overconfident, and research on calibration in multimodal settings such as radiology report generation is limited. To address this gap, we introduce ConRad (Confidence Calibration for Radiology Reports), a reinforcement learning framework for fine-tuning medical LVLMs to produce calibrated verbalized confidence estimates alongside radiology reports. We study two settings: a single report-level confidence score and a sentence-level variant assigning a confidence to each claim. Both are trained using the GRPO algorithm with reward functions based on the logarithmic scoring rule, which incentivizes truthful self-assessment by penalizing miscalibration and guarantees optimal calibration under reward maximization. Experimentally, ConRad substantially improves calibration and outperforms competing methods. In a clinical evaluation we show that ConRad's report level scores are well aligned with clinicians' judgment. By highlighting full reports or low-confidence statements for targeted review, ConRad can support safer clinical integration of AI-assistance for report generation.",
+      "authors": [
+        "David Bani-Harouni",
+        "Chantal Pellegrini",
+        "Julian Lüers",
+        "Su Hwan Kim",
+        "Markus Baalmann",
+        "Benedikt Wiestler",
+        "Rickmer Braren",
+        "Nassir Navab",
+        "Matthias Keicher"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-03-31T09:37:33+00:00",
+      "link": "https://arxiv.org/pdf/2603.29492v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Confidence calibration for radiology report generation",
+      "llm_evidence_cn": "放射报告生成的置信度校准",
+      "llm_evidence": "放射报告生成的置信度校准",
+      "canonical_evidence": "放射报告生成的置信度校准",
+      "llm_tldr_en": "Introduces a reinforcement learning framework for calibrating confidence in multimodal radiology report generation.",
+      "llm_tldr_cn": "引入了一种强化学习框架，用于校准多模态放射报告生成中的置信度。",
+      "llm_tldr": "引入了一种强化学习框架，用于校准多模态放射报告生成中的置信度。",
+      "llm_tags": [
+        "query:med-ml:composite"
+      ],
+      "matched_query_tag": "query:med-ml:composite",
+      "matched_query_text": "Papers central to 医学多模态、多语言相关论文检索, especially work that connects or combines: l; m; multimodal learning in medical imaging and clinical data; multilingual medical language models and translation; medical visual question answering in multiple languages; Multilingual multimodal AI in healthcare and medicine; Multimodal large language models for multilingual medical tasks; Multilingual vision language models for healthcare; Cross lingual multimodal learning for medical applications.",
+      "matched_requirement_id": "req-composite-med-ml",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.29901v1",
+      "title": "Less Is More? Selective Visual Attention to High-Importance Regions for Multimodal Radiology Summarization",
+      "abstract": "Automated radiology report summarization aims to distill verbose findings into concise clinical impressions, but existing multimodal models often struggle with visual noise and fail to meaningfully improve over strong text-only baselines in the FINDINGS $\\to$ IMPRESSION transformation. We challenge two prevailing assumptions: (1) that more visual input is always better, and (2) that multimodal models add limited value when findings already contain rich image-derived detail. Through controlled ablations on MIMIC-CXR benchmark, we show that selectively focusing on pathology-relevant visual patches rather than full images yields substantially better performance. We introduce ViTAS, Visual-Text Attention Summarizer, a multi-stage pipeline that combines ensemble-guided MedSAM2 lung segmentation, bidirectional cross-attention for multi-view fusion, Shapley-guided adaptive patch clustering, and hierarchical visual tokenization feeding a ViT. ViTAS achieves SOTA results with 29.25% BLEU-4 and 69.83% ROUGE-L, improved factual alignment in qualitative analysis, and the highest expert-rated human evaluation scores. Our findings demonstrate that less but more relevant visual input is not only sufficient but superior for multimodal radiology summarization.",
+      "authors": [
+        "Mst. Fahmida Sultana Naznin",
+        "Adnan Ibney Faruq",
+        "Mushfiqur Rahman",
+        "Niloy Kumar Mondal",
+        "Md. Mehedi Hasan Shawon",
+        "Md Rakibul Hasan"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.CL"
+      ],
+      "published": "2026-03-31T15:47:01+00:00",
+      "link": "https://arxiv.org/pdf/2603.29901v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "multimodal radiology summarization using visual attention",
+      "llm_evidence_cn": "利用视觉注意力的多模态放射学摘要",
+      "llm_evidence": "利用视觉注意力的多模态放射学摘要",
+      "canonical_evidence": "利用视觉注意力的多模态放射学摘要",
+      "llm_tldr_en": "Introduces ViTAS, focusing on pathology-relevant visual patches to improve multimodal radiology report summarization.",
+      "llm_tldr_cn": "引入 ViTAS，通过关注病理相关的视觉区域来提升多模态放射报告摘要的性能。",
+      "llm_tldr": "引入 ViTAS，通过关注病理相关的视觉区域来提升多模态放射报告摘要的性能。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multimodal learning in medical imaging and clinical data",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2603.29962v2",
+      "title": "SurgTEMP: Temporal-Aware Surgical Video Question Answering with Text-guided Visual Memory for Laparoscopic Cholecystectomy",
+      "abstract": "Surgical procedures are inherently complex and risky, requiring extensive expertise and constant focus to well navigate evolving intraoperative scenes. Computer-assisted systems such as surgical visual question answering (VQA) offer promises for education and intraoperative support. Current surgical VQA research largely focuses on static frame analysis, overlooking rich temporal semantics. Surgical video question answering is further challenged by low visual contrast, its highly knowledge-driven nature, diverse analytical needs spanning scattered temporal windows, and the hierarchy from basic perception to high-level intraoperative assessment. To address these challenges, we propose SurgTEMP, a multimodal LLM framework featuring (i) a query-guided token selection module that builds hierarchical visual memory (spatial and temporal memory banks) and (ii) a Surgical Competency Progression (SCP) training scheme. Together, these components enable effective modeling of variable-length surgical videos while preserving procedure-relevant cues and temporal coherence, and better support diverse downstream assessment tasks. To support model development, we introduce CholeVidQA-32K, a surgical video question answering dataset comprising 32K open-ended QA pairs and 3,855 video segments (approximately 128 h total) from laparoscopic cholecystectomy. The dataset is organized into a three-level hierarchy -- Perception, Assessment, and Reasoning -- spanning 11 tasks from instrument/action/anatomy perception to Critical View of Safety (CVS), intraoperative difficulty, skill proficiency, and adverse event assessment. In comprehensive evaluations against state-of-the-art open-source multimodal and video LLMs (fine-tuned and zero-shot), SurgTEMP achieves substantial performance improvements, advancing the state of video-based surgical VQA.",
+      "authors": [
+        "Shi Li",
+        "Vinkle Srivastav",
+        "Nicolas Chanel",
+        "Saurav Sharma",
+        "Nabani Banik",
+        "Lorenzo Arboit",
+        "Kun Yuan",
+        "Pietro Mascagni",
+        "Nicolas Padoy"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-31T16:27:46+00:00",
+      "link": "https://arxiv.org/pdf/2603.29962v2",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Surgical video question answering with multimodal memory",
+      "llm_evidence_cn": "结合多模态记忆的影像外科视频问答",
+      "llm_evidence": "结合多模态记忆的影像外科视频问答",
+      "canonical_evidence": "结合多模态记忆的影像外科视频问答",
+      "llm_tldr_en": "Introduces SurgTEMP for temporal-aware surgical video question answering using text-guided visual memory.",
+      "llm_tldr_cn": "提出SurgTEMP，利用文本引导的视觉记忆实现时空感知的影像外科视频问答。",
+      "llm_tldr": "提出SurgTEMP，利用文本引导的视觉记忆实现时空感知的影像外科视频问答。",
+      "llm_tags": [
+        "query:med-ml:composite"
+      ],
+      "matched_query_tag": "query:med-ml:composite",
+      "matched_query_text": "Papers central to 医学多模态、多语言相关论文检索, especially work that connects or combines: l; m; multimodal learning in medical imaging and clinical data; multilingual medical language models and translation; medical visual question answering in multiple languages; Multilingual multimodal AI in healthcare and medicine; Multimodal large language models for multilingual medical tasks; Multilingual vision language models for healthcare; Cross lingual multimodal learning for medical applications.",
+      "matched_requirement_id": "req-composite-med-ml",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.00215v1",
+      "title": "Agentic AI for Clinical Urgency Mapping and Queue Optimization in High-Volume Outpatient Departments: A Simulation-Based Evaluation",
+      "abstract": "Outpatient departments (OPDs) in Indian public hospitals face severe overcrowding, with daily volumes reaching 200--8,000 patients~\\cite{aiims2020annual}. The prevailing First-Come-First-Served (FCFS) token system treats all patients equally regardless of clinical urgency, leading to dangerous delays for critical cases. We present an agentic AI framework integrating six components: voice-based multilingual symptom capture (modeled), LLM-powered severity prediction, load-aware physician assignment, adaptive queue optimization with urgency drift detection, a multi-objective orchestrator, and a Patient Memory System for longitudinal context-aware triage. Evaluated through discrete-event simulation of a District Hospital in Jabalpur (Madhya Pradesh) with 368 synthetic patients over 30 runs, the framework achieves 94.2\\% critical patients seen within 10 minutes (vs.~30.8\\% under FCFS), detects $\\sim$236 simulated urgency drift events per session (modeled via stochastic deterioration probabilities), identifies $\\sim$11.9 additional hidden-critical cases via patient memory, and recomposes queue urgency distribution from 13/36/158/161 (Critical/High/Medium/Low) to $\\sim$25/178/115/50 through continuous reassessment, while maintaining comparable throughput ($\\sim$40.4 patients/hour).",
+      "authors": [
+        "Ravish Gupta",
+        "Saket Kumar",
+        "Maulik Dang"
+      ],
+      "primary_category": "eess.SY",
+      "categories": [
+        "eess.SY"
+      ],
+      "published": "2026-03-31T20:32:21+00:00",
+      "link": "https://arxiv.org/pdf/2604.00215v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Agentic AI with multilingual symptom capture for healthcare triage",
+      "llm_evidence_cn": "具有多语言症状采集功能的医疗分诊智能体 AI",
+      "llm_evidence": "具有多语言症状采集功能的医疗分诊智能体 AI",
+      "canonical_evidence": "具有多语言症状采集功能的医疗分诊智能体 AI",
+      "llm_tldr_en": "An agentic AI framework for clinical triage featuring multilingual voice capture and LLM-powered optimization.",
+      "llm_tldr_cn": "一种用于临床分诊的智能体 AI 框架，具备多语言语音采集和大模型驱动的队列优化功能。",
+      "llm_tldr": "一种用于临床分诊的智能体 AI 框架，具备多语言语音采集和大模型驱动的队列优化功能。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "Multilingual multimodal AI in healthcare and medicine",
+      "matched_requirement_id": "req-6",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.00493v1",
+      "title": "A Reasoning-Enabled Vision-Language Foundation Model for Chest X-ray Interpretation",
+      "abstract": "Chest X-rays (CXRs) are among the most frequently performed imaging examinations worldwide, yet rising imaging volumes increase radiologist workload and the risk of diagnostic errors. Although artificial intelligence (AI) systems have shown promise for CXR interpretation, most generate only final predictions, without making explicit how visual evidence is translated into radiographic findings and diagnostic predictions. We present CheXOne, a reasoning-enabled vision-language model for CXR interpretation. CheXOne jointly generates diagnostic predictions and explicit, clinically grounded reasoning traces that connect visual evidence, radiographic findings, and these predictions. The model is trained on 14.7 million instruction and reasoning samples curated from 30 public datasets spanning 36 CXR interpretation tasks, using a two-stage framework that combines instruction tuning with reinforcement learning to improve reasoning quality. We evaluate CheXOne in zero-shot settings across visual question answering, report generation, visual grounding and reasoning assessment, covering 17 evaluation settings. CheXOne outperforms existing medical and general-domain foundation models and achieves strong performance on independent public benchmarks. A clinical reader study demonstrates that CheXOne-drafted reports are comparable to or better than resident-written reports in 55% of cases, while effectively addressing clinical indications and enhancing both report writing and CXR interpretation efficiency. Further analyses involving radiologists reveal that the generated reasoning traces show high clinical factuality and provide causal support for the final predictions, offering a plausible explanation for the performance gains. These results suggest that explicit reasoning can improve model performance, interpretability and clinical utility in AI-assisted CXR interpretation.",
+      "authors": [
+        "Yabin Zhang",
+        "Chong Wang",
+        "Yunhe Gao",
+        "Jiaming Liu",
+        "Maya Varma",
+        "Justin Xu",
+        "Sophie Ostmeier",
+        "Jin Long",
+        "Sergios Gatidis",
+        "Seena Dehkharghani",
+        "Arne Michalson",
+        "Eun Kyoung Hong",
+        "Christian Bluethgen",
+        "Haiwei Henry Guo",
+        "Alexander Victor Ortiz",
+        "Stephan Altmayer",
+        "Sandhya Bodapati",
+        "Joseph David Janizek",
+        "Ken Chang",
+        "Jean-Benoit Delbrouck",
+        "Akshay S. Chaudhari",
+        "Curtis P. Langlotz"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-04-01T05:19:09+00:00",
+      "link": "https://arxiv.org/pdf/2604.00493v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Vision-language foundation model for chest X-ray interpretation",
+      "llm_evidence_cn": "用于胸部X光解读的视觉语言基础模型",
+      "llm_evidence": "用于胸部X光解读的视觉语言基础模型",
+      "canonical_evidence": "用于胸部X光解读的视觉语言基础模型",
+      "llm_tldr_en": "CheXOne is a reasoning-enabled VLM that generates diagnostic predictions and reasoning traces for X-rays.",
+      "llm_tldr_cn": "CheXOne是一种具备推理能力的视觉语言模型，可生成X光的诊断预测和推理轨迹。",
+      "llm_tldr": "CheXOne是一种具备推理能力的视觉语言模型，可生成X光的诊断预测和推理轨迹。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multimodal learning in medical imaging and clinical data",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch"
+    },
+    {
+      "id": "2604.00601v1",
+      "title": "KG-CMI: Knowledge graph enhanced cross-Mamba interaction for medical visual question answering",
+      "abstract": "Medical visual question answering (Med-VQA) is a crucial multimodal task in clinical decision support and telemedicine. Recent methods fail to fully leverage domain-specific medical knowledge, making it difficult to accurately associate lesion features in medical images with key diagnostic criteria. Additionally, classification-based approaches typically rely on predefined answer sets. Treating Med-VQA as a simple classification problem limits its ability to adapt to the diversity of free-form answers and may overlook detailed semantic information in those answers. To address these challenges, we propose a knowledge graph enhanced cross-Mamba interaction (KG-CMI) framework, which consists of a fine-grained cross-modal feature alignment (FCFA) module, a knowledge graph embedding (KGE) module, a cross-modal interaction representation (CMIR) module, and a free-form answer enhanced multi-task learning (FAMT) module. The KG-CMI learns cross-modal feature representations for images and texts by effectively integrating professional medical knowledge through a graph, establishing associations between lesion features and disease knowledge. Moreover, FAMT leverages auxiliary knowledge from open-ended questions, improving the model's capability for open-ended Med-VQA. Experimental results demonstrate that KG-CMI outperforms existing state-of-the-art methods on three Med-VQA datasets, i.e., VQA-RAD, SLAKE, and OVQA. Additionally, we conduct interpretability experiments to further validate the framework's effectiveness.",
+      "authors": [
+        "Xianyao Zheng",
+        "Hong Yu",
+        "Hui Cui",
+        "Changming Sun",
+        "Xiangyu Li",
+        "Ran Su",
+        "Leyi Wei",
+        "Jia Zhou",
+        "Junbo Wang",
+        "Qiangguo Jin"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-04-01T08:06:37+00:00",
+      "link": "https://arxiv.org/pdf/2604.00601v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 9.0,
+      "llm_evidence_en": "Medical visual question answering with knowledge graph and cross-modal interaction",
+      "llm_evidence_cn": "结合知识图谱与跨模态交互的医学视觉问答",
+      "llm_evidence": "结合知识图谱与跨模态交互的医学视觉问答",
+      "canonical_evidence": "结合知识图谱与跨模态交互的医学视觉问答",
+      "llm_tldr_en": "Introduces KG-CMI, a framework enhancing medical VQA through knowledge graphs and fine-grained cross-modal alignment.",
+      "llm_tldr_cn": "引入KG-CMI框架，通过知识图谱和细粒度跨模态对齐增强医学视觉问答性能。",
+      "llm_tldr": "引入KG-CMI框架，通过知识图谱和细粒度跨模态对齐增强医学视觉问答性能。",
+      "llm_tags": [
+        "query:med-ml:composite"
+      ],
+      "matched_query_tag": "query:med-ml:composite",
+      "matched_query_text": "Papers central to 医学多模态、多语言相关论文检索, especially work that connects or combines: l; m; multimodal learning in medical imaging and clinical data; multilingual medical language models and translation; medical visual question answering in multiple languages; Multilingual multimodal AI in healthcare and medicine; Multimodal large language models for multilingual medical tasks; Multilingual vision language models for healthcare; Cross lingual multimodal learning for medical applications.",
+      "matched_requirement_id": "req-composite-med-ml",
+      "selection_source": "fresh_fetch"
+    }
+  ],
+  "quick_skim": [
+    {
+      "id": "2603.23987v1",
+      "title": "Can we generate portable representations for clinical time series data using LLMs?",
+      "abstract": "Deploying clinical ML is slow and brittle: models that work at one hospital often degrade under distribution shifts at the next. In this work, we study a simple question -- can large language models (LLMs) create portable patient embeddings i.e. representations of patients enable a downstream predictor built on one hospital to be used elsewhere with minimal-to-no retraining and fine-tuning. To do so, we map from irregular ICU time series onto concise natural language summaries using a frozen LLM, then embed each summary with a frozen text embedding model to obtain a fixed length vector capable of serving as input to a variety of downstream predictors. Across three cohorts (MIMIC-IV, HIRID, PPICU), on multiple clinically grounded forecasting and classification tasks, we find that our approach is simple, easy to use and competitive with in-distribution with grid imputation, self-supervised representation learning, and time series foundation models, while exhibiting smaller relative performance drops when transferring to new hospitals. We study the variation in performance across prompt design, with structured prompts being crucial to reducing the variance of the predictive models without altering mean accuracy. We find that using these portable representations improves few-shot learning and does not increase demographic recoverability of age or sex relative to baselines, suggesting little additional privacy risk. Our work points to the potential that LLMs hold as tools to enable the scalable deployment of production grade predictive models by reducing the engineering overhead.",
+      "authors": [
+        "Zongliang Ji",
+        "Yifei Sun",
+        "Andre Amaral",
+        "Anna Goldenberg",
+        "Rahul G. Krishnan"
+      ],
+      "primary_category": "cs.LG",
+      "categories": [
+        "cs.LG"
+      ],
+      "published": "2026-03-25T06:34:32+00:00",
+      "link": "https://arxiv.org/pdf/2603.23987v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "LLM-generated patient embeddings from clinical time series",
+      "llm_evidence_cn": "利用大模型从临床时间序列生成患者嵌入",
+      "llm_evidence": "利用大模型从临床时间序列生成患者嵌入",
+      "canonical_evidence": "利用大模型从临床时间序列生成患者嵌入",
+      "llm_tldr_en": "Uses LLMs to create portable patient representations from clinical time series data for downstream prediction.",
+      "llm_tldr_cn": "利用大语言模型从临床时间序列数据中创建可移植的患者表示，用于下游预测。",
+      "llm_tldr": "利用大语言模型从临床时间序列数据中创建可移植的患者表示，用于下游预测。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multimodal learning in medical imaging and clinical data",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.23694v1",
+      "title": "CoRe: Joint Optimization with Contrastive Learning for Medical Image Registration",
+      "abstract": "Medical image registration is a fundamental task in medical image analysis, enabling the alignment of images from different modalities or time points. However, intensity inconsistencies and nonlinear tissue deformations pose significant challenges to the robustness of registration methods. Recent approaches leveraging self-supervised representation learning show promise by pre-training feature extractors to generate robust anatomical embeddings, that farther used for the registration. In this work, we propose a novel framework that integrates equivariant contrastive learning directly into the registration model. Our approach leverages the power of contrastive learning to learn robust feature representations that are invariant to tissue deformations. By jointly optimizing the contrastive and registration objectives, we ensure that the learned representations are not only informative but also suitable for the registration task. We evaluate our method on abdominal and thoracic image registration tasks, including both intra-patient and inter-patient scenarios. Experimental results demonstrate that the integration of contrastive learning directly into the registration framework significantly improves performance, surpassing strong baseline methods.",
+      "authors": [
+        "Eytan Kats",
+        "Christoph Grossbroehmer",
+        "Ziad Al-Haj Hemidi",
+        "Fenja Falta",
+        "Wiebke Heyer",
+        "Mattias P. Heinrich"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-24T20:08:34+00:00",
+      "link": "https://arxiv.org/pdf/2603.23694v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "Multimodal medical image registration using contrastive learning",
+      "llm_evidence_cn": "利用对比学习进行多模态医学图像配准",
+      "llm_evidence": "利用对比学习进行多模态医学图像配准",
+      "canonical_evidence": "利用对比学习进行多模态医学图像配准",
+      "llm_tldr_en": "CoRe optimizes medical image registration by integrating equivariant contrastive learning for robust representations.",
+      "llm_tldr_cn": "CoRe 通过集成等变对比学习优化医学图像配准，学习鲁棒的解剖特征表示。",
+      "llm_tldr": "CoRe 通过集成等变对比学习优化医学图像配准，学习鲁棒的解剖特征表示。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multimodal learning in medical imaging and clinical data",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.23896v1",
+      "title": "MMTIT-Bench: A Multilingual and Multi-Scenario Benchmark with Cognition-Perception-Reasoning Guided Text-Image Machine Translation",
+      "abstract": "End-to-end text-image machine translation (TIMT), which directly translates textual content in images across languages, is crucial for real-world multilingual scene understanding. Despite advances in vision-language large models (VLLMs), robustness across diverse visual scenes and low-resource languages remains underexplored due to limited evaluation resources. We present MMTIT-Bench, a human-verified multilingual and multi-scenario benchmark with 1,400 images spanning fourteen non-English and non-Chinese languages and diverse settings such as documents, scenes, and web images, enabling rigorous assessment of end-to-end TIMT. Beyond benchmarking, we study how reasoning-oriented data design improves translation. Although recent VLLMs have begun to incorporate long Chain-of-Thought (CoT) reasoning, effective thinking paradigms for TIMT are still immature: existing designs either cascade parsing and translation in a sequential manner or focus on language-only reasoning, overlooking the visual cognition central to VLLMs. We propose Cognition-Perception-Reasoning for Translation (CPR-Trans), a data paradigm that integrates scene cognition, text perception, and translation reasoning within a unified reasoning process. Using a VLLM-driven data generation pipeline, CPR-Trans provides structured, interpretable supervision that aligns perception with reasoning. Experiments on 3B and 7B models show consistent gains in accuracy and interpretability. We will release MMTIT-Bench to promote the multilingual and multi-scenario TIMT research upon acceptance.",
+      "authors": [
+        "Gengluo Li",
+        "Chengquan Zhang",
+        "Yupu Liang",
+        "Huawen Shen",
+        "Yaping Zhang",
+        "Pengyuan Lyu",
+        "Weinong Wang",
+        "Xingyu Wan",
+        "Gangyan Zeng",
+        "Han Hu",
+        "Can Ma",
+        "Yu Zhou"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-25T03:37:12+00:00",
+      "link": "https://arxiv.org/pdf/2603.23896v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Multilingual and multi-scenario benchmark for text-image machine translation",
+      "llm_evidence_cn": "多语言、多场景的文本图像机器翻译基准",
+      "llm_evidence": "多语言、多场景的文本图像机器翻译基准",
+      "canonical_evidence": "多语言、多场景的文本图像机器翻译基准",
+      "llm_tldr_en": "Introduces a multilingual benchmark for evaluating text-image machine translation across diverse visual scenes.",
+      "llm_tldr_cn": "引入了一个多语言基准，用于评估不同视觉场景下的文本图像机器翻译。",
+      "llm_tldr": "引入了一个多语言基准，用于评估不同视觉场景下的文本图像机器翻译。",
+      "llm_tags": [
+        "query:med-ml:composite"
+      ],
+      "matched_query_tag": "query:med-ml:composite",
+      "matched_query_text": "Papers central to 医学多模态、多语言相关论文检索, especially work that connects or combines: l; m; multimodal learning in medical imaging and clinical data; multilingual medical language models and translation; medical visual question answering in multiple languages; Multilingual multimodal AI in healthcare and medicine; Multimodal large language models for multilingual medical tasks; Multilingual vision language models for healthcare; Cross lingual multimodal learning for medical applications.",
+      "matched_requirement_id": "req-composite-med-ml",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.24224v1",
+      "title": "RVLM: Recursive Vision-Language Models with Adaptive Depth",
+      "abstract": "Medical AI systems face two fundamental limitations. First, conventional vision-language models (VLMs) perform single-pass inference, yielding black-box predictions that cannot be audited or explained in clinical terms. Second, iterative reasoning systems that expose intermediate steps rely on fixed iteration budgets wasting compute on simple cases while providing insufficient depth for complex ones. We address both limitations with a unified framework. RVLM replaces single-pass inference with an iterative generate-execute loop: at each step, the model writes Python code, invokes vision sub-agents, manipulates images, and accumulates evidence. Every diagnostic claim is grounded in executable code, satisfying auditability requirements of clinical AI governance frameworks. RRouter makes iteration depth adaptive: a lightweight controller predicts the optimal budget from task-complexity features, then monitors progress and terminates early when reasoning stalls. We evaluate on BraTS 2023 Meningioma (brain MRI) and MIMIC-CXR (chest X-ray) using Gemini 2.5 Flash without fine-tuning. Across repeated runs, RVLM shows high consistency on salient findings (e.g., mass presence and enhancement) and can detect cross-modal discrepancies between Fluid-Attenuated Inversion Recovery (FLAIR) signal characteristics and segmentation boundaries. On MIMIC-CXR, it generates structured reports and correctly recognises view-specific artefacts. Code: https://github.com/nican2018/rvlm.",
+      "authors": [
+        "Nicanor Mayumu",
+        "Zeenath Khan",
+        "Melodena Stephens",
+        "Patrick Mukala",
+        "Farhad Oroumchian"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-25T11:52:55+00:00",
+      "link": "https://arxiv.org/pdf/2603.24224v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Recursive vision-language model with vision sub-agents for clinical reasoning",
+      "llm_evidence_cn": "带有视觉子代理的递归视觉语言模型，用于临床推理",
+      "llm_evidence": "带有视觉子代理的递归视觉语言模型，用于临床推理",
+      "canonical_evidence": "带有视觉子代理的递归视觉语言模型，用于临床推理",
+      "llm_tldr_en": "RVLM uses an iterative generate-execute loop with vision sub-agents to improve clinical AI auditability.",
+      "llm_tldr_cn": "RVLM通过带有视觉子代理的迭代生成-执行循环，提高了临床AI的可审计性。",
+      "llm_tldr": "RVLM通过带有视觉子代理的迭代生成-执行循环，提高了临床AI的可审计性。",
+      "llm_tags": [
+        "query:mm-mas:composite"
+      ],
+      "matched_query_tag": "query:mm-mas:composite",
+      "matched_query_text": "Papers central to 多模态多智能体系统相关论文检索, especially work that connects or combines: l; multimodal; m; multimodal multi agent; recent advances in multimodal multi agent systems; multimodal large language models for multi agent cooperation; benchmarks for evaluating multimodal multi agent performance.",
+      "matched_requirement_id": "req-composite-mm-mas",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.23794v1",
+      "title": "Sparse Autoencoders for Interpretable Medical Image Representation Learning",
+      "abstract": "Vision foundation models (FMs) achieve state-of-the-art performance in medical imaging. However, they encode information in abstract latent representations that clinicians cannot interrogate or verify. The goal of this study is to investigate Sparse Autoencoders (SAEs) for replacing opaque FM image representations with human-interpretable, sparse features. We train SAEs on embeddings from BiomedParse (biomedical) and DINOv3 (general-purpose) using 909,873 CT and MRI 2D image slices from the TotalSegmentator dataset. We find that learned sparse features: (a) reconstruct original embeddings with high fidelity (R2 up to 0.941) and recover up to 87.8% of downstream performance using only 10 features (99.4% dimensionality reduction), (b) preserve semantic fidelity in image retrieval tasks, (c) correspond to specific concepts that can be expressed in language using large language model (LLM)-based auto-interpretation. (d) bridge clinical language and abstract latent representations in zero-shot language-driven image retrieval. Our work indicates SAEs are a promising pathway towards interpretable, concept-driven medical vision systems. Code repository: https://github.com/pwesp/sail.",
+      "authors": [
+        "Philipp Wesp",
+        "Robbie Holland",
+        "Vasiliki Sideri-Lampretsa",
+        "Sergios Gatidis"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.LG"
+      ],
+      "published": "2026-03-24T23:54:24+00:00",
+      "link": "https://arxiv.org/pdf/2603.23794v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "medical image representation learning",
+      "llm_evidence_cn": "医学图像表示学习",
+      "llm_evidence": "医学图像表示学习",
+      "canonical_evidence": "医学图像表示学习",
+      "llm_tldr_en": "Uses Sparse Autoencoders to create interpretable features from medical image foundation models.",
+      "llm_tldr_cn": "利用稀疏自编码器从医学图像基础模型中提取具有可解释性的特征。",
+      "llm_tldr": "利用稀疏自编码器从医学图像基础模型中提取具有可解释性的特征。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multimodal learning in medical imaging and clinical data",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.23914v1",
+      "title": "Attention-aware Inference Optimizations for Large Vision-Language Models with Memory-efficient Decoding",
+      "abstract": "Large Vision-Language Models (VLMs) have achieved remarkable success in multi-modal reasoning, but their inference time efficiency remains a significant challenge due to the memory overhead during decoding, especially when the query and answer of VLMs consist of long sequences of visual and text tokens. This paper presents AttentionPack, an adaptive and attention-aware optimization framework tailored for large vision-language models with improving memory-efficiency during decoding, focusing on addressing the challenges due to the increased high number of visual inputs and interactions, particularly in long-context tasks with multiple high-resolution images or videos. AttentionPack is novel in two aspects: (i) We introduce a multi-head attention compaction method for economically storing key and value matrices by exploiting the implicit low-rank structure, and (ii) we develop a token-specific attention-aware decompression mechanism to reduce latency overhead. Experimental results on multiple benchmarks demonstrate that AttentionPack improves memory efficiency by up to 8x, enabling higher batch sizes and faster batch inference while preserving the model output quality or longer context lengths for superior retrieval performance. We also report the effectiveness of AttentionPack combined with eviction, quantization and kernel fusion, showing further efficiency gains for resource-limited environments.",
+      "authors": [
+        "Fatih Ilhan",
+        "Gaowen Liu",
+        "Ramana Rao Kompella",
+        "Selim Furkan Tekin",
+        "Tiansheng Huang",
+        "Zachary Yahn",
+        "Yichang Xu",
+        "Ling Liu"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.LG"
+      ],
+      "published": "2026-03-25T04:01:10+00:00",
+      "link": "https://arxiv.org/pdf/2603.23914v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "Inference optimization for large vision-language models",
+      "llm_evidence_cn": "大型视觉语言模型的推理优化",
+      "llm_evidence": "大型视觉语言模型的推理优化",
+      "canonical_evidence": "大型视觉语言模型的推理优化",
+      "llm_tldr_en": "Introduces AttentionPack to optimize memory efficiency for large vision-language models during decoding.",
+      "llm_tldr_cn": "提出 AttentionPack 框架，旨在优化大型视觉语言模型在解码过程中的内存效率。",
+      "llm_tldr": "提出 AttentionPack 框架，旨在优化大型视觉语言模型在解码过程中的内存效率。",
+      "llm_tags": [
+        "query:mm-mas:composite"
+      ],
+      "matched_query_tag": "query:mm-mas:composite",
+      "matched_query_text": "Papers central to 多模态多智能体系统相关论文检索, especially work that connects or combines: l; multimodal; m; multimodal multi agent; recent advances in multimodal multi agent systems; multimodal large language models for multi agent cooperation; benchmarks for evaluating multimodal multi agent performance.",
+      "matched_requirement_id": "req-composite-mm-mas",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.24296v1",
+      "title": "AMIF: Authorizable Medical Image Fusion Model with Built-in Authentication",
+      "abstract": "Multimodal image fusion enables precise lesion localization and characterization for accurate diagnosis, thereby strengthening clinical decision-making and driving its growing prominence in medical imaging research. A powerful multimodal image fusion model relies on high-quality, clinically representative multimodal training data and a rigorously engineered model architecture. Therefore, the development of such professional radiomics models represents a collaborative achievement grounded in standardized acquisition, clinical-specific expertise, and algorithmic design proficiency, which necessitates protection of associated intellectual property rights. However, current multimodal image fusion models generate fused outputs without built-in mechanisms to safeguard intellectual property rights, inadvertently exposing proprietary model knowledge and sensitive training data through inference leakage. For example, malicious users can exploit fusion outputs and model distillation or other inference-based reverse engineering techniques to approximate the fusion performance of proprietary models. To address this issue, we propose AMIF, the first Authorizable Medical Image Fusion model with built-in authentication, which integrates authorization access control into the image fusion objective. For unauthorized usage, AMIF embeds explicit and visible copyright identifiers into fusion results. In contrast, high-quality fusion results are accessible upon successful key-based authentication.",
+      "authors": [
+        "Jie Song",
+        "Jun Jia",
+        "Wei Sun",
+        "Wangqiu Zhou",
+        "Tao Tan",
+        "Guangtao Zhai"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-25T13:34:22+00:00",
+      "link": "https://arxiv.org/pdf/2603.24296v1",
+      "tags": [
+        "keyword:MED ML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "multimodal image fusion for medical diagnosis",
+      "llm_evidence_cn": "用于医学诊断的多模态图像融合",
+      "llm_evidence": "用于医学诊断的多模态图像融合",
+      "canonical_evidence": "用于医学诊断的多模态图像融合",
+      "llm_tldr_en": "Proposes a medical image fusion model with built-in authentication to protect intellectual property in radiomics.",
+      "llm_tldr_cn": "提出一种具有内置身份验证功能的医学图像融合模型，旨在保护放射组学中的知识产权。",
+      "llm_tldr": "提出一种具有内置身份验证功能的医学图像融合模型，旨在保护放射组学中的知识产权。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multimodal learning in medical imaging and clinical data",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.23937v1",
+      "title": "Dialogue to Question Generation for Evidence-based Medical Guideline Agent Development",
+      "abstract": "Evidence-based medicine (EBM) is central to high-quality care, but remains difficult to implement in fast-paced primary care settings. Physicians face short consultations, increasing patient loads, and lengthy guideline documents that are impractical to consult in real time. To address this gap, we investigate the feasibility of using large language models (LLMs) as ambient assistants that surface targeted, evidence-based questions during physician-patient encounters. Our study focuses on question generation rather than question answering, with the aim of scaffolding physician reasoning and integrating guideline-based practice into brief consultations. We implemented two prompting strategies, a zero-shot baseline and a multi-stage reasoning variant, using Gemini 2.5 as the backbone model. We evaluated on a benchmark of 80 de-identified transcripts from real clinical encounters, with six experienced physicians contributing over 90 hours of structured review. Results indicate that while general-purpose LLMs are not yet fully reliable, they can produce clinically meaningful and guideline-relevant questions, suggesting significant potential to reduce cognitive burden and make EBM more actionable at the point of care.",
+      "authors": [
+        "Zongliang Ji",
+        "Ziyang Zhang",
+        "Xincheng Tan",
+        "Matthew Thompson",
+        "Anna Goldenberg",
+        "Carl Yang",
+        "Rahul G. Krishnan",
+        "Fan Zhang"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.LG"
+      ],
+      "published": "2026-03-25T04:58:53+00:00",
+      "link": "https://arxiv.org/pdf/2603.23937v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "LLM-based ambient assistants for medical guideline integration",
+      "llm_evidence_cn": "基于大语言模型的医疗指南集成环境助手",
+      "llm_evidence": "基于大语言模型的医疗指南集成环境助手",
+      "canonical_evidence": "基于大语言模型的医疗指南集成环境助手",
+      "llm_tldr_en": "Investigates LLMs for generating evidence-based questions to assist physicians during patient consultations.",
+      "llm_tldr_cn": "研究利用大语言模型生成循证问题，以在患者咨询期间辅助医生。",
+      "llm_tldr": "研究利用大语言模型生成循证问题，以在患者咨询期间辅助医生。",
+      "llm_tags": [
+        "query:llm-ma:composite"
+      ],
+      "matched_query_tag": "query:llm-ma:composite",
+      "matched_query_text": "Papers central to 大模型多智能体系统相关论文检索, especially work that connects or combines: d; a; m; Frameworks for building multi agent systems with LLMs; Emergent behavior in multi agent large language models; Collaborative problem solving in LLM multi agent environments; Multi agent reinforcement learning with large language models.",
+      "matched_requirement_id": "req-composite-llm-ma",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    },
+    {
+      "id": "2603.24388v1",
+      "title": "Causal Transfer in Medical Image Analysis",
+      "abstract": "Medical imaging models frequently fail when deployed across hospitals, scanners, populations, or imaging protocols due to domain shift, limiting their clinical reliability. While transfer learning and domain adaptation address such shifts statistically, they often rely on spurious correlations that break under changing conditions. On the other hand, causal inference provides a principled way to identify invariant mechanisms that remain stable across environments. This survey introduces and systematises Causal Transfer Learning (CTL) for medical image analysis. This paradigm integrates causal reasoning with cross-domain representation learning to enable robust and generalisable clinical AI. We frame domain shift as a causal problem and analyse how structural causal models, invariant risk minimisation, and counterfactual reasoning can be embedded within transfer learning pipelines. We studied spanning classification, segmentation, reconstruction, anomaly detection, and multimodal imaging, and organised them by task, shift type, and causal assumption. A unified taxonomy is proposed that connects causal frameworks and transfer mechanisms. We further summarise datasets, benchmarks, and empirical gains, highlighting when and why causal transfer outperforms correlation-based domain adaptation. Finally, we discuss how CTL supports fairness, robustness, and trustworthy deployment in multi-institutional and federated settings, and outline open challenges and research directions for clinically reliable medical imaging AI.",
+      "authors": [
+        "Mohammed M. Abdelsamea",
+        "Daniel Tweneboah Anyimadu",
+        "Tasneem Selim",
+        "Saif Alzubi",
+        "Lei Zhang",
+        "Ahmed Karam Eldaly",
+        "Xujiong Ye"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-25T15:04:53+00:00",
+      "link": "https://arxiv.org/pdf/2603.24388v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 6.0,
+      "llm_evidence_en": "causal transfer learning for medical image analysis",
+      "llm_evidence_cn": "用于医学图像分析的因果迁移学习",
+      "llm_evidence": "用于医学图像分析的因果迁移学习",
+      "canonical_evidence": "用于医学图像分析的因果迁移学习",
+      "llm_tldr_en": "A survey on causal transfer learning to improve the robustness of medical imaging models across domains.",
+      "llm_tldr_cn": "关于因果迁移学习的综述，旨在提高医学影像模型在不同领域间的鲁棒性。",
+      "llm_tldr": "关于因果迁移学习的综述，旨在提高医学影像模型在不同领域间的鲁棒性。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multimodal learning in medical imaging and clinical data",
+      "matched_requirement_id": "req-3",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "6"
+    },
+    {
+      "id": "2603.24772v1",
+      "title": "Evaluating Fine-Tuned LLM Model For Medical Transcription With Small Low-Resource Languages Validated Dataset",
+      "abstract": "Clinical documentation is a critical factor for patient safety, diagnosis, and continuity of care. The administrative burden of EHRs is a significant factor in physician burnout. This is a critical issue for low-resource languages, including Finnish. This study aims to investigate the effectiveness of a domain-aligned natural language processing (NLP); large language model for medical transcription in Finnish by fine-tuning LLaMA 3.1-8B on a small validated corpus of simulated clinical conversations by students at Metropolia University of Applied Sciences. The fine-tuning process for medical transcription used a controlled preprocessing and optimization approach. The fine-tuning effectiveness was evaluated by sevenfold cross-validation. The evaluation metrics for fine-tuned LLaMA 3.1-8B were BLEU = 0.1214, ROUGE-L = 0.4982, and BERTScore F1 = 0.8230. The results showed a low n-gram overlap but a strong semantic similarity with reference transcripts. This study indicate that fine-tuning can be an effective approach for translation of medical discourse in spoken Finnish and support the feasibility of fine-tuning a privacy-oriented domain-specific large language model for clinical documentation in Finnish. Beside that provide directions for future work.",
+      "authors": [
+        "Mohammed Nowshad Ruhani Chowdhury",
+        "Mohammed Nowaz Rabbani Chowdhury",
+        "Sakari Lukkarinen"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI",
+        "cs.LG"
+      ],
+      "published": "2026-03-25T19:44:49+00:00",
+      "link": "https://arxiv.org/pdf/2603.24772v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "medical transcription for low-resource language Finnish",
+      "llm_evidence_cn": "低资源语言芬兰语的医学转录",
+      "llm_evidence": "低资源语言芬兰语的医学转录",
+      "canonical_evidence": "低资源语言芬兰语的医学转录",
+      "llm_tldr_en": "Evaluates fine-tuned LLMs for medical transcription in the low-resource Finnish language.",
+      "llm_tldr_cn": "评估了针对低资源芬兰语医学转录进行微调的大语言模型。",
+      "llm_tldr": "评估了针对低资源芬兰语医学转录进行微调的大语言模型。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multilingual medical language models and translation",
+      "matched_requirement_id": "req-4",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "8plus"
+    },
+    {
+      "id": "2603.24536v1",
+      "title": "Robust Multilingual Text-to-Pictogram Mapping for Scalable Reading Rehabilitation",
+      "abstract": "Reading comprehension presents a significant challenge for children with Special Educational Needs and Disabilities (SEND), often requiring intensive one-on-one reading support. To assist therapists in scaling this support, we developed a multilingual, AI-powered interface that automatically enhances text with visual scaffolding. This system dynamically identifies key concepts and maps them to contextually relevant pictograms, supporting learners across languages. We evaluated the system across five typologically diverse languages (English, French, Italian, Spanish, and Arabic), through multilingual coverage analysis, expert clinical review by speech therapists and special education professionals, and latency assessment. Evaluation results indicate high pictogram coverage and visual scaffolding density across the five languages. Expert audits suggested that automatically selected pictograms were semantically appropriate, with combined correct and acceptable ratings exceeding 95% for the four European languages and approximately 90% for Arabic despite reduced pictogram repository coverage. System latency remained within interactive thresholds suitable for real-time educational use. These findings support the technical viability, semantic safety, and acceptability of automated multimodal scaffolding to improve accessibility for neurodiverse learners.",
+      "authors": [
+        "Soufiane Jhilal",
+        "Martina Galletti"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.HC"
+      ],
+      "published": "2026-03-25T17:12:14+00:00",
+      "link": "https://arxiv.org/pdf/2603.24536v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 7.0,
+      "llm_evidence_en": "multilingual AI for clinical reading rehabilitation and expert review",
+      "llm_evidence_cn": "用于临床阅读康复的多语言AI及专家评审",
+      "llm_evidence": "用于临床阅读康复的多语言AI及专家评审",
+      "canonical_evidence": "用于临床阅读康复的多语言AI及专家评审",
+      "llm_tldr_en": "A multilingual AI system for reading rehabilitation using text-to-pictogram mapping across five languages.",
+      "llm_tldr_cn": "一种跨五种语言的文本到象形图映射多语言AI系统，用于阅读康复支持。",
+      "llm_tldr": "一种跨五种语言的文本到象形图映射多语言AI系统，用于阅读康复支持。",
+      "llm_tags": [
+        "query:med-ml:composite"
+      ],
+      "matched_query_tag": "query:med-ml:composite",
+      "matched_query_text": "Papers central to 医学多模态、多语言相关论文检索, especially work that connects or combines: l; m; multimodal learning in medical imaging and clinical data; multilingual medical language models and translation; medical visual question answering in multiple languages; Multilingual multimodal AI in healthcare and medicine; Multimodal large language models for multilingual medical tasks; Multilingual vision language models for healthcare; Cross lingual multimodal learning for medical applications.",
+      "matched_requirement_id": "req-composite-med-ml",
+      "selection_source": "fresh_fetch",
+      "quick_tier": "7"
+    }
+  ]
+}

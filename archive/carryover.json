@@ -1,6 +1,574 @@
 {
-  "generated_at": "2026-04-01T20:59:03.297855+00:00",
-  "updated_date": "20260401",
+  "generated_at": "2026-04-02T19:49:44.854763+00:00",
+  "updated_date": "20260402",
   "carryover_days": 9,
-  "items": []
+  "items": [
+    {
+      "id": "2604.00514v1",
+      "title": "MAESIL: Masked Autoencoder for Enhanced Self-supervised Medical Image Learning",
+      "abstract": "Training deep learning models for three-dimensional (3D) medical imaging, such as Computed Tomography (CT), is fundamentally challenged by the scarcity of labeled data. While pre-training on natural images is common, it results in a significant domain shift, limiting performance. Self-Supervised Learning (SSL) on unlabeled medical data has emerged as a powerful solution, but prominent frameworks often fail to exploit the inherent 3D nature of CT scans. These methods typically process 3D scans as a collection of independent 2D slices, an approach that fundamentally discards critical axial coherence and the 3D structural context. To address this limitation, we propose the autoencoder for enhanced self-supervised medical image learning(MAESIL), a novel self-supervised learning framework designed to capture 3D structural information efficiently. The core innovation is the 'superpatch', a 3D chunk-based input unit that balances 3D context preservation with computational efficiency. Our framework partitions the volume into superpatches and employs a 3D masked autoencoder strategy with a dual-masking strategy to learn comprehensive spatial representations. We validated our approach on three diverse large-scale public CT datasets. Our experimental results show that MAESIL demonstrates significant improvements over existing methods such as AE, VAE and VQ-VAE in key reconstruction metrics such as PSNR and SSIM. This establishes MAESIL as a robust and practical pre-training solution for 3D medical imaging tasks.",
+      "authors": [
+        "Kyeonghun Kim",
+        "Hyeonseok Jung",
+        "Youngung Han",
+        "Junsu Lim",
+        "YeonJu Jean",
+        "Seongbin Park",
+        "Eunseob Choi",
+        "Hyunsu Go",
+        "SeoYoung Ju",
+        "Seohyoung Park",
+        "Gyeongmin Kim",
+        "MinJu Kwon",
+        "KyungSeok Yuh",
+        "Soo Yong Kim",
+        "Ken Ying-Kai Liao",
+        "Nam-Joon Kim",
+        "Hyuk-Jae Lee"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-04-01T05:56:39+00:00",
+      "link": "https://arxiv.org/pdf/2604.00514v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Self-supervised learning for 3D medical imaging",
+      "llm_evidence_cn": "3D医学影像的自监督学习",
+      "llm_evidence": "3D医学影像的自监督学习",
+      "canonical_evidence": "3D医学影像的自监督学习",
+      "llm_tldr_en": "Proposes MAESIL, a masked autoencoder designed to capture 3D structural context in medical CT scans.",
+      "llm_tldr_cn": "提出 MAESIL，一种旨在捕获医学 CT 扫描中 3D 结构上下文的掩码自编码器。",
+      "llm_tldr": "提出 MAESIL，一种旨在捕获医学 CT 扫描中 3D 结构上下文的掩码自编码器。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multimodal learning in medical imaging and clinical data",
+      "matched_requirement_id": "req-3",
+      "selection_source": "carryover_cache",
+      "paper_id": "2604.00514v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.27048v1",
+      "title": "MOOZY: A Patient-First Foundation Model for Computational Pathology",
+      "abstract": "Computational pathology needs whole-slide image (WSI) foundation models that transfer across diverse clinical tasks, yet current approaches remain largely slide-centric, often depend on private data and expensive paired-report supervision, and do not explicitly model relationships among multiple slides from the same patient. We present MOOZY, a patient-first pathology foundation model in which the patient case, not the individual slide, is the core unit of representation. MOOZY explicitly models dependencies across all slides from the same patient via a case transformer during pretraining, combining multi-stage open self-supervision with scaled low-cost task supervision. In Stage 1, we pretrain a vision-only slide encoder on 77,134 public slide feature grids using masked self-distillation. In Stage 2, we align these representations with clinical semantics using a case transformer and multi-task supervision over 333 tasks from 56 public datasets, including 205 classification and 128 survival tasks across four endpoints. Across eight held-out tasks with five-fold frozen-feature probe evaluation, MOOZY achieves best or tied-best performance on most metrics and improves macro averages over TITAN by +7.37%, +5.50%, and +7.83% and over PRISM by +8.83%, +10.70%, and +9.78% for weighted F1, weighted ROC-AUC, and balanced accuracy, respectively. MOOZY is also parameter efficient with 85.77M parameters, 14x smaller than GigaPath. These results demonstrate that open, reproducible patient-level pretraining yields transferable embeddings, providing a practical path toward scalable patient-first histopathology foundation models.",
+      "authors": [
+        "Yousef Kotp",
+        "Vincent Quoc-Huy Trinh",
+        "Christopher Pal",
+        "Mahdi S. Hosseini"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-27T23:33:33+00:00",
+      "link": "https://arxiv.org/pdf/2603.27048v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Foundation model for pathology using multiple slides",
+      "llm_evidence_cn": "基于多切片的病理学基础模型",
+      "llm_evidence": "基于多切片的病理学基础模型",
+      "canonical_evidence": "基于多切片的病理学基础模型",
+      "llm_tldr_en": "Presents MOOZY, a pathology foundation model that models dependencies across multiple slides per patient.",
+      "llm_tldr_cn": "提出 MOOZY，一种以患者为中心的病理基础模型，建模了同一患者多张切片间的依赖关系。",
+      "llm_tldr": "提出 MOOZY，一种以患者为中心的病理基础模型，建模了同一患者多张切片间的依赖关系。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multimodal learning in medical imaging and clinical data",
+      "matched_requirement_id": "req-3",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.27048v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.29467v1",
+      "title": "M-MiniGPT4: Multilingual VLLM Alignment via Translated Data",
+      "abstract": "This paper presents a Multilingual Vision Large Language Model, named M-MiniGPT4. Our model exhibits strong vision-language understanding (VLU) capabilities across 11 languages. We utilize a mixture of native multilingual and translated data to push the multilingual VLU performance of the MiniGPT4 architecture. In addition, we propose a multilingual alignment training stage that uses parallel text corpora to further enhance the multilingual capabilities of our model. M-MiniGPT4 achieves 36% accuracy on the multilingual MMMU benchmark, outperforming state-of-the-art models in the same weight class, including foundation models released after the majority of this work was completed. We open-source our models, code, and translated datasets to facilitate future research in low-resource and multilingual settings.",
+      "authors": [
+        "Seung Hun Han",
+        "Youssef Mohamed",
+        "Mohamed Elhoseiny"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL",
+        "cs.AI"
+      ],
+      "published": "2026-03-31T09:13:38+00:00",
+      "link": "https://arxiv.org/pdf/2603.29467v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Multilingual vision language model alignment",
+      "llm_evidence_cn": "多语言视觉语言模型对齐",
+      "llm_evidence": "多语言视觉语言模型对齐",
+      "canonical_evidence": "多语言视觉语言模型对齐",
+      "llm_tldr_en": "Introduces M-MiniGPT4, a multilingual VLLM aligned via translated data and parallel text corpora.",
+      "llm_tldr_cn": "推出 M-MiniGPT4，通过翻译数据和并行文本语料库增强多语言视觉语言理解能力。",
+      "llm_tldr": "推出 M-MiniGPT4，通过翻译数据和并行文本语料库增强多语言视觉语言理解能力。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "Multilingual vision language models for healthcare",
+      "matched_requirement_id": "req-8",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.29467v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.28191v1",
+      "title": "DongYuan: An LLM-Based Framework for Integrative Chinese and Western Medicine Spleen-Stomach Disorders Diagnosis",
+      "abstract": "The clinical burden of spleen-stomach disorders is substantial. While large language models (LLMs) offer new potential for medical applications, they face three major challenges in the context of integrative Chinese and Western medicine (ICWM): a lack of high-quality data, the absence of models capable of effectively integrating the reasoning logic of traditional Chinese medicine (TCM) syndrome differentiation with that of Western medical (WM) disease diagnosis, and the shortage of a standardized evaluation benchmark. To address these interrelated challenges, we propose DongYuan, an ICWM spleen-stomach diagnostic framework. Specifically, three ICWM datasets (SSDF-Syndrome, SSDF-Dialogue, and SSDF-PD) were curated to fill the gap in high-quality data for spleen-stomach disorders. We then developed SSDF-Core, a core diagnostic LLM that acquires robust ICWM reasoning capabilities through a two-stage training regimen of supervised fine-tuning. tuning (SFT) and direct preference optimization (DPO), and complemented it with SSDF-Navigator, a pluggable consultation navigation model designed to optimize clinical inquiry strategies. Additionally, we established SSDF-Bench, a comprehensive evaluation benchmark focused on ICWM diagnosis of spleen-stomach disorders. Experimental results demonstrate that SSDF-Core significantly outperforms 12 mainstream baselines on SSDF-Bench. DongYuan lays a solid methodological foundation and provides practical technical references for the future development of intelligent ICWM diagnostic systems.",
+      "authors": [
+        "Hua Li",
+        "Yingying Li",
+        "Xiaobin Feng",
+        "Xinyi Fu",
+        "Lifeng Dong",
+        "Qingfeng Yang",
+        "Yanzhe Chen",
+        "Xiaoju Feng",
+        "Zhidong Cao",
+        "Jianbin Guo",
+        "Yanru Du"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-03-30T08:56:24+00:00",
+      "link": "https://arxiv.org/pdf/2603.28191v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "LLM framework for Chinese and Western medicine diagnosis",
+      "llm_evidence_cn": "中西医结合诊断的大语言模型框架",
+      "llm_evidence": "中西医结合诊断的大语言模型框架",
+      "canonical_evidence": "中西医结合诊断的大语言模型框架",
+      "llm_tldr_en": "DongYuan integrates Traditional Chinese and Western medicine reasoning for spleen-stomach disorder diagnosis.",
+      "llm_tldr_cn": "东垣框架整合了中医和西医的推理逻辑，用于脾胃疾病的诊断。",
+      "llm_tldr": "东垣框架整合了中医和西医的推理逻辑，用于脾胃疾病的诊断。",
+      "llm_tags": [
+        "query:med-ml:composite"
+      ],
+      "matched_query_tag": "query:med-ml:composite",
+      "matched_query_text": "Papers central to 医学多模态、多语言相关论文检索, especially work that connects or combines: l; m; multimodal learning in medical imaging and clinical data; multilingual medical language models and translation; medical visual question answering in multiple languages; Multilingual multimodal AI in healthcare and medicine; Multimodal large language models for multilingual medical tasks; Multilingual vision language models for healthcare; Cross lingual multimodal learning for medical applications.",
+      "matched_requirement_id": "req-composite-med-ml",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.28191v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2604.00784v1",
+      "title": "An Approach to Enriching Surgical Video Datasets for Fine-Grained Spatial-Temporal Understanding of Vision-Language Models",
+      "abstract": "Surgical video understanding is a crucial prerequisite for advancing Computer-Assisted Surgery. While vision-language models (VLMs) have recently been applied to the surgical domain, existing surgical vision-language datasets lack in capturing and evaluating complex, interleaved spatial-temporal dynamics. Creating large scale datasets that accurately represent fine-grained spatial-temporal relationships in surgical videos is challenging due to costly manual annotations or error-prone generation using large language models. To address this gap, we introduce the SurgSTU-Pipeline, a deterministic generation pipeline featuring temporal and spatial continuity filtering to reliably create surgical datasets for fine-grained spatial-temporal multimodal understanding. Applying this pipeline to publicly available surgical datasets, we create the SurgSTU dataset, comprising 7515 video clips densely extended with 150k fine-grained spatial-temporal question-answer samples. Our comprehensive evaluation shows that while state-of-the-art generalist VLMs struggle in zero-shot settings, their spatial-temporal capabilities can be improved through in-context learning. A fine-tuned VLM on the SurgSTU training dataset achieves highest performance among all spatial-temporal tasks, validating the dataset's efficacy to improve spatial-temporal understanding of VLMs in surgical videos. Code will be made publicly available.",
+      "authors": [
+        "Lennart Maack",
+        "Alexander Schlaefer"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-04-01T11:45:28+00:00",
+      "link": "https://arxiv.org/pdf/2604.00784v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Vision-language models for surgical video understanding",
+      "llm_evidence_cn": "用于手术视频理解的视觉语言模型",
+      "llm_evidence": "用于手术视频理解的视觉语言模型",
+      "canonical_evidence": "用于手术视频理解的视觉语言模型",
+      "llm_tldr_en": "Introduces a pipeline to create high-quality surgical datasets for fine-grained spatial-temporal VLM understanding.",
+      "llm_tldr_cn": "引入 SurgSTU 管线，为手术视觉语言模型提供精细的时空理解数据集。",
+      "llm_tldr": "引入 SurgSTU 管线，为手术视觉语言模型提供精细的时空理解数据集。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multimodal learning in medical imaging and clinical data",
+      "matched_requirement_id": "req-3",
+      "selection_source": "carryover_cache",
+      "paper_id": "2604.00784v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.27460v1",
+      "title": "Project Imaging-X: A Survey of 1000+ Open-Access Medical Imaging Datasets for Foundation Model Development",
+      "abstract": "Foundation models have demonstrated remarkable success across diverse domains and tasks, primarily due to the thrive of large-scale, diverse, and high-quality datasets. However, in the field of medical imaging, the curation and assembling of such medical datasets are highly challenging due to the reliance on clinical expertise and strict ethical and privacy constraints, resulting in a scarcity of large-scale unified medical datasets and hindering the development of powerful medical foundation models. In this work, we present the largest survey to date of medical image datasets, covering over 1,000 open-access datasets with a systematic catalog of their modalities, tasks, anatomies, annotations, limitations, and potential for integration. Our analysis exposes a landscape that is modest in scale, fragmented across narrowly scoped tasks, and unevenly distributed across organs and modalities, which in turn limits the utility of existing medical image datasets for developing versatile and robust medical foundation models. To turn fragmentation into scale, we propose a metadata-driven fusion paradigm (MDFP) that integrates public datasets with shared modalities or tasks, thereby transforming multiple small data silos into larger, more coherent resources. Building on MDFP, we release an interactive discovery portal that enables end-to-end, automated medical image dataset integration, and compile all surveyed datasets into a unified, structured table that clearly summarizes their key characteristics and provides reference links, offering the community an accessible and comprehensive repository. By charting the current terrain and offering a principled path to dataset consolidation, our survey provides a practical roadmap for scaling medical imaging corpora, supporting faster data discovery, more principled dataset creation, and more capable medical foundation models.",
+      "authors": [
+        "Zhongying Deng",
+        "Cheng Tang",
+        "Ziyan Huang",
+        "Jiashi Lin",
+        "Ying Chen",
+        "Junzhi Ning",
+        "Chenglong Ma",
+        "Jiyao Liu",
+        "Wei Li",
+        "Yinghao Zhu",
+        "Shujian Gao",
+        "Yanyan Huang",
+        "Sibo Ju",
+        "Yanzhou Su",
+        "Pengcheng Chen",
+        "Wenhao Tang",
+        "Tianbin Li",
+        "Haoyu Wang",
+        "Yuanfeng Ji",
+        "Hui Sun",
+        "Shaobo Min",
+        "Liang Peng",
+        "Feilong Tang",
+        "Haochen Xue",
+        "Rulin Zhou",
+        "Chaoyang Zhang",
+        "Wenjie Li",
+        "Shaohao Rui",
+        "Weijie Ma",
+        "Xingyue Zhao",
+        "Yibin Wang",
+        "Kun Yuan",
+        "Zhaohui Lu",
+        "Shujun Wang",
+        "Jinjie Wei",
+        "Lihao Liu",
+        "Dingkang Yang",
+        "Lin Wang",
+        "Yulong Li",
+        "Haolin Yang",
+        "Yiqing Shen",
+        "Lequan Yu",
+        "Xiaowei Hu",
+        "Yun Gu",
+        "Yicheng Wu",
+        "Benyou Wang",
+        "Minghui Zhang",
+        "Angelica I. Aviles-Rivero",
+        "Qi Gao",
+        "Hongming Shan",
+        "Xiaoyu Ren",
+        "Fang Yan",
+        "Hongyu Zhou",
+        "Haodong Duan",
+        "Maosong Cao",
+        "Shanshan Wang",
+        "Bin Fu",
+        "Xiaomeng Li",
+        "Zhi Hou",
+        "Chunfeng Song",
+        "Lei Bai",
+        "Yuan Cheng",
+        "Yuandong Pu",
+        "Xiang Li",
+        "Wenhai Wang",
+        "Hao Chen",
+        "Jiaxin Zhuang",
+        "Songyang Zhang",
+        "Huiguang He",
+        "Mengzhang Li",
+        "Bohan Zhuang",
+        "Zhian Bai",
+        "Rongshan Yu",
+        "Liansheng Wang",
+        "Yukun Zhou",
+        "Xiaosong Wang",
+        "Xin Guo",
+        "Guanbin Li",
+        "Xiangru Lin",
+        "Dakai Jin",
+        "Mianxin Liu",
+        "Wenlong Zhang",
+        "Qi Qin",
+        "Conghui He",
+        "Yuqiang Li",
+        "Ye Luo",
+        "Nanqing Dong",
+        "Jie Xu",
+        "Wenqi Shao",
+        "Bo Zhang",
+        "Qiujuan Yan",
+        "Yihao Liu",
+        "Jun Ma",
+        "Zhi Lu",
+        "Yuewen Cao",
+        "Zongwei Zhou",
+        "Jianming Liang",
+        "Shixiang Tang",
+        "Qi Duan",
+        "Dongzhan Zhou",
+        "Chen Jiang",
+        "Yuyin Zhou",
+        "Yanwu Xu",
+        "Jiancheng Yang",
+        "Shaoting Zhang",
+        "Xiaohong Liu",
+        "Siqi Luo",
+        "Yi Xin",
+        "Chaoyu Liu",
+        "Haochen Wen",
+        "Xin Chen",
+        "Alejandro Lozano",
+        "Min Woo Sun",
+        "Yuhui Zhang",
+        "Yue Yao",
+        "Xiaoxiao Sun",
+        "Serena Yeung-Levy",
+        "Xia Li",
+        "Jing Ke",
+        "Chunhui Zhang",
+        "Zongyuan Ge",
+        "Ming Hu",
+        "Jin Ye",
+        "Zhifeng Li",
+        "Yirong Chen",
+        "Yu Qiao",
+        "Junjun He"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV",
+        "cs.AI"
+      ],
+      "published": "2026-03-29T00:46:53+00:00",
+      "link": "https://arxiv.org/pdf/2603.27460v1",
+      "tags": [
+        "keyword:MED ML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Survey of medical imaging datasets for foundation model development",
+      "llm_evidence_cn": "用于基础模型开发的医学影像数据集综述",
+      "llm_evidence": "用于基础模型开发的医学影像数据集综述",
+      "canonical_evidence": "用于基础模型开发的医学影像数据集综述",
+      "llm_tldr_en": "A massive survey of 1000+ medical imaging datasets to support multimodal medical foundation model development.",
+      "llm_tldr_cn": "对 1000 多个医学影像数据集的大规模综述，支持多模态医学基础模型的开发。",
+      "llm_tldr": "对 1000 多个医学影像数据集的大规模综述，支持多模态医学基础模型的开发。",
+      "llm_tags": [
+        "query:med-ml:composite"
+      ],
+      "matched_query_tag": "query:med-ml:composite",
+      "matched_query_text": "Papers central to 医学多模态、多语言相关论文检索, especially work that connects or combines: l; m; multimodal learning in medical imaging and clinical data; multilingual medical language models and translation; medical visual question answering in multiple languages; Multilingual multimodal AI in healthcare and medicine; Multimodal large language models for multilingual medical tasks; Multilingual vision language models for healthcare; Cross lingual multimodal learning for medical applications.",
+      "matched_requirement_id": "req-composite-med-ml",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.27460v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.27048v2",
+      "title": "MOOZY: A Patient-First Foundation Model for Computational Pathology",
+      "abstract": "Computational pathology needs whole-slide image (WSI) foundation models that transfer across diverse clinical tasks, yet current approaches remain largely slide-centric, often depend on private data and expensive paired-report supervision, and do not explicitly model relationships among multiple slides from the same patient. We present MOOZY, a patient-first pathology foundation model in which the patient case, not the individual slide, is the core unit of representation. MOOZY explicitly models dependencies across all slides from the same patient via a case transformer during pretraining, combining multi-stage open self-supervision with scaled low-cost task supervision. In Stage 1, we pretrain a vision-only slide encoder on 77,134 public slide feature grids using masked self-distillation. In Stage 2, we align these representations with clinical semantics using a case transformer and multi-task supervision over 333 tasks from 56 public datasets, including 205 classification and 128 survival tasks across four endpoints. Across eight held-out tasks with five-fold frozen-feature probe evaluation, MOOZY achieves best or tied-best performance on most metrics and improves macro averages over TITAN by +7.37%, +5.50%, and +7.83% and over PRISM by +8.83%, +10.70%, and +9.78% for weighted F1, weighted ROC-AUC, and balanced accuracy, respectively. MOOZY is also parameter efficient with 85.77M parameters, 14x smaller than GigaPath. These results demonstrate that open, reproducible patient-level pretraining yields transferable embeddings, providing a practical path toward scalable patient-first histopathology foundation models.",
+      "authors": [
+        "Yousef Kotp",
+        "Vincent Quoc-Huy Trinh",
+        "Christopher Pal",
+        "Mahdi S. Hosseini"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-27T23:33:33+00:00",
+      "link": "https://arxiv.org/pdf/2603.27048v2",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "multimodal foundation model for computational pathology",
+      "llm_evidence_cn": "计算病理学的多模态基础模型",
+      "llm_evidence": "计算病理学的多模态基础模型",
+      "canonical_evidence": "计算病理学的多模态基础模型",
+      "llm_tldr_en": "Presents MOOZY, a patient-centric pathology foundation model modeling dependencies across multiple slides.",
+      "llm_tldr_cn": "提出 MOOZY，一种以患者为中心的病理基础模型，能够建模多张切片间的依赖关系。",
+      "llm_tldr": "提出 MOOZY，一种以患者为中心的病理基础模型，能够建模多张切片间的依赖关系。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multimodal learning in medical imaging and clinical data",
+      "matched_requirement_id": "req-3",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.27048v2",
+      "carry_days": 1
+    },
+    {
+      "id": "2604.00684v1",
+      "title": "TP-Seg: Task-Prototype Framework for Unified Medical Lesion Segmentation",
+      "abstract": "Building a unified model with a single set of parameters to efficiently handle diverse types of medical lesion segmentation has become a crucial objective for AI-assisted diagnosis. Existing unified segmentation approaches typically rely on shared encoders across heterogeneous tasks and modalities, which often leads to feature entanglement, gradient interference, and suboptimal lesion discrimination. In this work, we propose TP-Seg, a task-prototype framework for unified medical lesion segmentation. On one hand, the task-conditioned adapter effectively balances shared and task-specific representations through a dual-path expert structure, enabling adaptive feature extraction across diverse medical imaging modalities and lesion types. On the other hand, the prototype-guided task decoder introduces learnable task prototypes as semantic anchors and employs a cross-attention mechanism to achieve fine-grained modeling of task-specific foreground and background semantics. Without bells and whistles, TP-Seg consistently outperforms specialized, general and unified segmentation methods across 8 different medical lesion segmentation tasks covering multiple imaging modalities, demonstrating strong generalization, scalability and clinical applicability.",
+      "authors": [
+        "Jiawei Xu",
+        "Qiangqiang Zhou",
+        "Dandan Zhu",
+        "Yong Chen",
+        "Yugen Yi",
+        "Xiaoqi Zhao"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-04-01T09:41:18+00:00",
+      "link": "https://arxiv.org/pdf/2604.00684v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Unified medical lesion segmentation across modalities",
+      "llm_evidence_cn": "跨模态的统一医学病灶分割",
+      "llm_evidence": "跨模态的统一医学病灶分割",
+      "canonical_evidence": "跨模态的统一医学病灶分割",
+      "llm_tldr_en": "Proposes a task-prototype framework for unified medical lesion segmentation across diverse imaging modalities.",
+      "llm_tldr_cn": "提出了一种任务原型框架，用于跨多种医学影像模态的统一病灶分割。",
+      "llm_tldr": "提出了一种任务原型框架，用于跨多种医学影像模态的统一病灶分割。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multimodal learning in medical imaging and clinical data",
+      "matched_requirement_id": "req-3",
+      "selection_source": "carryover_cache",
+      "paper_id": "2604.00684v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.27335v1",
+      "title": "PubMed Reasoner: Dynamic Reasoning-based Retrieval for Evidence-Grounded Biomedical Question Answering",
+      "abstract": "Trustworthy biomedical question answering (QA) systems must not only provide accurate answers but also justify them with current, verifiable evidence. Retrieval-augmented approaches partially address this gap but lack mechanisms to iteratively refine poor queries, whereas self-reflection methods kick in only after full retrieval is completed. In this context, we introduce PubMed Reasoner, a biomedical QA agent composed of three stages: self-critic query refinement evaluates MeSH terms for coverage, alignment, and redundancy to enhance PubMed queries based on partial (metadata) retrieval; reflective retrieval processes articles in batches until sufficient evidence is gathered; and evidence-grounded response generation produces answers with explicit citations. PubMed Reasoner with a GPT-4o backbone achieves 78.32% accuracy on PubMedQA, slightly surpassing human experts, and showing consistent gains on MMLU Clinical Knowledge. Moreover, LLM-as-judge evaluations prefer our responses across: reasoning soundness, evidence grounding, clinical relevance, and trustworthiness. By orchestrating retrieval-first reasoning over authoritative sources, our approach provides practical assistance to clinicians and biomedical researchers while controlling compute and token costs.",
+      "authors": [
+        "Yiqing Zhang",
+        "Xiaozhong Liu",
+        "Fabricio Murai"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-03-28T16:41:57+00:00",
+      "link": "https://arxiv.org/pdf/2603.27335v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Biomedical QA agent with dynamic reasoning",
+      "llm_evidence_cn": "具有动态推理能力的生物医学问答智能体",
+      "llm_evidence": "具有动态推理能力的生物医学问答智能体",
+      "canonical_evidence": "具有动态推理能力的生物医学问答智能体",
+      "llm_tldr_en": "Develops a biomedical QA agent using dynamic reasoning and retrieval for evidence-grounded answers.",
+      "llm_tldr_cn": "开发了一个利用动态推理和检索进行证据驱动回答的生物医学问答智能体。",
+      "llm_tldr": "开发了一个利用动态推理和检索进行证据驱动回答的生物医学问答智能体。",
+      "llm_tags": [
+        "query:med-ml:composite"
+      ],
+      "matched_query_tag": "query:med-ml:composite",
+      "matched_query_text": "Papers central to 医学多模态、多语言相关论文检索, especially work that connects or combines: l; m; multimodal learning in medical imaging and clinical data; multilingual medical language models and translation; medical visual question answering in multiple languages; Multilingual multimodal AI in healthcare and medicine; Multimodal large language models for multilingual medical tasks; Multilingual vision language models for healthcare; Cross lingual multimodal learning for medical applications.",
+      "matched_requirement_id": "req-composite-med-ml",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.27335v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.26434v1",
+      "title": "Automating Clinical Information Retrieval from Finnish Electronic Health Records Using Large Language Models",
+      "abstract": "Clinicians often need to retrieve patient-specific information from electronic health records (EHRs), a task that is time-consuming and error-prone. We present a locally deployable Clinical Contextual Question Answering (CCQA) framework that answers clinical questions directly from EHRs without external data transfer. Open-source large language models (LLMs) ranging from 4B to 70B parameters were benchmarked under fully offline conditions using 1,664 expert-annotated question-answer pairs derived from records of 183 patients. The dataset consisted predominantly of Finnish clinical text. In free-text generation, Llama-3.1-70B achieved 95.3% accuracy and 97.3% consistency across semantically equivalent question variants, while the smaller Qwen3-30B-A3B-2507 model achieved comparable performance. In a multiple-choice setting, models showed similar accuracy but variable calibration. Low-precision quantization (4-bit and 8-bit) preserved predictive performance while reducing GPU memory requirements and improving deployment feasibility. Clinical evaluation identified clinically significant errors in 2.9% of outputs, and semantically equivalent questions occasionally yielded discordant responses, including instances where one formulation was correct and the other contained a clinically significant error (0.96% of cases). These findings demonstrate that locally hosted open-source LLMs can accurately retrieve patient-specific information from EHRs using natural-language queries, while highlighting the need for validation and human oversight in clinical deployment.",
+      "authors": [
+        "Mikko Saukkoriipi",
+        "Nicole Hernandez",
+        "Jaakko Sahlsten",
+        "Kimmo Kaski",
+        "Otso Arponen"
+      ],
+      "primary_category": "cs.CL",
+      "categories": [
+        "cs.CL"
+      ],
+      "published": "2026-03-27T14:03:51+00:00",
+      "link": "https://arxiv.org/pdf/2603.26434v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Clinical information retrieval from Finnish EHRs using LLMs",
+      "llm_evidence_cn": "使用大模型从芬兰语电子健康档案中检索临床信息",
+      "llm_evidence": "使用大模型从芬兰语电子健康档案中检索临床信息",
+      "canonical_evidence": "使用大模型从芬兰语电子健康档案中检索临床信息",
+      "llm_tldr_en": "Benchmarks LLMs for clinical question answering on Finnish electronic health records in offline conditions.",
+      "llm_tldr_cn": "在离线环境下评估大模型对芬兰语电子健康档案进行临床问答的性能。",
+      "llm_tldr": "在离线环境下评估大模型对芬兰语电子健康档案进行临床问答的性能。",
+      "llm_tags": [
+        "query:med-ml"
+      ],
+      "matched_query_tag": "query:med-ml",
+      "matched_query_text": "multilingual medical language models and translation",
+      "matched_requirement_id": "req-4",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.26434v1",
+      "carry_days": 1
+    },
+    {
+      "id": "2603.28120v1",
+      "title": "MedLoc-R1: Performance-Aware Curriculum Reward Scheduling for GRPO-Based Medical Visual Grounding",
+      "abstract": "Medical visual grounding serves as a crucial foundation for fine-grained multimodal reasoning and interpretable clinical decision support. Despite recent advances in reinforcement learning (RL) for grounding tasks, existing approaches such as Group Relative Policy Optimization~(GRPO) suffer from severe reward sparsity when directly applied to medical images, primarily due to the inherent difficulty of localizing small or ambiguous regions of interest, which is further exacerbated by the rigid and suboptimal nature of fixed IoU-based reward schemes in RL. This leads to vanishing policy gradients and stagnated optimization, particularly during early training. To address this challenge, we propose MedLoc-R1, a performance-aware reward scheduling framework that progressively tightens the reward criterion in accordance with model readiness. MedLoc-R1 introduces a sliding-window performance tracker and a multi-condition update rule that automatically adjust the reward schedule from dense, easily obtainable signals to stricter, fine-grained localization requirements, while preserving the favorable properties of GRPO without introducing auxiliary networks or additional gradient paths. Experiments on three medical visual grounding benchmarks demonstrate that MedLoc-R1 consistently improves both localization accuracy and training stability over GRPO-based baselines. Our framework offers a general, lightweight, and effective solution for RL-based grounding in high-stakes medical applications. Code \\& checkpoints are available at \\hyperlink{}{https://github.com/MembrAI/MedLoc-R1}.",
+      "authors": [
+        "Guangjing Yang",
+        "Ziyuan Qin",
+        "Chaoran Zhang",
+        "Chenlin Du",
+        "Jinlin Wang",
+        "Wanran Sun",
+        "Zhenyu Zhang",
+        "Bing Ji",
+        "Qicheng Lao"
+      ],
+      "primary_category": "cs.CV",
+      "categories": [
+        "cs.CV"
+      ],
+      "published": "2026-03-30T07:31:21+00:00",
+      "link": "https://arxiv.org/pdf/2603.28120v1",
+      "tags": [
+        "keyword:MED ML",
+        "query:MED ML"
+      ],
+      "llm_score": 8.0,
+      "llm_evidence_en": "Multimodal reasoning and medical visual grounding with RL",
+      "llm_evidence_cn": "基于强化学习的多模态推理与医学视觉定位",
+      "llm_evidence": "基于强化学习的多模态推理与医学视觉定位",
+      "canonical_evidence": "基于强化学习的多模态推理与医学视觉定位",
+      "llm_tldr_en": "Proposes MedLoc-R1, a reinforcement learning approach to improve medical visual grounding and multimodal reasoning.",
+      "llm_tldr_cn": "提出MedLoc-R1，一种通过强化学习改进医学视觉定位和多模态推理的方法。",
+      "llm_tldr": "提出MedLoc-R1，一种通过强化学习改进医学视觉定位和多模态推理的方法。",
+      "llm_tags": [
+        "query:med-ml:composite"
+      ],
+      "matched_query_tag": "query:med-ml:composite",
+      "matched_query_text": "Papers central to 医学多模态、多语言相关论文检索, especially work that connects or combines: l; m; multimodal learning in medical imaging and clinical data; multilingual medical language models and translation; medical visual question answering in multiple languages; Multilingual multimodal AI in healthcare and medicine; Multimodal large language models for multilingual medical tasks; Multilingual vision language models for healthcare; Cross lingual multimodal learning for medical applications.",
+      "matched_requirement_id": "req-composite-med-ml",
+      "selection_source": "carryover_cache",
+      "paper_id": "2603.28120v1",
+      "carry_days": 1
+    }
+  ]
 }

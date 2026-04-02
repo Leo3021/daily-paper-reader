@@ -1,0 +1,266 @@
+Title: Agentic AI for Clinical Urgency Mapping and Queue Optimization in High-Volume Outpatient Departments: A Simulation-Based Evaluation
+
+URL Source: https://arxiv.org/pdf/2604.00215v1
+
+Published Time: Thu, 02 Apr 2026 00:12:26 GMT
+
+Number of Pages: 17
+
+Markdown Content:
+# Agentic AI for Clinical Urgency Mapping and Queue Optimization in High-Volume Outpatient Departments: A Simulation-Based Evaluation 
+
+Ravish Gupta 1, Saket Kumar 2, and Maulik Dang 3 
+
+> 1
+
+Lead Software Engineer, BigCommerce; IEEE Senior Member 
+
+ravishgupta@ieee.org  
+
+> 2
+
+University at Buffalo, The State University of New York, Buffalo, NY, USA 
+
+saketkmr.dev@gmail.com  
+
+> 3
+
+Senior Software Engineer, Amazon 
+
+dangmaulik@gmail.com 
+
+Abstract. Outpatient departments (OPDs) in Indian public hospitals face severe overcrowding, with daily volumes reaching 200–8,000 pa-tients [20]. The prevailing First-Come-First-Served (FCFS) token sys-tem treats all patients equally regardless of clinical urgency, leading to dangerous delays for critical cases. We present an agentic AI framework integrating six components: voice-based multilingual symptom capture (modeled), LLM-powered severity prediction, load-aware physician as-signment, adaptive queue optimization with urgency drift detection, a multi-objective orchestrator, and a Patient Memory System for longi-tudinal context-aware triage. Evaluated through discrete-event simu-lation of a District Hospital in Jabalpur (Madhya Pradesh) with 368 synthetic patients over 30 runs, the framework achieves 94.2% criti-cal patients seen within 10 minutes (vs. 30.8% under FCFS), detects 
+
+∼236 simulated urgency drift events per session (modeled via stochas-tic deterioration probabilities), identifies ∼11.9 additional hidden-critical cases via patient memory, and recomposes queue urgency distribution from 13/36/158/161 (Critical/High/Medium/Low) to ∼25/178/115/50 through continuous reassessment, while maintaining comparable through-put ( ∼40.4 patients/hour). 
+
+Keywords: Agentic AI, OPD triage, queue optimization, discrete-event simulation, LLM, patient memory, healthcare AI, India 
+
+# 1 Introduction 
+
+India’s public healthcare system serves over 1.4 billion people, with outpatient departments (OPDs) functioning as the primary point of contact for the vast ma-jority seeking medical care. Government hospitals in tier-2 cities like Jabalpur, Madhya Pradesh, routinely handle 200–400 OPD patients per session with lim-ited specialist physicians, creating chronic overcrowding and extended wait times that average 37–75 minutes nationally [1].  
+
+> arXiv:2604.00215v1 [eess.SY] 31 Mar 2026 2Gupta et al.
+
+The traditional token-based FCFS system, still prevalent in most Indian gov-ernment hospitals, assigns sequential numbers at registration and processes pa-tients strictly in arrival order. While simple and perceived as “fair,” this ap-proach makes no distinction between a patient with chest pain radiating to the left arm and one seeking a routine prescription refill. Published studies from Indian tertiary hospitals report that patients spend an average of 2 hours in the OPD, with only 3 minutes of actual physician consultation [2]. More critically, the absence of urgency-based prioritization means that patients with deterio-rating conditions may wait alongside those with routine complaints, potentially converting manageable emergencies into life-threatening situations. Rule-based triage systems, as demonstrated in Indian orthopedic OPDs [5], improve by categorizing patients into urgency levels. However, these systems rely on static assessments made at registration that do not adapt to changing patient conditions, provide no mechanism for urgency drift detection, and offer limited support for multilingual patient populations common in Indian tier-2 cities. Most critically, they operate in a clinical vacuum—assessing urgency based solely on the presenting complaint, without access to the patient’s medical history, medi-cations, or prior diagnoses that could reveal hidden urgency. Recent advances in large language models (LLMs) and agentic AI archi-tectures open up a different approach to OPD triage. Unlike static rule-based systems, an agentic AI framework can continuously monitor and reassess patient urgency, parse natural language symptom descriptions across languages, cross-reference symptoms against longitudinal patient records, and adjust physician assignment in real-time based on workload, specialty matching, and patient acu-ity. In this paper, we propose and evaluate an agentic AI framework for OPD urgency mapping that integrates six coordinated components into a unified decision-making system. We evaluate the framework through discrete-event sim-ulation using parameters grounded in published Indian healthcare studies, com-paring it against FCFS and rule-based triage baselines. 
+
+1.1 Contributions 
+
+Our key contributions are: (1) A six-component agentic AI architecture for OPD triage combining voice-based multilingual symptom capture (modeled), LLM-powered severity prediction, load-aware physician assignment, adaptive queue optimization with drift detection, multi-objective orchestration, and a Patient Memory System for longitudinal context-aware triage. (2) Real LLM integra-tion architecture using Anthropic’s Claude Sonnet with structured JSON out-put for deterministic, reproducible triage decisions—demonstrated as a working system, not a theoretical proposal. (3) A literature-grounded simulation frame-work with 368 synthetic patients modeled on a District Hospital in Jabalpur, using parameters derived from 10 published Indian healthcare studies. (4) Com-parative evaluation across 30 simulation runs demonstrating dynamic urgency recomposition—where the AI system actively changes the queue’s urgency distri-bution through drift detection ( ∼236 escalations/session) and Patient Memory Agentic AI for OPD Urgency Mapping 3
+
+escalation ( ∼11.9 hidden-critical cases/session), reclassifying ∼111 patients per session from low to higher urgency levels. 
+
+# 2 Related Work 
+
+2.1 OPD Queue Management in India 
+
+The challenge of OPD overcrowding in Indian hospitals has been extensively documented. Tiwari, Goel & Singh [1] studied arrival patterns at a North In-dian tertiary hospital serving 1.65 million outpatients annually, finding that 71% of patient waiting was attributable to factors within the department itself. Makwana and Dave [3] applied queuing network analysis to a Gujarat hospi-tal, demonstrating that mathematical modeling could achieve a 30% reduction in the probability of excessive waits through optimized resource deployment. Singh et al. [2] pioneered discrete-event simulation for Indian OPD optimization at a cancer institute, identifying physician utilization rates of 83.5% as criti-cal bottlenecks. Time-motion studies at AYUSH hospitals [4] documented the extreme mismatch between total OPD time (2 hours) and actual consultation time (3 minutes). Arya et al. [5] introduced “OPD TRIAGE” in Indian orthope-dic OPDs, studying 1,800 patients and demonstrating significant improvements through structured urgency categorization. 
+
+2.2 AI in Healthcare Triage 
+
+Machine learning approaches to triage have gained momentum internationally. Studies using the Korean NEDIS dataset [12] and MIMIC-IV-ED [13] have demonstrated that deep learning models can predict triage acuity with high accuracy. Graph neural networks have been applied to triage prediction [14], and benchmark datasets [15] have enabled comparative evaluation. Comple-mentary work has explored extracting patient health information from nat-ural language sources using deep neural networks, including identifying per-sonal health experiences in social media [16] and improving classification preci-sion for health narratives through specialized deep learning architectures [18]— demonstrating the viability of NLP-based approaches for understanding patient presentations from unstructured text. However, existing approaches are predom-inantly classification-based, predicting a static urgency level at arrival without addressing dynamic conditions, specialty-aware physician assignment, multilin-gual challenges, or longitudinal patient history integration. 
+
+2.3 Agentic AI and LLMs in Healthcare 
+
+LLM-based agentic systems move beyond static classification toward dynamic, context-aware decision-making. Recent work on multi-agent healthcare systems [10, 11] has demonstrated that LLM-powered agents can handle complex clinical reasoning, natural language understanding, and multi-objective optimization. A 4 Gupta et al.  
+
+> Fig. 1. System architecture of the six-component agentic AI framework. Solid arrows indicate data flow; the dashed arrow represents the 5-minute re-assessment loop for urgency drift detection.
+
+critical requirement for clinical deployment of such AI systems is explainability and transparent knowledge representation [17]. When automated agents make triage decisions that directly impact patient safety, the WHO’s Interagency In-tegrated Triage Tool (IITT) [8] provides a standardized framework for urgency categorization that our system builds upon, extending it with continuous moni-toring, adaptive re-prioritization, and longitudinal health record integration. 
+
+2.4 Gap Analysis 
+
+Existing approaches fail to address four critical requirements simultaneously: (1) dynamic urgency reassessment during queue waiting, (2) multilingual symptom capture for diverse patient populations, (3) load-aware physician assignment bal-ancing specialty matching with equitable workload distribution, and (4) integra-tion of longitudinal patient history for hidden urgency detection. Our framework addresses all four through an integrated agentic AI architecture powered by real LLM API calls. 
+
+# 3 Proposed Framework 
+
+Our framework comprises six coordinated components operating as an agentic AI system (Fig. 1). Each component functions as a specialized agent within the orchestration pipeline. Agentic AI for OPD Urgency Mapping 5
+
+3.1 Component 1: Voice-Based Symptom Capture (Modeled) 
+
+The first component addresses the registration bottleneck in Indian OPD set-tings, where traditional manual transcription averages 5.3 minutes per patient [4]. The proposed voice-based system would provide multilingual speech-to-text con-version (Hindi, Bundeli, English), structured symptom extraction, and pre-formatted physician summaries. 
+
+Implementation note: This component is modeled as a 40% reduction in regis-tration time (from 5.5 to 3.3 minutes average), based on published benchmarks from commercial speech-to-text systems for Indian languages. Actual deploy-ment is planned as future work (Section 7). 
+
+3.2 Component 2: LLM-Powered Severity Prediction 
+
+The severity prediction component uses a large language model (Anthropic’s Claude Sonnet) to process structured symptom data with patient vitals and de-mographics. Unlike traditional ML classifiers, our agent uses a structured JSON prompt architecture generating: urgency classification into four WHO IITT-aligned levels (Critical, High, Medium, Low) [8]; acuity scoring on a 1–10 scale extending the WHO IITT three-tier system; clinical reasoning for audit; red flag detection; and specialty recommendation. Rate limiting (40 requests/minute) and usage tracking ensure cost-effective operation. For the 30-run statistical analysis, we use a calibrated simulation model replicating the LLM’s triage behaviour; when an API key is provided, the system switches to live LLM API calls for validation. 
+
+3.3 Component 3: Load-Aware Physician Assignment 
+
+The assignment engine implements real-time physician availability tracking, spe-cialty matching, and workload balancing using a weighted scoring function: Assignment = 0 .50 × SpecialtyMatch + 0 .30 × LoadBalance + 0 .20 × Availability (1) 
+
+3.4 Component 4: Adaptive Queue Optimization 
+
+Unlike static triage systems, our queue optimization module continuously mon-itors and adjusts the queue through dynamic priority recalculation every 5 min-utes, wait-time escalation preventing indefinite low-priority starvation, and ur-gency drift detection identifying patients whose conditions are worsening. In our evaluation, the system detected an average of 235.6 ± 22.8 urgency drift events per session. 6 Gupta et al.                         
+
+> Table 1. Representative Patient Memory System escalations. Face-value urgency is assessed from presenting symptoms alone; escalated urgency incorporates longitudinal health records.
+> Patient Symptom Low →Reason
+> Ramesh V., 62M Mild headache, dizziness Critical TIA 6 months ago →stroke warning Savitri P., 55F Minor bruising, bleeding Critical On Warfarin →possible hemorrhage Mukesh Y., 48M Nausea, weakness High CKD Stage 3 →hyperkalemia risk Pushpa M., 35F Mild abdominal pain Critical High-risk pregnancy + prev. cesarean Vijay S., 70M Cough, mild fever High Severe COPD, ICU admission history Dinesh L., 28M Drowsy, confused High Status epilepticus + Phenytoin allergy Asha J., 58F Low-grade fever High Immunosuppressed (SLE on MMF)
+
+3.5 Component 5: Decision-Making Agent (Orchestrator) 
+
+The orchestrator integrates signals from all preceding components using a pri-ority scoring function: Priority = 0 .45 × U + 0 .20 × A + 0 .20 × W + 0 .15 × L (2) where U is UrgencyScore (Critical=1.0, High=0.75), A is normalized acuity, 
+
+W is WaitFactor (capped at 0.3 over 2 hours preventing starvation), and L is LoadScore incentivizing routing to less-burdened specialists. 
+
+3.6 Component 6: Patient Memory System 
+
+A critical gap in Indian OPD systems is the fragmentation of patient records. In government hospitals, records are typically paper-based and frequently unavail-able when a patient returns. The Patient Memory System maintains a persis-tent, searchable longitudinal health record. When a patient checks in, the system cross-references their current symptoms against their medical history using the LLM with a history-aware system prompt. Table 1 illustrates representative history-aware urgency escalations. In our simulation, 120 patients (32.6% of the 368-patient dataset) include longitudinal health records reflecting Madhya Pradesh’s disease burden: diabetes (61), hyper-tension (46), COPD (12), anaemia (11), high-risk pregnancy (11), tuberculosis (10), ischaemic heart disease (5), chronic kidney disease (12), sickle cell dis-ease (5), epilepsy (4), cancer (3), liver disease (2), and systemic lupus (1). Note that patients may have multiple comorbidities; counts reflect unique patients per condition. Each history patient presents with deceptively mild symptoms masking hid-den urgency detectable only through their medical history. Beyond urgency escalation, the memory system generates medication alerts (drug allergies, interaction warnings)—a capability entirely absent in current Indian OPD workflows. Agentic AI for OPD Urgency Mapping 7                  
+
+> Table 2. Simulation parameters and sources
+> Parameter Value Source
+> Session duration 360 min (6 hrs) Standard Indian OPD Patient volume 368 per session [1, 2] Arrival pattern Non-homogeneous Poisson [1] Physicians 6 specialists IPHS 2012 [7] Registration time μ=5.5, σ=2.0 min [4] Urgency distribution Crit 5%, High 15%, [5, 8] Med 40%, Low 40% Consultation times Crit 15 ±4, High 10 ±3[2, 4] Med 7 ±2.5, Low 5 ±1.5 Acuity scale 1–10 (extended IITT) [8]
+
+# 4 Methodology and Simulation Design 
+
+4.1 Simulation Setting 
+
+We modeled a Government District Hospital in Jabalpur, Madhya Pradesh—a tier-2 city where healthcare infrastructure gaps are representative of challenges across India’s semi-urban landscape. Simulation parameters are grounded in pub-lished studies (Table 2). 
+
+4.2 Synthetic Patient Dataset 
+
+We generated 368 patients with realistic demographics for the Jabalpur region: age distribution (Pediatric 15%, Young Adult 20%, Adult 25%, Middle-aged 22%, Elderly 18%) based on NFHS-5 [6]; gender (62% Female, 38% Male); occu-pations typical of tier-2 Indian cities; urban/semi-urban/rural mix (45/25/30%); Hindi (85%), Bundeli (10%), English (5%); and payment modes including Ayushman Bharat (35%) and self-pay (40%). Of these, 120 patients (32.6%) include longitudinal health records with disease distribution matching Madhya Pradesh epidemiology (IHME GBD 2016, NFHS-5). 
+
+4.3 LLM Integration Architecture 
+
+The triage agent interfaces with Anthropic’s Claude Sonnet via the Messages API. Three specialized system prompts handle standard triage, history-aware triage, and drift assessment—all enforcing structured JSON output. The archi-tecture is LLM-agnostic; any model supporting structured output could substi-tute with appropriate prompt adaptation. We selected Claude Sonnet for cost-effectiveness and strong clinical reasoning performance. At 368 patients, a full session costs ˜ $1.58 (˜ $0.004/patient: 569 input + 172 output tokens per triage call). Costs scale approximately linearly with volume: ˜ $2.14 at 500 patients, ˜$4.28 at 1,000, and ˜ $34 at 8,000—though high-volume settings would addi-tionally incur drift reassessment calls that grow with both patient count and 8 Gupta et al.                      
+
+> Table 3. Comparative performance metrics (30 runs, mean ±std)
+> Metric FCFS Rule-Based Agentic AI
+> Avg Wait (min) 33.1 ±2.9 41.7 ±4.4 77.0 ±8.3 Median Wait (min) 35.5 ±3.7 12.8 ±4.2 29.3 ±5.0 P95 Wait (min) 66.0 ±4.4 151.3 ±9.9 296.0 ±20.0 Throughput (pts/hr) 40.1 ±0.1 40.1 ±0.1 40.4 ±0.2 Specialty Match (%) 25.4 ±1.6 35.8 ±2.7 30.2 ±2.7 Drifts Detected 00235.6 ±22.8
+
+average wait time. On-premise deployment (Section 7) would eliminate per-call API costs at the expense of hardware investment. 
+
+4.4 Comparison Strategies 
+
+We compare three approaches: (1) FCFS (Token-Based) : traditional Indian OPD system with no urgency assessment; (2) Rule-Based Triage : static pri-ority assignment at registration with basic specialty matching but no drift de-tection or patient history; (3) Agentic AI : our proposed framework with all six components active. 
+
+4.5 Simulation Execution 
+
+We implemented a custom discrete-event simulation engine in Python using numpy for stochastic modeling. Each strategy was evaluated over 30 indepen-dent runs with different random seeds. The simulation uses a thinning algorithm (Lewis & Shedler, 1979) for the non-homogeneous Poisson arrival process. 
+
+# 5 Results 
+
+5.1 Overall Performance 
+
+Table 3 presents aggregated results across 30 simulation runs. All pairwise strat-egy differences were evaluated using Welch’s t-test with Cohen’s d effect sizes. FCFS achieves the lowest overall average wait (33.1 min) because it processes patients purely by arrival order without reordering. However, this metric masks the critical failing that all patients experience similar wait times regardless of urgency. The Agentic AI’s critical patient wait time improvement over FCFS is highly significant ( t = 21 .2, p < 10 −6, d = 5 .5), as is the throughput equivalence between FCFS and Rule-Based ( p = 0 .22, not significant). 
+
+5.2 Urgency-Stratified Wait Times 
+
+The key differentiator emerges when wait times are stratified by urgency level (Table 4, Fig. 2). Agentic AI for OPD Urgency Mapping 9                           
+
+> Table 4. Average wait time by urgency level (minutes, mean ±std)
+> Urgency FCFS Rule-Based Agentic AI AI vs FCFS AI vs RB
+> Critical 36.1 ±2.6 0.9 ±0.3 7.5 ±6.9 −28.6 +6.6 High 31.8 ±2.8 1.1 ±0.2 52.2 ±9.5 +20.4 +51.1 Medium 32.5 ±2.8 9.0 ±2.2 102.2 ±17.3 +69.7 +93.2 Low 33.8 ±3.0 86.0 ±8.2 142.4 ±19.9 +108.6 +56.4
+> Fig. 2. Average wait time by urgency level across three strategies (30 runs, error bars show ±1 std). The Agentic AI prioritizes Critical patients at the cost of longer waits for lower-urgency categories. Inset: zoomed Critical-urgency panel with 10-minute clinical target (dashed line).
+
+Four critical findings emerge from the urgency-stratified analysis: 
+
+Finding 1: Critical patient response. Both triage-aware systems dramat-ically improve critical patient service compared to 36.1 min under FCFS. The Rule-Based achieves 100% within 10 minutes (0.9 min average), while the Agen-tic AI achieves 94.2% (7.5 min average)—slightly lower due to the substantially larger critical pool created by history-based escalation. 
+
+Finding 2: Dynamic urgency recomposition. The Agentic AI substan-tially changes the queue’s urgency composition during the session. While FCFS and Rule-Based maintain the original distribution (13 Critical, 36 High, 158 Medium, 161 Low), the Agentic AI recomposes this to approximately 25 Critical, 178 High, 115 Medium, 50 Low through drift detection ( ∼236 events/session) and Patient Memory escalation. This represents ∼111 patients per session ( ∼30%) whose urgency was proactively upgraded—a safety intervention impossible under static systems. 10 Gupta et al.              
+
+> Table 5. Critical patient timeliness
+> Metric FCFS Rule-Based Agentic AI
+> Critical <10 min (%) 30.8 100.0 94.2 Critical <15 min (%) 34.4 100.0 94.8 Mean critical/session 13.0 13.0 24.9
+
+Finding 3: Hidden urgency detection. Of 161 patients presenting with low-urgency symptoms at face value, the Agentic AI correctly identifies ∼111 as requiring higher priority—reducing the effective Low queue from 161 to ∼50. Un-der FCFS, conditions like diabetes with DKA risk or IHD with chest discomfort would be treated as routine cases. 
+
+Finding 4: The priority-fairness trade-off. The Agentic AI accepts sub-stantially higher waits for High-urgency (52.2 vs 1.1 min) and Medium-urgency patients (102.2 vs 9.0 min) compared to Rule-Based. This reflects the large num-ber of escalated patients—High-urgency nearly quintuples from 36 to ∼178— creating significant competition at upper urgency levels. High-urgency waits of 52.2 min exceed the typical 30-min clinical target, highlighting a key limitation: as more patients are correctly reclassified to higher urgency, the system’s capac-ity to serve them promptly is strained. However, these patients would receive 
+
+no priority at all under FCFS (31.8 min as undifferentiated queue members), so the trade-off is between correct identification with longer waits versus misclas-sification with shorter but clinically uninformed waits. 
+
+5.3 Critical Patient Safety 
+
+Under FCFS, only 30.8% of critical patients are seen within 10 minutes—purely by chance (Fig. 3). The Agentic AI identifies an average of 11.9 additional critical patients per session (92% increase over face-value assessment), including patients whose presenting symptoms classify them as Low/Medium urgency but whose medical history reveals critical risk. 
+
+5.4 Urgency Drift Detection 
+
+Across 30 runs, the system detected 235.6 ±22.8 urgency drift events per session— instances where a patient’s condition was modeled as worsening during queue waiting, triggering automatic re-prioritization. The drift detection operates at 5-minute intervals with condition-specific deterioration probabilities: High 1.5%/check, Medium 3.0%/check, Low 2.0%/check. In live API mode, each drift triggers an LLM call considering specific condition and wait duration. We acknowledge that the current drift model uses simplified probabilistic deterioration; production deployment should integrate clinically validated early warning scores such as NEWS2 (National Early Warning Score) or the Indian adaptation thereof, in-corporating real-time vital sign monitoring (heart rate, respiratory rate, SpO 2,Agentic AI for OPD Urgency Mapping 11                    
+
+> Fig. 3. Critical patient wait time distribution (violin plot). The dashed line marks the 10-minute clinical target. FCFS shows wide spread; both triage-aware systems concentrate critical waits near zero.
+> Table 6. Ablation study: component contributions (30 runs each)
+> Variant Avg Wait Crit Wait Drifts Crit/Sess
+> Full System 77.0 7.5 235.6 24.9 No Patient Memory 36.5 0.9 68.8 13.8 No Drift Detection 27.7 0.7 013.0 No Memory + No Drift 28.0 0.7 013.0
+
+temperature, blood pressure, consciousness level) to ground drift detection in evidence-based deterioration indicators rather than stochastic probabilities. 
+
+5.5 Patient Memory System Impact 
+
+The Patient Memory System demonstrates the value of longitudinal context at scale: 120 patients (32.6%) with records matching MP epidemiology; ∼11.9 ad-ditional critical patients/session (92% increase); ∼142 additional High-urgency patients/session (from 36 face-value to ∼178 effective); drug safety alerts for known allergies; and disease-specific escalation rules covering diabetes, hyper-tension, IHD, sickle cell disease, anaemia, and immunosuppression. 
+
+5.6 Ablation Study: Component Contributions 
+
+To quantify individual component contributions, we conducted ablation experi-ments disabling drift detection and Patient Memory independently (Table 6). 
+
+Drift Detection (comparing rows 4 vs 2) adds 8.5 min to average wait but detects 68.8 drift events per session, escalating ∼49 patients from Low to higher 12 Gupta et al.            
+
+> Table 7. LLM vs dataset urgency agreement (95% Wilson CIs in brackets)
+> Metric All ( n=368) Non-History ( n=248)
+> Exact match 47.0% [42.0–52.1] 69.0% [62.9–74.4] Over-triaged (safer) 36.4% [31.7–41.4] 6.5% [4.0–10.2] Under-triaged 16.6% [13.1–20.7] 24.6% [19.7–30.3] History escalated 118/120 (98.3% [94.1–99.5]) —
+
+urgency even without patient history. Patient Memory is the dominant es-calation driver (comparing rows 2 vs 1): it amplifies drift detection from 69 to 236 events, adds 11.1 critical patients per session, and drives the queue recom-position from 14/54/112 to 25/178/50 (Critical/High/Low). The full system’s higher average wait (77.0 min) reflects the cost of correctly identifying hidden urgency; without these mechanisms (row 4), average wait drops to 28.0 min but at the cost of missing critical cases entirely. 
+
+5.7 Live LLM Validation 
+
+All 368 patients were processed through the live LLM with zero API errors (Table 7). The overall exact-match rate of 47.0% (95% CI: 42.0–52.1%) is low in isolation, but this aggregate is dominated by the 120 history patients whose symptoms were deliberately designed to appear mild; the LLM correctly esca-lates 98.3% of these, producing “over-triage” relative to the face-value label. Among the 248 non-history patients—where the LLM and dataset assess the same information—exact agreement reaches 69.0% (95% CI: 62.9–74.4%), com-parable to published inter-rater reliability in manual triage [19]. The LLM correctly identified 12 of 13 Critical patients (92.3%), with the single discrepancy being a non-history case (white discharge with itching and burning sensation) triaged as Medium rather than Critical. Among non-history patients, the LLM under-triaged 24.6%, predominantly Medium →Low reclassifi-cations for routine presentations. It escalated 118 of 120 history patients (98.3%), including 6 new Critical cases from non-Critical face-value patients. The full 368-patient run consumed 209,256 input tokens and 63,272 output tokens at $1.58, with ∼3-second average triage latency. 
+
+5.8 Physician Utilization 
+
+All three strategies achieve comparable throughput (˜40.1–40.4 pts/hr). The Agentic AI maintains equivalent throughput (40.4 vs 40.1) despite restructuring queue priorities, demonstrating that urgency-aware reordering does not reduce overall capacity. Agentic AI for OPD Urgency Mapping 13 
+
+# 6 Discussion 
+
+6.1 Dynamic Urgency Recomposition 
+
+The central finding is that the framework does not merely reorder patients within fixed urgency categories—it recomposes the queue’s urgency distribution in real-time. Through drift detection (˜236 events/session) and Patient Memory escalation (˜11.9 hidden-critical cases/session), the system transforms the dis-tribution from 13/36/158/161 to 25/178/115/50. The High-urgency population nearly quintuples while Low drops by 69%. This suggests a shift from “static prioritization” toward “dynamic clinical state tracking,” though validation with real clinical data is needed to confirm these simulation-based findings. 
+
+6.2 The Urgency-Fairness Balance 
+
+Strict Rule-Based triage creates starvation for low-priority patients (86.0 min av-erage). In resource-constrained Indian OPDs where many low-priority patients are elderly individuals or daily-wage workers, this has real socioeconomic conse-quences [9]. The Agentic AI reframes this trade-off by addressing misclassifica-tion rather than balancing wait times across fixed categories. It reclassifies ∼111 patients/session from Low to higher urgency—patients who should never have been in the Low queue. The remaining ∼50 truly non-urgent patients wait longer (142.4 vs 86.0 min), a meaningful increase offset by dramatically improved safety for correctly escalated patients. This highlights a capacity limitation: when the AI reveals the true urgency burden, existing physician resources become the bottleneck. Capacity planning implications are significant: if 178 patients per session require High-urgency evaluation (versus 36 under static systems), cur-rent staffing models based on the FCFS-era assumption of 10% High-urgency are inadequate. Strategies to address this include dynamic physician realloca-tion during peak escalation periods, staggered appointment scheduling informed by predicted urgency distributions, and data-driven advocacy for increased spe-cialist staffing at district hospitals based on the AI-revealed urgency burden. 
+
+6.3 Under-Triage Analysis and Safety Guardrails 
+
+Among 248 non-history patients, 24.6% were under-triaged by the LLM (as-signed lower urgency than the dataset label). Analysis reveals these are predom-inantly Medium → Low reclassifications for routine presentations (e.g., mild musculoskeletal complaints, routine follow-ups) where the LLM’s conservative assessment is clinically defensible. Critically, zero non-history Critical patients were under-triaged to below-Critical. The single missed Critical case (JAB-0390, white discharge with itching and burning sensation, triaged as Medium rather than Critical) represents a 7.7% critical miss rate—comparable to published inter-rater disagreement in manual triage (10–15%) [19]. For clinical deployment, we recommend mandatory human-in-the-loop verifi-cation: all Critical and High triage decisions must be confirmed by a senior nurse 14 Gupta et al. 
+
+before queue placement; a “safety net” rule should flag patients waiting beyond condition-specific thresholds for re-assessment; and periodic retrospective audits comparing AI triage against clinical outcomes should be mandated. The framework’s structured output—including confidence scores, red flag detection, and explicit reasoning—is designed to support rather than replace clinical judgement. 
+
+6.4 Hidden Urgency: Why Patient History Matters 
+
+The Patient Memory System addresses the most dangerous failure mode in In-dian OPD triage: the clinical vacuum. When a patient presents with a “mild headache,” without knowledge of a prior TIA, the stroke risk is invisible. With 120 patients matching MP epidemiology, the system escalates the vast majority of history patients—demonstrating that the mechanism scales effectively. Integration with India’s ABHA (Ayushman Bharat Health Account) would extend benefits to the full patient population. 
+
+6.5 Ethical Governance, Explainability, and Regulatory Compliance 
+
+AI-driven triage in healthcare raises significant ethical and regulatory considera-tions. Our framework addresses explainability through structured JSON output providing explicit clinical reasoning, confidence scores, and red flag detection— enabling audit trails required under India’s Digital Personal Data Protection Act (DPDPA, 2023). The LLM-agnostic architecture allows deployment of hospital-owned on-premise models, addressing data sovereignty concerns inherent in cloud-based LLM services. Key governance requirements include: Institutional Ethics Committee ap-proval and informed consent; compliance with Medical Council of India guide-lines on AI in clinical decision-making; transparent disclosure to patients; regular bias audits across demographic groups to prevent systematic discrimination; and clear escalation pathways when the AI is unavailable or produces low-confidence outputs. The WHO guidance on ethics and governance of AI for health (2021) provides a foundational framework that our system accommodates through its human-in-the-loop architecture and auditable decision trails. 
+
+6.6 Practical Architecture 
+
+The framework includes a working LLM integration with three-prompt archi-tecture providing deterministic JSON parsing, transparent audit trails, cost ef-ficiency (˜ $1.58/session), graceful degradation when API access is unavailable, and LLM-agnostic design allowing model substitution. 
+
+6.7 Limitations 
+
+Several limitations should be acknowledged: (1) Simulation with synthetic data —this is the primary limitation. All results are based on discrete-event simulation Agentic AI for OPD Urgency Mapping 15 
+
+with synthetic patients, not real clinical data. While parameters are grounded in published Indian healthcare studies, prospective validation using real OPD records or a small-scale pilot deployment is essential before any clinical con-clusions can be drawn. The performance improvements reported here should be considered indicative rather than proven. (2) LLM reliability —production deployment requires mandatory human-in-the-loop verification for all Critical and High triage assessments, with regular audits of under-triage rates. (3) Sim-plified drift modeling —current stochastic deterioration probabilities should be replaced with clinically validated early warning scores such as NEWS2 incorpo-rating real-time vital sign monitoring. (4) Infrastructure requirements —reliable internet, smartphones, and EHR integration may not be universally available in resource-constrained settings. (5) Patient Memory coverage —32.6% with records reflects partial digitization; full potential depends on ABHA adoption. (6) Abla-tion analysis —reveals that the Patient Memory System, while detecting hidden urgency, substantially increases average wait times (77.0 min) reflecting the cost of correctly identifying the true urgency burden, requiring careful calibration of escalation thresholds in clinical practice. 
+
+# 7 Future Work 
+
+The most critical next step is retrospective validation using deidentified OPD records, followed by a prospective pilot study. Key directions include: (1) Real-world pilot at NSCB Medical College Hospital, Jabalpur, beginning with ret-rospective validation of triage outcomes. (2) Hospital-owned on-premise LLM addressing data sovereignty under DPDPA (2023). (3) NEWS2-based drift detec-tion with IoT vital monitoring. (4) ABHA Health ID integration for nationwide longitudinal records. (5) Agentic tool use for diagnostic department integration (X-ray, Pathology, ECG). (6) Economic analysis quantifying cost savings from reduced waits and prevented adverse events. 
+
+# 8 Conclusion 
+
+We presented an agentic AI framework for clinical urgency mapping and queue optimization in high-volume Indian OPDs, evaluated through literature-grounded discrete-event simulation of a District Hospital in Jabalpur. The framework in-tegrates six components—including LLM-powered triage and a Patient Memory System with 120 patients matching Madhya Pradesh epidemiology—achieving 94.2% critical response within 10 minutes, dynamic urgency recomposition through drift detection ( ∼236 events/session) and history-aware escalation ( ∼11.9 addi-tional critical patients/session), transforming the queue from 13 Critical / 161 Low to 25 Critical / 50 Low through continuous reassessment. Our simulation indicates that the framework reclassifies ∼111 patients per session (30%) from face-value Low urgency to clinically appropriate higher levels— a “dynamic urgency recomposition” suggesting that a substantial fraction of OPD patients may carry hidden risk invisible to point-of-care-only assessment. 16 Gupta et al. 
+
+While these results are based on synthetic data and require prospective clinical validation, they point toward a middle ground between “fair but unsafe” (FCFS) and “safe but unfair” (strict triage), prioritizing patient safety while respecting practical realities of resource-constrained healthcare settings. 
+
+# Data and Code Availability 
+
+The simulation engine, synthetic patient dataset (368 patients), physician roster, patient history store, Claude API triage logs, and all analysis scripts used to produce the results in this paper are publicly available at https://github.com/ ravyg/opd-agentic-ai-triage. 
+
+# Disclosure of Interests 
+
+This work was conducted independently and does not relate to the authors’ positions at BigCommerce or Amazon, nor does it represent the views or interests of these organizations. The authors have no competing interests to declare that are relevant to the content of this article. 
+
+# References 
+
+1. Tiwari, Y., Goel, S., Singh, A.: Arrival time pattern and waiting time distribution of patients in the emergency outpatient department of a tertiary level health care institution of North India. J. Emerg. Trauma Shock 7(3), 160–165 (2014) 2. Singh, A.R., Gupta, A., Satpathy, S., Gowda, N.: Study to assess the utility of discrete event simulation software in projection & optimization of resources in the OPD at an apex cancer institute in India. Health Sci. Rep. 5(3), e627 (2022) 3. Makwana, K., Dave, G.B.: A study of improving hospital out patient department (OPD) using queuing network analysis methodology. J. Manag. 6(3) (2019). SSRN 3525372 4. Siddiqui, N., Khandakar, H.: A time motion study to evaluate the average waiting time in OPD with reference to patient satisfaction in the setting of state-level AYUSH Hospital (India). J. Integr. Med. Sci. 27(3), 71–76 (2019) 5. Arya, S., et al.: OPD TRIAGE—a novel concept for better patient management in heavily loaded orthopaedic OPDs. J. Clin. Orthop. Trauma 11(Suppl 4), S564–S568 (2020) 6. National Family Health Survey (NFHS-5), 2019–2021. Ministry of Health and Fam-ily Welfare, Government of India 7. Indian Public Health Standards (IPHS) for District Hospitals, Revised 2012. Di-rectorate General of Health Services, MoHFW, Government of India 8. WHO Interagency Integrated Triage Tool (IITT). World Health Organization (2020) 9. Sinan, S., Noordjoong, R.: Determinants of hospital waiting time for outpatient care in India. Int. J. Community Med. Public Health 5(7), 2022–2028 (2018) 10. Li, J., et al.: Agent Hospital: A Simulacrum of Hospital with Evolvable Medical Agents. arXiv:2405.02957 (2024) Agentic AI for OPD Urgency Mapping 17 11. Tang, X., et al.: MedAgents: Large Language Models as Collaborators for Zero-shot Medical Reasoning. arXiv:2311.10537 (2023) 12. Hong, W.S., Haimovich, A.D., Taylor, R.A.: Predicting hospital admission at emergency department triage using machine learning. PLoS ONE 13(7), e0201016 (2018) 13. Johnson, A., et al.: MIMIC-IV-ED: Emergency Department Data from MIMIC-IV. PhysioNet (2023) 14. Defilippo, A., Veltri, P., Li´ o, P., Guzzi, P.H.: Leveraging graph neural networks for supporting automatic triage of patients. Sci. Rep. 14, 13376 (2024) 15. Hospital Triage and Patient History Data. Kaggle. https://www.kaggle.com/datasets/maalona/hospital-triage-and-patient-history-data 16. Jiang, K., Gupta, R., Gupta, M., Calix, R.A., Bernard, G.R.: Identifying personal health-experience tweets with deep neural networks. In: Annual International Con-ference on Bioinformatics and Biomedicine (BIBM), pp. 1042–1045. IEEE (2017) 17. Jiang, K., Chen, T., Huang, L., Gupta, R., Calis, R.A., Bernard, G.R.: Artificial intelligence in medicine: Knowledge representation and transparent and explain-able systems. In: Lecture Notes in Computer Science, vol. 11979. Springer, Cham (2019) 18. Calix, R.A., Gupta, R., Gupta, M., Jiang, K.: Deep Granulator: Improving pre-cision in the classification of personal health-experience tweets with deep learn-ing. In: Proceedings of the IEEE International Conference on Bioinformatics and Biomedicine (BIBM), pp. 1154–1159. IEEE (2017) 19. Lee, S., et al.: Triage accuracy and causes of mistriage using the Korean Triage and Acuity Scale. PLoS ONE 14(7), e0216972 (2019) 20. All India Institute of Medical Sciences (AIIMS), New Delhi: Annual Report 2019– 2020. Ministry of Health and Family Welfare, Government of India (2020). Avail-able: https://pmssy.mohfw.gov.in/files/Annual \%20Report 50320 19-20.pdf
